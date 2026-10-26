@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/footer/Footer";
+import "leaflet/dist/leaflet.css";
 import "./Home.css";
 
 export const metadata: Metadata = {

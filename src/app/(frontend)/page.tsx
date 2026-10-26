@@ -15,9 +15,9 @@ export default function Home() {
   return (
     <>
       <HomeHero />
+      <TodalDeals />
       <Category />
       <Products />
-      <TodalDeals />
       <OfferLayout1 />
       <BestSeller />
       <OfferLayout2 />

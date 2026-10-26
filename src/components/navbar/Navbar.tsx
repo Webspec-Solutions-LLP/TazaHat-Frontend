@@ -246,7 +246,7 @@ export default function Navbar({
       </div>
 
       {isCartOpen && <Cart onClose={() => setIsCartOpen(false)} />}
-      {isLocationOpen && <Location deliveryLocation={deliveryLocation} onClose={() => setIsLocationOpen(false)} />}
+      {isLocationOpen && <Location deliveryLocation={deliveryLocation} onClose={() => setIsLocationOpen(false)} onLogin={() => { setIsLocationOpen(false); setIsLoginOpen(true); }} />}
       {isLoginOpen && <Login onClose={() => setIsLoginOpen(false)} />}
     </header>
   );

@@ -12,7 +12,6 @@ import "./Products.css";
 
 type Product = (typeof text.products)[number];
 const money = new Intl.NumberFormat(text.locale, { style: "currency", currency: text.currency, maximumFractionDigits: 0 });
-// Each slide is a column of two cards, so both rows move together.
 const columns = Array.from({ length: Math.ceil(text.products.length / 2) }, (_, index) => text.products.slice(index * 2, index * 2 + 2));
 
 function CartIcon() {
@@ -65,12 +64,12 @@ export default function Products() {
       <div className="products-container">
         <div className="products-header"><h2 id="products-heading">{text.heading}</h2><Link href="/products" className="products-view-all">{text.viewAll}</Link></div>
         <div id="products-list">
-            <Swiper className="products-slider" modules={[A11y, Keyboard, Mousewheel]} slidesPerView={2.2} spaceBetween={10} breakpoints={{ 601: { slidesPerView: 4.2, spaceBetween: 12 }, 1024: { slidesPerView: 6.5, spaceBetween: 12 } }} keyboard={{ enabled: true, onlyInViewport: true }} mousewheel={{ forceToAxis: true }} a11y={{ containerMessage: text.sliderLabel, slideLabelMessage: text.columnLabel }} tabIndex={0}>
+            <Swiper className="products-slider" modules={[A11y, Keyboard, Mousewheel]} slidesPerView={2.2} spaceBetween={10} breakpoints={{ 601: { slidesPerView: 4.2, spaceBetween: 12 }, 1024: { slidesPerView: 5.5, spaceBetween: 12 } }} keyboard={{ enabled: true, onlyInViewport: true }} mousewheel={{ forceToAxis: true }} a11y={{ containerMessage: text.sliderLabel, slideLabelMessage: text.columnLabel }} tabIndex={0}>
               {columns.map((column) => <SwiperSlide key={column[0].id}><div className="products-column">{column.map(renderProduct)}</div></SwiperSlide>)}
             </Swiper>
         </div>
       </div>
-      {selected && <AddToCart key={selected.id} product={selected} locale={text.locale} currency={text.currency} saved={saved.includes(selected.id)} onToggleWishlist={() => setSaved(current => current.includes(selected.id) ? current.filter(id => id !== selected.id) : [...current, selected.id])} onClose={closeDetails} />}
+      {selected && <AddToCart key={selected.id} product={selected} locale={text.locale} currency={text.currency} saved={saved.includes(selected.id)} onToggleWishlist={() => setSaved(current => current.includes(selected.id) ? current.filter(id => id !== selected.id) : [...current, selected.id])} onClose={closeDetails} onOpenProduct={setSelected} />}
     </section>
   );
 }

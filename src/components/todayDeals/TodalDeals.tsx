@@ -19,6 +19,8 @@ function CartIcon() {
 
 export default function TodalDeals() {
   const [remaining, setRemaining] = useState<number | null>(null);
+  const [showFloatingTimer, setShowFloatingTimer] = useState(false);
+  const dealsSection = useRef<HTMLElement>(null);
   useEffect(() => {
     // Demo offer ends at the next midnight in India; use the catalog deadline when available.
     const offset = 330 * 60 * 1000;
@@ -28,13 +30,32 @@ export default function TodalDeals() {
     const timer = window.setInterval(tick, 1000);
     return () => window.clearInterval(timer);
   }, []);
+  useEffect(() => {
+    let frame = 0;
+    const updateFloatingTimer = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        const section = dealsSection.current;
+        if (!section) return;
+        const navbarBottom = document.querySelector(".tazahat-navbar")?.getBoundingClientRect().bottom ?? 72;
+        setShowFloatingTimer(section.getBoundingClientRect().bottom <= navbarBottom);
+      });
+    };
+    updateFloatingTimer();
+    window.addEventListener("scroll", updateFloatingTimer, { passive: true });
+    window.addEventListener("resize", updateFloatingTimer);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", updateFloatingTimer);
+      window.removeEventListener("resize", updateFloatingTimer);
+    };
+  }, []);
   const clock = [
     { label: text.days, value: remaining === null ? null : Math.floor(remaining / 86400) },
     { label: text.hours, value: remaining === null ? null : Math.floor(remaining / 3600) % 24 },
     { label: text.minutes, value: remaining === null ? null : Math.floor(remaining / 60) % 60 },
     { label: text.seconds, value: remaining === null ? null : remaining % 60 },
   ];
-  const [showAll, setShowAll] = useState(false);
   const [saved, setSaved] = useState<string[]>([]);
   const [selected, setSelected] = useState<Product | null>(null);
   const dialog = useRef<HTMLDialogElement>(null);
@@ -63,21 +84,34 @@ export default function TodalDeals() {
   };
 
   return (
-    <section className="products-section today-deals-section" aria-labelledby="deals-heading" lang={text.language}>
+    <section ref={dealsSection} id="today-deals" className="products-section today-deals-section" aria-labelledby="deals-heading" lang={text.language}>
       <div className="products-container today-deals-panel">
         <div className="products-header deals-header">
           <div className="deals-title"><svg viewBox="0 0 24 32" fill="currentColor" aria-hidden="true"><path d="M14 1 2 18h9l-2 13 13-19h-9l3-11Z" /></svg><div><h2 id="deals-heading">{text.heading}</h2><p>{text.description}</p></div></div>
           <div className="deals-countdown" role="timer" aria-label={text.offerEnds}><span>{text.offerEnds}</span><div className="deals-clock">{clock.map(unit => <div className="deals-time" key={unit.label}><strong>{unit.value === null ? "--" : String(unit.value).padStart(2, "0")}</strong><span>{unit.label}</span></div>)}</div></div>
-          <button type="button" className="deals-view-all" aria-expanded={showAll} aria-controls="deals-list" onClick={() => setShowAll(!showAll)}>{showAll ? text.showLess : text.viewAll}</button>
         </div>
         <div id="deals-list">
-          {showAll ? <div className="products-grid">{catalog.products.map(renderProduct)}</div> : (
-            <Swiper className="products-slider" modules={[A11y, Keyboard, Mousewheel]} slidesPerView={2.2} spaceBetween={10} breakpoints={{ 601: { slidesPerView: 4.2, spaceBetween: 12 }, 1024: { slidesPerView: 6.5, spaceBetween: 12 } }} keyboard={{ enabled: true, onlyInViewport: true }} mousewheel={{ forceToAxis: true }} a11y={{ containerMessage: text.sliderLabel, slideLabelMessage: text.columnLabel }} tabIndex={0}>
-              {catalog.products.map(product => <SwiperSlide key={product.id}>{renderProduct(product)}</SwiperSlide>)}
-            </Swiper>
-          )}
+          <Swiper className="products-slider" modules={[A11y, Keyboard, Mousewheel]} slidesPerView={2.2} spaceBetween={10} breakpoints={{ 601: { slidesPerView: 4.2, spaceBetween: 12 }, 1024: { slidesPerView: 5.5, spaceBetween: 12 } }} keyboard={{ enabled: true, onlyInViewport: true }} mousewheel={{ forceToAxis: true }} a11y={{ containerMessage: text.sliderLabel, slideLabelMessage: text.columnLabel }} tabIndex={0}>
+            {catalog.products.map(product => <SwiperSlide key={product.id}>{renderProduct(product)}</SwiperSlide>)}
+          </Swiper>
         </div>
       </div>
+      {showFloatingTimer && (
+        <button
+          type="button"
+          className="deals-floating-timer"
+          aria-label="Return to today's deals"
+          onClick={() => dealsSection.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+        >
+          <span>{text.offerEnds}</span>
+          <span className="deals-floating-clock">
+            {clock.map(unit => <span className="deals-floating-time" key={unit.label}>
+              <strong>{unit.value === null ? "--" : String(unit.value).padStart(2, "0")}</strong>
+              <small>{unit.label}</small>
+            </span>)}
+          </span>
+        </button>
+      )}
       <dialog ref={dialog} className="product-dialog" aria-labelledby="deal-dialog-title" onClick={event => { if (event.target === event.currentTarget) dialog.current?.close(); }}>
         <button className="product-dialog-close" type="button" onClick={() => dialog.current?.close()}>{text.close} ×</button>
         {selected && <><Image src={selected.image} alt={selected.name} width={240} height={200} className="product-dialog-image" /><h2 id="deal-dialog-title">{selected.name}</h2><p>{selected.weight}</p><strong>{money.format(selected.price)}</strong><p className="product-demo-note">{text.demoNote}</p></>}
