@@ -1,0 +1,586 @@
+{
+  "language": "en",
+  "locale": "en-IN",
+  "currency": "INR",
+  "heading": "Best Selling Products",
+  "viewAll": "View All",
+  "showLess": "Show Less",
+  "viewDetails": "View Details",
+  "close": "Close",
+  "save": "Save {name} to favourites",
+  "unsave": "Remove {name} from favourites",
+  "discount": "{percent}% OFF",
+  "rating": "Rated {rating} out of 5 from {reviews} reviews",
+  "demoNote": "Demo product details. Prices and availability are illustrative.",
+  "sliderLabel": "Best selling products. Swipe or use arrow keys to explore.",
+  "columnLabel": "Product column {{index}} of {{slidesLength}}",
+  "products": [
+    {
+      "id": "rohu",
+      "name": "Rohu Fish - Fresh",
+      "image": "/images/products/product--2.png",
+      "price": 180,
+      "originalPrice": 220,
+      "weight": "500 g - 1 kg",
+      "rating": 4.6,
+      "reviews": 120,
+      "category": "Fish & Seafood",
+      "subcategory": "Fresh Fish",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 0.25,
+          "unit": "kg",
+          "price": 90,
+          "originalPrice": 110
+        },
+        {
+          "label": "500 g",
+          "amount": 0.5,
+          "unit": "kg",
+          "price": 180,
+          "originalPrice": 220
+        },
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 360,
+          "originalPrice": 440
+        }
+      ]
+    },
+    {
+      "id": "chicken",
+      "name": "Chicken Curry Cut",
+      "image": "/images/products/product--1.png",
+      "price": 220,
+      "originalPrice": 260,
+      "weight": "500 g",
+      "rating": 4.6,
+      "reviews": 98,
+      "category": "Meat & Poultry",
+      "subcategory": "Chicken",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 0.25,
+          "unit": "kg",
+          "price": 110,
+          "originalPrice": 130
+        },
+        {
+          "label": "500 g",
+          "amount": 0.5,
+          "unit": "kg",
+          "price": 220,
+          "originalPrice": 260
+        },
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 440,
+          "originalPrice": 520
+        }
+      ]
+    },
+    {
+      "id": "tomato",
+      "name": "Fresh Tomato",
+      "image": "/images/products/product--3.png",
+      "price": 30,
+      "originalPrice": 40,
+      "weight": "1 kg",
+      "rating": 4.4,
+      "reviews": 210,
+      "category": "Vegetables",
+      "subcategory": "Fresh Vegetables",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 0.25,
+          "unit": "kg",
+          "price": 7.5,
+          "originalPrice": 10
+        },
+        {
+          "label": "500 g",
+          "amount": 0.5,
+          "unit": "kg",
+          "price": 15,
+          "originalPrice": 20
+        },
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 30,
+          "originalPrice": 40
+        }
+      ]
+    },
+    {
+      "id": "milk",
+      "name": "Fresh Milk",
+      "image": "/images/products/product--4.png",
+      "price": 60,
+      "originalPrice": 70,
+      "weight": "1 L",
+      "rating": 4.5,
+      "reviews": 85,
+      "category": "Dairy & Eggs",
+      "subcategory": "Milk",
+      "variants": [
+        {
+          "label": "500 ml",
+          "amount": 0.5,
+          "unit": "L",
+          "price": 30,
+          "originalPrice": 35
+        },
+        {
+          "label": "1 L",
+          "amount": 1,
+          "unit": "L",
+          "price": 60,
+          "originalPrice": 70
+        },
+        {
+          "label": "2 L",
+          "amount": 2,
+          "unit": "L",
+          "price": 120,
+          "originalPrice": 140
+        }
+      ]
+    },
+    {
+      "id": "apple",
+      "name": "Fresh Apple",
+      "image": "/images/products/product--5.png",
+      "price": 90,
+      "originalPrice": 120,
+      "weight": "500 g",
+      "rating": 4.6,
+      "reviews": 76,
+      "category": "Fruits",
+      "subcategory": "Fresh Fruits",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 0.25,
+          "unit": "kg",
+          "price": 45,
+          "originalPrice": 60
+        },
+        {
+          "label": "500 g",
+          "amount": 0.5,
+          "unit": "kg",
+          "price": 90,
+          "originalPrice": 120
+        },
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 180,
+          "originalPrice": 240
+        }
+      ]
+    },
+    {
+      "id": "prawn",
+      "name": "Prawn (Medium)",
+      "image": "/images/products/product--6.png",
+      "price": 320,
+      "originalPrice": 395,
+      "weight": "500 g",
+      "rating": 4.6,
+      "reviews": 75,
+      "category": "Fish & Seafood",
+      "subcategory": "Shellfish",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 0.25,
+          "unit": "kg",
+          "price": 160,
+          "originalPrice": 197.5
+        },
+        {
+          "label": "500 g",
+          "amount": 0.5,
+          "unit": "kg",
+          "price": 320,
+          "originalPrice": 395
+        },
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 640,
+          "originalPrice": 790
+        }
+      ]
+    },
+    {
+      "id": "mutton",
+      "name": "Mutton Curry Cut",
+      "image": "/images/products/product--7.png",
+      "price": 480,
+      "originalPrice": 560,
+      "weight": "500 g",
+      "rating": 4.7,
+      "reviews": 64,
+      "category": "Meat & Poultry",
+      "subcategory": "Mutton",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 0.25,
+          "unit": "kg",
+          "price": 240,
+          "originalPrice": 280
+        },
+        {
+          "label": "500 g",
+          "amount": 0.5,
+          "unit": "kg",
+          "price": 480,
+          "originalPrice": 560
+        },
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 960,
+          "originalPrice": 1120
+        }
+      ]
+    },
+    {
+      "id": "cucumber",
+      "name": "Fresh Cucumber",
+      "image": "/images/products/product--8.png",
+      "price": 35,
+      "originalPrice": 45,
+      "weight": "500 g",
+      "rating": 4.5,
+      "reviews": 92,
+      "category": "Vegetables",
+      "subcategory": "Fresh Vegetables",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 0.25,
+          "unit": "kg",
+          "price": 17.5,
+          "originalPrice": 22.5
+        },
+        {
+          "label": "500 g",
+          "amount": 0.5,
+          "unit": "kg",
+          "price": 35,
+          "originalPrice": 45
+        },
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 70,
+          "originalPrice": 90
+        }
+      ]
+    },
+    {
+      "id": "paneer",
+      "name": "Fresh Paneer",
+      "image": "/images/products/product--9.png",
+      "price": 95,
+      "originalPrice": 120,
+      "weight": "200 g",
+      "rating": 4.7,
+      "reviews": 113,
+      "category": "Dairy & Eggs",
+      "subcategory": "Paneer",
+      "variants": [
+        {
+          "label": "200 g",
+          "amount": 0.2,
+          "unit": "kg",
+          "price": 95,
+          "originalPrice": 120
+        },
+        {
+          "label": "500 g",
+          "amount": 0.5,
+          "unit": "kg",
+          "price": 237.5,
+          "originalPrice": 300
+        },
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 475,
+          "originalPrice": 600
+        }
+      ]
+    },
+    {
+      "id": "potato",
+      "name": "Fresh Potato",
+      "image": "/images/products/product--10.png",
+      "price": 28,
+      "originalPrice": 35,
+      "weight": "1 kg",
+      "rating": 4.4,
+      "reviews": 184,
+      "category": "Vegetables",
+      "subcategory": "Root Vegetables",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 0.25,
+          "unit": "kg",
+          "price": 7,
+          "originalPrice": 8.75
+        },
+        {
+          "label": "500 g",
+          "amount": 0.5,
+          "unit": "kg",
+          "price": 14,
+          "originalPrice": 17.5
+        },
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 28,
+          "originalPrice": 35
+        }
+      ]
+    },
+    {
+      "id": "chicken-family",
+      "name": "Chicken Family Pack",
+      "image": "/images/products/product--1.png",
+      "price": 420,
+      "originalPrice": 500,
+      "weight": "1 kg",
+      "rating": 4.6,
+      "reviews": 82,
+      "category": "Meat & Poultry",
+      "subcategory": "Chicken",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 0.25,
+          "unit": "kg",
+          "price": 105,
+          "originalPrice": 125
+        },
+        {
+          "label": "500 g",
+          "amount": 0.5,
+          "unit": "kg",
+          "price": 210,
+          "originalPrice": 250
+        },
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 420,
+          "originalPrice": 500
+        }
+      ]
+    },
+    {
+      "id": "rohu-family",
+      "name": "Rohu Fish Family Pack",
+      "image": "/images/products/product--2.png",
+      "price": 340,
+      "originalPrice": 400,
+      "weight": "1 kg",
+      "rating": 4.7,
+      "reviews": 59,
+      "category": "Fish & Seafood",
+      "subcategory": "Fresh Fish",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 0.25,
+          "unit": "kg",
+          "price": 85,
+          "originalPrice": 100
+        },
+        {
+          "label": "500 g",
+          "amount": 0.5,
+          "unit": "kg",
+          "price": 170,
+          "originalPrice": 200
+        },
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 340,
+          "originalPrice": 400
+        }
+      ]
+    },
+    {
+      "id": "apple-family",
+      "name": "Apple Family Pack",
+      "image": "/images/products/product--5.png",
+      "price": 170,
+      "originalPrice": 220,
+      "weight": "1 kg",
+      "rating": 4.5,
+      "reviews": 67,
+      "category": "Fruits",
+      "subcategory": "Fresh Fruits",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 0.25,
+          "unit": "kg",
+          "price": 42.5,
+          "originalPrice": 55
+        },
+        {
+          "label": "500 g",
+          "amount": 0.5,
+          "unit": "kg",
+          "price": 85,
+          "originalPrice": 110
+        },
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 170,
+          "originalPrice": 220
+        }
+      ]
+    },
+    {
+      "id": "prawn-family",
+      "name": "Prawn Family Pack",
+      "image": "/images/products/product--6.png",
+      "price": 610,
+      "originalPrice": 750,
+      "weight": "1 kg",
+      "rating": 4.8,
+      "reviews": 42,
+      "category": "Fish & Seafood",
+      "subcategory": "Shellfish",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 0.25,
+          "unit": "kg",
+          "price": 152.5,
+          "originalPrice": 187.5
+        },
+        {
+          "label": "500 g",
+          "amount": 0.5,
+          "unit": "kg",
+          "price": 305,
+          "originalPrice": 375
+        },
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 610,
+          "originalPrice": 750
+        }
+      ]
+    },
+    {
+      "id": "paneer-family",
+      "name": "Paneer Family Pack",
+      "image": "/images/products/product--9.png",
+      "price": 225,
+      "originalPrice": 280,
+      "weight": "500 g",
+      "rating": 4.7,
+      "reviews": 88,
+      "category": "Dairy & Eggs",
+      "subcategory": "Paneer",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 0.25,
+          "unit": "kg",
+          "price": 112.5,
+          "originalPrice": 140
+        },
+        {
+          "label": "500 g",
+          "amount": 0.5,
+          "unit": "kg",
+          "price": 225,
+          "originalPrice": 280
+        },
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 450,
+          "originalPrice": 560
+        }
+      ]
+    },
+    {
+      "id": "tomato-family",
+      "name": "Tomato Value Pack",
+      "image": "/images/products/product--3.png",
+      "price": 55,
+      "originalPrice": 75,
+      "weight": "2 kg",
+      "rating": 4.4,
+      "reviews": 106,
+      "category": "Vegetables",
+      "subcategory": "Fresh Vegetables",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 0.25,
+          "unit": "kg",
+          "price": 6.88,
+          "originalPrice": 9.38
+        },
+        {
+          "label": "500 g",
+          "amount": 0.5,
+          "unit": "kg",
+          "price": 13.75,
+          "originalPrice": 18.75
+        },
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 27.5,
+          "originalPrice": 37.5
+        },
+        {
+          "label": "2 kg",
+          "amount": 2,
+          "unit": "kg",
+          "price": 55,
+          "originalPrice": 75
+        }
+      ]
+    }
+  ]
+}

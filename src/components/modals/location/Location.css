@@ -1,0 +1,200 @@
+.navbar-location {
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  background: transparent;
+  border: 0;
+}
+.navbar-location:hover .navbar-location-city { color: #b9e678; }
+.navbar-location:hover .navbar-location-arrow { transform: translateY(2px); }
+.navbar-location-arrow { transition: transform .2s ease; }
+
+.location-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: rgb(5 23 42 / 58%);
+  backdrop-filter: blur(5px);
+  animation: location-fade-in .42s ease both;
+}
+.location-modal {
+  position: relative;
+  width: min(100%, 640px);
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 75%);
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 28px 90px rgb(0 22 47 / 32%);
+  color: #17334e;
+  animation: location-modal-in .48s cubic-bezier(.22,.72,.2,1) both;
+}
+.location-backdrop.is-closing { animation: location-fade-out .38s ease both; }
+.location-backdrop.is-closing .location-modal { animation: location-modal-out .38s cubic-bezier(.4,0,.7,.3) both; }
+.location-modal::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #00366b, #0878ff 55%, #8bd331);
+  content: "";
+}
+.location-close {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #587087;
+  font: inherit;
+  font-size: 25px;
+  font-weight: 400;
+  line-height: 1;
+  cursor: pointer;
+  transition: color .2s ease;
+}
+.location-close:hover { color: #db4437; }
+.location-modal-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 70px;
+  padding: 9px 20px;
+  border-bottom: 1px solid #edf1f5;
+}
+.location-brand-mark {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border-radius: 6px;
+  background: #eaf4ff;
+  color: #07569b;
+  animation: location-mark-in .6s .12s both;
+}
+.location-brand-mark svg { width: 27px; height: 27px; }
+.location-brand-copy { display: flex; flex-direction: column; gap: 3px; }
+.location-brand-name {
+  color: #00366b;
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  font-size: 27px;
+  font-weight: 700;
+  letter-spacing: -.8px;
+  line-height: 1;
+}
+.location-brand-name > span { color: #68ad22; }
+.location-brand-tagline { color: #7b8c9c; font-size: 11px; letter-spacing: .15px; }
+.location-login-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+  padding: 8px 14px;
+  border: 1px solid #cfe0f0;
+  border-radius: 6px;
+  color: #07569b;
+  background: #fff;
+  font-family: inherit;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: color .2s ease, background .2s ease, border-color .2s ease, transform .2s ease;
+}
+.location-login-link:hover { transform: translateY(-2px); border-color: #07569b; background: #edf6ff; color: #00366b; }
+.location-content { padding: 23px 30px 24px; }
+.location-copy { margin-bottom: 16px; }
+.location-eyebrow { color: #678198; font-size: 10px; font-weight: 800; letter-spacing: 1.55px; }
+.location-copy h2 { margin: 7px 0 5px; color: #163858; font-size: clamp(23px, 4vw, 29px); font-weight: 650; letter-spacing: -.7px; line-height: 1.15; }
+.location-copy h2 span { color: #4b9618; }
+.location-copy p { margin: 0; color: #76899a; font-size: 13px; }
+.location-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid #d8e3ec;
+  border-radius: 6px;
+  background: #fbfdff;
+  color: #6c849a;
+  transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+.location-search-wrap:focus-within { border-color: #2081cf; background: #fff; box-shadow: 0 0 0 4px rgb(32 129 207 / 12%); }
+.location-search-wrap > svg { flex: 0 0 20px; width: 20px; height: 20px; }
+.location-search-wrap input { width: 100%; height: 100%; border: 0; outline: 0; background: transparent; color: #183a58; font: inherit; font-size: 13px; font-weight: 400; }
+.location-search-wrap input::placeholder { color: #9aa9b6; }
+.location-clear { display: grid; width: 26px; height: 26px; place-items: center; border: 0; border-radius: 7px; background: #edf3f8; color: #657d92; font-size: 19px; cursor: pointer; }
+.location-current {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 11px;
+  padding: 9px 11px;
+  border: 1px solid #dcebd2;
+  border-radius: 6px;
+  background: linear-gradient(105deg, #f4faef, #fbfdf9);
+}
+.location-current-icon { display: grid; width: 32px; height: 32px; flex: 0 0 32px; place-items: center; border-radius: 6px; background: #e4f1da; color: #4d8e20; }
+.location-current-icon svg { width: 20px; height: 20px; }
+.location-current > span:nth-child(2) { display: flex; flex-direction: column; gap: 3px; }
+.location-current small { color: #778d6a; font-size: 10px; }
+.location-current strong { color: #294c24; font-size: 13px; font-weight: 600; }
+.location-current-check { display: grid; width: 22px; height: 22px; place-items: center; margin-left: auto; border-radius: 50%; background: #6ba934; color: #fff; font-size: 13px; font-weight: 700; }
+.location-popular-heading { display: flex; align-items: center; gap: 10px; margin: 19px 0 10px; color: #445c70; font-size: 12px; font-weight: 600; }
+.location-heading-rule { height: 1px; flex: 1; background: #e9eef2; }
+.location-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.location-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  padding: 7px 11px;
+  border: 1px solid #e0e8ee;
+  border-radius: 6px;
+  background: #fff;
+  color: #526b80;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 400;
+  cursor: pointer;
+  opacity: 0;
+  animation: location-chip-in .35s calc(.18s + var(--chip-index) * 45ms) ease forwards;
+  transition: transform .18s ease, border-color .18s ease, color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+.location-chip:hover { transform: translateY(-1px); border-color: #83b65e; background: #f5faef; color: #39761b; box-shadow: 0 4px 10px rgb(60 117 25 / 9%); }
+.location-chip.is-selected { border-color: #68a638; background: #f0f8e9; color: #39761b; }
+.location-no-results { margin: 0; color: #7a8d9e; font-size: 12px; }
+.location-modal-footer { display: flex; align-items: center; gap: 7px; padding: 11px 30px; border-top: 1px solid #edf1f5; background: #fbfcfd; color: #8b9aa6; font-size: 10px; }
+.location-footer-dot { width: 4px; height: 4px; border-radius: 50%; background: #78b648; }
+.location-modal-footer > span:last-child { color: #52718b; font-weight: 700; }
+
+@keyframes location-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes location-fade-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes location-modal-in { from { opacity: 0; transform: translateY(16px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes location-modal-out { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(10px) scale(.985); } }
+@keyframes location-mark-in { from { opacity: 0; transform: rotate(-15deg) scale(.7); } to { opacity: 1; transform: rotate(0) scale(1); } }
+@keyframes location-chip-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 540px) {
+  .location-backdrop { padding: 12px; }
+  .location-modal { border-radius: 6px; }
+  .location-modal-brand { min-height: 64px; padding: 8px 14px 8px 16px; gap: 8px; }
+  .location-brand-mark { width: 40px; height: 40px; }
+  .location-brand-name { font-size: 21px; }
+  .location-login-link { padding: 7px 9px; font-size: 12px; }
+  .location-close { width: 24px; height: 28px; flex-basis: 24px; font-size: 23px; }
+  .location-content { padding: 19px 17px 20px; }
+  .location-modal-footer { padding: 10px 17px; }
+  .location-copy h2 { max-width: 320px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .location-backdrop, .location-modal, .location-brand-mark, .location-chip { animation-duration: .01ms; animation-delay: 0ms; }
+  .location-close, .location-login-link, .location-chip { transition-duration: .01ms; }
+}

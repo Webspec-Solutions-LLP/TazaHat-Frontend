@@ -1,0 +1,146 @@
+{
+  "language": "en",
+  "heading": "Bestsellers",
+  "moreLabel": "+{count} more",
+  "browseLabel": "Browse {name}",
+  "groups": [
+    {
+      "id": "vegetables",
+      "name": "Vegetables & Greens",
+      "more": 155,
+      "images": [
+        {
+          "src": "/images/products/product--3.png",
+          "alt": "Tomatoes"
+        },
+        {
+          "src": "/images/products/product--8.png",
+          "alt": "Cucumber"
+        },
+        {
+          "src": "/images/products/product12.png",
+          "alt": "Cauliflower"
+        },
+        {
+          "src": "/images/products/product15.png",
+          "alt": "Eggplant"
+        }
+      ]
+    },
+    {
+      "id": "fruits",
+      "name": "Fresh Fruits",
+      "more": 84,
+      "images": [
+        {
+          "src": "/images/products/product--5.png",
+          "alt": "Red apples"
+        },
+        {
+          "src": "/images/products/product13.png",
+          "alt": "Mangoes"
+        },
+        {
+          "src": "/images/products/product13.png",
+          "alt": "Ripe mangoes"
+        },
+        {
+          "src": "/images/products/product--5.png",
+          "alt": "Fresh apples"
+        }
+      ]
+    },
+    {
+      "id": "fish",
+      "name": "Fish & Seafood",
+      "more": 98,
+      "images": [
+        {
+          "src": "/images/products/product--2.png",
+          "alt": "Rohu fish"
+        },
+        {
+          "src": "/images/products/product--6.png",
+          "alt": "Prawns"
+        },
+        {
+          "src": "/images/products/product16.png",
+          "alt": "Fresh fish"
+        },
+        {
+          "src": "/images/products/product17.png",
+          "alt": "Crab"
+        }
+      ]
+    },
+    {
+      "id": "meat",
+      "name": "Meat & Poultry",
+      "more": 62,
+      "images": [
+        {
+          "src": "/images/products/product--1.png",
+          "alt": "Chicken"
+        },
+        {
+          "src": "/images/products/product--7.png",
+          "alt": "Mutton"
+        },
+        {
+          "src": "/images/products/product11.png",
+          "alt": "Eggs"
+        },
+        {
+          "src": "/images/products/product--1.png",
+          "alt": "Chicken cuts"
+        }
+      ]
+    },
+    {
+      "id": "dairy",
+      "name": "Dairy & Eggs",
+      "more": 79,
+      "images": [
+        {
+          "src": "/images/products/product--4.png",
+          "alt": "Milk"
+        },
+        {
+          "src": "/images/products/product--9.png",
+          "alt": "Paneer"
+        },
+        {
+          "src": "/images/products/product11.png",
+          "alt": "Eggs"
+        },
+        {
+          "src": "/images/products/product--9.png",
+          "alt": "Fresh paneer"
+        }
+      ]
+    },
+    {
+      "id": "essentials",
+      "name": "Everyday Essentials",
+      "more": 120,
+      "images": [
+        {
+          "src": "/images/products/product--10.png",
+          "alt": "Potatoes"
+        },
+        {
+          "src": "/images/products/product14.png",
+          "alt": "Onions"
+        },
+        {
+          "src": "/images/products/product--3.png",
+          "alt": "Tomatoes"
+        },
+        {
+          "src": "/images/products/product11.png",
+          "alt": "Eggs"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,245 @@
+{
+  "language": "en",
+  "locale": "en-IN",
+  "currency": "INR",
+  "brand": "TazaHaat",
+  "region": "West Bengal",
+  "heroTitle": "PRICE",
+  "heroHighlight": "LIST",
+  "tagline": "Freshness you can trust. Quality you can taste.",
+  "heading": "TazaHaat West Bengal",
+  "headingHighlight": "Price List",
+  "demoNotice": "Sample prices for preview. Confirm availability and current prices before ordering.",
+  "validLabel": "Demo price period",
+  "validFrom": "2026-10-15",
+  "validTo": "2026-10-16",
+  "orderNow": "Order Now",
+  "browse": "Browse Products",
+  "appLabel": "Get it on Google Play",
+  "appNote": "Fresh picks, right at your fingertips",
+  "offerTitle": "Fresh picks",
+  "offerText": "Great value every day",
+  "off": "OFF",
+  "perUnit": "/{unit}",
+  "empty": "No products in this category yet.",
+  "close": "Close",
+  "preview": "Product Preview",
+  "orderNote": "Online ordering is not available yet. Browse our product catalogue for more fresh picks.",
+  "heroImage": "/images/priceListHero section.png",
+  "playstoreImage": "/images/playstore.webp",
+  "logo": "/images/logo.png",
+  "benefits": [
+    {
+      "icon": "leaf",
+      "label": "Fresh & Quality"
+    },
+    {
+      "icon": "cut",
+      "label": "Speciality Cuts"
+    },
+    {
+      "icon": "snow",
+      "label": "Ready to Cook"
+    },
+    {
+      "icon": "box",
+      "label": "Carefully Packed"
+    }
+  ],
+  "categories": [
+    {
+      "id": "fish",
+      "name": "Fish & Seafood",
+      "image": "/images/category/category1.png",
+      "icon": ""
+    },
+    {
+      "id": "vegetables",
+      "name": "Vegetables",
+      "image": "/images/category/category2.png",
+      "icon": ""
+    },
+    {
+      "id": "fruits",
+      "name": "Fruits",
+      "image": "/images/category/category3.png",
+      "icon": ""
+    },
+    {
+      "id": "dairy",
+      "name": "Dairy & Eggs",
+      "image": "/images/category/category4.png",
+      "icon": ""
+    },
+    {
+      "id": "meat",
+      "name": "Meat & Poultry",
+      "image": "/images/category/category5.png",
+      "icon": ""
+    },
+    {
+      "id": "grocery",
+      "name": "Grocery & Staples",
+      "image": "/images/category/category6.png",
+      "icon": ""
+    },
+    {
+      "id": "bakery",
+      "name": "Snacks & Bakery",
+      "image": "/images/category/category7.png",
+      "icon": ""
+    },
+    {
+      "id": "offers",
+      "name": "Offers",
+      "image": "",
+      "icon": "percent"
+    }
+  ],
+  "products": [
+    {
+      "id": "rohu",
+      "name": "Rohu / Rui - Fresh",
+      "image": "/images/products/product--2.png",
+      "category": "fish",
+      "price": 360,
+      "originalPrice": 440,
+      "unit": "kg"
+    },
+    {
+      "id": "pomfret",
+      "name": "Fresh Pomfret - Whole",
+      "image": "/images/products/product16.png",
+      "category": "fish",
+      "price": 699,
+      "originalPrice": 850,
+      "unit": "kg"
+    },
+    {
+      "id": "hilsa",
+      "name": "Hilsa / Ilish - Whole",
+      "image": "/images/products/product18.png",
+      "category": "fish",
+      "price": 1099,
+      "originalPrice": 1299,
+      "unit": "kg"
+    },
+    {
+      "id": "prawns",
+      "name": "Medium Prawns - Fresh",
+      "image": "/images/products/product--6.png",
+      "category": "fish",
+      "price": 640,
+      "originalPrice": 790,
+      "unit": "kg"
+    },
+    {
+      "id": "crab",
+      "name": "Fresh Mud Crab",
+      "image": "/images/products/product17.png",
+      "category": "fish",
+      "price": 580,
+      "originalPrice": 700,
+      "unit": "kg"
+    },
+    {
+      "id": "fish-cuts",
+      "name": "Rohu Curry Cuts",
+      "image": "/images/products/product--2.png",
+      "category": "fish",
+      "price": 390,
+      "originalPrice": 480,
+      "unit": "kg"
+    },
+    {
+      "id": "chicken",
+      "name": "Chicken Curry Cut",
+      "image": "/images/products/product--1.png",
+      "category": "meat",
+      "price": 220,
+      "originalPrice": 260,
+      "unit": "500 g"
+    },
+    {
+      "id": "mutton",
+      "name": "Mutton Curry Cut",
+      "image": "/images/products/product--7.png",
+      "category": "meat",
+      "price": 480,
+      "originalPrice": 560,
+      "unit": "500 g"
+    },
+    {
+      "id": "ready-fish",
+      "name": "Cleaned Fish - Ready to Cook",
+      "image": "/images/products/product16.png",
+      "category": "fish",
+      "price": 420,
+      "originalPrice": 500,
+      "unit": "500 g"
+    },
+    {
+      "id": "tomato",
+      "name": "Fresh Tomato",
+      "image": "/images/products/product--3.png",
+      "category": "vegetables",
+      "price": 30,
+      "originalPrice": 40,
+      "unit": "kg"
+    },
+    {
+      "id": "apple",
+      "name": "Fresh Apple",
+      "image": "/images/products/product--5.png",
+      "category": "fruits",
+      "price": 90,
+      "originalPrice": 120,
+      "unit": "500 g"
+    },
+    {
+      "id": "milk",
+      "name": "Fresh Milk",
+      "image": "/images/products/product--4.png",
+      "category": "dairy",
+      "price": 60,
+      "originalPrice": 70,
+      "unit": "L"
+    },
+    {
+      "id": "staples",
+      "name": "Rice & Pulses Combo",
+      "image": "/images/category/category6.png",
+      "category": "grocery",
+      "price": 180,
+      "originalPrice": 220,
+      "unit": "pack"
+    },
+    {
+      "id": "bakery",
+      "name": "Assorted Bakery Pack",
+      "image": "/images/category/category7.png",
+      "category": "bakery",
+      "price": 140,
+      "originalPrice": 175,
+      "unit": "pack"
+    }
+  ],
+  "socialLabel": "Social media",
+  "socials": [
+    {
+      "id": "instagram",
+      "name": "Instagram",
+      "url": "https://www.instagram.com/"
+    },
+    {
+      "id": "whatsapp",
+      "name": "WhatsApp",
+      "url": "https://www.whatsapp.com/"
+    },
+    {
+      "id": "facebook",
+      "name": "Facebook",
+      "url": "https://www.facebook.com/"
+    }
+  ]
+}

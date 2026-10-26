@@ -1,0 +1,24 @@
+{
+  "language": "en",
+  "sectionLabel": "Fresh fish and meat offers",
+  "offers": [
+    {
+      "id": "fish",
+      "title": "Fresh Fish & Seafood",
+      "description": "From the Pure Waters to Your Home",
+      "image": "/images/offer2.png",
+      "imageAlt": "Fresh fish and seafood beside a fishing boat at sea",
+      "benefits": ["Wide Variety", "Hygienic Cutting", "Fast Delivery"],
+      "button": "Shop Fish"
+    },
+    {
+      "id": "meat",
+      "title": "Premium Meat & Poultry",
+      "description": "Tender, Nutritious & Fresh",
+      "image": "/images/offer1.png",
+      "imageAlt": "Fresh meat and poultry with herbs on a wooden board",
+      "benefits": [],
+      "button": "Shop Meat"
+    }
+  ]
+}

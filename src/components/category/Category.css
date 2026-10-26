@@ -1,0 +1,165 @@
+.category-section {
+  padding: 15px 0;
+  background: #fff;
+  color: #063361;
+}
+
+.category-container {
+  width: calc(100% - 48px);
+  max-width: 1320px;
+  margin-inline: auto;
+}
+
+.category-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.category-header h2 {
+  margin: 0 0 4px;
+  color: #063361;
+  font-size: clamp(22px, 2.2vw, 28px);
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.3px;
+}
+
+.category-header p {
+  margin: 0;
+  color: #61758d;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.category-view-all {
+  flex-shrink: 0;
+  min-height: 44px;
+  padding: 8px 0;
+  border: 0;
+  background: transparent;
+  color: #0864b7;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.category-view-all:hover { text-decoration: underline; }
+.category-view-all:focus-visible,
+.category-list:focus-visible { outline: 2px solid #0864b7; outline-offset: 4px; }
+
+.category-list {
+  --visible-cards: 6.4;
+  --card-gap: 10px;
+  display: flex;
+  gap: var(--card-gap);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  margin: 0;
+  padding: 10px 0 18px;
+  list-style: none;
+}
+
+.category-list::-webkit-scrollbar { display: none; }
+
+.category-slider.swiper { padding: 10px 0 18px; }
+.category-slider .swiper-wrapper { align-items: stretch; }
+.category-slider .swiper-slide { height: auto; display: flex; }
+.category-slider .category-card { flex: 1; width: 100%; }
+.category-slider:focus-visible { outline: 2px solid #0864b7; outline-offset: 2px; }
+
+.category-card {
+  box-sizing: border-box;
+  flex: 0 0 calc((100% - (var(--visible-cards) - 1) * var(--card-gap)) / var(--visible-cards));
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: center;
+  border-radius: 999px;
+  scroll-snap-align: start;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: none;
+  transition: box-shadow 180ms ease, transform 180ms ease;
+  color: inherit;
+  text-decoration: none;
+}
+
+.category-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px -4px #06336126;
+}
+
+.category-card:hover .category-arrow { background: #087cff; }
+
+.category-image {
+  position: relative;
+  width: 100%;
+  height: 150px;
+  flex-shrink: 0;
+  margin-bottom: 0;
+  overflow: hidden;
+}
+
+.category-image img { object-fit: contain; padding: 10px 8px 0; background: transparent; user-select: none; }
+.category-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 12px 24px;
+}
+.category-card h3 {
+  margin: 0;
+  color: #063361;
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.15px;
+  line-height: 1.4;
+}
+.category-count { margin: auto 0 0; padding-top: 8px; font-size: 11px; line-height: 1.5; color: #586979; }
+.category-arrow {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  margin-top: 12px;
+  border-radius: 50%;
+  background: #063f6b;
+  color: #fff;
+  font-size: 17px;
+  line-height: 1;
+  transition: background-color 180ms ease;
+}
+.category-count strong { color: #063361; font-weight: 700; }
+.category-list--all { flex-wrap: wrap; overflow: visible; }
+
+@media (prefers-reduced-motion: reduce) {
+  .category-card, .category-arrow { transition: none; }
+  .category-card:hover { transform: none; }
+}
+
+@media (max-width: 1023px) {
+  .category-list { --visible-cards: 3.4; }
+}
+
+@media (max-width: 600px) {
+  .category-section { padding: 16px 0 22px; }
+  .category-container { width: calc(100% - 32px); }
+  .category-header { align-items: flex-start; gap: 8px; margin-bottom: 12px; }
+  .category-header p { font-size: 12px; max-width: 230px; }
+  .category-view-all { max-width: 90px; font-size: 11px; text-align: right; }
+  .category-list { --visible-cards: 2.2; --card-gap: 8px; }
+  .category-image { height: 112px; }
+  .category-details { padding: 8px 10px 20px; }
+  .category-card h3 { font-size: 14px; }
+}

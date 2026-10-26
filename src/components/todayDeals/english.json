@@ -1,0 +1,23 @@
+{
+  "language": "en",
+  "locale": "en-IN",
+  "currency": "INR",
+  "heading": "Today's Special Deals",
+  "viewAll": "View all",
+  "showLess": "Show Less",
+  "viewDetails": "View Details",
+  "close": "Close",
+  "save": "Save {name} to favourites",
+  "unsave": "Remove {name} from favourites",
+  "discount": "{percent}% OFF",
+  "rating": "Rated {rating} out of 5 from {reviews} reviews",
+  "demoNote": "Demo product details. Prices and availability are illustrative.",
+  "sliderLabel": "Special deals. Swipe or use arrow keys to explore.",
+  "columnLabel": "Deal {{index}} of {{slidesLength}}",
+  "description": "Fresh picks at great prices",
+  "offerEnds": "Offer Ends In",
+  "days": "Days",
+  "hours": "Hours",
+  "minutes": "Minutes",
+  "seconds": "Seconds"
+}

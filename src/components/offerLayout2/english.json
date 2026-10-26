@@ -1,0 +1,37 @@
+{
+  "language": "en",
+  "badge": "Farm Fresh",
+  "heroTitle": "Farm to",
+  "heroHighlight": "Your Home",
+  "heroDescription": "Fresh. Natural. Nutritious.",
+  "heroButton": "Shop Fresh Now",
+  "farmNote": "Straight from",
+  "farmHighlight": "Farms to You",
+  "heading": "Today's Fresh Picks",
+  "description": "Handpicked fresh items at special prices",
+  "viewAll": "View All",
+  "shopNow": "Shop Now",
+  "fresh": "Fresh",
+  "upTo": "Up to",
+  "off": "OFF",
+  "whyHeading": "Why Choose Fresh Items?",
+  "background": "/images/offer2Background.png",
+  "categories": [
+    { "id": "vegetables", "name": "Vegetables", "image": "/images/category/category2.png", "discount": 30, "theme": "green" },
+    { "id": "fruits", "name": "Fruits", "image": "/images/category/category3.png", "discount": 25, "theme": "yellow" },
+    { "id": "meat", "name": "Meat & Poultry", "image": "/images/category/category5.png", "discount": 20, "theme": "pink" },
+    { "id": "fish", "name": "Fish & Seafood", "image": "/images/category/category1.png", "discount": 18, "theme": "blue" }
+  ],
+  "benefits": [
+    { "icon": "leaf", "title": "Farm Fresh", "description": "Directly Sourced" },
+    { "icon": "shield", "title": "Hygienic", "description": "& Safe" },
+    { "icon": "truck", "title": "Fast", "description": "Delivery" },
+    { "icon": "leaf", "title": "Wide", "description": "Variety" }
+  ],
+  "reasons": [
+    { "icon": "leaf", "title": "Better Nutrition", "description": "Rich in natural goodness", "theme": "green" },
+    { "icon": "heart", "title": "Supports", "description": "Healthy Lifestyle", "theme": "orange" },
+    { "icon": "leaf", "title": "No Artificial", "description": "Preservatives", "theme": "blue" },
+    { "icon": "smile", "title": "Freshly Picked", "description": "Everyday", "theme": "pink" }
+  ]
+}

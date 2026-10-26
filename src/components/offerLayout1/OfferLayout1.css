@@ -1,0 +1,35 @@
+.offer-layout-one { padding: 15px 0; }
+.offer-layout-one-container { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; width: calc(100% - 48px); max-width: 1320px; margin-inline: auto; }
+.offer-banner { position: relative; overflow: hidden; min-height: 230px; border-radius: 12px; isolation: isolate; box-shadow: 0 3px 12px #0633610a; }
+.offer-banner-image { object-fit: cover; object-position: center; z-index: -2; }
+.offer-banner--fish { background: #0864a5; color: #fff; }
+.offer-banner--fish::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, #00386ba6, #00386b26 62%, transparent 82%); }
+.offer-banner--meat { background: #ffe1e0; color: #791612; }
+.offer-banner-content { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; min-height: 230px; padding: 26px 28px; }
+.offer-banner-content h2 { max-width: 75%; margin: 0 0 6px; font: 800 clamp(21px, 2vw, 28px)/1.12 "Trebuchet MS", "Segoe UI", sans-serif; letter-spacing: -0.5px; }
+.offer-banner--meat h2 { max-width: 50%; }
+.offer-banner-content > p { max-width: 72%; margin: 0; font-size: 14px; line-height: 1.4; }
+.offer-banner-benefits { display: flex; flex-wrap: wrap; gap: 7px 10px; margin: 16px 0 0; padding: 0; list-style: none; }
+.offer-banner-benefits li { display: flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; }
+.offer-banner-benefits li + li { border-left: 1px solid #ffffff66; padding-left: 10px; }
+.offer-banner-benefits svg { flex-shrink: 0; }
+.offer-banner-button { display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-height: 38px; margin-top: 18px; padding: 8px 22px; border: 0; border-radius: 24px; background: #fff; color: #0864b7; font-size: 12px; font-weight: 700; cursor: pointer; transition: box-shadow 160ms ease; }
+.offer-banner--meat .offer-banner-button { background: #0753a0; color: #fff; }
+.offer-banner-button:hover { box-shadow: 0 4px 12px #002f6033; }
+.offer-banner-button:focus-visible { outline: 3px solid currentColor; outline-offset: 3px; }
+@media (min-width: 768px) and (max-width: 1023px) {
+  .offer-banner-content { padding: 22px 18px; }
+  .offer-banner-content > p { font-size: 12px; }
+  .offer-banner-benefits { max-width: 75%; gap: 5px 8px; }
+  .offer-banner-benefits li + li { border-left: 0; padding-left: 0; }
+}
+@media (max-width: 767px) {
+  .offer-layout-one-container { width: calc(100% - 32px); grid-template-columns: 1fr; gap: 12px; }
+  .offer-banner, .offer-banner-content { min-height: 210px; }
+  .offer-banner-content { padding: 22px 18px; }
+  .offer-banner-content > p { font-size: 12px; }
+  .offer-banner-benefits { gap: 6px; }
+  .offer-banner-benefits li { font-size: 9px; }
+  .offer-banner-benefits li + li { padding-left: 6px; }
+}
+@media (prefers-reduced-motion: reduce) { .offer-banner-button { transition: none; } }

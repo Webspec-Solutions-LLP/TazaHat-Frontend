@@ -1,0 +1,30 @@
+{
+  "title": "Quick answers",
+  "subtitle": "A few helpful details before you reach our team.",
+  "items": [
+    {
+      "question": "How can I check my order status?",
+      "answer": "Call our support line or message us on WhatsApp with your registered phone number and order ID. Our team can help check the latest delivery update."
+    },
+    {
+      "question": "What should I do if an item arrives in poor condition?",
+      "answer": "Contact support as soon as possible and include your order ID. A photo of the item or bill can help our team review the issue and guide you through the available options."
+    },
+    {
+      "question": "How do I report a late delivery?",
+      "answer": "Use the hotline or WhatsApp dispatch option with your order ID. The support team can check the delivery status and advise you on the next step."
+    },
+    {
+      "question": "Can I change my delivery address after placing an order?",
+      "answer": "Contact support as soon as possible. Address changes depend on the order's dispatch status and whether the new address is within the service area."
+    },
+    {
+      "question": "How can I request a refund or replacement?",
+      "answer": "Reach out with your order ID and a brief description of the issue. If relevant, attach a clear photo so the team can review your request."
+    },
+    {
+      "question": "When is customer support available?",
+      "answer": "The contact options on this page show the listed support channels and their availability. For urgent delivery concerns, use the hotline or WhatsApp action."
+    }
+  ]
+}
