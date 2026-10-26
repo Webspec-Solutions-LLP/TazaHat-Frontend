@@ -7,6 +7,7 @@ import Products from "@/components/products/Products";
 import TodalDeals from "@/components/todayDeals/TodalDeals";
 import OfferLayout1 from "@/components/offerLayout1/OfferLayout1";
 import OfferLayout2 from "@/components/offerLayout2/OfferLayout2";
+import OfferLayout3 from "@/components/offerLayout3/OfferLayout3";
 import BestSeller from "@/components/bestSeller/BestSeller";
 import "./Home.css";
 
@@ -21,6 +22,7 @@ export default function Home() {
       <OfferLayout1 />
       <BestSeller />
       <OfferLayout2 />
+      <OfferLayout3 />
       <section className="home-newsletter" aria-labelledby="newsletter-heading">
         <div className="home-newsletter-copy">
           <span className="home-newsletter-icon" aria-hidden="true">

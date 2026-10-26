@@ -1,0 +1,130 @@
+{
+  "orders": [
+    {
+      "id": "TH-2026-1048",
+      "date": "26 Oct 2026",
+      "status": "upcoming",
+      "payment": "Paid online",
+      "deliveryAddress": "Salt Lake, Kolkata, West Bengal",
+      "products": [
+        {
+          "id": "rohu-fish",
+          "name": "Rohu Fish - Fresh",
+          "image": "/images/products/product--2.png",
+          "quantity": 1,
+          "unit": "500 g",
+          "price": 180,
+          "deliveryStatus": "delivered"
+        },
+        {
+          "id": "tomato",
+          "name": "Fresh Tomato",
+          "image": "/images/products/product--3.png",
+          "quantity": 1,
+          "unit": "1 kg",
+          "price": 30,
+          "deliveryStatus": "delivered"
+        },
+        {
+          "id": "cucumber",
+          "name": "Fresh Cucumber",
+          "image": "/images/products/product--8.png",
+          "quantity": 1,
+          "unit": "500 g",
+          "price": 30,
+          "deliveryStatus": "on-the-way"
+        }
+      ]
+    },
+    {
+      "id": "TH-2026-1036",
+      "date": "22 Oct 2026",
+      "status": "complete",
+      "payment": "Cash on delivery",
+      "deliveryAddress": "New Town, Kolkata, West Bengal",
+      "products": [
+        {
+          "id": "chicken-curry-cut",
+          "name": "Chicken Curry Cut",
+          "image": "/images/products/product--1.png",
+          "quantity": 1,
+          "unit": "500 g",
+          "price": 220,
+          "deliveryStatus": "delivered"
+        },
+        {
+          "id": "fresh-milk",
+          "name": "Fresh Milk",
+          "image": "/images/products/product--4.png",
+          "quantity": 2,
+          "unit": "1 L",
+          "price": 60,
+          "deliveryStatus": "delivered"
+        },
+        {
+          "id": "fresh-potato",
+          "name": "Fresh Potato",
+          "image": "/images/products/product--10.png",
+          "quantity": 1,
+          "unit": "1 kg",
+          "price": 28,
+          "deliveryStatus": "delivered"
+        }
+      ]
+    },
+    {
+      "id": "TH-2026-1019",
+      "date": "18 Oct 2026",
+      "status": "cancel",
+      "payment": "Payment refunded",
+      "deliveryAddress": "Behala, Kolkata, West Bengal",
+      "products": [
+        {
+          "id": "prawn-medium",
+          "name": "Prawn (Medium)",
+          "image": "/images/products/product--6.png",
+          "quantity": 1,
+          "unit": "500 g",
+          "price": 320,
+          "deliveryStatus": "cancelled"
+        },
+        {
+          "id": "fresh-cucumber",
+          "name": "Fresh Cucumber",
+          "image": "/images/products/product--8.png",
+          "quantity": 1,
+          "unit": "500 g",
+          "price": 35,
+          "deliveryStatus": "cancelled"
+        }
+      ]
+    },
+    {
+      "id": "TH-2026-1007",
+      "date": "14 Oct 2026",
+      "status": "refund",
+      "payment": "Refund in progress",
+      "deliveryAddress": "Dum Dum, Kolkata, West Bengal",
+      "products": [
+        {
+          "id": "mutton-curry-cut",
+          "name": "Mutton Curry Cut",
+          "image": "/images/products/product--7.png",
+          "quantity": 1,
+          "unit": "500 g",
+          "price": 480,
+          "deliveryStatus": "refunded"
+        },
+        {
+          "id": "paneer",
+          "name": "Fresh Paneer",
+          "image": "/images/products/product--9.png",
+          "quantity": 1,
+          "unit": "200 g",
+          "price": 95,
+          "deliveryStatus": "refunded"
+        }
+      ]
+    }
+  ]
+}

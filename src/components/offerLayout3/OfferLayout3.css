@@ -1,0 +1,101 @@
+.winter-deals-section { padding: 24px 0 30px; color: #063361; background: #fff; }
+.winter-deals-container { box-sizing: border-box; display: grid; grid-template-columns: minmax(230px, 270px) minmax(0, 1fr); gap: 18px; width: calc(100% - 48px); max-width: 1320px; margin-inline: auto; }
+
+.winter-editorial { position: relative; display: flex; min-height: 100%; flex-direction: column; align-items: flex-start; padding: 24px 22px; overflow: hidden; border: 1px solid #0e5a8e; border-radius: 16px; color: #fff; background: radial-gradient(ellipse at 100% 100%, #1687a34d 0, transparent 47%), linear-gradient(155deg, #073a6c 0%, #07528b 54%, #16759b 100%); box-shadow: 0 8px 24px #073a6c20, inset 0 1px 0 #ffffff24; isolation: isolate; }
+.winter-editorial::before, .winter-editorial::after { position: absolute; z-index: -1; content: ""; border: 1px solid #ffffff1c; border-radius: 50%; pointer-events: none; }
+.winter-editorial::before { right: -76px; bottom: -52px; width: 230px; height: 230px; box-shadow: 0 0 0 18px #ffffff08, 0 0 0 38px #ffffff06; }
+.winter-editorial::after { right: 30px; bottom: 34px; width: 105px; height: 105px; border-color: #ffffff24; }
+.winter-editorial-snowflake { position: absolute; top: 20px; right: 18px; width: 45px; height: 45px; color: #c8e9fa; opacity: .52; }
+.winter-editorial-kicker { position: relative; margin: 2px 0 22px; color: #c6edff; font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+.winter-editorial-kicker::after { display: block; width: 35px; height: 2px; margin-top: 8px; border-radius: 2px; background: #aee3ff; content: ""; }
+.winter-editorial h2 { max-width: 220px; margin: 0; color: #fff; font: 700 30px/1.12 "Trebuchet MS", "Segoe UI", sans-serif; letter-spacing: -.5px; }
+.winter-editorial h2 span { display: block; color: #aee3ff; }
+.winter-editorial-description { max-width: 220px; margin: 11px 0 20px; color: #e0eff9; font-size: 11px; line-height: 1.65; }
+.winter-editorial-offer { position: relative; z-index: 1; display: grid; min-width: 165px; gap: 5px; margin-top: auto; padding: 12px 14px; border: 1px solid #ffffff2c; border-left: 3px solid #b9e9ff; border-radius: 5px; background: linear-gradient(110deg, #ffffff1c, #ffffff08); box-shadow: 0 5px 18px #0428451a; }
+.winter-editorial-offer span { color: #d2ebf8; font-size: 8px; font-weight: 700; letter-spacing: .9px; }
+.winter-editorial-offer strong { color: #fff; font-size: 19px; font-weight: 750; }
+.winter-editorial-note { margin: 9px 0 0; color: #d4eafa; font-size: 10px; }
+.winter-editorial-decoration { position: absolute; right: 48px; bottom: 48px; display: flex; align-items: flex-end; gap: 5px; opacity: .18; }
+.winter-editorial-decoration span { display: block; width: 12px; height: 48px; border: 1px solid #fff; border-radius: 50% 50% 0 0; }
+.winter-editorial-decoration span:nth-child(2) { height: 68px; }
+.winter-editorial-decoration span:nth-child(3) { height: 38px; }
+
+.winter-products-area { min-width: 0; padding: 3px 0 0; }
+.winter-products-heading { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin-bottom: 12px; padding: 0 2px 9px; border-bottom: 1px solid #e9eff4; }
+.winter-products-heading > div > span { color: #0874b4; font-size: 9px; font-weight: 700; letter-spacing: 1.1px; }
+.winter-products-heading h3 { margin: 3px 0 0; color: #10385e; font: 700 20px/1.2 "Trebuchet MS", "Segoe UI", sans-serif; }
+.winter-product-slider { width: 100%; overflow: hidden; padding: 2px 2px 12px; }
+.winter-product-slide { display: flex; height: auto; }
+
+.winter-product-card { position: relative; z-index: 0; display: flex; min-width: 0; flex-direction: column; gap: 3px; padding: 10px; border: 1px solid #e4edf5; border-radius: 13px; background: #fff; box-shadow: 0 3px 12px #06336112; transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease; }
+.winter-product-slide .winter-product-card { width: 100%; }
+.winter-product-card:hover { transform: translateY(-2px); border-color: #c9dff1; box-shadow: 0 8px 20px #0633611c; }
+.winter-product-image { position: relative; width: 100%; aspect-ratio: 1 / 1; margin-bottom: 5px; overflow: hidden; border-radius: 9px; background: linear-gradient(145deg, #f7fbff, #edf5fa); }
+.winter-product-image > img { padding: 12px; object-fit: contain; user-select: none; }
+.winter-product-discount { position: absolute; z-index: 1; top: 9px; left: 9px; display: inline-flex; min-height: 23px; align-items: center; padding: 4px 8px; border-radius: 999px; color: #fff; background: #e44c43; font-size: 9px; font-weight: 700; line-height: 1; }
+.winter-product-save { position: absolute; z-index: 2; top: 7px; right: 7px; display: grid; width: 34px; height: 34px; place-items: center; border: 0; border-radius: 50%; color: #7890a5; background: #ffffffeb; box-shadow: 0 2px 8px #06336116; cursor: pointer; }
+.winter-product-save[aria-pressed="true"] { color: #e24c64; }
+.winter-product-save svg { width: 20px; height: 20px; }
+.winter-product-rating { position: absolute; right: 8px; bottom: 8px; display: inline-flex; min-height: 24px; align-items: center; padding: 4px 7px; border-radius: 999px; color: #6b4710; background: #fff; box-shadow: 0 2px 6px #06336118; font-size: 10px; font-weight: 700; }
+.winter-product-card h4 { display: -webkit-box; min-height: 23px; margin: 0; overflow: hidden; color: #0a2f5c; font-size: 16px; font-weight: 600; line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; -webkit-box-orient: vertical; -webkit-line-clamp: 1; }
+.winter-product-description { display: -webkit-box; min-height: 14px; margin: 0; overflow: hidden; color: #77889a; font-size: 10px; line-height: 1.35; text-overflow: ellipsis; -webkit-box-orient: vertical; -webkit-line-clamp: 1; }
+.winter-product-weight { display: flex; min-height: 17px; align-items: center; gap: 4px; margin: 1px 0 0; color: #788798; font-size: 10px; }
+.winter-product-weight svg { width: 13px; height: 13px; flex-shrink: 0; }
+.winter-product-pricing { display: flex; min-height: 24px; flex-wrap: wrap; align-items: center; gap: 7px; }
+.winter-product-pricing strong { color: #0b3970; font-size: 17px; font-weight: 800; }
+.winter-product-pricing del { color: #98a1aa; font-size: 10px; }
+.winter-product-cart { display: flex; width: 100%; min-height: 40px; align-items: center; justify-content: center; gap: 9px; margin-top: auto; padding: 8px; border: 0; border-radius: 7px; color: #fff; background: #0b5eaa; font: inherit; font-size: 12px; font-weight: 650; cursor: pointer; transition: background-color 160ms ease; }
+.winter-product-cart:hover { background: #084c8b; }
+.winter-product-cart:focus-visible, .winter-product-save:focus-visible { outline: 2px solid #0874d1; outline-offset: 3px; }
+
+@media (max-width: 1100px) {
+  .winter-deals-container { grid-template-columns: minmax(200px, 230px) minmax(0, 1fr); gap: 14px; }
+  .winter-editorial { padding: 21px 17px; }
+  .winter-editorial h2 { font-size: 27px; }
+  .winter-product-slider { padding-bottom: 10px; }
+  .winter-product-image { aspect-ratio: 1 / .92; }
+}
+@media (max-width: 700px) {
+  .winter-deals-section { padding: 18px 0 22px; }
+  .winter-deals-container { grid-template-columns: 1fr; width: calc(100% - 32px); gap: 14px; }
+  .winter-editorial { min-height: 210px; padding: 18px; }
+  .winter-editorial-kicker { margin-bottom: 13px; }
+  .winter-editorial h2 { max-width: 280px; font-size: 29px; }
+  .winter-editorial h2 span { display: inline; margin-left: 6px; }
+  .winter-editorial-description { max-width: 310px; margin: 8px 0 13px; }
+  .winter-editorial-offer { margin-top: auto; }
+  .winter-editorial-note { margin: 7px 0 0; }
+  .winter-editorial-decoration { right: 52px; bottom: 34px; }
+  .winter-products-area { padding: 0; }
+}
+@media (max-width: 480px) {
+  .winter-deals-container { gap: 12px; }
+  .winter-editorial { min-height: 195px; padding: 16px; }
+  .winter-editorial-snowflake { width: 36px; height: 36px; }
+  .winter-editorial h2 { max-width: 245px; font-size: 26px; }
+  .winter-editorial-description { max-width: 250px; font-size: 10px; }
+  .winter-products-heading { align-items: center; margin-bottom: 9px; }
+  .winter-products-heading h3 { font-size: 17px; }
+  .winter-products-heading { margin-bottom: 8px; }
+  .winter-product-slider { padding-bottom: 9px; }
+  .winter-product-card { gap: 2px; padding: 7px; border-radius: 10px; }
+  .winter-product-image { aspect-ratio: 1 / 1; margin-bottom: 3px; border-radius: 7px; }
+  .winter-product-image > img { padding: 8px; }
+  .winter-product-discount { top: 6px; left: 6px; min-height: 19px; padding: 3px 6px; font-size: 8px; }
+  .winter-product-save { top: 5px; right: 5px; width: 28px; height: 28px; }
+  .winter-product-save svg { width: 17px; height: 17px; }
+  .winter-product-rating { right: 6px; bottom: 6px; min-height: 20px; padding: 3px 5px; font-size: 9px; }
+  .winter-product-card h4 { min-height: 19px; font-size: 13px; }
+  .winter-product-description { min-height: 13px; font-size: 8px; }
+  .winter-product-weight { min-height: 14px; font-size: 9px; }
+  .winter-product-weight svg { width: 11px; height: 11px; }
+  .winter-product-pricing { min-height: 21px; gap: 5px; }
+  .winter-product-pricing strong { font-size: 15px; }
+  .winter-product-pricing del { font-size: 9px; }
+  .winter-product-cart { min-height: 35px; gap: 6px; padding: 6px 3px; font-size: 10px; }
+  .winter-product-cart svg { width: 16px; height: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .winter-product-card, .winter-product-cart { transition: none; }
+  .winter-product-card:hover { transform: none; }
+}

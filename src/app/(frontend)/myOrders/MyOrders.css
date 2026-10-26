@@ -1,0 +1,112 @@
+.my-orders-page {
+  min-height: 65vh;
+  padding: 24px 0 40px;
+  color: #183a57;
+  background: #f5f8fb;
+  font-family: "Poppins", "Segoe UI", Arial, sans-serif;
+}
+
+.my-orders-container {
+  width: calc(100% - 48px);
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+.my-orders-heading {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 18px;
+}
+
+.my-orders-heading-icon {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  place-items: center;
+  border: 1px solid #dceaf6;
+  border-radius: 10px;
+  color: #0874d1;
+  background: #eaf5ff;
+}
+
+.my-orders-heading-icon svg { width: 21px; height: 21px; }
+.my-orders-heading h1 { margin: 0; color: #103453; font-size: 29px; font-weight: 600; line-height: 1.25; letter-spacing: 0; }
+
+.my-orders-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+  padding: 4px;
+  overflow-x: auto;
+  border: 1px solid #e6edf3;
+  border-radius: 9px;
+  background: #fff;
+  scrollbar-width: none;
+}
+
+.my-orders-tabs::-webkit-scrollbar { display: none; }
+.my-orders-tab { display: inline-flex; min-height: 37px; flex: 1 0 auto; align-items: center; justify-content: center; gap: 7px; padding: 6px 15px; border: 0; border-radius: 6px; color: #687d90; background: transparent; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; transition: color 160ms ease, background-color 160ms ease; }
+.my-orders-tab span { display: grid; min-width: 19px; height: 19px; place-items: center; padding: 0 4px; border-radius: 20px; color: #718398; background: #f0f4f8; font-size: 10px; }
+.my-orders-tab[aria-selected="true"] { color: #fff; background: #0874d1; }
+.my-orders-tab[aria-selected="true"] span { color: #0874d1; background: #fff; }
+.my-orders-tab:focus-visible, .my-order-details-button:focus-visible { outline: 2px solid #0874d1; outline-offset: 2px; }
+
+.my-orders-list { display: grid; gap: 8px; }
+.my-order-card { overflow: hidden; border: 1px solid #e5ecf2; border-radius: 9px; background: #fff; box-shadow: 0 2px 7px #163e5c08; }
+.my-order-summary { display: grid; grid-template-columns: minmax(155px, 1.35fr) minmax(115px, 1fr) minmax(80px, .7fr) minmax(110px, .85fr) minmax(105px, .75fr) 100px; min-height: 82px; align-items: center; gap: 14px; padding: 14px 20px; }
+.my-order-summary > div { display: grid; gap: 4px; min-width: 0; }
+.my-order-summary > div > span { color: #8493a1; font-size: 12px; line-height: 1.25; }
+.my-order-summary > div > strong { overflow: hidden; color: #25445e; font-size: 15px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.my-order-total > strong { color: #153d60 !important; font-size: 17px !important; }
+
+.my-order-status { display: inline-flex; width: fit-content; align-items: center; gap: 7px; padding: 8px 11px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: capitalize; }
+.my-order-status > span { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.my-order-status--upcoming { color: #a96808; background: #fff5df; }
+.my-order-status--complete { color: #21804d; background: #e8f7ef; }
+.my-order-status--cancel { color: #c34848; background: #fff0ef; }
+.my-order-status--refund { color: #7755b5; background: #f2edff; }
+
+.my-order-details-button { display: inline-flex; min-height: 40px; align-items: center; justify-content: center; padding: 8px 11px; border: 1px solid #dce9f5; border-radius: 6px; color: #086ab9; background: #f5faff; font: inherit; font-size: 13px; font-weight: 600; text-decoration: none; white-space: nowrap; cursor: pointer; }
+.my-order-details-button:hover { border-color: #b7d7f2; background: #edf7ff; }
+.my-orders-empty { padding: 34px 16px; border: 1px dashed #d9e5ef; border-radius: 9px; background: #fff; text-align: center; }
+.my-orders-empty h2 { margin: 0 0 4px; color: #244560; font-size: 16px; }
+.my-orders-empty p { margin: 0; color: #8191a0; font-size: 12px; }
+
+@media (max-width: 800px) {
+  .my-order-summary { grid-template-columns: minmax(0, 1fr) minmax(0, .8fr) auto; gap: 10px 12px; }
+  .my-order-number { grid-column: 1; grid-row: 1; }
+  .my-order-date { grid-column: 2; grid-row: 1; }
+  .my-order-quantity { grid-column: 3; grid-row: 1; }
+  .my-order-total { grid-column: 1; grid-row: 2; }
+  .my-order-status { grid-column: 2; grid-row: 2; justify-self: start; }
+  .my-order-details-button { grid-column: 3; grid-row: 2; }
+}
+
+@media (max-width: 520px) {
+  .my-orders-page { padding: 18px 0 30px; }
+  .my-orders-container { width: calc(100% - 32px); }
+  .my-orders-heading { gap: 9px; margin-bottom: 13px; }
+  .my-orders-heading-icon { width: 35px; height: 35px; flex-basis: 35px; border-radius: 8px; }
+  .my-orders-heading-icon svg { width: 19px; height: 19px; }
+  .my-orders-heading h1 { font-size: 25px; }
+  .my-orders-tabs { margin-bottom: 9px; }
+  .my-orders-tab { min-height: 34px; padding: 5px 10px; font-size: 11px; }
+  .my-order-summary { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; padding: 14px 12px; }
+  .my-order-number { grid-column: 1; grid-row: 1; }
+  .my-order-date { grid-column: 2; grid-row: 1; }
+  .my-order-quantity { grid-column: 1; grid-row: 2; }
+  .my-order-total { grid-column: 2; grid-row: 2; }
+  .my-order-summary > div > span { font-size: 11px; }
+  .my-order-summary > div > strong { font-size: 13px; }
+  .my-order-total > strong { font-size: 15px !important; }
+  .my-order-status { padding: 7px 9px; font-size: 11px; }
+  .my-order-details-button { min-height: 36px; font-size: 12px; }
+  .my-order-status { grid-column: 1; grid-row: 3; }
+  .my-order-details-button { grid-column: 2; grid-row: 3; justify-self: end; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .my-orders-tab { transition: none; }
+}
