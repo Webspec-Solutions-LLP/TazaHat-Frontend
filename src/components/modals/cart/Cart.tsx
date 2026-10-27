@@ -18,6 +18,7 @@ export type CartItem = {
 export interface CartProps {
   onClose: () => void;
   items?: CartItem[];
+  onItemsChange?: (items: CartItem[]) => void;
   currencySymbol?: string;
   onCheckout?: (items: CartItem[], total: number) => void;
 }
@@ -55,17 +56,28 @@ const DEFAULT_ITEMS: CartItem[] = [
 export default function Cart({
   onClose,
   items: externalItems,
+  onItemsChange,
   currencySymbol = "Rs",
   onCheckout,
 }: CartProps) {
   const router = useRouter();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [closing, setClosing] = useState(false);
-  const [priceDetailsOpen, setPriceDetailsOpen] = useState(false);
+  const [checkoutRequested, setCheckoutRequested] = useState(false);
+  const [priceDetailsOpen, setPriceDetailsOpen] = useState(true);
   const [cartItems, setCartItems] = useState<CartItem[]>(
-    externalItems && externalItems.length > 0 ? externalItems : DEFAULT_ITEMS
+    externalItems !== undefined ? externalItems : DEFAULT_ITEMS
   );
+  const isInitialCartItemsEffect = useRef(true);
   const titleId = useId();
+
+  useEffect(() => {
+    if (isInitialCartItemsEffect.current) {
+      isInitialCartItemsEffect.current = false;
+      return;
+    }
+    onItemsChange?.(cartItems);
+  }, [cartItems, onItemsChange]);
 
   // Show modal on mount and lock background scroll, clean up on unmount
   useEffect(() => {
@@ -89,10 +101,10 @@ export default function Cart({
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const timer = window.setTimeout(() => {
       onClose();
-      router.push("/checkout");
+      if (checkoutRequested) router.push("/checkout");
     }, prefersReducedMotion ? 0 : 400);
     return () => window.clearTimeout(timer);
-  }, [closing, onClose, router]);
+  }, [closing, checkoutRequested, onClose, router]);
 
   const handleClose = () => {
     setClosing(true);
@@ -133,6 +145,7 @@ export default function Cart({
   const handleCheckoutClick = () => {
     onCheckout?.(cartItems, totalAmount);
     window.sessionStorage.setItem("tazahat-checkout-items", JSON.stringify(cartItems));
+    setCheckoutRequested(true);
     setClosing(true);
   };
 

@@ -26,6 +26,22 @@
 .catalog-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding: 14px 16px; gap: 12px; background: #f6f9fc; border-radius: 6px; }
 .catalog-toolbar h1 { margin: 0; font: 700 28px/1.2 "Trebuchet MS", sans-serif; letter-spacing: -.3px; }
 .catalog-toolbar p { margin: 6px 0 0; font-size: 12px; color: #6b8093; }
+.catalog-toolbar-actions { display: flex; align-items: center; gap: 10px; }
+.catalog-sort { position: relative; z-index: 8; }
+.catalog-sort-trigger { display: flex; min-height: 44px; align-items: center; gap: 8px; padding: 0 11px; border: 1px solid #dce7f1; border-radius: 6px; background: #fff; color: #45647f; font: inherit; font-size: 11px; cursor: pointer; transition: border-color 220ms ease, box-shadow 220ms ease; }
+.catalog-sort-trigger:hover, .catalog-sort.is-open .catalog-sort-trigger { border-color: #9dc8ec; box-shadow: 0 3px 10px #06336110; }
+.catalog-sort-trigger > svg:first-child { width: 17px; height: 17px; flex: 0 0 auto; color: #0878d1; }
+.catalog-sort-trigger strong { color: #123b65; font-weight: 650; }
+.catalog-sort-chevron { width: 15px; height: 15px; flex: 0 0 auto; transition: transform 360ms cubic-bezier(.22, 1, .36, 1); }
+.catalog-sort.is-open .catalog-sort-chevron { transform: rotate(180deg); }
+.catalog-sort-menu { position: absolute; top: calc(100% + 7px); right: 0; min-width: 205px; display: grid; grid-template-rows: 0fr; overflow: hidden; visibility: hidden; opacity: 0; transform: translateY(-7px); transform-origin: top; border: 1px solid transparent; border-radius: 8px; background: #fff; box-shadow: 0 10px 24px #06336120; transition: grid-template-rows 360ms cubic-bezier(.22, 1, .36, 1), opacity 300ms ease, transform 360ms cubic-bezier(.22, 1, .36, 1), visibility 360ms; }
+.catalog-sort.is-open .catalog-sort-menu { grid-template-rows: 1fr; visibility: visible; opacity: 1; transform: translateY(0); border-color: #e0eaf3; }
+.catalog-sort-menu-inner { min-height: 0; overflow: hidden; padding: 4px; }
+.catalog-sort-menu button { display: flex; width: 100%; min-height: 37px; align-items: center; justify-content: space-between; gap: 10px; padding: 7px 10px; border: 0; border-radius: 5px; background: #fff; color: #45647f; font: inherit; font-size: 11px; text-align: left; cursor: pointer; transition: background-color 200ms ease, color 200ms ease; }
+.catalog-sort-menu button:hover, .catalog-sort-menu button[aria-selected="true"] { background: #eff7ff; color: #075da5; }
+.catalog-sort-menu button[aria-selected="true"] { font-weight: 650; }
+.catalog-sort-menu button span { color: #0878d1; font-weight: 700; }
+.catalog-sort-trigger:focus-visible, .catalog-sort-menu button:focus-visible { outline: 2px solid #087cff; outline-offset: 2px; }
 .catalog-view-toggle { display: flex; padding: 4px; gap: 4px; background: #f1f6fb; border-radius: 6px; }
 .catalog-view-toggle button { display: grid; place-items: center; width: 36px; height: 36px; background: transparent; border: 0; border-radius: 4px; color: #658097; cursor: pointer; }
 .catalog-view-toggle button[aria-pressed="true"] { background: #087cff; color: white; }
@@ -104,8 +120,15 @@
 @media (max-width: 480px) {
   .catalog-toolbar { padding: 12px; }
   .catalog-toolbar h1 { font-size: 24px; }
+  .catalog-toolbar-actions { gap: 6px; }
+  .catalog-sort-trigger { min-height: 40px; gap: 5px; padding: 0 7px; font-size: 10px; }
+  .catalog-sort-trigger > svg:first-child { width: 15px; height: 15px; }
+  .catalog-sort-menu { min-width: 190px; }
   .catalog-cards { gap: 10px; }
   .catalog-page .product-card { padding: 8px; }
   .catalog-page .product-card h3 { font-size: 12px; }
   .catalog-cards--grid .product-image { height: 120px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .catalog-sort-trigger, .catalog-sort-chevron, .catalog-sort-menu, .catalog-sort-menu button { transition: none; }
 }

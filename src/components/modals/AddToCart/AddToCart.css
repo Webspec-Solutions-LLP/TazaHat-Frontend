@@ -80,11 +80,11 @@
 .add-cart-actions button { display: flex; align-items: center; justify-content: center; gap: 7px; min-width: 0; min-height: 40px; border: 1px solid #0063cc; border-radius: 8px; padding: 7px 12px; font-size: 12px; font-weight: 600; white-space: nowrap; transition: background-color 180ms ease, box-shadow 180ms ease; }
 .add-cart-actions .add-cart-wishlist { justify-self: center; min-height: 40px; padding: 7px 14px; border-radius: 8px; }
 .add-cart-actions .add-cart-info { min-width: 104px; color: #0756a2; background: #fff; }
+.add-cart-actions .add-cart-submit { color: #fff; background: #063b85; }
 .add-cart-actions svg { width: 19px; height: 19px; }
 .add-cart-submit:hover { background: #0752a6; box-shadow: 0 4px 14px #063b8526; }
 .add-cart-wishlist:hover { background: #e5f2ff; }
 .add-cart-info:hover { background: #e5f2ff; }
-.add-cart-submit { color: white; background: #063b85; }
 .add-cart-wishlist { color: #0056bd; background: #ffffffbf; }
 .add-cart-wishlist[aria-pressed="true"] svg { fill: #0056bd; }
 .add-cart-description { padding: 6px 0 10px; color: #45617b; }

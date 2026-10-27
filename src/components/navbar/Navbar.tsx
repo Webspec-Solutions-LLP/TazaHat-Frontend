@@ -1,11 +1,14 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import Cart from "../modals/cart/Cart";
+import Cart, { type CartItem } from "../modals/cart/Cart";
+import AddToCart from "../modals/AddToCart/AddToCart";
 import Location from "../modals/location/Location";
 import Login from "../modals/login/Login";
+import productCatalog from "../products/english.json";
+import { readWishlistIds, subscribeToWishlist, toggleWishlistId } from "../../lib/wishlist";
 import "./Navbar.css";
 
 interface NavbarProps {
@@ -20,11 +23,37 @@ export default function Navbar({
   onSearch,
 }: NavbarProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchResultsOpen, setIsSearchResultsOpen] = useState(false);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<(typeof productCatalog.products)[number] | null>(null);
+  const [savedProducts, setSavedProducts] = useState<string[]>([]);
+  const [hasCustomCart, setHasCustomCart] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const refreshWishlist = () => setSavedProducts(readWishlistIds());
+    refreshWishlist();
+    return subscribeToWishlist(refreshWishlist);
+  }, []);
+  const handleCartItemsChange = useCallback((items: CartItem[]) => {
+    setHasCustomCart(true);
+    setCartItems(items);
+  }, []);
+  const searchResults = searchQuery.trim()
+    ? productCatalog.products
+        .filter((product) =>
+          `${product.name} ${product.category} ${product.subcategory}`
+            .toLowerCase()
+            .includes(searchQuery.trim().toLowerCase())
+        )
+        .slice(0, 6)
+    : [];
+  const visibleCartCount = hasCustomCart
+    ? cartItems.reduce((count, item) => count + item.quantity, 0)
+    : cartCount;
 
   useEffect(() => {
     if (!isAccountOpen) return;
@@ -44,10 +73,55 @@ export default function Navbar({
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (onSearch) {
-      onSearch(searchQuery);
-    }
+    onSearch?.(searchQuery);
   };
+
+  const addCartItem = useCallback((newItem: CartItem) => {
+    setHasCustomCart(true);
+    setCartItems((items) => {
+      const existingItem = items.find((item) => item.id === newItem.id);
+      if (existingItem) {
+        return items.map((item) =>
+          item.id === newItem.id
+            ? { ...item, quantity: item.quantity + newItem.quantity }
+            : item
+        );
+      }
+      return [...items, newItem];
+    });
+  }, []);
+
+  const handleAddToCart = (product: (typeof productCatalog.products)[number]) => {
+    addCartItem({
+      id: product.id,
+      name: product.name,
+      image: product.image,
+      price: product.price,
+      originalPrice: product.originalPrice,
+      weight: product.weight,
+      quantity: 1,
+    });
+  };
+
+  const updateCartQuantity = useCallback((itemId: string, delta: number) => {
+    setHasCustomCart(true);
+    setCartItems((items) =>
+      items
+        .map((item) => {
+          if (item.id !== itemId) return item;
+          const quantity = item.quantity + delta;
+          return quantity > 0 ? { ...item, quantity } : null;
+        })
+        .filter((item): item is CartItem => item !== null)
+    );
+  }, []);
+
+  const getProductCartItems = (productId: string) =>
+    cartItems.filter(
+      (item) => item.id === productId || item.id.startsWith(`${productId}-`)
+    );
+
+  const closeProductDetails = useCallback(() => setSelectedProduct(null), []);
 
   return (
     <header
@@ -84,25 +158,114 @@ export default function Navbar({
               className="navbar-search-input"
               placeholder="Search for fish, meat, vegetables, fruits, dairy..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                const query = e.target.value;
+                setSearchQuery(query);
+                setIsSearchResultsOpen(Boolean(query.trim()));
+              }}
               aria-label="Search products"
+              aria-controls="navbar-search-results"
             />
-            <button type="submit" className="navbar-search-btn" aria-label="Submit search">
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+            {searchQuery.trim() ? (
+              <button
+                type="button"
+                className="navbar-search-btn"
+                aria-label="Clear search"
+                onClick={() => {
+                  setSearchQuery("");
+                  setIsSearchResultsOpen(false);
+                }}
               >
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-            </button>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            ) : (
+              <button type="submit" className="navbar-search-btn" aria-label="Submit search">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+              </button>
+            )}
           </div>
+          {searchQuery.trim() && isSearchResultsOpen && (
+            <div className="navbar-search-results" id="navbar-search-results" role="list" aria-label="Search results">
+              {searchResults.length > 0 ? (
+                searchResults.map((product) => {
+                  const productCartItems = getProductCartItems(product.id);
+                  const productQuantity = productCartItems.reduce(
+                    (total, item) => total + item.quantity,
+                    0
+                  );
+                  return (
+                    <div className="navbar-search-result" key={product.id} role="listitem">
+                      <Image
+                        className="navbar-search-result-image"
+                        src={product.image}
+                        alt=""
+                        width={44}
+                        height={44}
+                      />
+                      <span className="navbar-search-result-info">
+                        <span className="navbar-search-result-name">{product.name}</span>
+                        <span className="navbar-search-result-meta">{product.weight} · Rs {product.price}</span>
+                      </span>
+                      {productQuantity > 0 ? (
+                        <div className="navbar-search-quantity" role="group" aria-label={`Quantity of ${product.name} in cart`}>
+                          <button
+                            type="button"
+                            aria-label={`Remove one ${product.name} from cart`}
+                            onClick={() => updateCartQuantity(productCartItems[0].id, -1)}
+                          >
+                            −
+                          </button>
+                          <output aria-live="polite" aria-label={`${productQuantity} in cart`}>{productQuantity}</output>
+                          <button
+                            type="button"
+                            aria-label={`Add one ${product.name} to cart`}
+                            onClick={() => updateCartQuantity(productCartItems[0].id, 1)}
+                            disabled={productCartItems[0].quantity >= 99}
+                          >
+                            +
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          className="navbar-search-add-btn"
+                          type="button"
+                          onClick={() => {
+                            setIsSearchResultsOpen(false);
+                            if (product.variants?.length) {
+                              setSelectedProduct(product);
+                            } else {
+                              handleAddToCart(product);
+                            }
+                          }}
+                          aria-label={`Add ${product.name} to cart`}
+                        >
+                          Add
+                        </button>
+                      )}
+                    </div>
+                  );
+                })
+              ) : (
+                <p className="navbar-search-empty">No matching products found.</p>
+              )}
+            </div>
+          )}
         </form>
 
         {/* Deliver-To / Location Selector */}
@@ -145,6 +308,35 @@ export default function Navbar({
 
         {/* Right Navigation Actions */}
         <nav className="navbar-actions" aria-label="User navigation">
+          <Link
+            href="/deliveryService"
+            className="navbar-delivery-service"
+            aria-label="Delivery Service"
+          >
+            <span className="navbar-delivery-icon-wrap">
+              <svg
+                viewBox="0 0 32 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M2 5h17v13H2z" />
+                <path d="M19 9h5l5 5v4H19z" />
+                <circle cx="8" cy="19" r="2.5" />
+                <circle cx="24" cy="19" r="2.5" />
+                <path d="M5 9h8M5 13h6M22 11h2l3 3h-5z" />
+              </svg>
+            </span>
+            <span className="navbar-delivery-copy">
+              <span className="navbar-delivery-label">Delivery Service</span>
+              <span className="navbar-delivery-caption">Book a pickup</span>
+            </span>
+            <span className="navbar-delivery-badge">New</span>
+          </Link>
+
           {/* Account */}
           <div className="navbar-account-menu" ref={accountMenuRef}>
             <button
@@ -173,7 +365,7 @@ export default function Navbar({
               <Link href="/myOrders" role="menuitem" tabIndex={isAccountOpen ? 0 : -1} onClick={() => setIsAccountOpen(false)}>
                 <span className="navbar-account-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 3h12l2 3v15H4V6l2-3Z"/><path d="M4 6h16M9 10v7l3-2 3 2v-7"/></svg></span>My Orders
               </Link>
-              <Link href="/account" role="menuitem" tabIndex={isAccountOpen ? 0 : -1} onClick={() => setIsAccountOpen(false)}>
+              <Link href="/myprofile" role="menuitem" tabIndex={isAccountOpen ? 0 : -1} onClick={() => setIsAccountOpen(false)}>
                 <span className="navbar-account-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="7.5" r="3.5"/><path d="M5 20v-1.2a7 7 0 0 1 14 0V20Z"/></svg></span>My Profile
               </Link>
             </div>
@@ -183,7 +375,7 @@ export default function Navbar({
           <button
             type="button"
             className="navbar-action-item"
-            aria-label={`Cart with ${cartCount} items`}
+            aria-label={`Cart with ${visibleCartCount} items`}
             onClick={() => setIsCartOpen(true)}
           >
             <div className="navbar-action-icon-wrap">
@@ -201,14 +393,34 @@ export default function Navbar({
                 <circle cx="20" cy="21" r="1" />
                 <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
               </svg>
-              <span className="navbar-cart-badge">{cartCount}</span>
+              <span className="navbar-cart-badge">{visibleCartCount}</span>
             </div>
             <span className="navbar-action-label">Cart</span>
           </button>
         </nav>
       </div>
 
-      {isCartOpen && <Cart onClose={() => setIsCartOpen(false)} />}
+      {isCartOpen && (
+        <Cart
+          onClose={() => setIsCartOpen(false)}
+          items={hasCustomCart ? cartItems : undefined}
+          onItemsChange={handleCartItemsChange}
+        />
+      )}
+      {selectedProduct && (
+        <AddToCart
+          key={selectedProduct.id}
+          product={selectedProduct}
+          locale={productCatalog.locale}
+          currency={productCatalog.currency}
+          saved={savedProducts.includes(selectedProduct.id)}
+          onToggleWishlist={() => setSavedProducts(toggleWishlistId(selectedProduct.id))}
+          onClose={closeProductDetails}
+          onOpenProduct={setSelectedProduct}
+          onAddToCart={addCartItem}
+          onUpdateCartQuantity={updateCartQuantity}
+        />
+      )}
       {isLocationOpen && <Location deliveryLocation={deliveryLocation} onClose={() => setIsLocationOpen(false)} onLogin={() => { setIsLocationOpen(false); setIsLoginOpen(true); }} />}
       {isLoginOpen && <Login onClose={() => setIsLoginOpen(false)} />}
     </header>

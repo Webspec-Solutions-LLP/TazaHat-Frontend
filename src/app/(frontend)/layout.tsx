@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/footer/Footer";
+import FloatingMessageButton from "@/components/floatingMessage/FloatingMessageButton";
 import "leaflet/dist/leaflet.css";
 import "./Home.css";
 
@@ -20,6 +21,7 @@ export default function RootLayout({
         <Navbar />
         <main className="flex-1">{children}</main>
         <Footer />
+        <FloatingMessageButton />
       </body>
     </html>
   );

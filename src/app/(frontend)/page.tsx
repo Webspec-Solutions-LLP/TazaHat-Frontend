@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import HomeHero from "@/components/home/HomeHero";
+import HomeBenefits from "@/components/home/HomeBenefits";
 import Category from "@/components/category/Category";
 import Products from "@/components/products/Products";
 import TodalDeals from "@/components/todayDeals/TodalDeals";
 import OfferLayout1 from "@/components/offerLayout1/OfferLayout1";
 import OfferLayout2 from "@/components/offerLayout2/OfferLayout2";
 import OfferLayout3 from "@/components/offerLayout3/OfferLayout3";
+import OfferLayout4 from "@/components/offerLayout4/OfferLayout4";
 import BestSeller from "@/components/bestSeller/BestSeller";
 import "./Home.css";
 
@@ -20,9 +22,11 @@ export default function Home() {
       <Category />
       <Products />
       <OfferLayout1 />
+      <HomeBenefits />
       <BestSeller />
       <OfferLayout2 />
       <OfferLayout3 />
+      <OfferLayout4 />
       <section className="home-newsletter" aria-labelledby="newsletter-heading">
         <div className="home-newsletter-copy">
           <span className="home-newsletter-icon" aria-hidden="true">

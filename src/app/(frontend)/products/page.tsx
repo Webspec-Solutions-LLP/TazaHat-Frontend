@@ -22,6 +22,9 @@ function ProductsContent() {
   const searchParams = useSearchParams();
   const lockedCategory = searchParams.get("category");
   const [view, setView] = useState<'grid' | 'list'>('grid');
+  const [sortBy, setSortBy] = useState("featured");
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  const sortRef = useRef<HTMLDivElement>(null);
   const [categories, setCategories] = useState<string[]>(() => lockedCategory ? [lockedCategory] : []);
   const [subcategories, setSubcategories] = useState<string[]>([]);
   const [rating, setRating] = useState(0);
@@ -31,12 +34,43 @@ function ProductsContent() {
   const subcategoryOptions = [...new Set(text.products.filter(p => !categories.length || categories.includes(p.category)).map(p => p.subcategory))];
   const filtered = text.products.filter(p => (!categories.length || categories.includes(p.category)) && (!subcategories.length || subcategories.includes(p.subcategory)) && p.rating >= rating && p.price <= price);
   useEffect(() => { setCategories(lockedCategory ? [lockedCategory] : []); setSubcategories([]); }, [lockedCategory]);
+  useEffect(() => {
+    if (!isSortOpen) return;
+    const closeOnOutsideClick = (event: PointerEvent) => {
+      if (!sortRef.current?.contains(event.target as Node)) setIsSortOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsSortOpen(false);
+    };
+    document.addEventListener("pointerdown", closeOnOutsideClick);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsideClick);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [isSortOpen]);
   const reset = () => { setCategories(lockedCategory ? [lockedCategory] : []); setSubcategories([]); setRating(0); setPrice(ceiling); };
   const [saved, setSaved] = useState<string[]>([]);
   const [selected, setSelected] = useState<Product | null>(null);
   const [variantIndexes, setVariantIndexes] = useState<Record<string, number>>({});
   const [openVariant, setOpenVariant] = useState<string | null>(null);
   const dialog = useRef<HTMLDialogElement>(null);
+  const sortOptions = [
+    { value: "featured", label: "Featured" },
+    { value: "price-low", label: "Price: Low to High" },
+    { value: "price-high", label: "Price: High to Low" },
+    { value: "rating", label: "Top Rated" },
+    { value: "name", label: "Name: A to Z" },
+  ];
+  const sortedProducts = [...filtered].sort((a, b) => {
+    switch (sortBy) {
+      case "price-low": return a.price - b.price;
+      case "price-high": return b.price - a.price;
+      case "rating": return b.rating - a.rating;
+      case "name": return a.name.localeCompare(b.name);
+      default: return 0;
+    }
+  });
 
   const renderProduct = (product: Product) => {
     const isSaved = saved.includes(product.id);
@@ -83,8 +117,53 @@ function ProductsContent() {
         <details open><summary>Filter by Price</summary><div className="catalog-price"><label htmlFor="catalog-price">Maximum price <strong>{money.format(price)}</strong></label><input id="catalog-price" type="range" min="0" max={ceiling} value={price} onChange={event => setPrice(Number(event.target.value))} /><div><span>{money.format(0)}</span><span>{money.format(ceiling)}</span></div></div></details>
       </aside>
       <section className="catalog-results" aria-labelledby="catalog-heading">
-        <header className="catalog-toolbar"><div><h1 id="catalog-heading">All Products</h1><p role="status">{filtered.length} of {text.products.length} products</p></div><div className="catalog-view-toggle" role="group" aria-label="Product display"><button type="button" aria-label="Grid view" aria-pressed={view === 'grid'} onClick={() => setView('grid')}><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button><button type="button" aria-label="List view" aria-pressed={view === 'list'} onClick={() => setView('list')}><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M9 5h12M9 12h12M9 19h12M3 5h2M3 12h2M3 19h2"/></svg></button></div></header>
-        {filtered.length ? <div className={'catalog-cards catalog-cards--' + view}>{filtered.map(renderProduct)}</div> : <div className="catalog-empty"><h2>No products found</h2><p>Try changing your filters to see more fresh picks.</p><button type="button" onClick={reset}>Clear filters</button></div>}
+        <header className="catalog-toolbar">
+          <div><h1 id="catalog-heading">All Products</h1><p role="status">{filtered.length} of {text.products.length} products</p></div>
+          <div className="catalog-toolbar-actions">
+            <div className={`catalog-sort${isSortOpen ? " is-open" : ""}`} ref={sortRef}>
+              <button
+                type="button"
+                className="catalog-sort-trigger"
+                aria-haspopup="listbox"
+                aria-expanded={isSortOpen}
+                aria-controls="catalog-sort-options"
+                onClick={() => setIsSortOpen(open => !open)}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 6h16M7 12h10m-7 6h4" /></svg>
+                <span>Sort: <strong>{sortOptions.find(option => option.value === sortBy)?.label}</strong></span>
+                <svg className="catalog-sort-chevron" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m5 7.5 5 5 5-5" /></svg>
+              </button>
+              <div
+                id="catalog-sort-options"
+                className="catalog-sort-menu"
+                role="listbox"
+                aria-label="Sort products"
+                aria-hidden={!isSortOpen}
+              >
+                <div className="catalog-sort-menu-inner">
+                  {sortOptions.map(option => (
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={sortBy === option.value}
+                      tabIndex={isSortOpen ? 0 : -1}
+                      key={option.value}
+                      onClick={() => {
+                        setSortBy(option.value);
+                        setIsSortOpen(false);
+                      }}
+                    >
+                      {option.label}
+                      {sortBy === option.value && <span aria-hidden="true">✓</span>}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="catalog-view-toggle" role="group" aria-label="Product display"><button type="button" aria-label="Grid view" aria-pressed={view === 'grid'} onClick={() => setView('grid')}><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button><button type="button" aria-label="List view" aria-pressed={view === 'list'} onClick={() => setView('list')}><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M9 5h12M9 12h12M9 19h12M3 5h2M3 12h2M3 19h2"/></svg></button></div>
+          </div>
+        </header>
+        {sortedProducts.length ? <div className={'catalog-cards catalog-cards--' + view}>{sortedProducts.map(renderProduct)}</div> : <div className="catalog-empty"><h2>No products found</h2><p>Try changing your filters to see more fresh picks.</p><button type="button" onClick={reset}>Clear filters</button></div>}
       </section>
       <dialog ref={dialog} className="product-dialog" aria-labelledby="product-dialog-title" onClick={event => { if (event.target === event.currentTarget) dialog.current?.close(); }}>
         <button className="product-dialog-close" type="button" onClick={() => dialog.current?.close()}>{text.close} ×</button>

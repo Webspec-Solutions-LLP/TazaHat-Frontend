@@ -1,0 +1,417 @@
+{
+  "language": "en",
+  "locale": "en-IN",
+  "currency": "INR",
+  "heading": "Steal Deals",
+  "subtitle": "Add Any 10 Items",
+  "addToCart": "Add to Cart",
+  "save": "Save {name} to favourites",
+  "unsave": "Remove {name} from favourites",
+  "discount": "{percent}% OFF",
+  "rating": "Rated {rating} out of 5 from {reviews} reviews",
+  "close": "Close",
+  "demoNote": "Demo product details. Prices and availability are illustrative.",
+  "sliderLabel": "Steal deals carousel. Swipe or use arrow keys to navigate.",
+  "slideLabel": "Deal {{index}} of {{slidesLength}}",
+  "navPrev": "Previous deals",
+  "navNext": "Next deals",
+  "tabs": [
+    {
+      "id": "trending",
+      "label": "Trending",
+      "type": "trending",
+      "badge": "HOT ITEM"
+    },
+    {
+      "id": "store-9",
+      "priceTag": "₹9",
+      "label": "Store",
+      "type": "price",
+      "maxPrice": 9
+    },
+    {
+      "id": "store-19",
+      "priceTag": "₹19",
+      "label": "Store",
+      "type": "price",
+      "maxPrice": 19
+    },
+    {
+      "id": "store-29",
+      "priceTag": "₹29",
+      "label": "Store",
+      "type": "price",
+      "maxPrice": 29
+    }
+  ],
+  "deals": [
+    {
+      "id": "steal-1",
+      "name": "Britannia Little Hearts Classic",
+      "image": "/images/products/product--5.png",
+      "price": 9,
+      "originalPrice": 30,
+      "weight": "75 g",
+      "rating": 4.8,
+      "reviews": 142,
+      "category": "Snacks & Munchies",
+      "subcategory": "Biscuits & Cookies",
+      "tag": "store-9",
+      "description": "Crunchy, sugar-glazed heart-shaped sweet biscuits.",
+      "variants": [
+        {
+          "label": "75 g",
+          "amount": 75,
+          "unit": "g",
+          "price": 9,
+          "originalPrice": 30
+        }
+      ]
+    },
+    {
+      "id": "steal-2",
+      "name": "Fresh Cucumber Crunch Pack",
+      "image": "/images/products/product--8.png",
+      "price": 9,
+      "originalPrice": 25,
+      "weight": "250 g",
+      "rating": 4.6,
+      "reviews": 88,
+      "category": "Vegetables",
+      "subcategory": "Daily Veggies",
+      "tag": "store-9",
+      "description": "Crisp and refreshing locally grown garden cucumbers.",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 250,
+          "unit": "g",
+          "price": 9,
+          "originalPrice": 25
+        }
+      ]
+    },
+    {
+      "id": "steal-3",
+      "name": "Fresh Mint & Coriander Bunch",
+      "image": "/images/products/product--3.png",
+      "price": 9,
+      "originalPrice": 20,
+      "weight": "100 g",
+      "rating": 4.7,
+      "reviews": 95,
+      "category": "Vegetables",
+      "subcategory": "Herbs & Seasonings",
+      "tag": "store-9",
+      "description": "Fresh aromatic coriander and mint leaves bundle.",
+      "variants": [
+        {
+          "label": "100 g",
+          "amount": 100,
+          "unit": "g",
+          "price": 9,
+          "originalPrice": 20
+        }
+      ]
+    },
+    {
+      "id": "steal-4",
+      "name": "Fresh Green Chilli Pack",
+      "image": "/images/products/product11.png",
+      "price": 9,
+      "originalPrice": 22,
+      "weight": "100 g",
+      "rating": 4.5,
+      "reviews": 64,
+      "category": "Vegetables",
+      "subcategory": "Spices & Chillies",
+      "tag": "store-9",
+      "description": "Spicy and crisp farm-picked green chillies.",
+      "variants": [
+        {
+          "label": "100 g",
+          "amount": 100,
+          "unit": "g",
+          "price": 9,
+          "originalPrice": 22
+        }
+      ]
+    },
+    {
+      "id": "steal-5",
+      "name": "Fresh Lemon Value Bunch",
+      "image": "/images/products/product12.png",
+      "price": 9,
+      "originalPrice": 20,
+      "weight": "4 pcs",
+      "rating": 4.7,
+      "reviews": 110,
+      "category": "Fruits",
+      "subcategory": "Citrus Fruits",
+      "tag": "store-9",
+      "description": "Juicy, tangy yellow lemons rich in Vitamin C.",
+      "variants": [
+        {
+          "label": "4 pcs",
+          "amount": 4,
+          "unit": "pcs",
+          "price": 9,
+          "originalPrice": 20
+        }
+      ]
+    },
+    {
+      "id": "steal-6",
+      "name": "Fresh Ginger Root",
+      "image": "/images/products/product13.png",
+      "price": 9,
+      "originalPrice": 24,
+      "weight": "100 g",
+      "rating": 4.6,
+      "reviews": 78,
+      "category": "Vegetables",
+      "subcategory": "Roots & Tubers",
+      "tag": "store-9",
+      "description": "Zesty aromatic ginger root for daily cooking and tea.",
+      "variants": [
+        {
+          "label": "100 g",
+          "amount": 100,
+          "unit": "g",
+          "price": 9,
+          "originalPrice": 24
+        }
+      ]
+    },
+    {
+      "id": "steal-7",
+      "name": "Fresh Tomato Desi Pack",
+      "image": "/images/products/product--3.png",
+      "price": 19,
+      "originalPrice": 40,
+      "weight": "500 g",
+      "rating": 4.6,
+      "reviews": 156,
+      "category": "Vegetables",
+      "subcategory": "Daily Veggies",
+      "tag": "store-19",
+      "description": "Plump, juicy ripe desi tomatoes bursting with flavor.",
+      "variants": [
+        {
+          "label": "500 g",
+          "amount": 500,
+          "unit": "g",
+          "price": 19,
+          "originalPrice": 40
+        }
+      ]
+    },
+    {
+      "id": "steal-8",
+      "name": "Farm Fresh Potato Classic",
+      "image": "/images/products/product--10.png",
+      "price": 19,
+      "originalPrice": 38,
+      "weight": "1 kg",
+      "rating": 4.7,
+      "reviews": 204,
+      "category": "Vegetables",
+      "subcategory": "Roots & Tubers",
+      "tag": "store-19",
+      "description": "Versatile golden potatoes suitable for daily cooking.",
+      "variants": [
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 19,
+          "originalPrice": 38
+        }
+      ]
+    },
+    {
+      "id": "steal-9",
+      "name": "Fresh Red Onion Value Bag",
+      "image": "/images/products/product14.png",
+      "price": 19,
+      "originalPrice": 45,
+      "weight": "500 g",
+      "rating": 4.5,
+      "reviews": 130,
+      "category": "Vegetables",
+      "subcategory": "Daily Veggies",
+      "tag": "store-19",
+      "description": "Crisp red onions for curries, salads and garnishing.",
+      "variants": [
+        {
+          "label": "500 g",
+          "amount": 500,
+          "unit": "g",
+          "price": 19,
+          "originalPrice": 45
+        }
+      ]
+    },
+    {
+      "id": "steal-10",
+      "name": "Fresh Garlic Pods",
+      "image": "/images/products/product15.png",
+      "price": 19,
+      "originalPrice": 42,
+      "weight": "200 g",
+      "rating": 4.8,
+      "reviews": 92,
+      "category": "Vegetables",
+      "subcategory": "Spices & Aromatics",
+      "tag": "store-19",
+      "description": "Flavorful garlic pods sourced from organic farms.",
+      "variants": [
+        {
+          "label": "200 g",
+          "amount": 200,
+          "unit": "g",
+          "price": 19,
+          "originalPrice": 42
+        }
+      ]
+    },
+    {
+      "id": "steal-11",
+      "name": "ZOFF Soya Chunks - Protein Rich",
+      "image": "/images/products/product16.png",
+      "price": 29,
+      "originalPrice": 60,
+      "weight": "200 g",
+      "rating": 4.7,
+      "reviews": 175,
+      "category": "Snacks & Munchies",
+      "subcategory": "Plant Protein",
+      "tag": "store-29",
+      "description": "Super soft and protein-packed 100% vegetarian soya chunks.",
+      "variants": [
+        {
+          "label": "200 g",
+          "amount": 200,
+          "unit": "g",
+          "price": 29,
+          "originalPrice": 60
+        }
+      ]
+    },
+    {
+      "id": "steal-12",
+      "name": "Farm Fresh Milk Pouch",
+      "image": "/images/products/product--4.png",
+      "price": 29,
+      "originalPrice": 36,
+      "weight": "500 ml",
+      "rating": 4.9,
+      "reviews": 310,
+      "category": "Dairy & Eggs",
+      "subcategory": "Fresh Milk",
+      "tag": "store-29",
+      "description": "Pasteurized wholesome cow milk with rich natural cream.",
+      "variants": [
+        {
+          "label": "500 ml",
+          "amount": 500,
+          "unit": "ml",
+          "price": 29,
+          "originalPrice": 36
+        }
+      ]
+    },
+    {
+      "id": "steal-13",
+      "name": "Fresh Green Peas / Matar",
+      "image": "/images/products/product17.png",
+      "price": 29,
+      "originalPrice": 55,
+      "weight": "250 g",
+      "rating": 4.6,
+      "reviews": 84,
+      "category": "Vegetables",
+      "subcategory": "Seasonal Veggies",
+      "tag": "store-29",
+      "description": "Sweet, tender and freshly podded green garden peas.",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 250,
+          "unit": "g",
+          "price": 29,
+          "originalPrice": 55
+        }
+      ]
+    },
+    {
+      "id": "steal-14",
+      "name": "Fresh Curd / Dahi Cup",
+      "image": "/images/products/product18.png",
+      "price": 29,
+      "originalPrice": 40,
+      "weight": "400 g",
+      "rating": 4.8,
+      "reviews": 160,
+      "category": "Dairy & Eggs",
+      "subcategory": "Curd & Yogurt",
+      "tag": "store-29",
+      "description": "Thick, creamy and naturally set probiotic curd.",
+      "variants": [
+        {
+          "label": "400 g",
+          "amount": 400,
+          "unit": "g",
+          "price": 29,
+          "originalPrice": 40
+        }
+      ]
+    },
+    {
+      "id": "steal-15",
+      "name": "Red Bull Energy Drink",
+      "image": "/images/products/product--9.png",
+      "price": 399,
+      "originalPrice": 480,
+      "weight": "4 x 250 ml",
+      "rating": 4.9,
+      "reviews": 280,
+      "category": "Cold Drinks & Juices",
+      "subcategory": "Energy Drinks",
+      "tag": "trending",
+      "description": "Vitalizes body and mind with premium energy blend.",
+      "variants": [
+        {
+          "label": "4 x 250 ml",
+          "amount": 4,
+          "unit": "pack",
+          "price": 399,
+          "originalPrice": 480
+        }
+      ]
+    },
+    {
+      "id": "steal-16",
+      "name": "Crisp Royal Gala Apples",
+      "image": "/images/products/product--5.png",
+      "price": 79,
+      "originalPrice": 120,
+      "weight": "500 g",
+      "rating": 4.8,
+      "reviews": 195,
+      "category": "Fruits",
+      "subcategory": "Apples & Pears",
+      "tag": "trending",
+      "description": "Sweet, crunchy and freshly hand-picked hill apples.",
+      "variants": [
+        {
+          "label": "500 g",
+          "amount": 500,
+          "unit": "g",
+          "price": 79,
+          "originalPrice": 120
+        }
+      ]
+    }
+  ]
+}

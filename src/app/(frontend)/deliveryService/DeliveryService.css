@@ -1,0 +1,673 @@
+/* DeliveryService - Fast Doorstep Parcel Delivery Layout */
+
+/* Page Background & Layout */
+.delivery-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 10% 0%, rgb(216 237 255 / 55%), transparent 34rem),
+    #f4f8fc;
+  color: #063361;
+  padding: 28px 0 40px;
+}
+
+.delivery-card-container {
+  box-sizing: border-box;
+  width: calc(100% - 48px);
+  max-width: 1320px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 10;
+}
+
+.delivery-card {
+  box-sizing: border-box;
+  background: #ffffff;
+  border: 1px solid #dce9f5;
+  border-radius: 16px;
+  box-shadow: 0 12px 36px rgb(6 51 97 / 8%), 0 2px 8px rgb(6 51 97 / 3%);
+  padding: 26px 30px 30px;
+}
+
+.delivery-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.delivery-form-intro {
+  padding: 14px 18px;
+  border: 1px solid #dceaf6;
+  border-left: 3px solid #0b66c3;
+  border-radius: 10px;
+  background: linear-gradient(110deg, #f1f8ff, #fff 72%);
+}
+
+.delivery-form-eyebrow {
+  display: inline-block;
+  margin-bottom: 4px;
+  color: #0b66c3;
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 1.15px;
+}
+
+.delivery-form-title {
+  margin: 0;
+  color: #063361;
+  font-size: clamp(21px, 2vw, 25px);
+  font-weight: 650;
+  letter-spacing: -0.45px;
+  line-height: 1.2;
+}
+
+.delivery-form-description {
+  margin: 4px 0 0;
+  color: #627b93;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+/* Grid Rows */
+.delivery-form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 22px;
+  align-items: flex-start;
+}
+
+.delivery-form-row--full {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+/* Field Group & Labels */
+.delivery-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.delivery-field-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 28px;
+}
+
+.delivery-label-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.delivery-icon-badge {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: #e2f1fc;
+  color: #0b66c3;
+}
+
+.delivery-label {
+  margin: 0;
+  color: #063361;
+  font-size: 13.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  letter-spacing: -0.15px;
+}
+
+.delivery-required {
+  color: #e53935;
+  margin-left: 4px;
+  font-weight: 600;
+}
+
+/* Add Address Button */
+.delivery-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border: 0;
+  border-radius: 6px;
+  background: #0b66c3;
+  color: #ffffff;
+  font-size: 11.5px;
+  font-weight: 550;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.18s ease, transform 0.18s ease;
+  box-shadow: 0 2px 6px rgba(11, 102, 195, 0.2);
+}
+
+.delivery-add-btn:hover {
+  background: #0854a0;
+  transform: translateY(-1px);
+}
+
+.delivery-add-btn:active {
+  transform: translateY(0);
+}
+
+.delivery-add-btn svg {
+  stroke-width: 2.8;
+}
+
+/* Inputs & Custom Selects */
+.delivery-input-control {
+  position: relative;
+  width: 100%;
+}
+
+.delivery-select,
+.delivery-input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 44px;
+  padding: 0 16px;
+  border: 1px solid #d4e3f0;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #063361;
+  font-size: 13.5px;
+  font-weight: 500;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.delivery-select {
+  padding-right: 36px;
+}
+
+.delivery-select:focus,
+.delivery-input:focus,
+.delivery-textarea:focus {
+  border-color: #0b66c3;
+  box-shadow: 0 0 0 3px rgba(11, 102, 195, 0.12);
+}
+
+.delivery-select-arrow {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #647d96;
+  display: flex;
+  align-items: center;
+}
+
+/* Pickup Date & Time Row */
+.delivery-date-time-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 22px;
+}
+
+.delivery-date-input-wrap,
+.delivery-time-select-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.delivery-date-input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 44px;
+  padding: 0 40px 0 38px;
+  border: 1px solid #d4e3f0;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #063361;
+  font-size: 13.5px;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.delivery-date-input::-webkit-calendar-picker-indicator {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+.delivery-input-icon-left {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #647d96;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+.delivery-time-select {
+  box-sizing: border-box;
+  width: 100%;
+  height: 44px;
+  padding: 0 36px 0 38px;
+  border: 1px solid #d4e3f0;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #063361;
+  font-size: 13.5px;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Information / Notice Box */
+.delivery-notice-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid #d2e7f8;
+  border-radius: 8px;
+  background: #eaf4fd;
+  color: #275988;
+  font-size: 12.5px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.delivery-notice-icon {
+  flex-shrink: 0;
+  color: #0b66c3;
+  display: flex;
+  align-items: center;
+}
+
+.delivery-notice-text {
+  margin: 0;
+}
+
+.delivery-notice-highlight {
+  color: #06407b;
+  font-weight: 600;
+}
+
+/* Payment Mode Radio Buttons */
+.delivery-payment-modes {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  min-height: 40px;
+}
+
+.delivery-radio-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.delivery-radio-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.delivery-radio-custom {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid #b5cee6;
+  background: #ffffff;
+  transition: border-color 0.18s ease;
+}
+
+.delivery-radio-input:checked + .delivery-radio-custom {
+  border-color: #0b66c3;
+}
+
+.delivery-radio-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #0b66c3;
+  transform: scale(0);
+  transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.delivery-radio-input:checked + .delivery-radio-custom .delivery-radio-dot {
+  transform: scale(1);
+}
+
+.delivery-radio-text {
+  color: #063361;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Special Instructions Textarea */
+.delivery-textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 76px;
+  padding: 10px 14px;
+  border: 1px solid #d4e3f0;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #063361;
+  font-family: inherit;
+  font-size: 13.5px;
+  line-height: 1.5;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.delivery-textarea::placeholder {
+  color: #7b8e9f;
+}
+
+/* Submit Action Button */
+.delivery-submit-wrap {
+  margin-top: 6px;
+}
+
+.delivery-submit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 44px;
+  border: 0;
+  border-radius: 8px;
+  background: #0b66c3;
+  color: #ffffff;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(11, 102, 195, 0.3);
+  transition: background-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.delivery-submit-btn:hover {
+  background: #08529d;
+  box-shadow: 0 6px 18px rgba(11, 102, 195, 0.4);
+  transform: translateY(-1px);
+}
+
+.delivery-submit-btn:active {
+  transform: translateY(0);
+}
+
+.delivery-submit-btn:focus-visible {
+  outline: 2px solid #005ac0;
+  outline-offset: 3px;
+}
+
+/* Modal Popup - Add Address */
+.delivery-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(4, 28, 56, 0.6);
+  backdrop-filter: blur(4px);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  animation: delivery-modal-fade 0.2s ease-out;
+}
+
+@keyframes delivery-modal-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.delivery-modal-card {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 540px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.22);
+  padding: 24px 28px;
+  animation: delivery-modal-slide 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes delivery-modal-slide {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.delivery-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5edf5;
+}
+
+.delivery-modal-title {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 600;
+  color: #063361;
+}
+
+.delivery-modal-close {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: #f0f5fa;
+  color: #56728f;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+.delivery-modal-close:hover {
+  background: #e2edf7;
+  color: #063361;
+}
+
+.delivery-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.delivery-modal-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.delivery-modal-label {
+  font-size: 13px;
+  font-weight: 550;
+  color: #063361;
+}
+
+.delivery-modal-input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 42px;
+  padding: 0 14px;
+  border: 1px solid #d4e3f0;
+  border-radius: 7px;
+  font-size: 13.5px;
+  color: #063361;
+  outline: none;
+}
+
+.delivery-modal-input:focus {
+  border-color: #0b66c3;
+  box-shadow: 0 0 0 3px rgba(11, 102, 195, 0.12);
+}
+
+.delivery-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.delivery-modal-cancel {
+  padding: 8px 16px;
+  border: 1px solid #c9dbe9;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #56728f;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.delivery-modal-save {
+  padding: 8px 20px;
+  border: 0;
+  border-radius: 6px;
+  background: #0b66c3;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.delivery-modal-save:hover {
+  background: #0854a0;
+}
+
+/* Success Alert Toast */
+.delivery-success-alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: 8px;
+  background: #e7f8ec;
+  border: 1px solid #a8e5b6;
+  color: #12632b;
+  font-size: 13.5px;
+  font-weight: 550;
+  margin-bottom: 14px;
+  animation: delivery-modal-slide 0.25s ease-out;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .delivery-card {
+    padding: 24px;
+  }
+
+  .delivery-form-row,
+  .delivery-date-time-grid {
+    gap: 14px 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .delivery-page {
+    padding: 18px 0 28px;
+  }
+
+  .delivery-card-container {
+    width: calc(100% - 32px);
+  }
+
+  .delivery-card {
+    padding: 22px 18px 26px;
+    border-radius: 14px;
+  }
+
+  .delivery-form-row,
+  .delivery-date-time-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .delivery-notice-box {
+    align-items: flex-start;
+  }
+
+  .delivery-payment-modes {
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .delivery-card { padding: 17px 14px 20px; }
+  .delivery-form-intro { padding: 12px 14px; }
+  .delivery-label {
+    font-size: 13px;
+  }
+
+  .delivery-add-btn {
+    padding: 5px 10px;
+    font-size: 11.5px;
+  }
+
+  .delivery-select,
+  .delivery-input,
+  .delivery-date-input,
+  .delivery-time-select {
+    height: 42px;
+    font-size: 13px;
+  }
+
+  .delivery-submit-btn {
+    height: 42px;
+    font-size: 13px;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .delivery-add-btn,
+  .delivery-submit-btn {
+    transition: none;
+    transform: none;
+  }
+
+  .delivery-modal-backdrop,
+  .delivery-modal-card,
+  .delivery-success-alert {
+    animation: none;
+  }
+}

@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { A11y, Keyboard, Mousewheel } from "swiper/modules";
+import type { CartItem } from "../cart/Cart";
 import "swiper/css";
 import catalog from "../../products/english.json";
 import "./AddToCart.css";
@@ -17,7 +18,7 @@ function DetailIcon({ kind }: { kind: string }) {
   </svg>;
 }
 
-export default function AddToCart({ product, locale, currency, saved, onToggleWishlist, onClose, onOpenProduct }: {
+export default function AddToCart({ product, locale, currency, saved, onToggleWishlist, onClose, onOpenProduct, onAddToCart, onUpdateCartQuantity }: {
   product: Product;
   locale: string;
   currency: string;
@@ -25,11 +26,14 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
   onToggleWishlist: () => void;
   onClose: () => void;
   onOpenProduct: (product: Product) => void;
+  onAddToCart?: (item: CartItem) => void;
+  onUpdateCartQuantity?: (itemId: string, delta: number) => void;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const descriptionRef = useRef<HTMLElement>(null);
   const [closing, setClosing] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [addedVariantId, setAddedVariantId] = useState<string | null>(null);
   const [activeImage, setActiveImage] = useState(0);
   const [relatedVariantIndexes, setRelatedVariantIndexes] = useState<Record<string, number>>({});
   const [relatedSaved, setRelatedSaved] = useState<string[]>([]);
@@ -52,6 +56,21 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
   const selectedOriginalPrice = variant.originalPrice * quantity;
   const relatedProducts = catalog.products.filter(item => item.id !== product.id && item.category === product.category);
   const relatedMoney = new Intl.NumberFormat(locale, { style: "currency", currency, maximumFractionDigits: 0 });
+  const cartItemId = `${product.id}-${variant.label}`;
+  const isAddedToCart = addedVariantId === cartItemId;
+  const handleAddToCart = () => {
+    onAddToCart?.({
+      id: cartItemId,
+      name: product.name,
+      image: product.image,
+      price: variant.price,
+      originalPrice: variant.originalPrice,
+      weight: variant.label,
+      quantity: 1,
+    });
+    setQuantity(1);
+    setAddedVariantId(cartItemId);
+  };
 
   useEffect(() => {
     const element = dialog.current;
@@ -110,7 +129,7 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
               <legend>Weight / Pack size</legend>
               <div className="add-cart-variant-grid">
                 {variants.map((option, index) => <label key={option.label} className="add-cart-variant">
-                  <input type="radio" name={`weight-${product.id}`} value={option.label} checked={variantIndex === index} onChange={() => setVariantIndex(index)} />
+                  <input type="radio" name={`weight-${product.id}`} value={option.label} checked={variantIndex === index} onChange={() => { setVariantIndex(index); setQuantity(1); }} />
                   <span className="add-cart-variant-card"><span className="add-cart-variant-heading"><strong>{option.label}</strong><span className="add-cart-variant-check" aria-hidden="true">✓</span></span></span>
                 </label>)}
               </div>
@@ -118,9 +137,45 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
             <label className="add-cart-field">Dressing Type<select defaultValue=""><option value="">Select Dressing Type</option><option>Whole / Uncut</option><option>Cleaned</option><option>Curry Cut</option></select></label>
             <label className="add-cart-field">Special instruction<input type="text" placeholder="Any preferences? (optional)" maxLength={250} /></label>
             <div className="add-cart-actions">
-              <div className="add-cart-quantity">
-                <div><button type="button" aria-label="Decrease quantity" disabled={quantity <= 1} onClick={() => setQuantity(value => value - 1)}>−</button><output aria-live="polite" aria-label="Quantity">{quantity}</output><button type="button" aria-label="Increase quantity" disabled={quantity >= 99} onClick={() => setQuantity(value => value + 1)}>+</button></div>
-              </div>
+              {isAddedToCart ? (
+                <div className="add-cart-quantity">
+                  <div>
+                    <button
+                      type="button"
+                      aria-label="Decrease quantity"
+                      onClick={() => {
+                        onUpdateCartQuantity?.(cartItemId, -1);
+                        if (quantity <= 1) {
+                          setAddedVariantId(null);
+                          setQuantity(1);
+                        } else {
+                          setQuantity(value => value - 1);
+                        }
+                      }}
+                    >
+                      −
+                    </button>
+                    <output aria-live="polite" aria-label="Quantity">{quantity}</output>
+                    <button
+                      type="button"
+                      aria-label="Increase quantity"
+                      disabled={quantity >= 99}
+                      onClick={() => {
+                        onUpdateCartQuantity?.(cartItemId, 1);
+                        setQuantity(value => value + 1);
+                      }}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                onAddToCart && (
+                  <button type="button" className="add-cart-submit" onClick={handleAddToCart}>
+                    <DetailIcon kind="cart" />Add to Cart
+                  </button>
+                )
+              )}
               <button type="button" className="add-cart-wishlist" aria-pressed={saved} onClick={onToggleWishlist}><DetailIcon kind="heart" />{saved ? "Wishlisted" : "Add to Wishlist"}</button>
               <button type="button" className="add-cart-info" aria-controls="add-cart-description" onClick={() => descriptionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })}><DetailIcon kind="info" />Info</button>
             </div>

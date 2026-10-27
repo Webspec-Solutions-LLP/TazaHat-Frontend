@@ -7,6 +7,7 @@ import { A11y, Keyboard, Mousewheel } from "swiper/modules";
 import "swiper/css";
 import text from "./english.json";
 import catalog from "../products/english.json";
+import { readWishlistIds, subscribeToWishlist, toggleWishlistId } from "../../lib/wishlist";
 import "../products/Products.css";
 import "./TodayDeals.css";
 
@@ -59,6 +60,11 @@ export default function TodalDeals() {
   const [saved, setSaved] = useState<string[]>([]);
   const [selected, setSelected] = useState<Product | null>(null);
   const dialog = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const refreshWishlist = () => setSaved(readWishlistIds());
+    refreshWishlist();
+    return subscribeToWishlist(refreshWishlist);
+  }, []);
 
   const renderProduct = (product: Product) => {
     const isSaved = saved.includes(product.id);
@@ -70,7 +76,7 @@ export default function TodalDeals() {
           <Image src={product.image} alt={product.name} fill sizes="(max-width: 600px) 45vw, (max-width: 1023px) 25vw, 180px" draggable={false} />
           <span className="product-discount-badge">{text.discount.replace("{percent}", String(discount))}</span>
           <span className="product-image-rating" aria-label={text.rating.replace("{rating}", String(product.rating)).replace("{reviews}", String(product.reviews))}>★ {product.rating}</span>
-          <button type="button" className="product-save" aria-pressed={isSaved} aria-label={(isSaved ? text.unsave : text.save).replace("{name}", product.name)} onClick={() => setSaved(current => isSaved ? current.filter(id => id !== product.id) : [...current, product.id])}>
+          <button type="button" className="product-save" aria-pressed={isSaved} aria-label={(isSaved ? text.unsave : text.save).replace("{name}", product.name)} onClick={() => setSaved(toggleWishlistId(product.id))}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" /></svg>
           </button>
         </div>
