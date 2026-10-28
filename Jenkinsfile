@@ -31,6 +31,12 @@ pipeline {
         }
 
         stage('Build Image') {
+            when {
+                anyOf {
+                    branch 'master'
+                    expression { env.GIT_BRANCH in ['master', 'origin/master'] }
+                }
+            }
             steps {
                 sh '''
                   set -e
@@ -41,6 +47,12 @@ pipeline {
         }
 
         stage('Deploy') {
+            when {
+                anyOf {
+                    branch 'master'
+                    expression { env.GIT_BRANCH in ['master', 'origin/master'] }
+                }
+            }
             steps {
                 sh '''
                   set -e
@@ -74,6 +86,12 @@ pipeline {
         }
 
         stage('Health Check') {
+            when {
+                anyOf {
+                    branch 'master'
+                    expression { env.GIT_BRANCH in ['master', 'origin/master'] }
+                }
+            }
             steps {
                 sh '''
                   set -e
