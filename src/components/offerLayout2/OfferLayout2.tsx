@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import text from "./english.json";
 import "./OfferLayout2.css";
 
@@ -11,7 +12,10 @@ function FreshIcon({ kind }: { kind: string }) {
 }
 
 export default function OfferLayout2() {
-  const shop = () => document.querySelector<HTMLInputElement>(".navbar-search-input")?.focus();
+  const router = useRouter();
+  const shop = (category?: string) => {
+    router.push(category ? `/products?category=${encodeURIComponent(category)}` : "/products");
+  };
   return (
     <section className="fresh-offer-section" lang={text.language} aria-labelledby="fresh-picks-heading">
       <div className="fresh-offer-layout" style={{ backgroundImage: `url(${text.background})` }}>
@@ -20,7 +24,7 @@ export default function OfferLayout2() {
             <span className="fresh-farm-badge"><FreshIcon kind="leaf" />{text.badge}</span>
             <h2>{text.heroTitle}<span>{text.heroHighlight}</span></h2>
             <p>{text.heroDescription}</p>
-            <button type="button" onClick={shop}>{text.heroButton}<span aria-hidden="true">→</span></button>
+            <button type="button" onClick={() => shop()}>{text.heroButton}<span aria-hidden="true">→</span></button>
           </div>
           <div className="fresh-farm-sign"><FreshIcon kind="leaf" /><span>{text.farmNote}</span><strong>{text.farmHighlight}</strong></div>
         </div>
@@ -33,7 +37,7 @@ export default function OfferLayout2() {
             {text.categories.map(category => <article className={`fresh-pick-card fresh-theme--${category.theme}`} key={category.id}>
               <div className="fresh-pick-discount"><small>{text.upTo}</small><strong>{category.discount}%</strong><span>{text.off}</span></div>
               <div className="fresh-pick-image"><Image src={`${category.image}?v=transparent-2`} alt={category.name} fill unoptimized sizes="(max-width: 600px) 40vw, 160px" /></div>
-              <div className="fresh-pick-details"><FreshIcon kind="leaf" /><h3><span>{text.fresh}</span>{category.name}</h3><button type="button" onClick={shop}>{text.shopNow}<span aria-hidden="true">→</span></button></div>
+              <div className="fresh-pick-details"><FreshIcon kind="leaf" /><h3><span>{text.fresh}</span>{category.name}</h3><button type="button" onClick={() => shop(category.name)}>{text.shopNow}<span aria-hidden="true">→</span></button></div>
             </article>)}
           </div>
           <ul className="fresh-picks-benefits">{text.benefits.map(benefit => <li key={benefit.title}><FreshIcon kind={benefit.icon} /><div><strong>{benefit.title}</strong><span>{benefit.description}</span></div></li>)}</ul>

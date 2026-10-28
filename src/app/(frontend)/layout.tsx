@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/footer/Footer";
 import FloatingMessageButton from "@/components/floatingMessage/FloatingMessageButton";
+import BottomNavigation from "@/components/bottomNavigation/BottomNavigation";
+import FeedbackButton from "@/components/feedbackButton/FeedbackButton";
 import "leaflet/dist/leaflet.css";
 import "./Home.css";
 
@@ -19,9 +21,11 @@ export default function RootLayout({
     <html lang="en">
       <body className="min-h-screen flex flex-col">
         <Navbar />
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 frontend-layout-main">{children}</main>
         <Footer />
         <FloatingMessageButton />
+        <BottomNavigation />
+        <FeedbackButton />
       </body>
     </html>
   );

@@ -1,7 +1,7 @@
 /* OfferLayout4 - Steal Deals Layout */
 
 .offer-layout-4 {
-  padding: 10px 0;
+  padding: 8px 0;
   background: #ffffff;
   color: #063361;
 }
@@ -210,7 +210,7 @@
 
 /* Swiper Slider */
 .offer-layout-4 .products-slider {
-  padding: 2px 2px 12px;
+  padding: 2px 2px 5px;
 }
 
 .offer-layout-4 .products-slider .swiper-wrapper {
@@ -235,7 +235,6 @@
   background: #ffffff;
   border: 1px solid #e4edf5;
   border-radius: 12px;
-  box-shadow: 0 3px 12px #06336112;
   transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
 }
 
@@ -452,52 +451,106 @@
 }
 
 /* Responsive adjustments */
-@media (max-width: 768px) {
-  .offer-layout-4 {
-    padding: 10px 0;
-  }
-  .steal-tab-item {
-    min-width: 76px;
-    height: 48px;
-    padding: 3px 12px;
-  }
-  .steal-tab-price {
-    font-size: 17px;
-  }
+@media (max-width: 1299px) {
+  .offer-layout-4-container { max-width: 1024px; }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 1099px) {
   .offer-layout-4-container {
-    width: calc(100% - 24px);
+    width: calc(100% - 80px);
+    max-width: none;
   }
-  .steal-tab-item {
-    min-width: 76px;
-    height: 48px;
-    padding: 3px 12px;
+
+  .steal-deals-title { font-size: 25px; }
+  .steal-tab-item { min-width: 70px; height: 45px; padding: 3px 9px; }
+  .steal-tab-price { font-size: 16px; }
+  .offer-layout-4 .product-card { padding: 9px; }
+  .offer-layout-4 .product-image { margin-bottom: 4px; }
+  .offer-layout-4 .product-card h3 { font-size: 14px; }
+  .offer-layout-4 .product-pricing { gap: 5px; margin: 1px 0 4px; }
+  .offer-layout-4 .product-pricing strong { font-size: 15px; }
+  .offer-layout-4 .product-details-button { min-height: 33px; font-size: 10px; }
+}
+
+@media (max-width: 876px) {
+  .offer-layout-4-container { width: calc(100% - 60px); }
+  .steal-deals-header-top { margin-bottom: 8px; }
+  .steal-deals-title { font-size: 22px; }
+  .steal-tabs-bar { margin-bottom: 5px; }
+  .steal-tab-item { min-width: 64px; height: 42px; padding: 3px 7px; }
+  .steal-tab-price { font-size: 14px; }
+  .steal-tab-sublabel, .steal-tab-label { font-size: 8px; }
+  .steal-tab-flame-icon { width: 19px; height: 19px; }
+  .offer-layout-4 .product-card { gap: 1px; padding: 7px; border-radius: 10px; }
+  .offer-layout-4 .product-image { margin-bottom: 3px; border-radius: 7px; }
+  .offer-layout-4 .product-image > img { padding: 8px; }
+  .offer-layout-4 .product-discount-badge { top: 6px; left: 6px; min-height: 20px; padding: 3px 6px; font-size: 8px; }
+  .offer-layout-4 .product-save { top: 5px; right: 5px; width: 27px; height: 27px; }
+  .offer-layout-4 .product-card h3 { min-height: 19px; font-size: 12px; }
+  .offer-layout-4 .product-description, .offer-layout-4 .product-weight { font-size: 8px; }
+  .offer-layout-4 .product-pricing { min-height: 21px; margin: 1px 0 3px; }
+  .offer-layout-4 .product-pricing strong { font-size: 14px; }
+  .offer-layout-4 .product-pricing del { font-size: 9px; }
+  .offer-layout-4 .product-details-button { min-height: 31px; gap: 5px; padding: 5px 3px; font-size: 9px; }
+}
+
+@media (max-width: 678px) {
+  .offer-layout-4-container { width: calc(100% - 30px); }
+  .steal-deals-title { font-size: 20px; }
+  .steal-tab-item { min-width: 60px; height: 40px; padding: 3px 6px; }
+  .steal-tab-price { font-size: 13px; }
+  .steal-tab-sublabel, .steal-tab-label { font-size: 7px; }
+  .offer-layout-4 .product-image-rating { right: 5px; bottom: 5px; min-height: 19px; padding: 3px 5px; font-size: 8px; }
+  .offer-layout-4 .product-save svg { width: 16px; height: 16px; }
+  .offer-layout-4 .product-card h3 { font-size: 11px; }
+  .offer-layout-4 .product-details-button svg { width: 15px; height: 15px; }
+}
+
+@media (max-width: 575px) {
+  .offer-layout-4 {
+    padding: 0;
   }
-  .steal-tab-price {
-    font-size: 17px;
-  }
-  .steal-tab-label,
-  .steal-tab-sublabel { font-size: 9px; }
-  .offer-layout-4 .product-card {
-    padding: 8px;
-    gap: 1px;
-  }
-  .offer-layout-4 .product-card h3 {
-    min-height: 20px;
-    margin-bottom: 2px;
-    font-size: 14px;
-  }
-  .offer-layout-4 .product-image-rating,
-  .offer-layout-4 .product-discount-badge {
-    min-height: 21px;
-    padding: 4px 6px;
-    font-size: 8px;
-  }
-  .offer-layout-4 .product-image > img {
-    padding: 9px;
-  }
+  .offer-layout-4-container { width: calc(100% - 30px); }
+  .steal-deals-header-top { margin-bottom: 7px; }
+  .steal-deals-title { font-size: 18px; }
+  .steal-tabs-bar { margin-bottom: 4px; }
+  .steal-tab-item { min-width: 56px; height: 37px; padding: 2px 5px; }
+  .steal-tab-price { font-size: 12px; }
+  .steal-tab-sublabel, .steal-tab-label { font-size: 7px; }
+  .steal-tab-flame-icon { width: 17px; height: 17px; }
+  .steal-tab-hot-tag { font-size: 4.5px; }
+  .offer-layout-4 .product-card { padding: 6px; }
+  .offer-layout-4 .product-image > img { padding: 6px; }
+  .offer-layout-4 .product-card h3 { min-height: 17px; font-size: 10px; }
+  .offer-layout-4 .product-description { min-height: 12px; font-size: 7px; }
+  .offer-layout-4 .product-weight { gap: 3px; font-size: 7px; }
+  .offer-layout-4 .product-pricing { gap: 4px; min-height: 19px; }
+  .offer-layout-4 .product-pricing strong { font-size: 12px; }
+  .offer-layout-4 .product-pricing del { font-size: 8px; }
+  .offer-layout-4 .product-details-button { min-height: 29px; gap: 4px; font-size: 8px; }
+}
+
+@media (max-width: 450px) {
+  .offer-layout-4-container { width: calc(100% - 20px); }
+  .steal-deals-title { font-size: 16px; }
+  .steal-tab-item { min-width: 52px; height: 35px; padding: 2px 4px; }
+  .steal-tab-price { font-size: 11px; }
+  .steal-tab-sublabel, .steal-tab-label { font-size: 6px; }
+  .steal-tab-flame-icon { width: 15px; height: 15px; }
+  .steal-tab-hot-tag { font-size: 4px; }
+  .offer-layout-4 .product-card { padding: 5px; }
+  .offer-layout-4 .product-image { margin-bottom: 2px; }
+  .offer-layout-4 .product-discount-badge { top: 4px; left: 4px; min-height: 16px; padding: 2px 4px; font-size: 6px; }
+  .offer-layout-4 .product-save { top: 4px; right: 4px; width: 23px; height: 23px; }
+  .offer-layout-4 .product-save svg { width: 14px; height: 14px; }
+  .offer-layout-4 .product-image-rating { right: 4px; bottom: 4px; min-height: 16px; padding: 2px 4px; font-size: 7px; }
+  .offer-layout-4 .product-card h3 { min-height: 16px; font-size: 9px; }
+  .offer-layout-4 .product-description, .offer-layout-4 .product-weight { font-size: 6px; }
+  .offer-layout-4 .product-pricing { gap: 3px; min-height: 17px; }
+  .offer-layout-4 .product-pricing strong { font-size: 11px; }
+  .offer-layout-4 .product-pricing del { font-size: 7px; }
+  .offer-layout-4 .product-details-button { min-height: 26px; gap: 3px; padding: 4px 2px; font-size: 7px; }
+  .offer-layout-4 .product-details-button svg { width: 13px; height: 13px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

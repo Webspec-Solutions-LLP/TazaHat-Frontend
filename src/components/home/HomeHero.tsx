@@ -8,9 +8,9 @@ import "swiper/css/pagination";
 
 const banners = [
   {
-    image: "/images/banner6.png",
+    image: "/images/banner6.webp",
     alt: "Fresh fish and seafood beside the Hooghly River and Howrah Bridge",
-    sideImage: "/images/banner2.png",
+    sideImage: "/images/banner2.webp",
     sideAlt: "Fresh fish, seafood, meat, and poultry",
     eyebrow: "Fresh from the river",
     title: "Fresh catch. Better meals.",
@@ -18,9 +18,9 @@ const banners = [
     action: "Shop seafood",
   },
   {
-    image: "/images/banner7.png",
+    image: "/images/banner7.webp",
     alt: "Fresh vegetables, fruit, and dairy from the farm",
-    sideImage: "/images/banner3.png",
+    sideImage: "/images/banner3.webp",
     sideAlt: "Fresh dairy products including milk, cheese, and yogurt",
     eyebrow: "Good food, every day",
     title: "Bring home the harvest.",

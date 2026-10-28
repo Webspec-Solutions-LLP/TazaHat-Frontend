@@ -9,6 +9,42 @@ import "./MyProfile.css";
 
 const orders = orderData.orders;
 
+const supportTickets = [
+  {
+    id: "TH-24816",
+    subject: "Delivery arrived later than expected",
+    category: "Delivery",
+    raised: "18 Oct 2026, 10:42 AM",
+    status: "Resolved",
+    tone: "resolved",
+    issue: "My order arrived after the selected delivery window.",
+    update: "We reviewed the delivery timeline and added a delivery credit to your account. We are sorry for the delay.",
+    updated: "18 Oct 2026, 1:15 PM",
+  },
+  {
+    id: "TH-24703",
+    subject: "Item missing from my order",
+    category: "Order issue",
+    raised: "12 Oct 2026, 6:20 PM",
+    status: "In progress",
+    tone: "progress",
+    issue: "One item from my order was not included in the delivery.",
+    update: "Our support team is checking the packing record and will update you shortly.",
+    updated: "12 Oct 2026, 6:45 PM",
+  },
+  {
+    id: "TH-24189",
+    subject: "Question about product freshness",
+    category: "Product quality",
+    raised: "02 Oct 2026, 9:05 AM",
+    status: "Resolved",
+    tone: "resolved",
+    issue: "I wanted to know how to report a product quality concern.",
+    update: "We shared the quality review steps and confirmed the concern was addressed with the customer.",
+    updated: "02 Oct 2026, 11:30 AM",
+  },
+];
+
 type SavedAddress = AddressFormValues & {
   id: string;
 };
@@ -323,6 +359,29 @@ export default function MyProfilePage() {
         />
       )}
       <Products heading="Your liked products" />
+      <section className="profile-tickets" aria-labelledby="profile-tickets-title">
+        <div className="profile-tickets-heading">
+          <div className="profile-tickets-title-wrap">
+            <span className="profile-tickets-icon"><ProfileIcon><path d="M4 5h16v12H9l-5 3V5Z"/><path d="M8 9h8M8 13h5"/></ProfileIcon></span>
+            <span><h2 id="profile-tickets-title">Support tickets</h2><p>Track the issues you reported and our team’s updates.</p></span>
+          </div>
+          <span className="profile-tickets-count">{supportTickets.length} tickets</span>
+        </div>
+        <div className="profile-ticket-list">
+          {supportTickets.map((ticket) => (
+            <article className="profile-ticket-card" key={ticket.id}>
+              <div className="profile-ticket-topline">
+                <span className="profile-ticket-number">Ticket #{ticket.id}</span>
+                <span className={`profile-ticket-status profile-ticket-status--${ticket.tone}`}><i aria-hidden="true" />{ticket.status}</span>
+              </div>
+              <div className="profile-ticket-title-row"><h3>{ticket.subject}</h3><span>{ticket.category}</span></div>
+              <p className="profile-ticket-issue"><strong>Your issue</strong>{ticket.issue}</p>
+              <div className="profile-ticket-update"><span className="profile-ticket-update-icon"><ProfileIcon><path d="m5 12 4 4L19 6"/></ProfileIcon></span><div><strong>{ticket.tone === "resolved" ? "Resolution" : "Latest update"}</strong><p>{ticket.update}</p></div></div>
+              <div className="profile-ticket-dates"><span>Raised <time>{ticket.raised}</time></span><span>Updated <time>{ticket.updated}</time></span></div>
+            </article>
+          ))}
+        </div>
+      </section>
     </main>
   );
 }

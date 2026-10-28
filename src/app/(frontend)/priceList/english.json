@@ -25,9 +25,9 @@
   "close": "Close",
   "preview": "Product Preview",
   "orderNote": "Online ordering is not available yet. Browse our product catalogue for more fresh picks.",
-  "heroImage": "/images/priceListHero section.png",
+  "heroImage": "/images/priceListHero section.webp",
   "playstoreImage": "/images/playstore.webp",
-  "logo": "/images/logo.png",
+  "logo": "/images/logo.webp",
   "benefits": [
     {
       "icon": "leaf",
@@ -56,37 +56,37 @@
     {
       "id": "vegetables",
       "name": "Vegetables",
-      "image": "/images/category/category2.png",
+      "image": "/images/category/category2.webp",
       "icon": ""
     },
     {
       "id": "fruits",
       "name": "Fruits",
-      "image": "/images/category/category3.png",
+      "image": "/images/category/category3.webp",
       "icon": ""
     },
     {
       "id": "dairy",
       "name": "Dairy & Eggs",
-      "image": "/images/category/category4.png",
+      "image": "/images/category/category4.webp",
       "icon": ""
     },
     {
       "id": "meat",
       "name": "Meat & Poultry",
-      "image": "/images/category/category5.png",
+      "image": "/images/category/category5.webp",
       "icon": ""
     },
     {
       "id": "grocery",
       "name": "Grocery & Staples",
-      "image": "/images/category/category6.png",
+      "image": "/images/category/category6.webp",
       "icon": ""
     },
     {
       "id": "bakery",
       "name": "Snacks & Bakery",
-      "image": "/images/category/category7.png",
+      "image": "/images/category/category7.webp",
       "icon": ""
     },
     {
@@ -208,7 +208,7 @@
     {
       "id": "staples",
       "name": "Rice & Pulses Combo",
-      "image": "/images/category/category6.png",
+      "image": "/images/category/category6.webp",
       "category": "grocery",
       "price": 180,
       "originalPrice": 220,
@@ -217,7 +217,7 @@
     {
       "id": "bakery",
       "name": "Assorted Bakery Pack",
-      "image": "/images/category/category7.png",
+      "image": "/images/category/category7.webp",
       "category": "bakery",
       "price": 140,
       "originalPrice": 175,

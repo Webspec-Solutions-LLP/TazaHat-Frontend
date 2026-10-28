@@ -58,8 +58,6 @@ export default function TodalDeals() {
     { label: text.seconds, value: remaining === null ? null : remaining % 60 },
   ];
   const [saved, setSaved] = useState<string[]>([]);
-  const [selected, setSelected] = useState<Product | null>(null);
-  const dialog = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     const refreshWishlist = () => setSaved(readWishlistIds());
     refreshWishlist();
@@ -84,7 +82,7 @@ export default function TodalDeals() {
         <p className="product-description" title={description}>{description}</p>
         <p className="product-weight"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m12 3 9 5v8l-9 5-9-5V8l9-5Zm-9 5 9 5 9-5M12 13v8M7.5 5.5l9 5" /></svg>{product.weight}</p>
         <div className="product-pricing"><strong>{money.format(product.price)}</strong><del>{money.format(product.originalPrice)}</del></div>
-        <button className="product-details-button" type="button" onClick={() => { setSelected(product); dialog.current?.showModal(); }}><CartIcon />Add to Cart</button>
+        <button className="product-details-button" type="button" onClick={() => window.dispatchEvent(new CustomEvent("tazahat:add-cart-item", { detail: { id: product.id, name: product.name, image: product.image, price: product.price, originalPrice: product.originalPrice, weight: product.weight, quantity: 1 } }))}><CartIcon />Add to Cart</button>
       </article>
     );
   };
@@ -97,7 +95,7 @@ export default function TodalDeals() {
           <div className="deals-countdown" role="timer" aria-label={text.offerEnds}><span>{text.offerEnds}</span><div className="deals-clock">{clock.map(unit => <div className="deals-time" key={unit.label}><strong>{unit.value === null ? "--" : String(unit.value).padStart(2, "0")}</strong><span>{unit.label}</span></div>)}</div></div>
         </div>
         <div id="deals-list">
-          <Swiper className="products-slider" modules={[A11y, Keyboard, Mousewheel]} slidesPerView={2.2} spaceBetween={10} breakpoints={{ 601: { slidesPerView: 4.2, spaceBetween: 12 }, 1024: { slidesPerView: 5.5, spaceBetween: 12 } }} keyboard={{ enabled: true, onlyInViewport: true }} mousewheel={{ forceToAxis: true }} a11y={{ containerMessage: text.sliderLabel, slideLabelMessage: text.columnLabel }} tabIndex={0}>
+          <Swiper className="products-slider" modules={[A11y, Keyboard, Mousewheel]} slidesPerView={1.7} spaceBetween={8} breakpoints={{ 451: { slidesPerView: 2.1, spaceBetween: 9 }, 576: { slidesPerView: 2.7, spaceBetween: 10 }, 679: { slidesPerView: 3.5, spaceBetween: 10 }, 1024: { slidesPerView: 5.5, spaceBetween: 12 } }} keyboard={{ enabled: true, onlyInViewport: true }} mousewheel={{ forceToAxis: true }} a11y={{ containerMessage: text.sliderLabel, slideLabelMessage: text.columnLabel }} tabIndex={0}>
             {catalog.products.map(product => <SwiperSlide key={product.id}>{renderProduct(product)}</SwiperSlide>)}
           </Swiper>
         </div>
@@ -118,10 +116,6 @@ export default function TodalDeals() {
           </span>
         </button>
       )}
-      <dialog ref={dialog} className="product-dialog" aria-labelledby="deal-dialog-title" onClick={event => { if (event.target === event.currentTarget) dialog.current?.close(); }}>
-        <button className="product-dialog-close" type="button" onClick={() => dialog.current?.close()}>{text.close} ×</button>
-        {selected && <><Image src={selected.image} alt={selected.name} width={240} height={200} className="product-dialog-image" /><h2 id="deal-dialog-title">{selected.name}</h2><p>{selected.weight}</p><strong>{money.format(selected.price)}</strong><p className="product-demo-note">{text.demoNote}</p></>}
-      </dialog>
     </section>
   );
 }

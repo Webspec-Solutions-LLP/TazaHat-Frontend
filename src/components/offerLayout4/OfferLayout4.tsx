@@ -264,14 +264,14 @@ export default function OfferLayout4() {
             onSwiper={swiper => {
               swiperRef.current = swiper;
             }}
-            slidesPerView={1.8}
-            spaceBetween={10}
+            slidesPerView={2.1}
+            spaceBetween={8}
             breakpoints={{
-              420: { slidesPerView: 2.3, spaceBetween: 10 },
-              620: { slidesPerView: 3.2, spaceBetween: 12 },
-              768: { slidesPerView: 4.2, spaceBetween: 12 },
-              1024: { slidesPerView: 4.8, spaceBetween: 14 },
-              1200: { slidesPerView: 5.6, spaceBetween: 14 },
+              451: { slidesPerView: 2.5, spaceBetween: 8 },
+              576: { slidesPerView: 2.9, spaceBetween: 9 },
+              679: { slidesPerView: 3.1, spaceBetween: 10 },
+              877: { slidesPerView: 3.7, spaceBetween: 12 },
+              1100: { slidesPerView: 5.6, spaceBetween: 14 },
             }}
             a11y={{
               containerMessage: text.sliderLabel,

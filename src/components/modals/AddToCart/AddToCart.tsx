@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { A11y, Keyboard, Mousewheel } from "swiper/modules";
 import type { CartItem } from "../cart/Cart";
+import Chat from "../chat/Chat";
 import "swiper/css";
 import catalog from "../../products/english.json";
 import "./AddToCart.css";
@@ -30,6 +31,7 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
   onUpdateCartQuantity?: (itemId: string, delta: number) => void;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
+  const previousOverflow = useRef("");
   const descriptionRef = useRef<HTMLElement>(null);
   const [closing, setClosing] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -37,6 +39,7 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
   const [activeImage, setActiveImage] = useState(0);
   const [relatedVariantIndexes, setRelatedVariantIndexes] = useState<Record<string, number>>({});
   const [relatedSaved, setRelatedSaved] = useState<string[]>([]);
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const variants = product.variants?.length ? product.variants : [{ label: product.weight, amount: 1, unit: "pack", price: product.price, originalPrice: product.originalPrice }];
   const [variantIndex, setVariantIndex] = useState(() => Math.max(0, variants.findIndex(variant => variant.price === product.price)));
   const variant = variants[variantIndex] ?? variants[0];
@@ -75,12 +78,12 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
   useEffect(() => {
     const element = dialog.current;
     const previousFocus = document.activeElement as HTMLElement | null;
-    const previousOverflow = document.body.style.overflow;
+    previousOverflow.current = document.body.style.overflow;
     element?.showModal();
     document.body.style.overflow = "hidden";
     return () => {
       element?.close();
-      document.body.style.overflow = previousOverflow;
+      document.body.style.overflow = previousOverflow.current;
       // The trigger can be removed during a route transition; only restore
       // focus when it remains connected to the current document.
       if (previousFocus?.isConnected) previousFocus.focus();
@@ -94,6 +97,7 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
   }, [closing, onClose]);
 
   return (
+    <>
     <dialog ref={dialog} className={`add-cart-dialog${closing ? " is-closing" : ""}`} aria-labelledby="add-cart-title" onCancel={event => { event.preventDefault(); setClosing(true); }} onClick={event => { if (event.target === event.currentTarget) setClosing(true); }}>
       <div className="add-cart-panel">
         <button autoFocus type="button" className="add-cart-close" aria-label="Close product details" onClick={() => setClosing(true)}><DetailIcon kind="arrow" /></button>
@@ -177,7 +181,7 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
                 )
               )}
               <button type="button" className="add-cart-wishlist" aria-pressed={saved} onClick={onToggleWishlist}><DetailIcon kind="heart" />{saved ? "Wishlisted" : "Add to Wishlist"}</button>
-              <button type="button" className="add-cart-info" aria-controls="add-cart-description" onClick={() => descriptionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })}><DetailIcon kind="info" />Info</button>
+              <button type="button" className="add-cart-info" onClick={() => { dialog.current?.close(); document.body.style.overflow = previousOverflow.current; setIsChatOpen(true); }}><DetailIcon kind="info" />Info</button>
             </div>
             <section ref={descriptionRef} id="add-cart-description" className="add-cart-description" aria-labelledby="add-cart-description-title">
               <h3 id="add-cart-description-title">Description</h3>
@@ -234,5 +238,7 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
         </section>
       </div>
     </dialog>
+    {isChatOpen && <Chat onClose={() => { setIsChatOpen(false); setClosing(true); }} product={product} />}
+    </>
   );
 }

@@ -124,7 +124,6 @@ function ProductDetailsContent() {
               <button type="button" aria-label="Increase quantity" disabled={quantity >= 99} onClick={() => setQuantity(n => Math.min(99, n + 1))}><Icon name="plus" /></button>
             </div>
             <button type="button" className="pd-wishlist"><Icon name="heart" /> Add to Wishlist</button>
-            <button type="button" className="pd-info-button" onClick={() => { setActiveTab("description"); descriptionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }); }}><Icon name="info" /> Info</button>
           </div>
           <div className="pd-order-note"><span><Icon name="shield" /></span><p><strong>Freshness you can trust</strong><small>Carefully selected, hygienically handled and packed fresh for delivery.</small></p></div>
         </section>

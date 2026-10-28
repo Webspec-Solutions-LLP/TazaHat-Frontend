@@ -78,7 +78,7 @@ export default function Products({ heading }: ProductsProps) {
       <div className="products-container">
         <div className="products-header"><h2 id="products-heading">{sectionHeading}</h2><Link href="/products" className="products-view-all">{text.viewAll}</Link></div>
         <div id="products-list">
-            <Swiper className="products-slider" modules={[A11y, Keyboard, Mousewheel]} slidesPerView={2.2} spaceBetween={10} breakpoints={{ 601: { slidesPerView: 4.2, spaceBetween: 12 }, 1024: { slidesPerView: 5.5, spaceBetween: 12 } }} keyboard={{ enabled: true, onlyInViewport: true }} mousewheel={{ forceToAxis: true }} a11y={{ containerMessage: sliderLabel, slideLabelMessage: text.columnLabel }} tabIndex={0}>
+            <Swiper className="products-slider" modules={[A11y, Keyboard, Mousewheel]} slidesPerView={1.7} spaceBetween={8} breakpoints={{ 451: { slidesPerView: 2.1, spaceBetween: 9 }, 576: { slidesPerView: 2.7, spaceBetween: 10 }, 679: { slidesPerView: 3.5, spaceBetween: 10 }, 877: { slidesPerView: 5.5, spaceBetween: 12 } }} keyboard={{ enabled: true, onlyInViewport: true }} mousewheel={{ forceToAxis: true }} a11y={{ containerMessage: sliderLabel, slideLabelMessage: text.columnLabel }} tabIndex={0}>
               {columns.map((column) => <SwiperSlide key={column[0].id}><div className="products-column">{column.map(renderProduct)}</div></SwiperSlide>)}
             </Swiper>
         </div>

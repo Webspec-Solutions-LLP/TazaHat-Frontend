@@ -1,0 +1,44 @@
+.feedback-floating-button {
+  position: fixed;
+  z-index: 980;
+  top: 50%;
+  left: 0;
+  display: flex;
+  width: 42px;
+  min-height: 126px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 8px;
+  border: 1px solid #ffffff36;
+  border-left: 0;
+  border-radius: 0 14px 14px 0;
+  background: linear-gradient(160deg, #f0fbff 0%, #dff4ff 100%);
+  color: #075b9e;
+  box-shadow: 0 7px 22px #073b6528, inset 0 1px #fff;
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: width 180ms ease, color 180ms ease, box-shadow 180ms ease;
+}
+
+.feedback-floating-button:hover {
+  width: 48px;
+  color: #003d70;
+  box-shadow: 0 9px 26px #073b6538, inset 0 1px #fff;
+}
+
+.feedback-floating-button svg { width: 21px; height: 21px; flex: 0 0 21px; }
+.feedback-floating-button span { font-size: 12px; font-weight: 750; letter-spacing: .35px; writing-mode: vertical-rl; }
+.feedback-floating-button:focus-visible { outline: 3px solid #84d635; outline-offset: 3px; }
+
+@media (max-width: 575px) {
+  .feedback-floating-button { width: 36px; min-height: 112px; padding: 12px 6px; border-radius: 0 12px 12px 0; }
+  .feedback-floating-button:hover { width: 40px; }
+  .feedback-floating-button svg { width: 18px; height: 18px; flex-basis: 18px; }
+  .feedback-floating-button span { font-size: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feedback-floating-button { transition: none; }
+}

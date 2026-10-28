@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import Address, { type AddressFormValues } from "@/components/modals/address/Address";
 import "./Checkout.css";
 
 const days = [
@@ -31,6 +32,12 @@ type CheckoutItem = {
   weight?: string;
 };
 
+const demoAddresses = [
+  "Office : C/O Tapash Nath, Dharmanagar, near school, Cooch Behar, West Bengal 73610",
+  "Home : House 14, Road 3, Banamalipur, Agartala, Tripura 799001",
+  "Flat 3B, Sunshine Residency, Ramnagar, Agartala, Tripura 799002",
+];
+
 function Icon({ name }: { name: string }) {
   const common = { width: 26, height: 26, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.9, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, "aria-hidden": true as const };
   const paths: Record<string, React.ReactNode> = {
@@ -54,8 +61,9 @@ export default function CheckoutPage() {
   const [deliveryType, setDeliveryType] = useState("Store Pick Up");
   const [schedule, setSchedule] = useState(0);
   const [payment, setPayment] = useState("Online Payment");
-  const [address, setAddress] = useState("Office : C/O.Tapash Nath - Dharmanagar, Demo, Dharmanagar, near school, Cooch Behar, West Bengal 73610");
-  const [editingAddress, setEditingAddress] = useState(false);
+  const [address, setAddress] = useState(demoAddresses[0]);
+  const [isAddressListOpen, setIsAddressListOpen] = useState(false);
+  const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [coupon, setCoupon] = useState("");
   const [couponMessage, setCouponMessage] = useState("");
   const [placed, setPlaced] = useState(false);
@@ -63,6 +71,11 @@ export default function CheckoutPage() {
   const subtotal = useMemo(() => items.reduce((sum, item) => sum + item.price * item.quantity, 0), [items]);
   const itemCount = useMemo(() => items.reduce((sum, item) => sum + item.quantity, 0), [items]);
   const total = subtotal + deliveryFee + schedules[schedule].fee;
+
+  const saveAddress = (values: AddressFormValues) => {
+    setAddress([values.recipient, values.houseNumber, values.addressLine1, values.addressLine2, values.locality, values.landmark, values.pincode].filter(Boolean).join(", "));
+    setIsAddressModalOpen(false);
+  };
 
   useEffect(() => {
     const savedItems = window.sessionStorage.getItem("tazahat-checkout-items");
@@ -92,8 +105,9 @@ export default function CheckoutPage() {
           </section>
           <section className="checkout-section checkout-address">
             <div className="checkout-section-heading"><span className="checkout-icon"><Icon name="pin" /></span><div><h1>Delivery Address <b>*</b></h1><p>Select your delivery address or add a new one</p></div></div>
-            <button className="checkout-add-address" type="button" onClick={() => setEditingAddress(value => !value)}><span>＋</span> {editingAddress ? "Save Address" : "Add Address"}</button>
-            {editingAddress ? <input className="checkout-address-input" aria-label="Delivery address" value={address} onChange={event => setAddress(event.target.value)} placeholder="Enter your delivery address" /> : <button className="checkout-address-choice" type="button" onClick={() => setEditingAddress(true)}><span className="checkout-radio checked"/><span className="checkout-home-icon">⌂</span><strong>{address}</strong><span className="checkout-chevron">⌄</span></button>}
+            <button className="checkout-add-address" type="button" onClick={() => setIsAddressModalOpen(true)}><span>＋</span> Add Address</button>
+            <button className={`checkout-address-choice${isAddressListOpen ? " is-open" : ""}`} type="button" aria-expanded={isAddressListOpen} onClick={() => setIsAddressListOpen(open => !open)}><span className="checkout-radio checked"/><span className="checkout-home-icon">⌂</span><strong>{address}</strong><span className="checkout-chevron" aria-hidden="true"/></button>
+            {isAddressListOpen && <div className="checkout-address-list" role="listbox" aria-label="Saved delivery addresses">{demoAddresses.map((savedAddress) => <button key={savedAddress} type="button" role="option" aria-selected={address === savedAddress} className={`checkout-address-option${address === savedAddress ? " selected" : ""}`} onClick={() => { setAddress(savedAddress); setIsAddressListOpen(false); }}><span className={`checkout-radio${address === savedAddress ? " checked" : ""}`}/><span>{savedAddress}</span></button>)}</div>}
           </section>
 
           <section className="checkout-section">
@@ -137,6 +151,7 @@ export default function CheckoutPage() {
           <div className="checkout-promo-art"><div className="checkout-promo-copy">Fresh<br/>From River<br/>To Your Table</div><Image src="/images/products/product--2.png" alt="Fresh fish" fill sizes="(max-width: 800px) 40vw, 300px"/></div>
         </aside>
       </div>
+      {isAddressModalOpen && <Address onClose={() => setIsAddressModalOpen(false)} onSave={saveAddress} />}
     </main>
   );
 }

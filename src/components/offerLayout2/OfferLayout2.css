@@ -2,7 +2,7 @@
 
 /* Section & Container */
 .fresh-offer-section {
-  padding: 15px 0;
+  padding: 8px 0;
   color: #084c2d;
 }
 
@@ -413,97 +413,132 @@
   outline-offset: 3px;
 }
 
-/* Responsive adjustments */
-@media (max-width: 1100px) {
-  .fresh-offer-layout {
-    grid-template-columns: 32% minmax(0, 1fr);
-  }
-
-  .fresh-reasons {
-    grid-column: 1 / -1;
-    margin: 0;
-    padding: 18px;
-    border: 0;
-    border-radius: 0;
-  }
-
-  .fresh-reasons h2 {
-    margin-bottom: 14px;
-    font-size: 20px;
-  }
-
-  .fresh-reasons ul {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-  }
-
-  .fresh-offer-hero h2 {
-    font-size: 34px;
-  }
+/* Responsive container and content sizing */
+@media (max-width: 1299px) {
+  .fresh-offer-layout { max-width: 1024px; }
 }
 
-@media (max-width: 767px) {
-  .fresh-offer-layout {
-    width: calc(100% - 32px);
-    grid-template-columns: 1fr;
-  }
+@media (max-width: 1099px) {
+  .fresh-offer-layout { box-sizing: border-box; width: calc(100% - 80px); max-width: none; padding-inline: 0; grid-template-columns: 32% minmax(0, 1fr); }
+  .fresh-reasons { grid-column: 1 / -1; margin: 0; padding: 16px; border: 0; border-radius: 0; }
+  .fresh-reasons h2 { margin-bottom: 10px; font-size: 19px; }
+  .fresh-reasons ul { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; }
+  .fresh-offer-hero h2 { font-size: 32px; }
+}
 
-  .fresh-offer-hero {
-    min-height: 340px;
-    border: 0;
-    border-radius: 0 0 40px 0;
-    background-size: cover;
-  }
+@media (max-width: 876px) {
+  .fresh-offer-layout { width: calc(100% - 60px); }
+  .fresh-offer-hero { min-height: 390px; }
+  .fresh-offer-hero-copy { padding: 20px 16px; }
+  .fresh-farm-badge { gap: 5px; padding: 6px 10px; font-size: 11px; }
+  .fresh-farm-badge svg { width: 19px; height: 19px; }
+  .fresh-offer-hero h2 { margin-top: 14px; font-size: 28px; letter-spacing: -.7px; }
+  .fresh-offer-hero-copy > p { margin: 7px 0 10px; font-size: 13px; }
+  .fresh-offer-hero button { gap: 8px; padding: 8px 13px; font-size: 11px; }
+  .fresh-farm-sign { bottom: 18px; left: 18px; padding: 8px 12px; font-size: 13px; }
+  .fresh-picks-main { padding: 15px 10px 12px; }
+  .fresh-picks-header { gap: 6px; margin-bottom: 22px; }
+  .fresh-picks-header h2 { gap: 4px; font-size: 20px; }
+  .fresh-picks-header h2 svg { width: 19px; height: 25px; }
+  .fresh-picks-header p { margin-top: 3px; font-size: 10px; }
+  .fresh-view-all { gap: 4px; padding: 6px 8px; font-size: 9px; }
+  .fresh-pick-cards { gap: 26px 7px; }
+  .fresh-pick-discount { top: -15px; right: 5px; width: 48px; height: 56px; }
+  .fresh-pick-discount small { font-size: 8px; }
+  .fresh-pick-discount strong { font-size: 19px; }
+  .fresh-pick-discount > span { font-size: 10px; }
+  .fresh-pick-image { height: 125px; }
+  .fresh-pick-image img { padding: 18px 2px 0; }
+  .fresh-pick-details { padding: 6px 4px 10px; }
+  .fresh-pick-details > svg { width: 18px; height: 18px; margin-bottom: 3px; }
+  .fresh-pick-details h3 { min-height: 40px; font-size: 11px; }
+  .fresh-pick-details button { gap: 3px; padding: 6px 3px; font-size: 9px; }
+  .fresh-picks-benefits { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 0; margin-top: 12px; padding: 10px 5px; border-radius: 18px; }
+  .fresh-picks-benefits li { gap: 5px; }
+  .fresh-picks-benefits li:nth-child(3) { border-left: 0; }
+  .fresh-picks-benefits svg { width: 21px; height: 21px; }
+  .fresh-picks-benefits strong, .fresh-picks-benefits span { font-size: 8px; }
+  .fresh-reasons { padding: 14px; }
+  .fresh-reasons h2 { margin-bottom: 9px; font-size: 18px; }
+  .fresh-reasons ul { gap: 8px; }
+  .fresh-reasons li { gap: 6px; }
+  .fresh-reason-icon { width: 27px; height: 27px; }
+  .fresh-reason-icon svg { width: 18px; height: 18px; }
+  .fresh-reasons strong { font-size: 9px; }
+  .fresh-reasons p { margin-top: 2px; font-size: 8px; }
+}
 
-  .fresh-offer-hero-copy {
-    padding: 24px 20px;
-  }
+@media (max-width: 678px) {
+  .fresh-offer-layout { width: calc(100% - 30px); grid-template-columns: minmax(0, 1fr); }
+  .fresh-offer-hero { min-height: 300px; border: 0; border-radius: 0; background-size: cover; }
+  .fresh-offer-hero-copy { padding: 18px 16px; }
+  .fresh-offer-hero h2 { max-width: none; font-size: clamp(18px, 4vw, 24px); white-space: nowrap; }
+  .fresh-offer-hero h2 span { display: inline; }
+  .fresh-picks-main { padding: 14px 10px; }
+  .fresh-picks-header { margin-bottom: 20px; }
+  .fresh-picks-header h2 { font-size: 19px; }
+  .fresh-pick-cards { gap: 24px 10px; }
+  .fresh-pick-image { height: 140px; }
+  .fresh-pick-details h3 { min-height: 36px; font-size: 12px; }
+  .fresh-pick-details button { font-size: 10px; }
+  .fresh-reasons { border-top: 4px solid white; }
+  .fresh-reasons ul { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 
-  .fresh-farm-sign {
-    left: auto;
-    right: 18px;
-    bottom: 18px;
-    font-size: 13px;
-  }
+@media (max-width: 575px) {
+  .fresh-offer-layout { width: calc(100% - 30px); }
+  .fresh-offer-hero { min-height: 270px; }
+  .fresh-offer-hero-copy { padding: 15px 13px; }
+  .fresh-farm-badge { gap: 4px; padding: 5px 8px; font-size: 10px; }
+  .fresh-farm-badge svg { width: 17px; height: 17px; }
+  .fresh-offer-hero h2 { margin: 12px 0 5px; font-size: clamp(17px, 4vw, 21px); }
+  .fresh-offer-hero-copy > p { max-width: 82%; font-size: 11px; }
+  .fresh-offer-hero button { padding: 7px 11px; font-size: 10px; }
+  .fresh-farm-sign { right: 12px; bottom: 12px; padding: 6px 9px; font-size: 11px; }
+  .fresh-picks-main { padding: 12px 8px; }
+  .fresh-picks-header { gap: 4px; margin-bottom: 18px; }
+  .fresh-picks-header h2 { font-size: 17px; }
+  .fresh-picks-header h2 svg { width: 16px; height: 21px; }
+  .fresh-picks-header p { font-size: 9px; }
+  .fresh-view-all { padding: 5px 6px; font-size: 8px; }
+  .fresh-pick-cards { gap: 22px 7px; }
+  .fresh-pick-discount { top: -12px; right: 4px; width: 42px; height: 49px; }
+  .fresh-pick-discount small { font-size: 7px; }
+  .fresh-pick-discount strong { font-size: 17px; }
+  .fresh-pick-discount > span { font-size: 9px; }
+  .fresh-pick-image { height: 120px; }
+  .fresh-pick-image img { padding: 14px 2px 0; }
+  .fresh-pick-details { padding: 5px 3px 8px; }
+  .fresh-pick-details > svg { width: 16px; height: 16px; margin-bottom: 2px; }
+  .fresh-pick-details h3 { min-height: 33px; font-size: 10px; }
+  .fresh-pick-details button { padding: 5px 2px; font-size: 8px; }
+  .fresh-picks-benefits { gap: 7px 0; margin-top: 10px; padding: 8px 4px; }
+  .fresh-picks-benefits li { gap: 4px; padding-inline: 3px; }
+  .fresh-picks-benefits svg { width: 18px; height: 18px; }
+  .fresh-picks-benefits strong, .fresh-picks-benefits span { font-size: 7px; }
+  .fresh-reasons { padding: 12px; }
+  .fresh-reasons h2 { font-size: 16px; }
+  .fresh-reasons ul { gap: 7px; }
+  .fresh-reason-icon { width: 24px; height: 24px; }
+  .fresh-reason-icon svg { width: 16px; height: 16px; }
+  .fresh-reasons strong { font-size: 8px; }
+  .fresh-reasons p { font-size: 7px; }
+}
 
-  .fresh-picks-main {
-    padding: 20px 12px;
-  }
-
-  .fresh-picks-header h2 {
-    font-size: 21px;
-  }
-
-  .fresh-picks-header p {
-    font-size: 11px;
-  }
-
-  .fresh-pick-cards {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 36px 14px;
-  }
-
-  .fresh-pick-details h3 {
-    min-height: 36px;
-  }
-
-  .fresh-picks-benefits {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px 0;
-    border-radius: 18px;
-  }
-
-  .fresh-picks-benefits li:nth-child(3) {
-    border-left: 0;
-  }
-
-  .fresh-picks-benefits strong,
-  .fresh-picks-benefits span {
-    font-size: 11px;
-  }
-
-  .fresh-reasons ul {
-    grid-template-columns: repeat(2, 1fr);
-  }
+@media (max-width: 450px) {
+  .fresh-offer-layout { width: calc(100% - 20px); }
+  .fresh-offer-hero { min-height: 250px; }
+  .fresh-offer-hero-copy { padding: 13px 11px; }
+  .fresh-offer-hero h2 { max-width: none; font-size: 18px; }
+  .fresh-picks-main { padding: 10px 7px; }
+  .fresh-picks-header h2 { font-size: 15px; }
+  .fresh-picks-header p { font-size: 8px; }
+  .fresh-pick-cards { gap: 20px 6px; }
+  .fresh-pick-image { height: 105px; }
+  .fresh-pick-details h3 { min-height: 30px; font-size: 9px; }
+  .fresh-pick-details button { font-size: 7px; }
+  .fresh-picks-benefits { padding-inline: 3px; }
+  .fresh-picks-benefits li { gap: 3px; }
+  .fresh-picks-benefits svg { width: 16px; height: 16px; }
+  .fresh-picks-benefits strong, .fresh-picks-benefits span { font-size: 6px; }
 }

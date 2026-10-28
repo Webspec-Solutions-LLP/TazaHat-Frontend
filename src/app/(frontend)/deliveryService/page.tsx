@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Address, { type AddressFormValues } from "@/components/modals/address/Address";
 import "./DeliveryService.css";
 
 // Icons matching the design screenshot
@@ -233,11 +234,6 @@ export default function DeliveryServicePage() {
   // Modal State for adding a new address
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [modalTarget, setModalTarget] = useState<"pickup" | "delivery">("pickup");
-  const [newFullName, setNewFullName] = useState("");
-  const [newPhone, setNewPhone] = useState("");
-  const [newStreet, setNewStreet] = useState("");
-  const [newArea, setNewArea] = useState("");
-  const [newPincode, setNewPincode] = useState("799001");
 
   // Submission feedback
   const [submittedMessage, setSubmittedMessage] = useState<string | null>(null);
@@ -249,17 +245,12 @@ export default function DeliveryServicePage() {
 
   const closeAddressModal = () => {
     setIsAddressModalOpen(false);
-    setNewFullName("");
-    setNewPhone("");
-    setNewStreet("");
-    setNewArea("");
   };
 
-  const handleSaveAddress = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newStreet.trim()) return;
-
-    const formattedAddress = `${newFullName ? `${newFullName}, ` : ""}${newStreet.trim()}, ${newArea ? `${newArea}, ` : ""}Agartala - ${newPincode}${newPhone ? ` (Ph: ${newPhone})` : ""}`;
+  const handleSaveAddress = (values: AddressFormValues) => {
+    const formattedAddress = [values.recipient, values.houseNumber, values.addressLine1, values.addressLine2, values.locality, values.landmark, values.pincode]
+      .filter(Boolean)
+      .join(", ");
 
     setAddresses(prev => [formattedAddress, ...prev]);
 
@@ -362,7 +353,7 @@ export default function DeliveryServicePage() {
                     className="delivery-add-btn"
                     onClick={() => openAddressModal("pickup")}
                   >
-                    <PlusIcon /> Add Address
+                    <PlusIcon /> Add New Address
                   </button>
                 </div>
                 <div className="delivery-input-control">
@@ -402,7 +393,7 @@ export default function DeliveryServicePage() {
                     className="delivery-add-btn"
                     onClick={() => openAddressModal("delivery")}
                   >
-                    <PlusIcon /> Add Address
+                    <PlusIcon /> Add New Address
                   </button>
                 </div>
                 <div className="delivery-input-control">
@@ -713,99 +704,7 @@ export default function DeliveryServicePage() {
         </div>
       </div>
 
-      {/* Add Address Modal Dialog */}
-      {isAddressModalOpen && (
-        <div className="delivery-modal-backdrop" onClick={closeAddressModal}>
-          <div
-            className="delivery-modal-card"
-            onClick={e => e.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="add-address-title"
-          >
-            <div className="delivery-modal-header">
-              <h2 id="add-address-title" className="delivery-modal-title">
-                {modalTarget === "pickup" ? "Add New Pickup Address" : "Add New Delivery Address"}
-              </h2>
-              <button
-                type="button"
-                className="delivery-modal-close"
-                onClick={closeAddressModal}
-                aria-label="Close dialog"
-              >
-                <CloseIcon />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveAddress} className="delivery-modal-form">
-              <div className="delivery-modal-input-group">
-                <label className="delivery-modal-label">Contact Person Name</label>
-                <input
-                  type="text"
-                  className="delivery-modal-input"
-                  placeholder="e.g. Rahul Sen"
-                  value={newFullName}
-                  onChange={e => setNewFullName(e.target.value)}
-                />
-              </div>
-
-              <div className="delivery-modal-input-group">
-                <label className="delivery-modal-label">Phone Number</label>
-                <input
-                  type="tel"
-                  className="delivery-modal-input"
-                  placeholder="e.g. +91 9876543210"
-                  value={newPhone}
-                  onChange={e => setNewPhone(e.target.value)}
-                />
-              </div>
-
-              <div className="delivery-modal-input-group">
-                <label className="delivery-modal-label">House / Flat / Road / Street *</label>
-                <input
-                  type="text"
-                  className="delivery-modal-input"
-                  placeholder="e.g. House #22, Lane 4, Banamalipur"
-                  value={newStreet}
-                  onChange={e => setNewStreet(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="delivery-modal-input-group">
-                <label className="delivery-modal-label">Area / Locality / Landmark</label>
-                <input
-                  type="text"
-                  className="delivery-modal-input"
-                  placeholder="e.g. Near City Center"
-                  value={newArea}
-                  onChange={e => setNewArea(e.target.value)}
-                />
-              </div>
-
-              <div className="delivery-modal-input-group">
-                <label className="delivery-modal-label">Pincode</label>
-                <input
-                  type="text"
-                  className="delivery-modal-input"
-                  placeholder="799001"
-                  value={newPincode}
-                  onChange={e => setNewPincode(e.target.value)}
-                />
-              </div>
-
-              <div className="delivery-modal-actions">
-                <button type="button" className="delivery-modal-cancel" onClick={closeAddressModal}>
-                  Cancel
-                </button>
-                <button type="submit" className="delivery-modal-save">
-                  Save Address
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {isAddressModalOpen && <Address onClose={closeAddressModal} onSave={handleSaveAddress} />}
     </main>
   );
 }

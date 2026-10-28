@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import productCatalog from "@/components/products/english.json";
 import "./Chat.css";
@@ -22,6 +23,7 @@ type ChatMessage = {
   time: string;
   order?: OrderLine[];
   orderStatus?: "placed" | "cancelled";
+  product?: Pick<(typeof productCatalog.products)[number], "id" | "name" | "image">;
 };
 
 const initialMessages: ChatMessage[] = [
@@ -137,10 +139,15 @@ function createReply(text: string, activeOrder: boolean): Omit<ChatMessage, "id"
   };
 }
 
-export default function Chat({ onClose }: { onClose: () => void }) {
-  const [messages, setMessages] = useState(initialMessages);
+type ChatProduct = Pick<(typeof productCatalog.products)[number], "id" | "name" | "image">;
+
+export default function Chat({ onClose, product }: { onClose: () => void; product?: ChatProduct }) {
+  const [messages, setMessages] = useState<ChatMessage[]>(() => product ? [
+    { id: "product-question", sender: "ai", author: "TazaHat Assistant", text: `Hi! What would you like to know about ${product.name}? Ask me about its freshness, size, or how to prepare it.`, time: "Now", product },
+  ] : initialMessages);
   const [message, setMessage] = useState("");
   const [isReplying, setIsReplying] = useState(false);
+  const [isTicketPromptOpen, setIsTicketPromptOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -232,6 +239,10 @@ export default function Chat({ onClose }: { onClose: () => void }) {
           <strong id="chat-title">TazaHat Support</strong>
           <span><i /> AI assistant · Team support</span>
         </span>
+        <button className="chat-ticket-button" type="button" onClick={() => setIsTicketPromptOpen(true)} aria-label="Raise a support ticket">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 5h16v12H9l-5 3V5Z"/><path d="M8 9h8M8 13h5"/></svg>
+          <span>Raise a Ticket</span>
+        </button>
         <button className="chat-collapse-button" type="button" onClick={closeChat} aria-label="Minimize chat">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="m6 9 6 6 6-6" />
@@ -249,10 +260,17 @@ export default function Chat({ onClose }: { onClose: () => void }) {
           <article className={`chat-message chat-message--${chatMessage.sender}`} key={chatMessage.id}>
             <span className="chat-message-author">{chatMessage.author}</span>
             <p>{chatMessage.text}</p>
+            {chatMessage.product && (
+              <Link className="chat-product-tag" href={`/productDetails?id=${encodeURIComponent(chatMessage.product.id)}`} aria-label={`View ${chatMessage.product.name} details`} onClick={closeChat}>
+                <span className="chat-product-tag-image"><Image src={chatMessage.product.image} alt="" fill sizes="42px" /></span>
+                <span className="chat-product-tag-copy"><small>PRODUCT</small><strong>{chatMessage.product.name}</strong></span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </Link>
+            )}
             {chatMessage.order && (
               <div className="chat-order-card">
                 {chatMessage.order.map((item) => (
-                  <div className="chat-order-line" key={item.id}>
+                  <Link className="chat-order-line" key={item.id} href={`/productDetails?id=${encodeURIComponent(item.id)}`} onClick={closeChat} aria-label={`View ${item.name} product details`}>
                     <span className="chat-order-image">
                       <Image src={item.image} alt="" fill sizes="38px" />
                     </span>
@@ -261,7 +279,7 @@ export default function Chat({ onClose }: { onClose: () => void }) {
                       <small>{item.weight} · Qty {item.quantity}</small>
                     </span>
                     <strong className="chat-order-price">₹{item.price * item.quantity}</strong>
-                  </div>
+                  </Link>
                 ))}
                 <div className="chat-order-total">
                   <span>{chatMessage.orderStatus === "cancelled" ? "Cancelled demo order" : "Demo order total"}</span>
@@ -283,6 +301,16 @@ export default function Chat({ onClose }: { onClose: () => void }) {
       </div>
 
       <form className="chat-composer" onSubmit={sendMessage}>
+        {isTicketPromptOpen && (
+          <div className="chat-ticket-prompt">
+            <span className="chat-ticket-prompt-mark" aria-hidden="true">!</span>
+            <button type="button" onClick={() => setMessage("Yes, please tell us about your problem. ")}>
+              <small>SUPPORT TICKET</small>
+              <span>Yes, please tell us about your problem.</span>
+            </button>
+            <button className="chat-ticket-prompt-dismiss" type="button" aria-label="Dismiss ticket prompt" onClick={() => setIsTicketPromptOpen(false)}>×</button>
+          </div>
+        )}
         <label className="chat-sr-only" htmlFor="chat-message-input">Send a message to TazaHat support</label>
         <input
           id="chat-message-input"

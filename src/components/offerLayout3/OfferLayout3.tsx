@@ -68,12 +68,13 @@ export default function OfferLayout3() {
           <Swiper
             className="winter-product-slider"
             modules={[A11y, Keyboard, Mousewheel]}
-            slidesPerView={1.2}
-            spaceBetween={10}
+            slidesPerView={1.8}
+            spaceBetween={8}
             breakpoints={{
-              480: { slidesPerView: 2.2, spaceBetween: 10 },
-              701: { slidesPerView: 3.2, spaceBetween: 12 },
-              1101: { slidesPerView: 3.7, spaceBetween: 12 },
+              451: { slidesPerView: 2.1, spaceBetween: 8 },
+              576: { slidesPerView: 2.5, spaceBetween: 9 },
+              877: { slidesPerView: 3.1, spaceBetween: 10 },
+              1100: { slidesPerView: 3.7, spaceBetween: 12 },
             }}
             keyboard={{ enabled: true, onlyInViewport: true }}
             mousewheel={{ forceToAxis: true }}

@@ -15,11 +15,11 @@
   "upTo": "Up to",
   "off": "OFF",
   "whyHeading": "Why Choose Fresh Items?",
-  "background": "/images/offer2Background.png",
+  "background": "/images/offer2Background.webp",
   "categories": [
-    { "id": "vegetables", "name": "Vegetables", "image": "/images/category/category2.png", "discount": 30, "theme": "green" },
-    { "id": "fruits", "name": "Fruits", "image": "/images/category/category3.png", "discount": 25, "theme": "yellow" },
-    { "id": "meat", "name": "Meat & Poultry", "image": "/images/category/category5.png", "discount": 20, "theme": "pink" },
+    { "id": "vegetables", "name": "Vegetables", "image": "/images/category/category2.webp", "discount": 30, "theme": "green" },
+    { "id": "fruits", "name": "Fruits", "image": "/images/category/category3.webp", "discount": 25, "theme": "yellow" },
+    { "id": "meat", "name": "Meat & Poultry", "image": "/images/category/category5.webp", "discount": 20, "theme": "pink" },
     { "id": "fish", "name": "Fish & Seafood", "image": "/images/category/category1.png", "discount": 18, "theme": "blue" }
   ],
   "benefits": [

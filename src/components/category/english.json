@@ -18,12 +18,12 @@
     "lastSlideMessage": "This is the last category"
   },
   "categories": [
-    { "id": "vegetables", "name": "Vegetables", "types": 32, "image": "/images/category/category2.png", "color": "#edf6e8" },
-    { "id": "fruits", "name": "Fruits", "types": 24, "image": "/images/category/category3.png", "color": "#fff4db" },
+    { "id": "vegetables", "name": "Vegetables", "types": 32, "image": "/images/category/category2.webp", "color": "#edf6e8" },
+    { "id": "fruits", "name": "Fruits", "types": 24, "image": "/images/category/category3.webp", "color": "#fff4db" },
     { "id": "fish-seafood", "name": "Fish & Seafood", "types": 18, "image": "/images/category/category1.png", "color": "#eaf4fc" },
-    { "id": "meat-poultry", "name": "Meat & Poultry", "types": 12, "image": "/images/category/category5.png", "color": "#fcecee" },
-    { "id": "dairy-eggs", "name": "Dairy & Eggs", "types": 16, "image": "/images/category/category4.png", "color": "#f0edfc" },
-    { "id": "grocery-staples", "name": "Grocery & Staples", "types": 45, "image": "/images/category/category6.png", "color": "#f9f1e3" },
-    { "id": "snacks-bakery", "name": "Snacks & Bakery", "types": 28, "image": "/images/category/category7.png", "color": "#e8f5ef" }
+    { "id": "meat-poultry", "name": "Meat & Poultry", "types": 12, "image": "/images/category/category5.webp", "color": "#fcecee" },
+    { "id": "dairy-eggs", "name": "Dairy & Eggs", "types": 16, "image": "/images/category/category4.webp", "color": "#f0edfc" },
+    { "id": "grocery-staples", "name": "Grocery & Staples", "types": 45, "image": "/images/category/category6.webp", "color": "#f9f1e3" },
+    { "id": "snacks-bakery", "name": "Snacks & Bakery", "types": 28, "image": "/images/category/category7.webp", "color": "#e8f5ef" }
   ]
 }

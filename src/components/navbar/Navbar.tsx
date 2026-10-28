@@ -11,6 +11,9 @@ import productCatalog from "../products/english.json";
 import { readWishlistIds, subscribeToWishlist, toggleWishlistId } from "../../lib/wishlist";
 import "./Navbar.css";
 
+const SEARCH_HISTORY_KEY = "tazahat-search-history";
+const MAX_SEARCH_HISTORY = 8;
+
 interface NavbarProps {
   cartCount?: number;
   deliveryLocation?: string;
@@ -24,6 +27,8 @@ export default function Navbar({
 }: NavbarProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchResultsOpen, setIsSearchResultsOpen] = useState(false);
+  const [isCompactSearchOpen, setIsCompactSearchOpen] = useState(false);
+  const [searchHistory, setSearchHistory] = useState<string[]>([]);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<(typeof productCatalog.products)[number] | null>(null);
   const [savedProducts, setSavedProducts] = useState<string[]>([]);
@@ -33,6 +38,19 @@ export default function Navbar({
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    try {
+      const storedHistory = window.localStorage.getItem(SEARCH_HISTORY_KEY);
+      if (storedHistory) {
+        const parsedHistory: unknown = JSON.parse(storedHistory);
+        if (Array.isArray(parsedHistory)) {
+          setSearchHistory(parsedHistory.filter((item): item is string => typeof item === "string").slice(0, MAX_SEARCH_HISTORY));
+        }
+      }
+    } catch {
+      // Ignore unavailable storage or malformed history and keep search usable.
+    }
+  }, []);
   useEffect(() => {
     const refreshWishlist = () => setSavedProducts(readWishlistIds());
     refreshWishlist();
@@ -71,9 +89,34 @@ export default function Navbar({
     };
   }, [isAccountOpen]);
 
+  const rememberSearch = (value: string) => {
+    const query = value.trim();
+    if (!query) return;
+    const nextHistory = [query, ...searchHistory.filter((item) => item.toLowerCase() !== query.toLowerCase())].slice(0, MAX_SEARCH_HISTORY);
+    setSearchHistory(nextHistory);
+    try {
+      window.localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(nextHistory));
+    } catch {
+      // Search still works when storage is disabled or full.
+    }
+    return query;
+  };
+
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSearch?.(searchQuery);
+    const query = rememberSearch(searchQuery);
+    if (!query) return;
+    setIsSearchResultsOpen(true);
+    onSearch?.(query);
+  };
+
+  const clearSearchHistory = () => {
+    setSearchHistory([]);
+    try {
+      window.localStorage.removeItem(SEARCH_HISTORY_KEY);
+    } catch {
+      // Keep the in-memory history cleared even when storage is unavailable.
+    }
   };
 
   const addCartItem = useCallback((newItem: CartItem) => {
@@ -90,6 +133,18 @@ export default function Navbar({
       return [...items, newItem];
     });
   }, []);
+
+  useEffect(() => {
+    const handleSectionAddToCart = (event: Event) => {
+      const item = (event as CustomEvent<CartItem>).detail;
+      if (!item?.id) return;
+      addCartItem(item);
+      setIsCartOpen(true);
+    };
+
+    window.addEventListener("tazahat:add-cart-item", handleSectionAddToCart);
+    return () => window.removeEventListener("tazahat:add-cart-item", handleSectionAddToCart);
+  }, [addCartItem]);
 
   const handleAddToCart = (product: (typeof productCatalog.products)[number]) => {
     addCartItem({
@@ -133,7 +188,7 @@ export default function Navbar({
         <div className="navbar-brand">
           <Link href="/" className="navbar-logo-link" aria-label="TazaHaat Home">
             <Image
-              src="/images/logo.png"
+              src="/images/logo.webp"
               alt="TazaHaat Logo"
               width={48}
               height={48}
@@ -151,17 +206,24 @@ export default function Navbar({
         </div>
 
         {/* Center: Search Bar */}
-        <form className="navbar-search-form" onSubmit={handleSearchSubmit} role="search">
+        <button type="button" className="navbar-compact-search-toggle" aria-label="Open search" aria-expanded={isCompactSearchOpen} onClick={() => setIsCompactSearchOpen(open => !open)}>
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"/><path d="m16.5 16.5 4 4"/></svg>
+        </button>
+        {isCompactSearchOpen && <button type="button" className="navbar-search-backdrop" aria-label="Close search" onClick={() => setIsCompactSearchOpen(false)} />}
+        <form className={`navbar-search-form${isCompactSearchOpen ? " is-compact-open" : ""}`} onSubmit={handleSearchSubmit} role="search">
           <div className="navbar-search-box">
+            <span className="navbar-search-overlay-icon" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7.5"/><path d="m16.5 16.5 4 4"/></svg></span>
             <input
               type="text"
               className="navbar-search-input"
               placeholder="Search for fish, meat, vegetables, fruits, dairy..."
               value={searchQuery}
+              onFocus={() => setIsSearchResultsOpen(true)}
               onChange={(e) => {
                 const query = e.target.value;
                 setSearchQuery(query);
                 setIsSearchResultsOpen(Boolean(query.trim()));
+                if (query.trim()) rememberSearch(query);
               }}
               aria-label="Search products"
               aria-controls="navbar-search-results"
@@ -199,10 +261,34 @@ export default function Navbar({
                 </svg>
               </button>
             )}
+            <button type="button" className="navbar-search-overlay-close" aria-label="Close search" onClick={() => setIsCompactSearchOpen(false)}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
           </div>
-          {searchQuery.trim() && isSearchResultsOpen && (
+          {isSearchResultsOpen && (searchQuery.trim() || searchHistory.length > 0) && (
             <div className="navbar-search-results" id="navbar-search-results" role="list" aria-label="Search results">
-              {searchResults.length > 0 ? (
+              {!searchQuery.trim() ? (
+                <>
+                  <div className="navbar-search-history-heading">
+                    <span>Recent searches</span>
+                    <button type="button" onClick={clearSearchHistory}>Clear</button>
+                  </div>
+                  {searchHistory.map((query) => (
+                    <button
+                      className="navbar-search-history-item"
+                      key={query}
+                      type="button"
+                      onClick={() => {
+                        setSearchQuery(query);
+                        setIsSearchResultsOpen(true);
+                        rememberSearch(query);
+                        onSearch?.(query);
+                      }}
+                    >
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                      <span>{query}</span>
+                    </button>
+                  ))}
+                </>
+              ) : searchResults.length > 0 ? (
                 searchResults.map((product) => {
                   const productCartItems = getProductCartItems(product.id);
                   const productQuantity = productCartItems.reduce(
@@ -308,6 +394,10 @@ export default function Navbar({
 
         {/* Right Navigation Actions */}
         <nav className="navbar-actions" aria-label="User navigation">
+          <Link href="/deliveryService" className="navbar-compact-delivery" aria-label="Delivery Service">
+            <svg viewBox="0 0 28 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M2 5.5h14v12H2z"/><path d="M16 10h5l4 4.25v3.25h-9z"/><path d="M21 10v4.5h4"/><circle cx="6.5" cy="19" r="2.25"/><circle cx="21" cy="19" r="2.25"/><path d="M3 8h5"/></svg>
+            <span>Delivery</span>
+          </Link>
           <Link
             href="/deliveryService"
             className="navbar-delivery-service"

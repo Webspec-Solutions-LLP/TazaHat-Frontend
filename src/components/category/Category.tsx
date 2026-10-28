@@ -47,9 +47,9 @@ export default function Category() {
           <Swiper
               className="category-slider"
               modules={[A11y, Keyboard, Mousewheel]}
-              slidesPerView={2.2}
+              slidesPerView={2.3}
               spaceBetween={8}
-              breakpoints={{ 601: { slidesPerView: 3.4, spaceBetween: 10 }, 1024: { slidesPerView: 6.4, spaceBetween: 10 } }}
+              breakpoints={{ 451: { slidesPerView: 3.1, spaceBetween: 8 }, 576: { slidesPerView: 3.8, spaceBetween: 9 }, 679: { slidesPerView: 4.5, spaceBetween: 9 }, 877: { slidesPerView: 5.6, spaceBetween: 10 }, 1100: { slidesPerView: 6.4, spaceBetween: 10 } }}
               keyboard={{ enabled: true, onlyInViewport: true }}
               mousewheel={{ forceToAxis: true }}
               a11y={english.sliderAccessibility}

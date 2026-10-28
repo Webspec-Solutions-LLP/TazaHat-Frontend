@@ -64,7 +64,7 @@ export default function Login({ onClose }: LoginModalProps) {
 
       <section className="login-brand-panel" aria-label="TazaHat fresh groceries">
         <Link className="login-brand" href="/" aria-label="TazaHat home">
-          <span className="login-brand-logo"><Image src="/images/logo.png" alt="" width={100} height={100} priority /></span>
+          <span className="login-brand-logo"><Image src="/images/logo.webp" alt="" width={100} height={100} priority /></span>
           <span className="login-brand-copy"><strong>Taza<span>Hat</span></strong><small>Freshness Delivered</small></span>
         </Link>
         <div className="login-brand-message">

@@ -14,7 +14,7 @@ export default function Footer() {
             <Link href="/" className="footer-logo-link" aria-label="TazaHaat Home">
               <span className="footer-brand-lockup">
               <Image
-                src="/images/logo.png"
+                src="/images/logo.webp"
                 alt="TazaHaat Logo"
                 width={120}
                 height={52}
@@ -154,7 +154,7 @@ export default function Footer() {
             </div>
             <Link href="/sell-with-us" className="footer-sell-button">Sell with Us <span aria-hidden="true">&rarr;</span></Link>
             <div className="footer-seller-links"><Link href="/seller-guidelines">Seller Guidelines</Link><Link href="/partnership">Partnership Program</Link></div>
-            <Image src="/images/category/category2.png?v=transparent-2" alt="" width={120} height={120} unoptimized className="footer-seller-produce" />
+            <Image src="/images/category/category2.webp?v=transparent-2" alt="" width={120} height={120} unoptimized className="footer-seller-produce" />
           </div>
           <div className="footer-app-col">
             <h3 className="footer-col-title">Get Our App</h3>
