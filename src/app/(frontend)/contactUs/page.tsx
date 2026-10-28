@@ -14,7 +14,7 @@ const contactCards = [
     badge: "Instant Active",
     icon: "chat",
     action: "Chat on WhatsApp",
-    href: "https://wa.me/919830042288",
+    href: "https://wa.me/918794269987",
     tone: "green",
   },
   {
@@ -24,7 +24,7 @@ const contactCards = [
     badge: "Toll-Free",
     icon: "phone",
     action: "6:00 AM â€“ 10:00 PM Daily",
-    href: "tel:+919830042288",
+    href: "tel:+918794269987",
     tone: "blue",
   },
   {
