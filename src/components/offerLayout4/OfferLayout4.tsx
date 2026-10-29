@@ -272,8 +272,8 @@ export default function OfferLayout4() {
               451: { slidesPerView: 2.5, spaceBetween: 8 },
               576: { slidesPerView: 2.9, spaceBetween: 9 },
               679: { slidesPerView: 3.1, spaceBetween: 10 },
-              877: { slidesPerView: 3.7, spaceBetween: 12 },
-              1100: { slidesPerView: 5.6, spaceBetween: 14 },
+              877: { slidesPerView: 4.5, spaceBetween: 12 },
+              1300: { slidesPerView: 5.5, spaceBetween: 12 },
             }}
             a11y={{
               containerMessage: text.sliderLabel,

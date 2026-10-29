@@ -2,19 +2,13 @@
 
 import { Suspense, useMemo, useRef, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import AddToCart from "@/components/modals/AddToCart/AddToCart";
+import Products from "@/components/products/Products";
 import productsText from "../priceList/english.json";
 import productCards from "@/components/products/english.json";
-import { A11y, Keyboard, Mousewheel } from "swiper/modules";
-import { Swiper, SwiperSlide } from "swiper/react";
-import "swiper/css";
 import "./ProductDetails.css";
 
 const money = new Intl.NumberFormat(productsText.locale, { style: "currency", currency: productsText.currency, maximumFractionDigits: 0 });
-type CatalogProduct = (typeof productCards.products)[number];
-
 function Icon({ name }: { name: "fish" | "leaf" | "shield" | "flask" | "box" | "cart" | "heart" | "minus" | "plus" | "info" }) {
   const paths: Record<typeof name, React.ReactNode> = {
     fish: <><path d="M3 12C8 2 17 5 20 12c-3 7-12 10-17 0Zm0 0-2-4v8l2-4Z"/><circle cx="16" cy="11" r=".8"/></>,
@@ -56,18 +50,12 @@ function ProductDetailsContent() {
   const params = useSearchParams();
   const product = useMemo(() => productsText.products.find(item => item.id === params.get("id")) ?? productsText.products[0], [params]);
   const productCard = productCards.products.find(item => item.id === product.id);
-  const descriptionRef = useRef<HTMLElement>(null);
-  const relatedRef = useRef<HTMLElement>(null);
+  const relatedRef = useRef<HTMLDivElement>(null);
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(product.image);
-  const [activeTab, setActiveTab] = useState("description");
   const [selectedWeightIndex, setSelectedWeightIndex] = useState(0);
   const [dressingType, setDressingType] = useState("");
   const [specialInstruction, setSpecialInstruction] = useState("");
-  const [relatedVariantIndexes, setRelatedVariantIndexes] = useState<Record<string, number>>({});
-  const [relatedSaved, setRelatedSaved] = useState<string[]>([]);
-  const [selectedRelated, setSelectedRelated] = useState<CatalogProduct | null>(null);
-  const closeRelatedDetails = () => setSelectedRelated(null);
   const weightOptions = productCard?.variants?.length
     ? productCard.variants.map(variant => ({ label: variant.label, multiplier: variant.price / product.price }))
     : product.unit.toLowerCase() === "kg"
@@ -97,10 +85,16 @@ function ProductDetailsContent() {
   return <main className="product-details-page">
     <div className="product-details-shell">
       <div className="pd-layout">
-        <section className="pd-gallery" aria-label="Product images">
+        <div className="pd-left-column"><section className="pd-gallery" aria-label="Product images">
           <div className="pd-thumbnails">{gallery.map((src, index) => <button key={`${src}-${index}`} className={activeImage === src ? "is-active" : ""} onClick={() => setActiveImage(src)} aria-label={`Show product image ${index + 1}`}><Image src={src} alt="" fill sizes="76px" /></button>)}</div>
           <div className="pd-main-image"><Image src={activeImage} alt={product.name} fill priority sizes="(max-width: 900px) 100vw, 40vw" /><span className="pd-fresh">🐟 &nbsp;Fresh Catch</span><span className="pd-natural">◉ &nbsp;100% Fresh &amp; Natural</span></div>
         </section>
+        <aside className="pd-trust" aria-label="Product quality promises">
+          <h2 className="pd-trust-heading">Our Quality Promise</h2>
+          <ul>{trustItems.map(item => <li key={item.title}><span className="pd-trust-icon"><Icon name={item.icon} /></span><span><strong>{item.title}</strong><small>{item.text}</small></span></li>)}</ul>
+          <div className="pd-river-art"><span aria-hidden="true">🐟　🌿</span></div>
+        </aside>
+        </div>
         <div className="pd-right-column">
           <div className="pd-right-overview">
         <section className="pd-info" aria-labelledby="pd-title">
@@ -127,56 +121,17 @@ function ProductDetailsContent() {
           </div>
           <div className="pd-order-note"><span><Icon name="shield" /></span><p><strong>Freshness you can trust</strong><small>Carefully selected, hygienically handled and packed fresh for delivery.</small></p></div>
         </section>
-        <aside className="pd-trust" aria-label="Product quality promises">
-          <ul>{trustItems.map(item => <li key={item.title}><span className="pd-trust-icon"><Icon name={item.icon} /></span><span><strong>{item.title}</strong><small>{item.text}</small></span></li>)}</ul>
-          <div className="pd-river-art"><strong>Fresh<br/>From River<br/>To Your Table</strong><span>🐟　🌿<br/>〰️〰️〰️</span></div>
-        </aside>
       </div>
-          <section ref={descriptionRef} className="pd-extra" aria-label="More product information">
-        <nav className="pd-tabs" aria-label="Product information tabs">
-          {[{ id: "description", label: "Description", icon: "▤" }, { id: "reviews", label: "Reviews (7)", icon: "☆" }, { id: "shipping", label: "Shipping", icon: "▰" }, { id: "related", label: "Related Products", icon: "↗" }].map(tab => <button type="button" key={tab.id} className={activeTab === tab.id ? "is-active" : ""} onClick={() => setActiveTab(tab.id)}><span aria-hidden="true">{tab.icon}</span>{tab.label}</button>)}
-        </nav>
-        {activeTab === "description" && <div className="pd-tab-content"><div><h2>About This Product</h2><p>{product.name} is carefully selected for quality and freshness. It has a delicious taste and is perfect for everyday meals and family recipes.</p></div><aside><h3>Key Features</h3><ul><li>100% Fresh &amp; Natural</li><li>Carefully selected quality</li><li>Freshness you can taste</li><li>Packed with care</li><li>Great for everyday meals</li></ul></aside></div>}
-        {activeTab === "reviews" && <div className="pd-tab-content pd-tab-single"><div><h2>Customer Reviews</h2><p className="pd-review-score">★★★★★ <span>4.5 out of 5 · 7 reviews</span></p><p>Customers love the freshness and quality of this product.</p></div></div>}
-        {activeTab === "shipping" && <div className="pd-tab-content pd-tab-single"><div><h2>Shipping &amp; Delivery</h2><p>We carefully pack every order to keep it fresh. Delivery availability and timing depend on your location.</p></div></div>}
-        {activeTab === "related" && <div className="pd-tab-content pd-tab-single"><div><h2>Related Products</h2><p>Browse the related products below, selected from the same category.</p><button type="button" className="pd-related-jump" onClick={() => relatedRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}>See related products</button></div></div>}
-          </section>
-          <section ref={relatedRef} className="pd-related" aria-labelledby="pd-related-title">
-            <div className="pd-related-heading"><h2 id="pd-related-title">Related Products</h2></div>
-            {relatedProducts.length > 0 ? <Swiper className="pd-related-slider" modules={[A11y, Keyboard, Mousewheel]} slidesPerView={2.1} spaceBetween={10} keyboard={{ enabled: true, onlyInViewport: true }} mousewheel={{ forceToAxis: true }} a11y={{ containerMessage: "Related products. Swipe or use arrow keys to explore." }} tabIndex={0}>
-              {relatedProducts.map(item => {
-                const itemVariants = item.variants?.length ? item.variants : [{ label: item.weight, amount: 1, unit: "pack", price: item.price, originalPrice: item.originalPrice }];
-                const variantIndex = relatedVariantIndexes[item.id] ?? Math.max(0, itemVariants.findIndex(option => option.price === item.price));
-                const itemVariant = itemVariants[variantIndex] ?? itemVariants[0];
-                const price = itemVariant?.price ?? item.price;
-                const originalPrice = itemVariant?.originalPrice ?? item.originalPrice;
-                const discount = originalPrice > 0 ? Math.round((1 - price / originalPrice) * 100) : 0;
-                const isSaved = relatedSaved.includes(item.id);
-                const description = `${item.name} selected for freshness and quality, ready for your everyday meals.`;
-                return <SwiperSlide key={item.id}><article className="pd-related-card">
-                  <div className="pd-related-image">
-                    <Image src={item.image} alt={item.name} fill sizes="(max-width: 600px) 44vw, 220px" />
-                    {discount > 0 && <span className="pd-related-discount">{discount}% OFF</span>}
-                    <button className="pd-related-save" type="button" aria-label={`${isSaved ? "Remove" : "Save"} ${item.name} ${isSaved ? "from" : "to"} wishlist`} aria-pressed={isSaved} onClick={() => setRelatedSaved(current => isSaved ? current.filter(id => id !== item.id) : [...current, item.id])}><Icon name="heart" /></button>
-                    <span className="pd-related-rating">★ {item.rating}</span>
-                  </div>
-                  <h3><Link href={`/productDetails?id=${encodeURIComponent(item.id)}`}>{item.name}</Link></h3>
-                  <p className="pd-related-description" title={description}>{description}</p>
-                  <div className="pd-related-price"><strong>{money.format(price)}</strong><del>{money.format(originalPrice)}</del></div>
-                  <label className="pd-related-variant">
-                    <span className="sr-only">Pack size for {item.name}</span>
-                    <select value={variantIndex} onChange={event => setRelatedVariantIndexes(current => ({ ...current, [item.id]: Number(event.target.value) }))}>
-                      {itemVariants.map((option, index) => <option key={`${item.id}-${option.label}`} value={index}>{option.label}</option>)}
-                    </select>
-                  </label>
-                  <button className="pd-related-add" type="button" onClick={() => setSelectedRelated(item)}><Icon name="cart" />Add to Cart</button>
-                </article></SwiperSlide>;
-              })}
-            </Swiper> : <p className="pd-related-empty">More products in this category are coming soon.</p>}
+          <section className="pd-extra" aria-label="More product information">
+            <ol className="pd-info-list">
+              <li><h2>Product Description</h2><p>{product.name} is selected for freshness and quality, then carefully packed to arrive ready for your kitchen. Its satisfying taste and texture make it a versatile choice for everyday meals, family recipes, and special occasions. Prepare it your way and pair it with your favorite sides and seasonings.</p><ul><li>Carefully selected quality</li><li>Packed with care</li><li>Versatile for everyday recipes</li><li>A convenient choice for family meals</li></ul></li>
+              <li><h2>Shipping &amp; Delivery</h2><p>We carefully pack every order to keep it fresh. Delivery availability and timing depend on your location.</p></li>
+              <li><h2>Customer Reviews</h2><p className="pd-review-score"><span aria-label="Rating: 4.5 out of 5">&#9733;&#9733;&#9733;&#9733;&#9734;</span> <span>4.5 out of 5 &middot; 4 demo reviews</span></p><ul className="pd-reviews"><li><strong>Ayesha R.</strong><span>&#9733;&#9733;&#9733;&#9733;&#9733; &middot; Fresh and carefully packed. Worked perfectly for a family dinner.</span></li><li><strong>Rafiq H.</strong><span>&#9733;&#9733;&#9733;&#9733;&#9734; &middot; Good quality and easy to prepare. Would order again.</span></li><li><strong>Moumita D.</strong><span>&#9733;&#9733;&#9733;&#9733;&#9733; &middot; Tasty, fresh, and a great fit for my usual recipes.</span></li><li><strong>Soham P.</strong><span>&#9733;&#9733;&#9733;&#9733;&#9734; &middot; Nice product and neat packaging. Arrived ready to cook.</span></li></ul></li>
+            </ol>
           </section>
         </div>
       </div>
+      <div ref={relatedRef} className="pd-related"><Products heading="Related Products" products={relatedProducts} showViewAll={false} layout="related" /></div>
     </div>
-    {selectedRelated && <AddToCart key={selectedRelated.id} product={selectedRelated} locale={productCards.locale} currency={productCards.currency} saved={relatedSaved.includes(selectedRelated.id)} onToggleWishlist={() => setRelatedSaved(current => current.includes(selectedRelated.id) ? current.filter(id => id !== selectedRelated.id) : [...current, selectedRelated.id])} onClose={closeRelatedDetails} onOpenProduct={setSelectedRelated} />}
   </main>;
 }

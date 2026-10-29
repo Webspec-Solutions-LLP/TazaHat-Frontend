@@ -99,13 +99,13 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
   return (
     <>
     <dialog ref={dialog} className={`add-cart-dialog${closing ? " is-closing" : ""}`} aria-labelledby="add-cart-title" onCancel={event => { event.preventDefault(); setClosing(true); }} onClick={event => { if (event.target === event.currentTarget) setClosing(true); }}>
+      <button autoFocus type="button" className="add-cart-close" aria-label="Close product details" onClick={() => setClosing(true)}><DetailIcon kind="arrow" /></button>
       <div className="add-cart-panel">
-        <button autoFocus type="button" className="add-cart-close" aria-label="Close product details" onClick={() => setClosing(true)}><DetailIcon kind="arrow" /></button>
         <div className="add-cart-layout">
           <div className="add-cart-gallery">
             <div className="add-cart-photo" id="add-cart-main-image">
               <span className="add-cart-photo-badge"><DetailIcon kind="leaf" />Fresh picks</span>
-              <Image src={currentImage.src} alt={`${product.name} — ${currentImage.label}`} fill sizes="(max-width: 760px) 80vw, 380px" style={{ transform: `scale(${currentImage.scale})` }} />
+              <Image src={currentImage.src} alt={`${product.name} — ${currentImage.label}`} fill sizes="(max-width: 575px) 100vw, (max-width: 760px) 100vw, 380px" style={{ transform: `scale(${currentImage.scale})` }} />
               <span className="add-cart-photo-count">{activeImage + 1} / {galleryImages.length}</span>
             </div>
             <div className="add-cart-thumbnails" role="group" aria-label="Product images">

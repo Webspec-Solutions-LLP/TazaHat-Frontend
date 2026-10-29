@@ -344,7 +344,7 @@
   .navbar-delivery-service { min-width: 130px; gap: 7px; padding-inline: 8px; }
 }
 @media (max-width: 1099px) {
-  .tazahat-navbar-container { width: 100%;padding-inline: 40px; gap: 15px; }
+  .tazahat-navbar-container { max-width: 100%; width: 100%; padding-inline: 40px; gap: 15px; }
   .navbar-logo-img { width: 42px; height: 42px; }
   .navbar-brand-name { font-size: 21px; }
   .navbar-location { gap: 7px; padding-inline: 8px; }
@@ -412,12 +412,12 @@
   .navbar-search-form { right: 5vw; left: 5vw; width: 90vw; }
 }
 @media (max-width: 575px) {
-  .frontend-layout-main { padding-top: 65px; }
-  .tazahat-navbar-container { min-height: 62px; padding-inline: 8px; gap: 7px; }
+  .frontend-layout-main { padding-top: 58px; }
+  .tazahat-navbar-container { min-height: 54px; padding-block: 3px; padding-inline: 8px; gap: 7px; }
   .navbar-brand { min-width: 0; }
   .navbar-logo-link { gap: 4px; }
-  .navbar-logo-img { width: 38px; height: 38px; }
-  .navbar-brand-name { font-size: 18px; }
+  .navbar-logo-img { width: 32px; height: 32px; }
+  .navbar-brand-name { font-size: 16px; }
   .navbar-tagline { font-size: 7px; }
   .navbar-location { min-width: 0; flex: 1; gap: 5px; padding-inline: 5px; }
   .navbar-location-text { min-width: 0; }
@@ -438,10 +438,10 @@
   .navbar-search-form.is-compact-open .navbar-search-overlay-close { width: 32px; height: 32px; flex-basis: 32px; }
 }
 @media (max-width: 575px) and (min-width: 451px) {
-  .frontend-layout-main { padding-top: 71px; }
-  .tazahat-navbar-container { min-height: 68px; padding-inline: 8px; gap: 9px; }
-  .navbar-logo-img { width: 42px; height: 42px; }
-  .navbar-brand-name { font-size: 20px; }
+  .frontend-layout-main { padding-top: 60px; }
+  .tazahat-navbar-container { min-height: 56px; padding-block: 3px; padding-inline: 8px; gap: 9px; }
+  .navbar-logo-img { width: 34px; height: 34px; }
+  .navbar-brand-name { font-size: 18px; }
   .navbar-tagline { font-size: 8px; }
   .navbar-location { gap: 7px; padding-inline: 7px; }
   .navbar-location-icon-wrap svg { width: 21px; height: 21px; }
@@ -451,9 +451,10 @@
   .navbar-compact-search-toggle svg { width: 21px; height: 21px; }
 }
 @media (max-width: 450px) {
-  .tazahat-navbar-container { min-height: 62px; padding-inline: 6px; gap: 5px; }
+  .frontend-layout-main { padding-top: 58px; }
+  .tazahat-navbar-container { min-height: 54px; padding-block: 3px; padding-inline: 6px; gap: 5px; }
   .navbar-logo-link { gap: 4px; }
-  .navbar-logo-img { width: 34px; height: 34px; }
+  .navbar-logo-img { width: 30px; height: 30px; }
   .navbar-brand-name { font-size: 16px; letter-spacing: -.5px; }
   .navbar-tagline { margin-top: 1px; font-size: 6.5px; }
   .navbar-location { gap: 4px; padding-inline: 4px; }
@@ -465,4 +466,132 @@
   .navbar-compact-search-toggle svg { width: 18px; height: 18px; }
   .navbar-search-form.is-compact-open { top: 68px; right: 8vw; left: 8vw; width: 84vw; }
   .navbar-search-form.is-compact-open .navbar-search-box { height: 44px; }
+}
+
+@media (max-width: 575px) {
+  .tazahat-navbar {
+    height: 57px;
+    box-sizing: border-box;
+    overflow: visible;
+  }
+
+  .tazahat-navbar-container {
+    height: 100%;
+    min-height: 0;
+  }
+
+  .tazahat-navbar-container > :not(.navbar-search-form) {
+    transition: opacity 220ms ease, transform 420ms cubic-bezier(.2,.75,.25,1), visibility 0s;
+  }
+
+  .tazahat-navbar.is-compact-search-open .tazahat-navbar-container > :not(.navbar-search-form) {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateX(-24px);
+    transition: opacity 180ms ease, transform 420ms cubic-bezier(.2,.75,.25,1), visibility 0s linear 420ms;
+  }
+
+  .navbar-search-form,
+  .navbar-search-form:not(.is-compact-open) {
+    position: absolute;
+    z-index: 220;
+    top: -2px;
+    right: 0;
+    bottom: -1px;
+    left: 0;
+    display: block;
+    width: auto;
+    min-width: 0;
+    margin: 0;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateX(100%);
+    transition: transform 480ms cubic-bezier(.2,.75,.25,1), opacity 260ms ease, visibility 0s linear 480ms;
+  }
+
+  .navbar-search-form.is-compact-open {
+    top: -2px;
+    right: 0;
+    bottom: -1px;
+    left: 0;
+    width: auto;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateX(0);
+    transition-delay: 0s;
+  }
+
+  .navbar-search-form .navbar-search-box {
+    box-sizing: border-box;
+    height: 100%;
+    padding: 0 11px 0 14px;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .navbar-search-form.is-compact-open .navbar-search-box {
+    height: 100%;
+    padding: 0 11px 0 14px;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .navbar-search-form .navbar-search-overlay-icon {
+    flex-basis: 36px;
+  }
+
+  .navbar-search-form.is-compact-open .navbar-search-overlay-icon {
+    flex-basis: 36px;
+  }
+
+  .navbar-search-form .navbar-search-overlay-icon svg {
+    width: 21px;
+    height: 21px;
+  }
+
+  .navbar-search-form.is-compact-open .navbar-search-overlay-icon svg {
+    width: 21px;
+    height: 21px;
+  }
+
+  .navbar-search-form .navbar-search-input {
+    padding-inline: 7px;
+    font-size: 14px;
+  }
+
+  .navbar-search-form.is-compact-open .navbar-search-input {
+    padding-inline: 7px;
+    font-size: 14px;
+  }
+
+  .navbar-search-form .navbar-search-overlay-close {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+  }
+
+  .navbar-search-form.is-compact-open .navbar-search-overlay-close {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+  }
+
+  .navbar-search-form .navbar-search-results {
+    top: calc(100% + 8px);
+    right: 8px;
+    left: 8px;
+    max-height: min(420px, 65vh);
+    padding: 7px;
+    border-radius: 11px;
+  }
+}
+
+@media (max-width: 575px) and (min-width: 451px) {
+  .tazahat-navbar {
+    height: 59px;
+  }
 }

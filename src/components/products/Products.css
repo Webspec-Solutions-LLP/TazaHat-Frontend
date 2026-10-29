@@ -13,6 +13,30 @@
   margin-inline: auto;
 }
 
+.products-related {
+  padding: 0;
+}
+
+.products-related .products-container {
+  width: 100%;
+  max-width: none;
+  padding: 0;
+}
+
+.products-related .products-slider.swiper {
+  padding-bottom: 0;
+}
+
+.products-related .products-header h2 {
+  color: #16477e;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.products-related .products-column {
+  grid-template-rows: auto;
+}
+
 /* Header & View All */
 .products-header {
   display: flex;
