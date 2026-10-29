@@ -1,12 +1,15 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { A11y, Keyboard, Mousewheel } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import AddToCart from "../modals/AddToCart/AddToCart";
+import Variant from "../modals/variant/Variant";
+import type { CartItem } from "../modals/cart/Cart";
 import catalog from "../products/english.json";
+import { readWishlistIds, subscribeToWishlist, toggleWishlistId } from "../../lib/wishlist";
 import text from "./english.json";
 import "./OfferLayout3.css";
 
@@ -39,7 +42,13 @@ function Snowflake({ className }: { className: string }) {
 export default function OfferLayout3() {
   const [saved, setSaved] = useState<string[]>([]);
   const [selected, setSelected] = useState<Product | null>(null);
-  const closeDetails = useCallback(() => setSelected(null), []);
+  const [variantProduct, setVariantProduct] = useState<Product | null>(null);
+  const [openVariant, setOpenVariant] = useState<string | null>(null);
+  useEffect(() => {
+    const refreshWishlist = () => setSaved(readWishlistIds());
+    refreshWishlist();
+    return subscribeToWishlist(refreshWishlist);
+  }, []);
 
   return (
     <section className="winter-deals-section" lang={text.language} aria-labelledby="winter-deals-heading">
@@ -83,7 +92,9 @@ export default function OfferLayout3() {
           >
             {text.deals.map(deal => {
               const product = dealProducts[deal.id];
-              const isSaved = saved.includes(deal.id);
+              const isSaved = saved.includes(product.id);
+              const variants = product.variants?.length ? product.variants : [{ label: deal.weight, amount: 1, unit: "pack", price: deal.price, originalPrice: deal.originalPrice }];
+              const variant = variants[0];
               const discount = deal.originalPrice > 0 ? Math.round((1 - deal.price / deal.originalPrice) * 100) : 0;
 
               return (
@@ -97,7 +108,7 @@ export default function OfferLayout3() {
                       type="button"
                       aria-pressed={isSaved}
                       aria-label={(isSaved ? text.unsave : text.save).replace("{name}", deal.name)}
-                      onClick={() => setSaved(current => isSaved ? current.filter(id => id !== deal.id) : [...current, deal.id])}
+                      onClick={() => setSaved(toggleWishlistId(product.id))}
                     >
                       <svg viewBox="0 0 24 24" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" /></svg>
                     </button>
@@ -105,14 +116,19 @@ export default function OfferLayout3() {
                   </div>
                   <h4>{deal.name}</h4>
                   <p className="winter-product-description" title={deal.description}>{deal.description}</p>
-                  <p className="winter-product-weight">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m12 3 9 5v8l-9 5-9-5V8l9-5Zm-9 5 9 5 9-5M12 13v8" /></svg>
-                    {deal.weight}
-                  </p>
-                  <div className="winter-product-pricing"><strong>{money.format(deal.price)}</strong><del>{money.format(deal.originalPrice)}</del></div>
-                  <button className="winter-product-cart" type="button" onClick={() => setSelected(product)}>
-                    <CartIcon />{text.addToCart}
-                  </button>
+                  <div className="winter-product-pricing"><strong>{money.format(variant.price)}</strong><del>{money.format(variant.originalPrice)}</del></div>
+                  <div className="winter-product-variant-wrap">
+                    <button type="button" className="winter-product-variant-trigger" aria-haspopup="listbox" aria-expanded={openVariant === deal.id} onClick={() => setOpenVariant(current => current === deal.id ? null : deal.id)}>
+                      <span>{variant.label}</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 7.5 5 5 5-5" /></svg>
+                    </button>
+                    {openVariant === deal.id && <div className="winter-product-variant-menu" role="listbox" aria-label={`Choose size for ${deal.name}`}>
+                      {variants.map((option, index) => <button type="button" role="option" aria-selected={index === 0} key={`${deal.id}-${option.label}`} onClick={() => setOpenVariant(null)}><span>{option.label}</span><span>{money.format(option.price)}</span></button>)}
+                    </div>}
+                  </div>
+                  <div className="winter-product-actions">
+                    <button className="winter-product-cart" type="button" onClick={() => setVariantProduct(product)}><CartIcon />{text.addToCart}</button>
+                    <button className="winter-product-quick-view" type="button" aria-label={`View ${deal.name} details`} onClick={() => setSelected(product)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                  </div>
                 </article>
                 </SwiperSlide>
               );
@@ -120,10 +136,11 @@ export default function OfferLayout3() {
           </Swiper>
         </div>
       </div>
-      {selected && <AddToCart key={selected.id} product={selected} locale={text.locale} currency={text.currency} saved={saved.includes(text.deals.find(deal => deal.productId === selected.id)?.id ?? "")} onToggleWishlist={() => {
-        const dealId = text.deals.find(deal => deal.productId === selected.id)?.id;
-        if (dealId) setSaved(current => current.includes(dealId) ? current.filter(id => id !== dealId) : [...current, dealId]);
-      }} onClose={closeDetails} onOpenProduct={setSelected} />}
+      {selected && <AddToCart key={selected.id} product={selected} locale={text.locale} currency={text.currency} saved={saved.includes(selected.id)} onToggleWishlist={() => setSaved(toggleWishlistId(selected.id))} onClose={() => setSelected(null)} onOpenProduct={setSelected} />}
+      {variantProduct && <Variant product={variantProduct} currency={text.currency} onClose={() => setVariantProduct(null)} onGoToCart={(item: CartItem) => {
+        window.dispatchEvent(new CustomEvent("tazahat:add-cart-item", { detail: item }));
+        setVariantProduct(null);
+      }} />}
     </section>
   );
 }

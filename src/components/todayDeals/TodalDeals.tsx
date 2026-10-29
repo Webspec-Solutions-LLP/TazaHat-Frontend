@@ -2,13 +2,16 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { A11y, Keyboard, Mousewheel } from "swiper/modules";
 import "swiper/css";
 import text from "./english.json";
 import catalog from "../products/english.json";
 import { readWishlistIds, subscribeToWishlist, toggleWishlistId } from "../../lib/wishlist";
-import "../products/Products.css";
+import AddToCart from "../modals/AddToCart/AddToCart";
+import Variant from "../modals/variant/Variant";
+import type { CartItem } from "../modals/cart/Cart";
 import "./TodayDeals.css";
 
 type Product = (typeof catalog.products)[number];
@@ -58,6 +61,10 @@ export default function TodalDeals() {
     { label: text.seconds, value: remaining === null ? null : remaining % 60 },
   ];
   const [saved, setSaved] = useState<string[]>([]);
+  const [selected, setSelected] = useState<Product | null>(null);
+  const [variantProduct, setVariantProduct] = useState<Product | null>(null);
+  const [variantIndexes, setVariantIndexes] = useState<Record<string, number>>({});
+  const [openVariant, setOpenVariant] = useState<string | null>(null);
   useEffect(() => {
     const refreshWishlist = () => setSaved(readWishlistIds());
     refreshWishlist();
@@ -66,7 +73,11 @@ export default function TodalDeals() {
 
   const renderProduct = (product: Product) => {
     const isSaved = saved.includes(product.id);
-    const discount = product.originalPrice > 0 ? Math.max(0, Math.round((1 - product.price / product.originalPrice) * 100)) : 0;
+    const variants = product.variants?.length ? product.variants : [{ label: product.weight, amount: 1, unit: "pack", price: product.price, originalPrice: product.originalPrice }];
+    const initialVariant = Math.max(0, variants.findIndex(variant => variant.price === product.price));
+    const selectedIndex = variantIndexes[product.id] ?? initialVariant;
+    const variant = variants[selectedIndex] ?? variants[0];
+    const discount = variant.originalPrice > 0 ? Math.max(0, Math.round((1 - variant.price / variant.originalPrice) * 100)) : 0;
     const description = `${product.name} selected for freshness and quality, ready for your everyday meals.`;
     return (
       <article className="product-card" key={product.id}>
@@ -78,11 +89,21 @@ export default function TodalDeals() {
             <svg width="18" height="18" viewBox="0 0 24 24" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" /></svg>
           </button>
         </div>
-        <h3>{product.name}</h3>
+        <h3><Link href={`/productDetails?id=${encodeURIComponent(product.id)}`}>{product.name}</Link></h3>
         <p className="product-description" title={description}>{description}</p>
-        <p className="product-weight"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m12 3 9 5v8l-9 5-9-5V8l9-5Zm-9 5 9 5 9-5M12 13v8M7.5 5.5l9 5" /></svg>{product.weight}</p>
-        <div className="product-pricing"><strong>{money.format(product.price)}</strong><del>{money.format(product.originalPrice)}</del></div>
-        <button className="product-details-button" type="button" onClick={() => window.dispatchEvent(new CustomEvent("tazahat:add-cart-item", { detail: { id: product.id, name: product.name, image: product.image, price: product.price, originalPrice: product.originalPrice, weight: product.weight, quantity: 1 } }))}><CartIcon />Add to Cart</button>
+        <div className="product-pricing"><strong>{money.format(variant.price)}</strong><del>{money.format(variant.originalPrice)}</del></div>
+        <div className="product-variant-wrap">
+          <button type="button" className="product-variant-trigger" aria-haspopup="listbox" aria-expanded={openVariant === product.id} onClick={() => setOpenVariant(current => current === product.id ? null : product.id)}>
+            <span>{variant.label}</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 7.5 5 5 5-5" /></svg>
+          </button>
+          {openVariant === product.id && <div className="product-variant-menu" role="listbox" aria-label={`Choose size for ${product.name}`}>
+            {variants.map((option, index) => <button type="button" role="option" aria-selected={index === selectedIndex} key={`${product.id}-${option.label}`} onClick={() => { setVariantIndexes(current => ({ ...current, [product.id]: index })); setOpenVariant(null); }}><span>{option.label}</span><span>{money.format(option.price)}</span></button>)}
+          </div>}
+        </div>
+        <div className="product-card-actions">
+          <button className="product-details-button" type="button" onClick={() => setVariantProduct(product)}><CartIcon />Add to Cart</button>
+          <button className="product-quick-view" type="button" aria-label={`View ${product.name} details`} onClick={() => setSelected(product)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        </div>
       </article>
     );
   };
@@ -116,6 +137,11 @@ export default function TodalDeals() {
           </span>
         </button>
       )}
+      {selected && <AddToCart key={selected.id} product={selected} locale={catalog.locale} currency={catalog.currency} saved={saved.includes(selected.id)} onToggleWishlist={() => setSaved(toggleWishlistId(selected.id))} onClose={() => setSelected(null)} onOpenProduct={setSelected} />}
+      {variantProduct && <Variant product={variantProduct} currency={catalog.currency} onClose={() => setVariantProduct(null)} onGoToCart={(item: CartItem) => {
+        window.dispatchEvent(new CustomEvent("tazahat:add-cart-item", { detail: item }));
+        setVariantProduct(null);
+      }} />}
     </section>
   );
 }

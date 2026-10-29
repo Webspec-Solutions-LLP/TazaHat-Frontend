@@ -4,6 +4,8 @@ import { useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import AddToCart from "@/components/modals/AddToCart/AddToCart";
+import Variant from "@/components/modals/variant/Variant";
+import type { CartItem } from "@/components/modals/cart/Cart";
 import catalog from "@/components/products/english.json";
 import {
   getServerWishlistSnapshot,
@@ -12,7 +14,6 @@ import {
   subscribeToWishlist,
   toggleWishlistId,
 } from "@/lib/wishlist";
-import "@/components/products/Products.css";
 import "./Wishlist.css";
 
 type Product = (typeof catalog.products)[number];
@@ -42,6 +43,9 @@ function CartIcon() {
 
 export default function WishlistPage() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [variantProduct, setVariantProduct] = useState<Product | null>(null);
+  const [variantIndexes, setVariantIndexes] = useState<Record<string, number>>({});
+  const [openVariant, setOpenVariant] = useState<string | null>(null);
   const savedIdsSnapshot = useSyncExternalStore(
     subscribeToWishlist,
     getWishlistSnapshot,
@@ -70,8 +74,12 @@ export default function WishlistPage() {
         {products.length ? (
           <div className="wishlist-grid">
             {products.map((product) => {
-              const discount = product.originalPrice > 0
-                ? Math.max(0, Math.round((1 - product.price / product.originalPrice) * 100))
+              const variants = product.variants?.length ? product.variants : [{ label: product.weight, amount: 1, unit: "pack", price: product.price, originalPrice: product.originalPrice }];
+              const initialVariant = Math.max(0, variants.findIndex(variant => variant.price === product.price));
+              const selectedIndex = variantIndexes[product.id] ?? initialVariant;
+              const variant = variants[selectedIndex] ?? variants[0];
+              const discount = variant.originalPrice > 0
+                ? Math.max(0, Math.round((1 - variant.price / variant.originalPrice) * 100))
                 : 0;
               const description = `${product.name} selected for freshness and quality, ready for your everyday meals.`;
               return (
@@ -105,25 +113,24 @@ export default function WishlistPage() {
                       <HeartIcon />
                     </button>
                   </div>
-                  <h3>{product.name}</h3>
+                  <h3><Link href={`/productDetails?id=${encodeURIComponent(product.id)}`}>{product.name}</Link></h3>
                   <p className="product-description" title={description}>{description}</p>
-                  <p className="product-weight">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d="m12 3 9 5v8l-9 5-9-5V8l9-5Zm-9 5 9 5 9-5M12 13v8M7.5 5.5l9 5" />
-                    </svg>
-                    {product.weight}
-                  </p>
                   <div className="product-pricing">
-                    <strong>{money.format(product.price)}</strong>
-                    <del>{money.format(product.originalPrice)}</del>
+                    <strong>{money.format(variant.price)}</strong>
+                    <del>{money.format(variant.originalPrice)}</del>
                   </div>
-                  <button
-                    className="product-details-button"
-                    type="button"
-                    onClick={() => setSelectedProduct(product)}
-                  >
-                    <CartIcon /> Add to Cart
-                  </button>
+                  <div className="product-variant-wrap">
+                    <button type="button" className="product-variant-trigger" aria-haspopup="listbox" aria-expanded={openVariant === product.id} onClick={() => setOpenVariant(current => current === product.id ? null : product.id)}>
+                      <span>{variant.label}</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 7.5 5 5 5-5" /></svg>
+                    </button>
+                    {openVariant === product.id && <div className="product-variant-menu" role="listbox" aria-label={`Choose size for ${product.name}`}>
+                      {variants.map((option, index) => <button type="button" role="option" aria-selected={index === selectedIndex} key={`${product.id}-${option.label}`} onClick={() => { setVariantIndexes(current => ({ ...current, [product.id]: index })); setOpenVariant(null); }}><span>{option.label}</span><span>{money.format(option.price)}</span></button>)}
+                    </div>}
+                  </div>
+                  <div className="product-card-actions">
+                    <button className="product-details-button" type="button" onClick={() => setVariantProduct(product)}><CartIcon /> Add to Cart</button>
+                    <button className="product-quick-view" type="button" aria-label={`View ${product.name} details`} onClick={() => setSelectedProduct(product)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                  </div>
                 </article>
               );
             })}
@@ -148,6 +155,17 @@ export default function WishlistPage() {
           onToggleWishlist={() => toggleProduct(selectedProduct.id)}
           onClose={() => setSelectedProduct(null)}
           onOpenProduct={setSelectedProduct}
+        />
+      )}
+      {variantProduct && (
+        <Variant
+          product={variantProduct}
+          currency={catalog.currency}
+          onClose={() => setVariantProduct(null)}
+          onGoToCart={(item: CartItem) => {
+            window.dispatchEvent(new CustomEvent("tazahat:add-cart-item", { detail: item }));
+            setVariantProduct(null);
+          }}
         />
       )}
     </section>

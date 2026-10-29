@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import AddToCart from "../modals/AddToCart/AddToCart";
+import Variant from "../modals/variant/Variant";
+import type { CartItem } from "../modals/cart/Cart";
 import Image from "next/image";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -26,6 +28,7 @@ function CartIcon() {
 export default function Products({ heading }: ProductsProps) {
   const [saved, setSaved] = useState<string[]>([]);
   const [selected, setSelected] = useState<Product | null>(null);
+  const [variantProduct, setVariantProduct] = useState<Product | null>(null);
   const [variantIndexes, setVariantIndexes] = useState<Record<string, number>>({});
   const [openVariant, setOpenVariant] = useState<string | null>(null);
   const closeDetails = useCallback(() => setSelected(null), []);
@@ -68,7 +71,10 @@ export default function Products({ heading }: ProductsProps) {
             {variants.map((option, index) => <button type="button" role="option" aria-selected={index === selectedIndex} key={`${product.id}-${option.label}`} onClick={() => { setVariantIndexes(current => ({ ...current, [product.id]: index })); setOpenVariant(null); }}><span>{option.label}</span><span>{money.format(option.price)}</span></button>)}
           </div>}
         </div>
-        <button className="product-details-button" type="button" onClick={() => setSelected(product)}><CartIcon />Add to Cart</button>
+        <div className="product-card-actions">
+          <button className="product-details-button" type="button" onClick={() => setVariantProduct(product)}><CartIcon />Add to Cart</button>
+          <button className="product-quick-view" type="button" aria-label={`View ${product.name} details`} onClick={() => setSelected(product)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        </div>
       </article>
     );
   };
@@ -84,6 +90,10 @@ export default function Products({ heading }: ProductsProps) {
         </div>
       </div>
       {selected && <AddToCart key={selected.id} product={selected} locale={text.locale} currency={text.currency} saved={saved.includes(selected.id)} onToggleWishlist={() => setSaved(toggleWishlistId(selected.id))} onClose={closeDetails} onOpenProduct={setSelected} />}
+      {variantProduct && <Variant product={variantProduct} currency={text.currency} onClose={() => setVariantProduct(null)} onGoToCart={(item: CartItem) => {
+        window.dispatchEvent(new CustomEvent("tazahat:add-cart-item", { detail: item }));
+        setVariantProduct(null);
+      }} />}
     </section>
   );
 }

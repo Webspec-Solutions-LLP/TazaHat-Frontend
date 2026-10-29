@@ -645,3 +645,40 @@
     transform: none;
   }
 }
+
+/* Matching product card variant picker and split actions */
+.winter-product-card:has(.winter-product-variant-trigger[aria-expanded="true"]) { z-index: 5; }
+.winter-product-variant-wrap { position: relative; z-index: 6; margin-top: 0; }
+.winter-product-variant-trigger { display: flex; width: 100%; min-height: 32px; align-items: center; justify-content: space-between; padding: 5px 9px; border: 1px solid #d8e5f0; border-radius: 6px; background: #fff; color: #284a6c; font-size: 11px; text-align: left; cursor: pointer; }
+.winter-product-variant-trigger svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.7; transition: transform 260ms ease; }
+.winter-product-variant-trigger[aria-expanded="true"] svg { transform: rotate(180deg); }
+.winter-product-variant-menu { position: absolute; top: calc(100% + 4px); right: 0; left: 0; z-index: 10; max-height: 150px; overflow-y: auto; border: 1px solid #d8e5f0; border-radius: 7px; background: #fff; box-shadow: 0 8px 18px #06336124; animation: product-variant-open 280ms cubic-bezier(.2,.8,.2,1) both; transform-origin: top; }
+.winter-product-variant-menu button { display: flex; width: 100%; min-height: 29px; align-items: center; justify-content: space-between; padding: 5px 8px; border: 0; background: #fff; color: #284a6c; font-size: 10px; text-align: left; cursor: pointer; }
+.winter-product-variant-menu button:hover, .winter-product-variant-menu button[aria-selected="true"] { background: #eff7ff; color: #075eae; }
+.winter-product-actions { display: flex; align-items: stretch; gap: 8px; margin-top: 5px; }
+.winter-product-cart { flex: 1 1 auto; width: auto; min-width: 0; min-height: 38px; margin-top: 0; border-radius: 7px; }
+.winter-product-quick-view { display: grid; flex: 0 0 60px; min-height: 38px; place-items: center; padding: 6px; border: 1px solid #0754a0; border-radius: 8px; background: #fff; color: #0754a0; cursor: pointer; transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease; }
+.winter-product-quick-view svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.winter-product-quick-view:hover { transform: translateY(-1px); border-color: #084b91; background: #e8f3ff; color: #084b91; box-shadow: 0 3px 8px #0754a024; }
+.winter-product-card button:focus-visible { outline: 2px solid #0874d1; outline-offset: 2px; }
+
+@media (max-width: 876px) {
+  .winter-product-cart { min-height: 34px; padding: 5px 4px; font-size: 10px; }
+  .winter-product-quick-view { flex-basis: 44px; min-height: 34px; }
+}
+@media (max-width: 678px) {
+  .winter-product-cart { min-height: 32px; gap: 4px; font-size: 9px; }
+  .winter-product-quick-view { flex-basis: 40px; min-height: 32px; }
+}
+@media (max-width: 575px) {
+  .winter-product-cart { min-height: 30px; font-size: 8px; }
+  .winter-product-quick-view { flex-basis: 36px; min-height: 30px; }
+}
+@media (max-width: 450px) {
+  .winter-product-cart { min-height: 28px; gap: 3px; padding-inline: 3px; font-size: 7px; }
+  .winter-product-quick-view { flex-basis: 32px; min-height: 28px; padding: 3px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .winter-product-variant-trigger svg, .winter-product-quick-view { transition: none; }
+  .winter-product-variant-menu { animation: none; }
+}

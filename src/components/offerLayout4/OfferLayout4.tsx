@@ -1,13 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { A11y } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper";
 import "swiper/css";
 
 import AddToCart from "../modals/AddToCart/AddToCart";
+import Variant from "../modals/variant/Variant";
+import type { CartItem } from "../modals/cart/Cart";
+import { readWishlistIds, subscribeToWishlist, toggleWishlistId } from "../../lib/wishlist";
 import catalog from "../products/english.json";
 import text from "./english.json";
 import "./OfferLayout4.css";
@@ -96,10 +100,17 @@ export default function OfferLayout4() {
   const [activeTabId, setActiveTabId] = useState<string>(text.tabs[0]?.id ?? "trending");
   const [saved, setSaved] = useState<string[]>([]);
   const [selected, setSelected] = useState<CatalogProduct | null>(null);
+  const [variantProduct, setVariantProduct] = useState<CatalogProduct | null>(null);
+  const [variantIndexes, setVariantIndexes] = useState<Record<string, number>>({});
+  const [openVariant, setOpenVariant] = useState<string | null>(null);
   const swiperRef = useRef<SwiperType | null>(null);
   const previousTabId = useRef(activeTabId);
 
-  const closeDetails = useCallback(() => setSelected(null), []);
+  useEffect(() => {
+    const refreshWishlist = () => setSaved(readWishlistIds());
+    refreshWishlist();
+    return subscribeToWishlist(refreshWishlist);
+  }, []);
 
   const filteredDeals = useMemo(() => {
     const tab = text.tabs.find(t => t.id === activeTabId);
@@ -123,10 +134,15 @@ export default function OfferLayout4() {
   const handleTabChange = (tabId: string) => setActiveTabId(tabId);
 
   const renderProduct = (product: Deal, index: number) => {
-    const isSaved = saved.includes(product.id);
+    const cardProduct = toCatalogProduct(product);
+    const isSaved = saved.includes(cardProduct.id);
+    const variants = cardProduct.variants?.length ? cardProduct.variants : [{ label: cardProduct.weight, amount: 1, unit: "pack", price: cardProduct.price, originalPrice: cardProduct.originalPrice }];
+    const initialVariant = Math.max(0, variants.findIndex(variant => variant.price === cardProduct.price));
+    const selectedIndex = variantIndexes[cardProduct.id] ?? initialVariant;
+    const variant = variants[selectedIndex] ?? variants[0];
     const discount =
-      product.originalPrice > 0
-        ? Math.max(0, Math.round((1 - product.price / product.originalPrice) * 100))
+      variant.originalPrice > 0
+        ? Math.max(0, Math.round((1 - variant.price / variant.originalPrice) * 100))
         : 0;
     const description =
       product.description ||
@@ -163,9 +179,7 @@ export default function OfferLayout4() {
             aria-pressed={isSaved}
             aria-label={(isSaved ? text.unsave : text.save).replace("{name}", product.name)}
             onClick={() =>
-              setSaved(current =>
-                isSaved ? current.filter(id => id !== product.id) : [...current, product.id]
-              )
+              setSaved(toggleWishlistId(cardProduct.id))
             }
           >
             <svg
@@ -181,38 +195,26 @@ export default function OfferLayout4() {
             </svg>
           </button>
         </div>
-        <h3>{product.name}</h3>
+        <h3><Link href={`/productDetails?id=${encodeURIComponent(product.id)}`}>{product.name}</Link></h3>
         <p className="product-description" title={description}>
           {description}
         </p>
-        <p className="product-weight">
-          <svg
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.6"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="m12 3 9 5v8l-9 5-9-5V8l9-5Zm-9 5 9 5 9-5M12 13v8M7.5 5.5l9 5" />
-          </svg>
-          {product.weight}
-        </p>
         <div className="product-pricing">
-          <strong>{money.format(product.price)}</strong>
-          <del>{money.format(product.originalPrice)}</del>
+          <strong>{money.format(variant.price)}</strong>
+          <del>{money.format(variant.originalPrice)}</del>
         </div>
-        <button
-          className="product-details-button"
-          type="button"
-          onClick={() => setSelected(toCatalogProduct(product))}
-        >
-          <CartIcon />
-          {text.addToCart}
-        </button>
+        <div className="product-variant-wrap">
+          <button type="button" className="product-variant-trigger" aria-haspopup="listbox" aria-expanded={openVariant === cardProduct.id} onClick={() => setOpenVariant(current => current === cardProduct.id ? null : cardProduct.id)}>
+            <span>{variant.label}</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 7.5 5 5 5-5" /></svg>
+          </button>
+          {openVariant === cardProduct.id && <div className="product-variant-menu" role="listbox" aria-label={`Choose size for ${product.name}`}>
+            {variants.map((option, optionIndex) => <button type="button" role="option" aria-selected={optionIndex === selectedIndex} key={`${cardProduct.id}-${option.label}`} onClick={() => { setVariantIndexes(current => ({ ...current, [cardProduct.id]: optionIndex })); setOpenVariant(null); }}><span>{option.label}</span><span>{money.format(option.price)}</span></button>)}
+          </div>}
+        </div>
+        <div className="product-card-actions">
+          <button className="product-details-button" type="button" onClick={() => setVariantProduct(cardProduct)}><CartIcon />{text.addToCart}</button>
+          <button className="product-quick-view" type="button" aria-label={`View ${product.name} details`} onClick={() => setSelected(cardProduct)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        </div>
       </article>
     );
   };
@@ -296,15 +298,20 @@ export default function OfferLayout4() {
           locale={text.locale}
           currency={text.currency}
           saved={saved.includes(selected.id)}
-          onToggleWishlist={() =>
-            setSaved(current =>
-              current.includes(selected.id)
-                ? current.filter(id => id !== selected.id)
-                : [...current, selected.id]
-            )
-          }
-          onClose={closeDetails}
+          onToggleWishlist={() => setSaved(toggleWishlistId(selected.id))}
+          onClose={() => setSelected(null)}
           onOpenProduct={setSelected}
+        />
+      )}
+      {variantProduct && (
+        <Variant
+          product={variantProduct}
+          currency={text.currency}
+          onClose={() => setVariantProduct(null)}
+          onGoToCart={(item: CartItem) => {
+            window.dispatchEvent(new CustomEvent("tazahat:add-cart-item", { detail: item }));
+            setVariantProduct(null);
+          }}
         />
       )}
     </section>
