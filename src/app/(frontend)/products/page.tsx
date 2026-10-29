@@ -27,6 +27,7 @@ function ProductsContent() {
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState("featured");
   const [isSortOpen, setIsSortOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const sortRef = useRef<HTMLDivElement>(null);
   const [categories, setCategories] = useState<string[]>(() => lockedCategory ? [lockedCategory] : []);
   const [subcategories, setSubcategories] = useState<string[]>([]);
@@ -52,6 +53,14 @@ function ProductsContent() {
       document.removeEventListener("keydown", closeOnEscape);
     };
   }, [isSortOpen]);
+  useEffect(() => {
+    if (!isFilterOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsFilterOpen(false);
+    };
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [isFilterOpen]);
   const reset = () => { setCategories(lockedCategory ? [lockedCategory] : []); setSubcategories([]); setRating(0); setPrice(ceiling); };
   const [saved, setSaved] = useState<string[]>([]);
   const [selected, setSelected] = useState<Product | null>(null);
@@ -92,12 +101,12 @@ function ProductsContent() {
       <article className="product-card" key={product.id}>
         <div className="product-image">
           <Image src={product.image} alt={product.name} fill sizes="(max-width: 600px) 45vw, (max-width: 1023px) 25vw, 180px" draggable={false} />
-          <span className="product-discount-badge">{text.discount.replace("{percent}", String(discount))}</span>
           <span className="product-image-rating" aria-label={text.rating.replace("{rating}", String(product.rating)).replace("{reviews}", String(product.reviews))}>★ {product.rating}</span>
-          <button type="button" className="product-save" aria-pressed={isSaved} aria-label={(isSaved ? text.unsave : text.save).replace("{name}", product.name)} onClick={() => setSaved(toggleWishlistId(product.id))}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" /></svg>
-          </button>
         </div>
+        <span className="product-discount-badge">{text.discount.replace("{percent}", String(discount))}</span>
+        <button type="button" className="product-save" aria-pressed={isSaved} aria-label={(isSaved ? text.unsave : text.save).replace("{name}", product.name)} onClick={() => setSaved(toggleWishlistId(product.id))}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" /></svg>
+        </button>
         <h3><a href={`/productDetails?id=${encodeURIComponent(product.id)}`}>{product.name}</a></h3>
         <p className="product-description" title={description}>{description}</p>
         <div className="product-pricing"><strong>{money.format(variant.price)}</strong><del>{money.format(variant.originalPrice)}</del></div>
@@ -119,8 +128,9 @@ function ProductsContent() {
 
   return (
     <main className="products-section catalog-page">
-      <aside className="catalog-filters" aria-label="Product filters">
-        <div className="catalog-filter-title"><h2>Filter By</h2><button type="button" onClick={reset}>Reset</button></div>
+      {isFilterOpen && <button className="catalog-filter-backdrop" type="button" aria-label="Close filters" onClick={() => setIsFilterOpen(false)} />}
+      <aside className={`catalog-filters${isFilterOpen ? " is-open" : ""}`} aria-label="Product filters">
+        <div className="catalog-filter-title"><h2>Filter By</h2><button type="button" onClick={reset}>Reset</button><button className="catalog-filter-close" type="button" aria-label="Close filters" onClick={() => setIsFilterOpen(false)}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15" /></svg></button></div>
         <details open><summary>Filter by Category</summary><div className="catalog-filter-options">{categoryOptions.map(option => <label key={option}><input type="checkbox" checked={categories.includes(option)} disabled={Boolean(lockedCategory)} onChange={() => { setCategories(current => current.includes(option) ? current.filter(x => x !== option) : [...current, option]); setSubcategories([]); }} />{option}<span>{text.products.filter(p => p.category === option).length}</span></label>)}</div></details>
         <details open><summary>Filter by Subcategory</summary><div className="catalog-filter-options">{subcategoryOptions.map(option => <label key={option}><input type="checkbox" checked={subcategories.includes(option)} onChange={() => setSubcategories(current => current.includes(option) ? current.filter(x => x !== option) : [...current, option])} />{option}</label>)}</div></details>
         <details open><summary>Filter by Rating</summary><div className="catalog-filter-options">{[0, 4, 4.5, 4.7].map(value => <label key={value}><input type="radio" name="rating" checked={rating === value} onChange={() => setRating(value)} />{value === 0 ? 'All ratings' : '? ' + value + ' & above'}</label>)}</div></details>
@@ -170,6 +180,10 @@ function ProductsContent() {
                 </div>
               </div>
             </div>
+            <button className="catalog-filter-trigger" type="button" aria-expanded={isFilterOpen} onClick={() => setIsFilterOpen(open => !open)}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 6h16M7 12h10m-7 6h4" /></svg>
+              <span>Filter</span>
+            </button>
             <div className="catalog-view-toggle" role="group" aria-label="Product display"><button type="button" aria-label="Grid view" aria-pressed={view === 'grid'} onClick={() => setView('grid')}><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button><button type="button" aria-label="List view" aria-pressed={view === 'list'} onClick={() => setView('list')}><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M9 5h12M9 12h12M9 19h12M3 5h2M3 12h2M3 19h2"/></svg></button></div>
           </div>
         </header>
