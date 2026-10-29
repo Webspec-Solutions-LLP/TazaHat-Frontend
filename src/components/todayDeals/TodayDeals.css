@@ -291,3 +291,78 @@
   .today-deals-panel .product-details-button { min-height: 25px; font-size: 7px; }
 }
 
+/* Self-contained product card styling */
+.today-deals-section { color: #063361; background: #fff; }
+.today-deals-section .products-container { width: calc(100% - 48px); max-width: 1320px; margin-inline: auto; }
+.today-deals-section .products-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.today-deals-section .products-slider.swiper { padding: 6px 2px 8px; }
+.today-deals-section .product-card { position: relative; z-index: 0; display: flex; width: 100%; min-width: 0; flex-direction: column; gap: 3px; padding: 10px; border: 1px solid #e4edf5; border-radius: 12px; background: #fff; color: #063361; box-shadow: 0 3px 12px #06336112; transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease; }
+.today-deals-section .product-card:has(.product-variant-trigger[aria-expanded="true"]) { z-index: 5; }
+.today-deals-section .product-card:hover { transform: translateY(-2px); border-color: #c9dff1; box-shadow: 0 8px 20px #0633611c; }
+.today-deals-section .product-image { position: relative; width: 100%; aspect-ratio: 1; overflow: hidden; margin-bottom: 3px; border-radius: 9px; background: linear-gradient(145deg, #f7fbff, #edf5fa); }
+.today-deals-section .product-image > img { object-fit: contain; padding: 12px; user-select: none; }
+.today-deals-section .product-discount-badge, .today-deals-section .product-image-rating { position: absolute; z-index: 1; display: inline-flex; min-height: 22px; align-items: center; padding: 4px 7px; border-radius: 999px; font-size: 9px; font-weight: 700; line-height: 1; }
+.today-deals-section .product-discount-badge { top: 8px; left: 8px; color: #fff; background: #e44c43; }
+.today-deals-section .product-image-rating { right: 8px; bottom: 8px; color: #6b4710; background: #fff; box-shadow: 0 2px 6px #06336118; }
+.today-deals-section .product-save { position: absolute; top: 6px; right: 6px; z-index: 2; display: grid; width: 30px; height: 30px; place-items: center; border: 0; border-radius: 50%; background: #ffffffed; color: #7890a5; box-shadow: 0 2px 8px #06336116; cursor: pointer; }
+.today-deals-section .product-save[aria-pressed="true"] { color: #e24c64; }
+.today-deals-section .product-card h3 { display: block; min-height: 21px; margin: 0 0 2px; overflow: hidden; color: #0a2f5c; font-size: 17px; font-weight: 600; line-height: 1.22; text-overflow: ellipsis; white-space: nowrap; }
+.today-deals-section .product-card h3 a { color: inherit; text-decoration: none; }
+.today-deals-section .product-card h3 a:hover { color: #0864b7; }
+.today-deals-section .product-description { display: -webkit-box; min-height: 14px; margin: 0; overflow: hidden; color: #77889a; font-size: 10px; line-height: 1.25; text-overflow: ellipsis; -webkit-box-orient: vertical; -webkit-line-clamp: 1; }
+.today-deals-section .product-pricing { display: flex; min-height: 21px; align-items: center; flex-wrap: wrap; gap: 7px; }
+.today-deals-section .product-pricing strong { color: #0b3970; font-size: 16px; font-weight: 700; }
+.today-deals-section .product-pricing del { color: #98a1aa; font-size: 10px; }
+.today-deals-section .product-variant-wrap { position: relative; z-index: 6; }
+.today-deals-section .product-variant-trigger { display: flex; width: 100%; min-height: 32px; align-items: center; justify-content: space-between; padding: 5px 9px; border: 1px solid #d8e5f0; border-radius: 6px; background: #fff; color: #284a6c; font-size: 11px; text-align: left; cursor: pointer; }
+.today-deals-section .product-variant-trigger svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.7; transition: transform 260ms ease; }
+.today-deals-section .product-variant-trigger[aria-expanded="true"] svg { transform: rotate(180deg); }
+.today-deals-section .product-variant-menu { position: absolute; top: calc(100% + 4px); right: 0; left: 0; z-index: 10; max-height: 150px; overflow-y: auto; border: 1px solid #d8e5f0; border-radius: 7px; background: #fff; box-shadow: 0 8px 18px #06336124; animation: product-variant-open 280ms cubic-bezier(.2,.8,.2,1) both; transform-origin: top; }
+.today-deals-section .product-variant-menu button { display: flex; width: 100%; min-height: 29px; align-items: center; justify-content: space-between; padding: 5px 8px; border: 0; background: #fff; color: #284a6c; font-size: 10px; text-align: left; cursor: pointer; }
+.today-deals-section .product-variant-menu button:hover, .today-deals-section .product-variant-menu button[aria-selected="true"] { background: #eff7ff; color: #075eae; }
+.today-deals-section .product-card-actions { display: flex; align-items: stretch; gap: 8px; margin-top: 5px; }
+.today-deals-section .product-details-button { display: flex; flex: 1 1 auto; min-width: 0; min-height: 38px; align-items: center; justify-content: center; gap: 7px; margin: 0; padding: 7px 8px; border: 0; border-radius: 7px; background: #0754a0; color: #fff; font-size: 12px; font-weight: 600; white-space: nowrap; cursor: pointer; transition: background-color 160ms ease, transform 160ms ease; }
+.today-deals-section .product-details-button:hover { background: #064483; }
+.today-deals-section .product-quick-view { display: grid; flex: 0 0 60px; min-height: 38px; place-items: center; padding: 6px; border: 1px solid #0754a0; border-radius: 8px; background: #fff; color: #0754a0; cursor: pointer; transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease; }
+.today-deals-section .product-quick-view svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.today-deals-section .product-quick-view:hover { transform: translateY(-1px); border-color: #084b91; background: #e8f3ff; color: #084b91; box-shadow: 0 3px 8px #0754a024; }
+.today-deals-section .product-card button:focus-visible { outline: 2px solid #1683d8; outline-offset: 2px; }
+
+@media (max-width: 1099px) { .today-deals-section .products-container { width: calc(100% - 80px); max-width: none; } }
+@media (max-width: 876px) {
+  .today-deals-section .products-container { width: calc(100% - 60px); }
+  .today-deals-panel .product-card { gap: 2px; padding: 8px; }
+  .today-deals-panel .product-card h3 { min-height: 19px; font-size: 15px; }
+  .today-deals-panel .product-pricing { min-height: 19px; gap: 5px; }
+  .today-deals-panel .product-pricing strong { font-size: 14px; }
+  .today-deals-panel .product-details-button { min-height: 34px; padding: 5px 4px; font-size: 10px; }
+  .today-deals-panel .product-quick-view { flex-basis: 44px; min-height: 34px; }
+}
+@media (max-width: 678px) {
+  .today-deals-section .products-container { width: calc(100% - 30px); }
+  .today-deals-panel .product-card { padding: 7px; }
+  .today-deals-panel .product-card h3 { font-size: 14px; }
+  .today-deals-panel .product-details-button { min-height: 32px; gap: 4px; font-size: 9px; }
+  .today-deals-panel .product-quick-view { flex-basis: 40px; min-height: 32px; }
+}
+@media (max-width: 575px) {
+  .today-deals-section .products-container { width: calc(100% - 30px); }
+  .today-deals-panel .product-card { padding: 6px; }
+  .today-deals-panel .product-card h3 { min-height: 16px; font-size: 13px; }
+  .today-deals-panel .product-description { font-size: 9px; }
+  .today-deals-panel .product-pricing strong { font-size: 12px; }
+  .today-deals-panel .product-details-button { min-height: 30px; font-size: 8px; }
+  .today-deals-panel .product-quick-view { flex-basis: 36px; min-height: 30px; }
+}
+@media (max-width: 450px) {
+  .today-deals-section .products-container { width: calc(100% - 20px); }
+  .today-deals-panel .product-card { padding: 5px; }
+  .today-deals-panel .product-card h3 { font-size: 12px; }
+  .today-deals-panel .product-details-button { min-height: 28px; padding-inline: 3px; font-size: 7px; }
+  .today-deals-panel .product-quick-view { flex-basis: 32px; min-height: 28px; padding: 3px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .today-deals-section .product-card, .today-deals-section .product-details-button, .today-deals-section .product-quick-view, .today-deals-section .product-variant-trigger svg { transition: none; }
+  .today-deals-section .product-variant-menu { animation: none; }
+}
+

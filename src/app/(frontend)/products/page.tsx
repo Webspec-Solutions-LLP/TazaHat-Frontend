@@ -4,7 +4,10 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import text from "@/components/products/english.json";
-import "@/components/products/Products.css";
+import AddToCart from "@/components/modals/AddToCart/AddToCart";
+import Variant from "@/components/modals/variant/Variant";
+import type { CartItem } from "@/components/modals/cart/Cart";
+import { readWishlistIds, subscribeToWishlist, toggleWishlistId } from "@/lib/wishlist";
 import "./ProductsList.css";
 
 type Product = (typeof text.products)[number];
@@ -52,9 +55,14 @@ function ProductsContent() {
   const reset = () => { setCategories(lockedCategory ? [lockedCategory] : []); setSubcategories([]); setRating(0); setPrice(ceiling); };
   const [saved, setSaved] = useState<string[]>([]);
   const [selected, setSelected] = useState<Product | null>(null);
+  const [variantProduct, setVariantProduct] = useState<Product | null>(null);
   const [variantIndexes, setVariantIndexes] = useState<Record<string, number>>({});
   const [openVariant, setOpenVariant] = useState<string | null>(null);
-  const dialog = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const refreshWishlist = () => setSaved(readWishlistIds());
+    refreshWishlist();
+    return subscribeToWishlist(refreshWishlist);
+  }, []);
   const sortOptions = [
     { value: "featured", label: "Featured" },
     { value: "price-low", label: "Price: Low to High" },
@@ -86,14 +94,13 @@ function ProductsContent() {
           <Image src={product.image} alt={product.name} fill sizes="(max-width: 600px) 45vw, (max-width: 1023px) 25vw, 180px" draggable={false} />
           <span className="product-discount-badge">{text.discount.replace("{percent}", String(discount))}</span>
           <span className="product-image-rating" aria-label={text.rating.replace("{rating}", String(product.rating)).replace("{reviews}", String(product.reviews))}>★ {product.rating}</span>
-          <button type="button" className="product-save" aria-pressed={isSaved} aria-label={(isSaved ? text.unsave : text.save).replace("{name}", product.name)} onClick={() => setSaved(current => isSaved ? current.filter(id => id !== product.id) : [...current, product.id])}>
+          <button type="button" className="product-save" aria-pressed={isSaved} aria-label={(isSaved ? text.unsave : text.save).replace("{name}", product.name)} onClick={() => setSaved(toggleWishlistId(product.id))}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" /></svg>
           </button>
         </div>
-        <h3>{product.name}</h3>
+        <h3><a href={`/productDetails?id=${encodeURIComponent(product.id)}`}>{product.name}</a></h3>
         <p className="product-description" title={description}>{description}</p>
         <div className="product-pricing"><strong>{money.format(variant.price)}</strong><del>{money.format(variant.originalPrice)}</del></div>
-        <p className="product-rating" aria-label={text.rating.replace("{rating}", String(product.rating)).replace("{reviews}", String(product.reviews))}><span aria-hidden="true">★ {product.rating} <span>({product.reviews})</span></span></p>
         <div className="product-variant-wrap">
           <button type="button" className="product-variant-trigger" aria-haspopup="listbox" aria-expanded={openVariant === product.id} onClick={() => setOpenVariant(current => current === product.id ? null : product.id)}>
             <span>{variant.label}</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 7.5 5 5 5-5" /></svg>
@@ -102,7 +109,10 @@ function ProductsContent() {
             {variants.map((option, index) => <button type="button" role="option" aria-selected={index === selectedIndex} key={`${product.id}-${option.label}`} onClick={() => { setVariantIndexes(current => ({ ...current, [product.id]: index })); setOpenVariant(null); }}><span>{option.label}</span><span>{money.format(option.price)}</span></button>)}
           </div>}
         </div>
-        <button className="product-details-button" type="button" onClick={() => { setSelected(product); dialog.current?.showModal(); }}><CartIcon />Add to Cart</button>
+        <div className="product-card-actions">
+          <button className="product-details-button" type="button" onClick={() => setVariantProduct(product)}><CartIcon />Add to Cart</button>
+          <button className="product-quick-view" type="button" aria-label={`View ${product.name} details`} onClick={() => setSelected(product)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        </div>
       </article>
     );
   };
@@ -165,10 +175,11 @@ function ProductsContent() {
         </header>
         {sortedProducts.length ? <div className={'catalog-cards catalog-cards--' + view}>{sortedProducts.map(renderProduct)}</div> : <div className="catalog-empty"><h2>No products found</h2><p>Try changing your filters to see more fresh picks.</p><button type="button" onClick={reset}>Clear filters</button></div>}
       </section>
-      <dialog ref={dialog} className="product-dialog" aria-labelledby="product-dialog-title" onClick={event => { if (event.target === event.currentTarget) dialog.current?.close(); }}>
-        <button className="product-dialog-close" type="button" onClick={() => dialog.current?.close()}>{text.close} ×</button>
-        {selected && <><Image src={selected.image} alt={selected.name} width={240} height={200} className="product-dialog-image" /><h2 id="product-dialog-title">{selected.name}</h2><p>{selected.weight}</p><strong>{money.format(selected.price)}</strong><p className="product-demo-note">{text.demoNote}</p></>}
-      </dialog>
+      {selected && <AddToCart key={selected.id} product={selected} locale={text.locale} currency={text.currency} saved={saved.includes(selected.id)} onToggleWishlist={() => setSaved(toggleWishlistId(selected.id))} onClose={() => setSelected(null)} onOpenProduct={setSelected} />}
+      {variantProduct && <Variant product={variantProduct} currency={text.currency} onClose={() => setVariantProduct(null)} onGoToCart={(item: CartItem) => {
+        window.dispatchEvent(new CustomEvent("tazahat:add-cart-item", { detail: item }));
+        setVariantProduct(null);
+      }} />}
     </main>
   );
 }

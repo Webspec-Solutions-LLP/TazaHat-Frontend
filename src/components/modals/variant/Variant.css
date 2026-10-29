@@ -1,0 +1,73 @@
+.variant-dialog {
+  width: min(440px, calc(100vw - 32px));
+  max-height: min(620px, calc(100dvh - 32px));
+  margin: auto;
+  padding: 0;
+  overflow: auto;
+  border: 1px solid #dce8f3;
+  border-radius: 10px;
+  background: #fff;
+  color: #123f77;
+  box-shadow: 0 24px 80px #08213b38;
+  animation: variant-dialog-in 180ms ease-out both;
+}
+
+.variant-dialog::backdrop { background: #08213b80; }
+.variant-panel { padding: 16px; }
+.variant-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.variant-eyebrow { margin: 0 0 5px; color: #66819c; font-size: 12px; font-weight: 600; }
+.variant-header h2 { margin: 0; color: #123f77; font-size: 20px; line-height: 1.3; }
+.variant-close { display: grid; flex: 0 0 36px; width: 36px; height: 36px; place-items: center; border: 1px solid #d6e6f5; border-radius: 50%; background: #edf6ff; color: #315f8b; cursor: pointer; transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease; }
+.variant-close svg { width: 17px; height: 17px; }
+.variant-close:hover { border-color: #b8d5ef; background: #dceeff; color: #0754a0; transform: rotate(90deg); }
+.variant-product-summary { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; align-items: center; gap: 10px; margin: 12px 0; padding: 9px; border: 1px solid #e2edf6; border-radius: 9px; background: #f7fbff; }
+.variant-product-image { position: relative; width: 56px; height: 56px; overflow: hidden; border-radius: 8px; background: #edf5fb; }
+.variant-product-image img { object-fit: contain; padding: 5px; }
+.variant-product-summary > div:nth-child(2) { display: grid; gap: 4px; }
+.variant-product-summary > div:nth-child(2) span, .variant-total span { color: #71879c; font-size: 11px; }
+.variant-product-summary > div:nth-child(2) strong { font-size: 14px; }
+.variant-product-summary .variant-selected-size small { color: #71879c; font-size: 11px; }
+.variant-selected-price { color: #0754a0; font-size: 18px; font-variant-numeric: tabular-nums; }
+.variant-options { min-width: 0; padding: 0; margin: 0; border: 0; }
+.variant-options legend { margin-bottom: 9px; color: #244e78; font-size: 13px; font-weight: 700; }
+.variant-option-list { display: grid; gap: 5px; }
+.variant-option { display: flex; align-items: center; gap: 10px; min-height: 42px; padding: 6px 10px; border: 1px solid #dce7f1; border-radius: 7px; cursor: pointer; transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease; }
+.variant-option:has(input:checked) { border-color: #1672c1; background: #f0f7ff; box-shadow: inset 0 0 0 1px #1672c1; }
+.variant-option input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.variant-option-copy { display: flex; flex: 1; align-items: center; justify-content: space-between; gap: 10px; }
+.variant-option-copy strong { color: #244e78; font-size: 13px; }
+.variant-option-copy small { color: #0754a0; font-size: 13px; font-weight: 700; }
+.variant-radio-mark { display: grid; width: 18px; height: 18px; place-items: center; border: 1.5px solid #b8c9d9; border-radius: 50%; }
+.variant-option:has(input:checked) .variant-radio-mark { border: 5px solid #1269b4; background: #fff; }
+.variant-option input:focus-visible + .variant-option-copy { outline: 2px solid #1683d8; outline-offset: 3px; }
+.variant-footer { display: grid; grid-template-columns: minmax(60px, 1fr) 104px minmax(132px, 1.2fr); align-items: center; gap: 8px; margin-top: 10px; padding: 8px 9px; border: 1px solid #d9eafb; border-radius: 9px; background: #edf6ff; }
+.variant-total { display: grid; gap: 3px; }
+.variant-total strong { color: #0754a0; font-size: 21px; font-variant-numeric: tabular-nums; }
+.variant-selected-weight { overflow: hidden; color: #315576; font-size: 12px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.variant-quantity { display: grid; grid-template-columns: 1fr 30px 1fr; width: 104px; height: 36px; align-items: center; overflow: hidden; border: 1px solid #c9dcec; border-radius: 7px; background: #fff; }
+.variant-quantity button { display: grid; width: 100%; height: 34px; place-items: center; border: 0; background: transparent; color: #0754a0; font-size: 18px; cursor: pointer; }
+.variant-quantity button:hover:not(:disabled) { background: #edf6ff; }
+.variant-quantity button:disabled { color: #aab9c8; cursor: default; }
+.variant-quantity output { min-width: 24px; text-align: center; color: #123f77; font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.variant-go-cart { display: flex; min-width: 0; min-height: 38px; align-items: center; justify-content: center; gap: 8px; padding: 7px 12px; border: 0; border-radius: 7px; background: #0754a0; color: #fff; font-size: 13px; font-weight: 700; white-space: nowrap; cursor: pointer; transition: background-color 150ms ease, transform 150ms ease, box-shadow 150ms ease; }
+.variant-go-cart:hover { background: #064483; box-shadow: 0 4px 12px #0754a02b; }
+.variant-go-cart:active { transform: scale(.98); }
+.variant-go-cart svg { width: 19px; height: 19px; }
+.variant-dialog button:focus-visible { outline: 2px solid #1683d8; outline-offset: 3px; }
+
+@keyframes variant-dialog-in { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+@media (max-width: 480px) {
+  .variant-panel { padding: 14px; }
+  .variant-header h2 { font-size: 18px; }
+  .variant-footer { grid-template-columns: minmax(38px, 1fr) 86px minmax(106px, 1fr); gap: 5px; padding: 7px; }
+  .variant-selected-weight { font-size: 11px; }
+  .variant-quantity { grid-template-columns: 1fr 24px 1fr; width: 86px; height: 34px; }
+  .variant-quantity button { height: 32px; }
+  .variant-go-cart { min-height: 36px; gap: 5px; padding-inline: 6px; font-size: 11px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .variant-dialog { animation: none; }
+  .variant-option, .variant-go-cart, .variant-close { transition: none; }
+}
