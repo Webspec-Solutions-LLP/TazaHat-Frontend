@@ -38,6 +38,7 @@ export default function Navbar({
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     try {
       const storedHistory = window.localStorage.getItem(SEARCH_HISTORY_KEY);
@@ -180,7 +181,7 @@ export default function Navbar({
 
   return (
     <header
-      className="tazahat-navbar"
+      className={`tazahat-navbar${isCompactSearchOpen ? " is-compact-search-open" : ""}`}
       style={{ backgroundColor: "#00366b", color: "#ffffff" }}
     >
       <div className="tazahat-navbar-container">
@@ -206,7 +207,16 @@ export default function Navbar({
         </div>
 
         {/* Center: Search Bar */}
-        <button type="button" className="navbar-compact-search-toggle" aria-label="Open search" aria-expanded={isCompactSearchOpen} onClick={() => setIsCompactSearchOpen(open => !open)}>
+        <button
+          type="button"
+          className="navbar-compact-search-toggle"
+          aria-label="Open search"
+          aria-expanded={isCompactSearchOpen}
+          onClick={() => {
+            setIsCompactSearchOpen(true);
+            window.requestAnimationFrame(() => searchInputRef.current?.focus());
+          }}
+        >
           <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"/><path d="m16.5 16.5 4 4"/></svg>
         </button>
         {isCompactSearchOpen && <button type="button" className="navbar-search-backdrop" aria-label="Close search" onClick={() => setIsCompactSearchOpen(false)} />}
@@ -214,6 +224,7 @@ export default function Navbar({
           <div className="navbar-search-box">
             <span className="navbar-search-overlay-icon" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7.5"/><path d="m16.5 16.5 4 4"/></svg></span>
             <input
+              ref={searchInputRef}
               type="text"
               className="navbar-search-input"
               placeholder="Search for fish, meat, vegetables, fruits, dairy..."

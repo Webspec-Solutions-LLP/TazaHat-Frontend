@@ -82,8 +82,8 @@ export default function OfferLayout3() {
             breakpoints={{
               451: { slidesPerView: 2.1, spaceBetween: 8 },
               576: { slidesPerView: 2.5, spaceBetween: 9 },
-              877: { slidesPerView: 3.1, spaceBetween: 10 },
-              1100: { slidesPerView: 3.7, spaceBetween: 12 },
+              877: { slidesPerView: 2.9, spaceBetween: 10 },
+              1300: { slidesPerView: 3.7, spaceBetween: 12 },
             }}
             keyboard={{ enabled: true, onlyInViewport: true }}
             mousewheel={{ forceToAxis: true }}
