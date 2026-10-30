@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { fallbackImage, isRemoteImage } from "@/lib/api";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { A11y, Autoplay, Pagination, Keyboard } from "swiper/modules";
 import "swiper/css";
@@ -29,17 +31,41 @@ const banners = [
   },
 ];
 
-export default function HomeHero() {
+export interface HeroBanner { id: string; image: string; title: string | null; details: string | null; href: string | null }
+
+type Slide = (typeof banners)[number] & { href?: string | null };
+
+/** Banners set up in the CRM (Sliders) for the visitor's city. The photo is theirs; the side picture and promo stay as designed. */
+export default function HomeHero({ items }: { items?: HeroBanner[] }) {
+  const router = useRouter();
   const startShopping = () => {
     document.querySelector<HTMLInputElement>(".navbar-search-input")?.focus();
+  };
+  const slides: Slide[] = items?.length
+    ? items.map((b, index) => ({
+        image: b.image,
+        alt: b.title ?? b.details ?? "TazaHat offer",
+        sideImage: banners[index % banners.length].sideImage,
+        sideAlt: banners[index % banners.length].sideAlt,
+        eyebrow: "TazaHat offer",
+        title: b.title ?? b.details ?? "Fresh every day",
+        description: b.title ? b.details ?? "" : "",
+        action: "Shop now",
+        href: b.href,
+      }))
+    : banners;
+  const open = (href?: string | null) => {
+    if (!href) return startShopping();
+    if (/^https?:\/\//.test(href)) window.open(href, "_blank", "noopener");
+    else router.push(href);
   };
 
   return (
     <section className="home-hero" aria-label="Fresh food from TazaHaat">
       <div className="home-content-container">
         <Swiper className="home-banner-slider" modules={[A11y, Autoplay, Pagination, Keyboard]} slidesPerView={1} spaceBetween={16} autoplay={{ delay: 5000, disableOnInteraction: false, pauseOnMouseEnter: true }} pagination={{ clickable: true }} keyboard={{ enabled: true, onlyInViewport: true }} rewind a11y={{ containerMessage: "Fresh food banners" }}>
-          {banners.map((banner, index) => (
-            <SwiperSlide key={banner.image}>
+          {slides.map((banner, index) => (
+            <SwiperSlide key={`${banner.image}-${index}`}>
               <article className={`home-banner-grid${index === 1 ? " home-banner-grid--reverse-side" : ""}`}>
                 <div className="home-main-banner">
                   <Image
@@ -47,6 +73,8 @@ export default function HomeHero() {
                     alt={banner.alt}
                     fill
                     priority={index === 0}
+                    unoptimized={isRemoteImage(banner.image)}
+                    onError={fallbackImage}
                     sizes="(max-width: 700px) calc(100vw - 32px), 800px"
                     className="home-banner-image"
                   />
@@ -54,7 +82,7 @@ export default function HomeHero() {
                     <p className="home-banner-eyebrow">{banner.eyebrow}</p>
                     <h1>{banner.title}</h1>
                     <p className="home-banner-description">{banner.description}</p>
-                    <button className="home-banner-shop" type="button" onClick={startShopping}>
+                    <button className="home-banner-shop" type="button" onClick={() => open(banner.href)}>
                       {banner.action}<span aria-hidden="true">&rarr;</span>
                     </button>
                   </div>

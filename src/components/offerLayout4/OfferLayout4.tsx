@@ -14,10 +14,13 @@ import type { CartItem } from "../modals/cart/Cart";
 import { readWishlistIds, subscribeToWishlist, toggleWishlistId } from "../../lib/wishlist";
 import catalog from "../products/english.json";
 import text from "./english.json";
+import { fallbackImage, isRemoteImage } from "@/lib/api";
 import "./OfferLayout4.css";
+import VariantChips from "@/components/products/VariantChips";
 
 type CatalogProduct = (typeof catalog.products)[number];
-type Deal = (typeof text.deals)[number];
+type Deal = CatalogProduct & { tag?: string; description?: string };
+export type StealTab = { id: string; label: string; type: string; badge?: string; priceTag?: string; maxPrice?: number };
 
 const money = new Intl.NumberFormat(text.locale, {
   style: "currency",
@@ -96,13 +99,15 @@ function FlameBadge() {
   );
 }
 
-export default function OfferLayout4() {
-  const [activeTabId, setActiveTabId] = useState<string>(text.tabs[0]?.id ?? "trending");
+/** Products from the API (`products`, first tab = trending) with price tabs; without them the sample deals from english.json are shown. */
+export default function OfferLayout4({ products, tabs }: { products?: CatalogProduct[]; tabs?: StealTab[] }) {
+  const allDeals = (products ?? text.deals) as Deal[];
+  const allTabs: StealTab[] = tabs ?? text.tabs;
+  const [activeTabId, setActiveTabId] = useState<string>(allTabs[0]?.id ?? "trending");
   const [saved, setSaved] = useState<string[]>([]);
   const [selected, setSelected] = useState<CatalogProduct | null>(null);
   const [variantProduct, setVariantProduct] = useState<CatalogProduct | null>(null);
   const [variantIndexes, setVariantIndexes] = useState<Record<string, number>>({});
-  const [openVariant, setOpenVariant] = useState<string | null>(null);
   const swiperRef = useRef<SwiperType | null>(null);
   const previousTabId = useRef(activeTabId);
 
@@ -113,15 +118,15 @@ export default function OfferLayout4() {
   }, []);
 
   const filteredDeals = useMemo(() => {
-    const tab = text.tabs.find(t => t.id === activeTabId);
+    const tab = allTabs.find(t => t.id === activeTabId);
     if (!tab || tab.id === "trending") {
-      return text.deals;
+      return allDeals;
     }
     if (tab.maxPrice !== undefined) {
-      return text.deals.filter(deal => deal.price === tab.maxPrice);
+      return allDeals.filter(deal => deal.price <= tab.maxPrice!);
     }
-    return text.deals.filter(deal => deal.tag === tab.id);
-  }, [activeTabId]);
+    return allDeals.filter(deal => deal.tag === tab.id);
+  }, [activeTabId, allDeals, allTabs]);
 
   useEffect(() => {
     const swiper = swiperRef.current;
@@ -161,18 +166,20 @@ export default function OfferLayout4() {
             fill
             sizes="(max-width: 600px) 45vw, (max-width: 1023px) 25vw, 180px"
             draggable={false}
+            unoptimized={isRemoteImage(product.image)}
+            onError={fallbackImage}
           />
           <span className="product-discount-badge">
             {text.discount.replace("{percent}", String(discount))}
           </span>
-          <span
+          {product.rating > 0 && <span
             className="product-image-rating"
             aria-label={text.rating
               .replace("{rating}", String(product.rating))
               .replace("{reviews}", String(product.reviews))}
           >
             ★ {product.rating}
-          </span>
+          </span>}
           <button
             type="button"
             className="product-save"
@@ -195,7 +202,7 @@ export default function OfferLayout4() {
             </svg>
           </button>
         </div>
-        <h3><Link href={`/productDetails?id=${encodeURIComponent(product.id)}`}>{product.name}</Link></h3>
+        <h3><Link href={`/${encodeURIComponent(product.id)}`}>{product.name}</Link></h3>
         <p className="product-description" title={description}>
           {description}
         </p>
@@ -203,14 +210,7 @@ export default function OfferLayout4() {
           <strong>{money.format(variant.price)}</strong>
           <del>{money.format(variant.originalPrice)}</del>
         </div>
-        <div className="product-variant-wrap">
-          <button type="button" className="product-variant-trigger" aria-haspopup="listbox" aria-expanded={openVariant === cardProduct.id} onClick={() => setOpenVariant(current => current === cardProduct.id ? null : cardProduct.id)}>
-            <span>{variant.label}</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 7.5 5 5 5-5" /></svg>
-          </button>
-          {openVariant === cardProduct.id && <div className="product-variant-menu" role="listbox" aria-label={`Choose size for ${product.name}`}>
-            {variants.map((option, optionIndex) => <button type="button" role="option" aria-selected={optionIndex === selectedIndex} key={`${cardProduct.id}-${option.label}`} onClick={() => { setVariantIndexes(current => ({ ...current, [cardProduct.id]: optionIndex })); setOpenVariant(null); }}><span>{option.label}</span><span>{money.format(option.price)}</span></button>)}
-          </div>}
-        </div>
+        <VariantChips name={product.name} variants={variants} selected={selectedIndex} onSelect={index => setVariantIndexes(current => ({ ...current, [cardProduct.id]: index }))} onMore={() => setVariantProduct(cardProduct)} />
         <div className="product-card-actions">
           <button className="product-details-button" type="button" onClick={() => setVariantProduct(cardProduct)}><CartIcon />{text.addToCart}</button>
           <button className="product-quick-view" type="button" aria-label={`View ${product.name} details`} onClick={() => setSelected(cardProduct)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
@@ -231,7 +231,7 @@ export default function OfferLayout4() {
 
         {/* Store Tabs Bar */}
         <div className="steal-tabs-bar" role="tablist" aria-label="Steal deals categories">
-          {text.tabs.map(tab => {
+          {allTabs.map(tab => {
             const isActive = tab.id === activeTabId;
             return (
               <button

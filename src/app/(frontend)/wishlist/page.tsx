@@ -15,6 +15,7 @@ import {
   toggleWishlistId,
 } from "@/lib/wishlist";
 import "./Wishlist.css";
+import VariantChips from "@/components/products/VariantChips";
 
 type Product = (typeof catalog.products)[number];
 const money = new Intl.NumberFormat(catalog.locale, {
@@ -45,7 +46,6 @@ export default function WishlistPage() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [variantProduct, setVariantProduct] = useState<Product | null>(null);
   const [variantIndexes, setVariantIndexes] = useState<Record<string, number>>({});
-  const [openVariant, setOpenVariant] = useState<string | null>(null);
   const savedIdsSnapshot = useSyncExternalStore(
     subscribeToWishlist,
     getWishlistSnapshot,
@@ -113,20 +113,13 @@ export default function WishlistPage() {
                       <HeartIcon />
                     </button>
                   </div>
-                  <h3><Link href={`/productDetails?id=${encodeURIComponent(product.id)}`}>{product.name}</Link></h3>
+                  <h3><Link href={`/${encodeURIComponent(product.id)}`}>{product.name}</Link></h3>
                   <p className="product-description" title={description}>{description}</p>
                   <div className="product-pricing">
                     <strong>{money.format(variant.price)}</strong>
                     <del>{money.format(variant.originalPrice)}</del>
                   </div>
-                  <div className="product-variant-wrap">
-                    <button type="button" className="product-variant-trigger" aria-haspopup="listbox" aria-expanded={openVariant === product.id} onClick={() => setOpenVariant(current => current === product.id ? null : product.id)}>
-                      <span>{variant.label}</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 7.5 5 5 5-5" /></svg>
-                    </button>
-                    {openVariant === product.id && <div className="product-variant-menu" role="listbox" aria-label={`Choose size for ${product.name}`}>
-                      {variants.map((option, index) => <button type="button" role="option" aria-selected={index === selectedIndex} key={`${product.id}-${option.label}`} onClick={() => { setVariantIndexes(current => ({ ...current, [product.id]: index })); setOpenVariant(null); }}><span>{option.label}</span><span>{money.format(option.price)}</span></button>)}
-                    </div>}
-                  </div>
+                  <VariantChips name={product.name} variants={variants} selected={selectedIndex} onSelect={index => setVariantIndexes(current => ({ ...current, [product.id]: index }))} onMore={() => setVariantProduct(product)} />
                   <div className="product-card-actions">
                     <button className="product-details-button" type="button" onClick={() => setVariantProduct(product)}><CartIcon /> Add to Cart</button>
                     <button className="product-quick-view" type="button" aria-label={`View ${product.name} details`} onClick={() => setSelectedProduct(product)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>

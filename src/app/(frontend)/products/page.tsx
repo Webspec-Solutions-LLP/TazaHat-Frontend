@@ -1,185 +1,25 @@
-"use client";
+import type { Metadata } from "next";
+import CityPrompt from "@/components/home/CityPrompt";
+import { cardToProduct } from "@/lib/api";
+import { getShopCatalog, getShopCategories } from "@/lib/server/api";
+import { readCityCookie } from "@/lib/server/city";
+import ProductsCatalog, { type CatalogQueryProps } from "./ProductsCatalog";
 
-import { Suspense, useEffect, useRef, useState } from "react";
-import Image from "next/image";
-import { useSearchParams } from "next/navigation";
-import text from "@/components/products/english.json";
-import AddToCart from "@/components/modals/AddToCart/AddToCart";
-import Variant from "@/components/modals/variant/Variant";
-import type { CartItem } from "@/components/modals/cart/Cart";
-import { readWishlistIds, subscribeToWishlist, toggleWishlistId } from "@/lib/wishlist";
-import "./ProductsList.css";
+export const metadata: Metadata = { title: "Products | TazaHat" };
 
-type Product = (typeof text.products)[number];
-const money = new Intl.NumberFormat(text.locale, { style: "currency", currency: text.currency, maximumFractionDigits: 0 });
+const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) || undefined;
 
-function CartIcon() {
-  return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M2 3h2l2.4 12.2a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6L22 8H5" /><circle cx="9" cy="21" r="1" /><circle cx="19" cy="21" r="1" /></svg>;
-}
+/** Server component: filters come from the address bar, products for the visitor's city are fetched here (20 per page). */
+export default async function ProductsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const sp = await searchParams;
+  const city = await readCityCookie();
+  if (!city) return <main className="products-section catalog-page"><CityPrompt /></main>;
 
-export default function ProductsPage() {
-  return <Suspense fallback={<main className="products-section catalog-page" aria-busy="true" />}><ProductsContent /></Suspense>;
-}
-
-function ProductsContent() {
-  const searchParams = useSearchParams();
-  const lockedCategory = searchParams.get("category");
-  const [view, setView] = useState<'grid' | 'list'>('grid');
-  const [sortBy, setSortBy] = useState("featured");
-  const [isSortOpen, setIsSortOpen] = useState(false);
-  const sortRef = useRef<HTMLDivElement>(null);
-  const [categories, setCategories] = useState<string[]>(() => lockedCategory ? [lockedCategory] : []);
-  const [subcategories, setSubcategories] = useState<string[]>([]);
-  const [rating, setRating] = useState(0);
-  const ceiling = Math.max(...text.products.map(p => p.price));
-  const [price, setPrice] = useState(ceiling);
-  const categoryOptions = [...new Set([...text.products.map(p => p.category), ...(lockedCategory ? [lockedCategory] : [])])];
-  const subcategoryOptions = [...new Set(text.products.filter(p => !categories.length || categories.includes(p.category)).map(p => p.subcategory))];
-  const filtered = text.products.filter(p => (!categories.length || categories.includes(p.category)) && (!subcategories.length || subcategories.includes(p.subcategory)) && p.rating >= rating && p.price <= price);
-  useEffect(() => { setCategories(lockedCategory ? [lockedCategory] : []); setSubcategories([]); }, [lockedCategory]);
-  useEffect(() => {
-    if (!isSortOpen) return;
-    const closeOnOutsideClick = (event: PointerEvent) => {
-      if (!sortRef.current?.contains(event.target as Node)) setIsSortOpen(false);
-    };
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setIsSortOpen(false);
-    };
-    document.addEventListener("pointerdown", closeOnOutsideClick);
-    document.addEventListener("keydown", closeOnEscape);
-    return () => {
-      document.removeEventListener("pointerdown", closeOnOutsideClick);
-      document.removeEventListener("keydown", closeOnEscape);
-    };
-  }, [isSortOpen]);
-  const reset = () => { setCategories(lockedCategory ? [lockedCategory] : []); setSubcategories([]); setRating(0); setPrice(ceiling); };
-  const [saved, setSaved] = useState<string[]>([]);
-  const [selected, setSelected] = useState<Product | null>(null);
-  const [variantProduct, setVariantProduct] = useState<Product | null>(null);
-  const [variantIndexes, setVariantIndexes] = useState<Record<string, number>>({});
-  const [openVariant, setOpenVariant] = useState<string | null>(null);
-  useEffect(() => {
-    const refreshWishlist = () => setSaved(readWishlistIds());
-    refreshWishlist();
-    return subscribeToWishlist(refreshWishlist);
-  }, []);
-  const sortOptions = [
-    { value: "featured", label: "Featured" },
-    { value: "price-low", label: "Price: Low to High" },
-    { value: "price-high", label: "Price: High to Low" },
-    { value: "rating", label: "Top Rated" },
-    { value: "name", label: "Name: A to Z" },
-  ];
-  const sortedProducts = [...filtered].sort((a, b) => {
-    switch (sortBy) {
-      case "price-low": return a.price - b.price;
-      case "price-high": return b.price - a.price;
-      case "rating": return b.rating - a.rating;
-      case "name": return a.name.localeCompare(b.name);
-      default: return 0;
-    }
-  });
-
-  const renderProduct = (product: Product) => {
-    const isSaved = saved.includes(product.id);
-    const variants = product.variants?.length ? product.variants : [{ label: product.weight, amount: 1, unit: "pack", price: product.price, originalPrice: product.originalPrice }];
-    const initialVariant = Math.max(0, variants.findIndex(variant => variant.price === product.price));
-    const selectedIndex = variantIndexes[product.id] ?? initialVariant;
-    const variant = variants[selectedIndex] ?? variants[0];
-    const discount = variant.originalPrice > 0 ? Math.max(0, Math.round((1 - variant.price / variant.originalPrice) * 100)) : 0;
-    const description = `${product.name} selected for freshness and quality, ready for your everyday meals.`;
-    return (
-      <article className="product-card" key={product.id}>
-        <div className="product-image">
-          <Image src={product.image} alt={product.name} fill sizes="(max-width: 600px) 45vw, (max-width: 1023px) 25vw, 180px" draggable={false} />
-          <span className="product-discount-badge">{text.discount.replace("{percent}", String(discount))}</span>
-          <span className="product-image-rating" aria-label={text.rating.replace("{rating}", String(product.rating)).replace("{reviews}", String(product.reviews))}>★ {product.rating}</span>
-          <button type="button" className="product-save" aria-pressed={isSaved} aria-label={(isSaved ? text.unsave : text.save).replace("{name}", product.name)} onClick={() => setSaved(toggleWishlistId(product.id))}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" /></svg>
-          </button>
-        </div>
-        <h3><a href={`/productDetails?id=${encodeURIComponent(product.id)}`}>{product.name}</a></h3>
-        <p className="product-description" title={description}>{description}</p>
-        <div className="product-pricing"><strong>{money.format(variant.price)}</strong><del>{money.format(variant.originalPrice)}</del></div>
-        <div className="product-variant-wrap">
-          <button type="button" className="product-variant-trigger" aria-haspopup="listbox" aria-expanded={openVariant === product.id} onClick={() => setOpenVariant(current => current === product.id ? null : product.id)}>
-            <span>{variant.label}</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 7.5 5 5 5-5" /></svg>
-          </button>
-          {openVariant === product.id && <div className="product-variant-menu" role="listbox" aria-label={`Choose size for ${product.name}`}>
-            {variants.map((option, index) => <button type="button" role="option" aria-selected={index === selectedIndex} key={`${product.id}-${option.label}`} onClick={() => { setVariantIndexes(current => ({ ...current, [product.id]: index })); setOpenVariant(null); }}><span>{option.label}</span><span>{money.format(option.price)}</span></button>)}
-          </div>}
-        </div>
-        <div className="product-card-actions">
-          <button className="product-details-button" type="button" onClick={() => setVariantProduct(product)}><CartIcon />Add to Cart</button>
-          <button className="product-quick-view" type="button" aria-label={`View ${product.name} details`} onClick={() => setSelected(product)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
-        </div>
-      </article>
-    );
-  };
-
-  return (
-    <main className="products-section catalog-page">
-      <aside className="catalog-filters" aria-label="Product filters">
-        <div className="catalog-filter-title"><h2>Filter By</h2><button type="button" onClick={reset}>Reset</button></div>
-        <details open><summary>Filter by Category</summary><div className="catalog-filter-options">{categoryOptions.map(option => <label key={option}><input type="checkbox" checked={categories.includes(option)} disabled={Boolean(lockedCategory)} onChange={() => { setCategories(current => current.includes(option) ? current.filter(x => x !== option) : [...current, option]); setSubcategories([]); }} />{option}<span>{text.products.filter(p => p.category === option).length}</span></label>)}</div></details>
-        <details open><summary>Filter by Subcategory</summary><div className="catalog-filter-options">{subcategoryOptions.map(option => <label key={option}><input type="checkbox" checked={subcategories.includes(option)} onChange={() => setSubcategories(current => current.includes(option) ? current.filter(x => x !== option) : [...current, option])} />{option}</label>)}</div></details>
-        <details open><summary>Filter by Rating</summary><div className="catalog-filter-options">{[0, 4, 4.5, 4.7].map(value => <label key={value}><input type="radio" name="rating" checked={rating === value} onChange={() => setRating(value)} />{value === 0 ? 'All ratings' : '? ' + value + ' & above'}</label>)}</div></details>
-        <details open><summary>Filter by Price</summary><div className="catalog-price"><label htmlFor="catalog-price">Maximum price <strong>{money.format(price)}</strong></label><input id="catalog-price" type="range" min="0" max={ceiling} value={price} onChange={event => setPrice(Number(event.target.value))} /><div><span>{money.format(0)}</span><span>{money.format(ceiling)}</span></div></div></details>
-      </aside>
-      <section className="catalog-results" aria-labelledby="catalog-heading">
-        <header className="catalog-toolbar">
-          <div><h1 id="catalog-heading">All Products</h1><p role="status">{filtered.length} of {text.products.length} products</p></div>
-          <div className="catalog-toolbar-actions">
-            <div className={`catalog-sort${isSortOpen ? " is-open" : ""}`} ref={sortRef}>
-              <button
-                type="button"
-                className="catalog-sort-trigger"
-                aria-haspopup="listbox"
-                aria-expanded={isSortOpen}
-                aria-controls="catalog-sort-options"
-                onClick={() => setIsSortOpen(open => !open)}
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 6h16M7 12h10m-7 6h4" /></svg>
-                <span>Sort: <strong>{sortOptions.find(option => option.value === sortBy)?.label}</strong></span>
-                <svg className="catalog-sort-chevron" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m5 7.5 5 5 5-5" /></svg>
-              </button>
-              <div
-                id="catalog-sort-options"
-                className="catalog-sort-menu"
-                role="listbox"
-                aria-label="Sort products"
-                aria-hidden={!isSortOpen}
-              >
-                <div className="catalog-sort-menu-inner">
-                  {sortOptions.map(option => (
-                    <button
-                      type="button"
-                      role="option"
-                      aria-selected={sortBy === option.value}
-                      tabIndex={isSortOpen ? 0 : -1}
-                      key={option.value}
-                      onClick={() => {
-                        setSortBy(option.value);
-                        setIsSortOpen(false);
-                      }}
-                    >
-                      {option.label}
-                      {sortBy === option.value && <span aria-hidden="true">✓</span>}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div className="catalog-view-toggle" role="group" aria-label="Product display"><button type="button" aria-label="Grid view" aria-pressed={view === 'grid'} onClick={() => setView('grid')}><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button><button type="button" aria-label="List view" aria-pressed={view === 'list'} onClick={() => setView('list')}><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M9 5h12M9 12h12M9 19h12M3 5h2M3 12h2M3 19h2"/></svg></button></div>
-          </div>
-        </header>
-        {sortedProducts.length ? <div className={'catalog-cards catalog-cards--' + view}>{sortedProducts.map(renderProduct)}</div> : <div className="catalog-empty"><h2>No products found</h2><p>Try changing your filters to see more fresh picks.</p><button type="button" onClick={reset}>Clear filters</button></div>}
-      </section>
-      {selected && <AddToCart key={selected.id} product={selected} locale={text.locale} currency={text.currency} saved={saved.includes(selected.id)} onToggleWishlist={() => setSaved(toggleWishlistId(selected.id))} onClose={() => setSelected(null)} onOpenProduct={setSelected} />}
-      {variantProduct && <Variant product={variantProduct} currency={text.currency} onClose={() => setVariantProduct(null)} onGoToCart={(item: CartItem) => {
-        window.dispatchEvent(new CustomEvent("tazahat:add-cart-item", { detail: item }));
-        setVariantProduct(null);
-      }} />}
-    </main>
-  );
+  const query: CatalogQueryProps = { category: first(sp.category), sub: first(sp.sub), q: first(sp.q), sort: first(sp.sort), maxPrice: first(sp.maxPrice) };
+  const [firstPage, categories] = await Promise.all([
+    getShopCatalog(city.id, query, 1, 20).catch(() => null),
+    getShopCategories(city.id).catch(() => []),
+  ]);
+  if (!firstPage) return <main className="products-section catalog-page"><p className="home-city-status home-city-status--error" role="alert">We could not load products right now. Please try again.</p></main>;
+  return <ProductsCatalog key={JSON.stringify(query)} initial={firstPage.items.map(cardToProduct)} total={firstPage.total} categories={categories} query={query} cityName={city.name} />;
 }

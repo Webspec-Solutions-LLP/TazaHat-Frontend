@@ -705,3 +705,12 @@ body::-webkit-scrollbar {
   .home-newsletter-fields input { padding-inline: 7px; font-size: 9px; }
   .home-newsletter-fields button { padding-inline: 8px; font-size: 9px; }
 }
+
+/* delivery-city prompt and status lines on the home page */
+.home-city-prompt { max-width: 640px; margin: 28px auto; padding: 28px 20px; text-align: center; border: 1px solid rgb(18 47 33 / 12%); border-radius: 16px; background: #f4faf5; }
+.home-city-prompt h2 { margin: 0 0 6px; font-size: 22px; color: #122f21; }
+.home-city-prompt p { margin: 0 0 16px; color: #4d6657; font-size: 14px; }
+.home-city-prompt button { padding: 11px 20px; border: 0; border-radius: 10px; background: #1b7f3b; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+.home-city-status { margin: 22px auto; padding: 0 16px; text-align: center; color: #4d6657; font-size: 14px; }
+.home-city-status--error { color: #b3261e; }
+.home-city-status button { margin-left: 6px; border: 0; background: none; color: inherit; font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; }

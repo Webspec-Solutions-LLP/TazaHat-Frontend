@@ -3,12 +3,16 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Cart, { type CartItem } from "../modals/cart/Cart";
 import AddToCart from "../modals/AddToCart/AddToCart";
 import Location from "../modals/location/Location";
 import Login from "../modals/login/Login";
-import productCatalog from "../products/english.json";
+import { searchSuggestionsAction } from "@/app/actions";
+import { SearchSuggestionSkeleton } from "../skeleton/Skeletons";
+import { fallbackImage, isRemoteImage, type Product as CatalogProduct } from "@/lib/api";
 import { readWishlistIds, subscribeToWishlist, toggleWishlistId } from "../../lib/wishlist";
+import { OPEN_LOCATION_EVENT, useCity } from "../../lib/city";
 import "./Navbar.css";
 
 const SEARCH_HISTORY_KEY = "tazahat-search-history";
@@ -16,25 +20,42 @@ const MAX_SEARCH_HISTORY = 8;
 
 interface NavbarProps {
   cartCount?: number;
-  deliveryLocation?: string;
   onSearch?: (query: string) => void;
 }
 
 export default function Navbar({
   cartCount = 0,
-  deliveryLocation = "Kolkata, West Bengal",
   onSearch,
 }: NavbarProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
+  const searchFormRef = useRef<HTMLFormElement>(null);
   const [isSearchResultsOpen, setIsSearchResultsOpen] = useState(false);
   const [isCompactSearchOpen, setIsCompactSearchOpen] = useState(false);
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [selectedProduct, setSelectedProduct] = useState<(typeof productCatalog.products)[number] | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<CatalogProduct | null>(null);
   const [savedProducts, setSavedProducts] = useState<string[]>([]);
   const [hasCustomCart, setHasCustomCart] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isLocationOpen, setIsLocationOpen] = useState(false);
+  const { city, ready: cityReady } = useCity();
+  const deliveryLocation = city ? city.name : "Select your city";
+  const askedForCity = useRef(false);
+  // first visit: ask for the delivery city; other parts of the page can ask again with the "open location" event
+  useEffect(() => {
+    if (cityReady && !city && !askedForCity.current) {
+      askedForCity.current = true;
+      setIsLocationOpen(true);
+    }
+  }, [cityReady, city]);
+  useEffect(() => {
+    const open = () => setIsLocationOpen(true);
+    window.addEventListener(OPEN_LOCATION_EVENT, open);
+    return () => window.removeEventListener(OPEN_LOCATION_EVENT, open);
+  }, []);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement>(null);
@@ -61,15 +82,36 @@ export default function Navbar({
     setHasCustomCart(true);
     setCartItems(items);
   }, []);
-  const searchResults = searchQuery.trim()
-    ? productCatalog.products
-        .filter((product) =>
-          `${product.name} ${product.category} ${product.subcategory}`
-            .toLowerCase()
-            .includes(searchQuery.trim().toLowerCase())
-        )
-        .slice(0, 6)
-    : [];
+  // Search suggestions come from the server (for the delivery city), a moment after the visitor stops typing.
+  const [searchResults, setSearchResults] = useState<CatalogProduct[]>([]);
+  const [searchedFor, setSearchedFor] = useState("");
+  useEffect(() => {
+    const text = searchQuery.trim();
+    if (text.length < 2) { const reset = window.setTimeout(() => { setSearchResults([]); setSearchedFor(""); }, 0); return () => window.clearTimeout(reset); }
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      void searchSuggestionsAction(text)
+        .then((found) => { if (!cancelled) { setSearchResults(found); setSearchedFor(text); } })
+        .catch(() => { if (!cancelled) { setSearchResults([]); setSearchedFor(text); } });
+    }, 250);
+    return () => { cancelled = true; window.clearTimeout(timer); };
+  }, [searchQuery]);
+  // the answer on screen is for what is typed now (not an older, shorter word)
+  const isSearching = searchQuery.trim().length >= 2 && searchedFor !== searchQuery.trim();
+  // on the results page the box shows what was searched
+  const urlQuery = pathname === "/products" ? searchParams.get("q") ?? "" : "";
+  const [shownUrlQuery, setShownUrlQuery] = useState("");
+  if (urlQuery !== shownUrlQuery) {
+    setShownUrlQuery(urlQuery);
+    setSearchQuery(urlQuery);
+  }
+  // click outside the search box closes the suggestions
+  useEffect(() => {
+    if (!isSearchResultsOpen) return;
+    const close = (event: PointerEvent) => { if (!searchFormRef.current?.contains(event.target as Node)) setIsSearchResultsOpen(false); };
+    document.addEventListener("pointerdown", close);
+    return () => document.removeEventListener("pointerdown", close);
+  }, [isSearchResultsOpen]);
   const visibleCartCount = hasCustomCart
     ? cartItems.reduce((count, item) => count + item.quantity, 0)
     : cartCount;
@@ -103,12 +145,20 @@ export default function Navbar({
     return query;
   };
 
+  /** open the results page (/products?q=...) for a search */
+  const goSearch = (text: string) => {
+    const query = rememberSearch(text);
+    if (!query) return;
+    setSearchQuery(query);
+    setIsSearchResultsOpen(false);
+    setIsCompactSearchOpen(false);
+    searchInputRef.current?.blur();
+    onSearch?.(query);
+    router.push(`/products?q=${encodeURIComponent(query)}`);
+  };
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const query = rememberSearch(searchQuery);
-    if (!query) return;
-    setIsSearchResultsOpen(true);
-    onSearch?.(query);
+    goSearch(searchQuery);
   };
 
   const clearSearchHistory = () => {
@@ -147,7 +197,7 @@ export default function Navbar({
     return () => window.removeEventListener("tazahat:add-cart-item", handleSectionAddToCart);
   }, [addCartItem]);
 
-  const handleAddToCart = (product: (typeof productCatalog.products)[number]) => {
+  const handleAddToCart = (product: CatalogProduct) => {
     addCartItem({
       id: product.id,
       name: product.name,
@@ -176,6 +226,26 @@ export default function Navbar({
     cartItems.filter(
       (item) => item.id === productId || item.id.startsWith(`${productId}-`)
     );
+
+  // Other parts of the page (the product page's quantity stepper) see the cart through these events and can change a quantity.
+  const cartItemsRef = useRef(cartItems);
+  useEffect(() => {
+    cartItemsRef.current = cartItems;
+    window.dispatchEvent(new CustomEvent("tazahat:cart-changed", { detail: cartItems }));
+  }, [cartItems]);
+  useEffect(() => {
+    const answer = () => window.dispatchEvent(new CustomEvent("tazahat:cart-changed", { detail: cartItemsRef.current }));
+    const change = (event: Event) => {
+      const { id, delta } = (event as CustomEvent<{ id: string; delta: number }>).detail ?? {};
+      if (typeof id === "string" && typeof delta === "number") updateCartQuantity(id, delta);
+    };
+    window.addEventListener("tazahat:cart-request", answer);
+    window.addEventListener("tazahat:update-cart-quantity", change);
+    return () => {
+      window.removeEventListener("tazahat:cart-request", answer);
+      window.removeEventListener("tazahat:update-cart-quantity", change);
+    };
+  }, [updateCartQuantity]);
 
   const closeProductDetails = useCallback(() => setSelectedProduct(null), []);
 
@@ -220,7 +290,7 @@ export default function Navbar({
           <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"/><path d="m16.5 16.5 4 4"/></svg>
         </button>
         {isCompactSearchOpen && <button type="button" className="navbar-search-backdrop" aria-label="Close search" onClick={() => setIsCompactSearchOpen(false)} />}
-        <form className={`navbar-search-form${isCompactSearchOpen ? " is-compact-open" : ""}`} onSubmit={handleSearchSubmit} role="search">
+        <form ref={searchFormRef} className={`navbar-search-form${isCompactSearchOpen ? " is-compact-open" : ""}`} onSubmit={handleSearchSubmit} role="search">
           <div className="navbar-search-box">
             <span className="navbar-search-overlay-icon" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7.5"/><path d="m16.5 16.5 4 4"/></svg></span>
             <input
@@ -234,8 +304,9 @@ export default function Navbar({
                 const query = e.target.value;
                 setSearchQuery(query);
                 setIsSearchResultsOpen(Boolean(query.trim()));
-                if (query.trim()) rememberSearch(query);
               }}
+              onKeyDown={(e) => { if (e.key === "Escape") { setIsSearchResultsOpen(false); searchInputRef.current?.blur(); } }}
+              autoComplete="off"
               aria-label="Search products"
               aria-controls="navbar-search-results"
             />
@@ -287,12 +358,7 @@ export default function Navbar({
                       className="navbar-search-history-item"
                       key={query}
                       type="button"
-                      onClick={() => {
-                        setSearchQuery(query);
-                        setIsSearchResultsOpen(true);
-                        rememberSearch(query);
-                        onSearch?.(query);
-                      }}
+                      onClick={() => goSearch(query)}
                     >
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
                       <span>{query}</span>
@@ -308,17 +374,21 @@ export default function Navbar({
                   );
                   return (
                     <div className="navbar-search-result" key={product.id} role="listitem">
+                      <Link href={`/${encodeURIComponent(product.id)}`} className="navbar-search-result-link" onClick={() => setIsSearchResultsOpen(false)}>
                       <Image
                         className="navbar-search-result-image"
                         src={product.image}
                         alt=""
                         width={44}
                         height={44}
+                        unoptimized={isRemoteImage(product.image)}
+                        onError={fallbackImage}
                       />
                       <span className="navbar-search-result-info">
                         <span className="navbar-search-result-name">{product.name}</span>
                         <span className="navbar-search-result-meta">{product.weight} · Rs {product.price}</span>
                       </span>
+                      </Link>
                       {productQuantity > 0 ? (
                         <div className="navbar-search-quantity" role="group" aria-label={`Quantity of ${product.name} in cart`}>
                           <button
@@ -358,8 +428,13 @@ export default function Navbar({
                     </div>
                   );
                 })
+              ) : isSearching ? (
+                <SearchSuggestionSkeleton />
               ) : (
-                <p className="navbar-search-empty">No matching products found.</p>
+                <p className="navbar-search-empty">No products found for “{searchQuery.trim()}” in your city.</p>
+              )}
+              {searchQuery.trim() && searchResults.length > 0 && (
+                <button type="button" className="navbar-search-see-all" onClick={() => goSearch(searchQuery)}>See all results for “{searchQuery.trim()}” <span aria-hidden="true">→</span></button>
               )}
             </div>
           )}
@@ -512,8 +587,8 @@ export default function Navbar({
         <AddToCart
           key={selectedProduct.id}
           product={selectedProduct}
-          locale={productCatalog.locale}
-          currency={productCatalog.currency}
+          locale="en-IN"
+          currency="INR"
           saved={savedProducts.includes(selectedProduct.id)}
           onToggleWishlist={() => setSavedProducts(toggleWishlistId(selectedProduct.id))}
           onClose={closeProductDetails}
@@ -522,7 +597,7 @@ export default function Navbar({
           onUpdateCartQuantity={updateCartQuantity}
         />
       )}
-      {isLocationOpen && <Location deliveryLocation={deliveryLocation} onClose={() => setIsLocationOpen(false)} onLogin={() => { setIsLocationOpen(false); setIsLoginOpen(true); }} />}
+      {isLocationOpen && <Location onClose={() => setIsLocationOpen(false)} onLogin={() => { setIsLocationOpen(false); setIsLoginOpen(true); }} />}
       {isLoginOpen && <Login onClose={() => setIsLoginOpen(false)} />}
     </header>
   );

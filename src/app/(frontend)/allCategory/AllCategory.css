@@ -15,3 +15,6 @@
 .all-category-grid .category-arrow { width: 24px; height: 24px; margin-top: 9px; }
 @media (max-width: 1100px) { .all-category-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 @media (max-width: 600px) { .all-category-page { padding-block: 20px 32px; }.all-category-page .category-container { width: calc(100% - 32px); }.all-category-page .category-header { align-items: center; }.all-category-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }.all-category-grid .category-card { min-height: 0; }.all-category-grid .category-image { aspect-ratio: 1 / .82; }.all-category-grid .category-details { padding: 8px 8px 12px; }.all-category-grid .category-card h2 { font-size: 13px; } }
+.all-category-skeleton { min-height: 220px; border-radius: 12px; }
+.all-category-status { margin: 22px 0 6px; text-align: center; color: #4b6a86; font-size: 14px; }
+.all-category-status button { margin-left: 6px; border: 0; background: none; color: #0b5cad; font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; }

@@ -4,7 +4,8 @@ import Footer from "@/components/footer/Footer";
 import FloatingMessageButton from "@/components/floatingMessage/FloatingMessageButton";
 import BottomNavigation from "@/components/bottomNavigation/BottomNavigation";
 import FeedbackButton from "@/components/feedbackButton/FeedbackButton";
-import "leaflet/dist/leaflet.css";
+import { CityProvider } from "@/lib/city";
+import { readCityCookie } from "@/lib/server/city";
 import "./Home.css";
 
 export const metadata: Metadata = {
@@ -12,20 +13,23 @@ export const metadata: Metadata = {
   description: "TazaHat Online Marketplace",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const city = await readCityCookie();
   return (
     <html lang="en">
       <body className="min-h-screen flex flex-col">
+        <CityProvider value={city}>
         <Navbar />
         <main className="flex-1 frontend-layout-main">{children}</main>
         <Footer />
         <FloatingMessageButton />
         <BottomNavigation />
         <FeedbackButton />
+        </CityProvider>
       </body>
     </html>
   );

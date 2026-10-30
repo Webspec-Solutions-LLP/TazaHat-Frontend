@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useId } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import "./Cart.css";
+import { fallbackImage, isRemoteImage } from "@/lib/api";
 
 export type CartItem = {
   id: string;
@@ -243,6 +244,8 @@ export default function Cart({
                       fill
                       sizes="80px"
                       className="cart-item-image"
+                      unoptimized={isRemoteImage(item.image)}
+                      onError={fallbackImage}
                     />
                   </div>
 

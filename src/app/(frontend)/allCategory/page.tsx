@@ -1,36 +1,34 @@
-import Image from "next/image";
+import type { Metadata } from "next";
 import Link from "next/link";
-import categoryText from "@/components/category/english.json";
+import CityPrompt from "@/components/home/CityPrompt";
+import english from "@/components/category/english.json";
+import "@/components/skeleton/Skeleton.css";
+import { categoryToItem } from "@/lib/api";
+import { getShopCategoryPage } from "@/lib/server/api";
+import { readCityCookie } from "@/lib/server/city";
+import AllCategories from "./AllCategories";
 import "@/components/category/Category.css";
 import "./AllCategory.css";
 
-export default function AllCategoryPage() {
+export const metadata: Metadata = { title: "All categories | TazaHat" };
+const PAGE_SIZE = 12;
+
+/** Server component: the first page of the visitor's city categories; the rest load while scrolling. */
+export default async function AllCategoryPage() {
+  const city = await readCityCookie();
+  const first = city ? await getShopCategoryPage(city.id, 1, PAGE_SIZE).catch(() => null) : null;
   return (
-    <main className="all-category-page category-section" lang={categoryText.language}>
+    <main className="all-category-page category-section" lang={english.language}>
       <div className="category-container">
         <header className="category-header">
           <div>
-            <h1>{categoryText.heading}</h1>
-            <p>{categoryText.description}</p>
+            <h1>{english.heading}</h1>
+            <p>{english.description}</p>
           </div>
           <Link className="category-view-all" href="/">Back to Home</Link>
         </header>
-        <ul className="all-category-grid" aria-label={categoryText.allCategoriesLabel}>
-          {categoryText.categories.map((category) => (
-            <li key={category.id}>
-              <Link className="category-card" href={`/products?category=${encodeURIComponent(category.name)}`} style={{ backgroundColor: category.color }}>
-              <div className="category-image">
-                <Image src={`${category.image}?v=transparent-2`} unoptimized draggable={false} alt="" fill sizes="(max-width: 600px) 42vw, (max-width: 1023px) 26vw, 190px" />
-              </div>
-              <div className="category-details">
-                <h2>{category.name}</h2>
-                <p className="category-count"><strong>{category.types}</strong> {category.types === 1 ? categoryText.productType : categoryText.productTypes}</p>
-                <span className="category-arrow" aria-hidden="true">→</span>
-              </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        {!city ? <CityPrompt /> : !first ? <p className="home-city-status home-city-status--error" role="alert">We could not load the categories right now. Please try again.</p>
+          : <AllCategories initial={first.categories.map((c, i) => categoryToItem(c, i))} hasMoreInitially={first.page * first.limit < first.total} />}
       </div>
     </main>
   );
