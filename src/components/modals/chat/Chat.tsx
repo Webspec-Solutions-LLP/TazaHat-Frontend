@@ -21,6 +21,8 @@ type ChatMessage = {
   author: string;
   text: string;
   time: string;
+  image?: string;
+  replyTo?: { author: string; text: string; image?: string };
   order?: OrderLine[];
   orderStatus?: "placed" | "cancelled";
   product?: Pick<(typeof productCatalog.products)[number], "id" | "name" | "image">;
@@ -146,10 +148,16 @@ export default function Chat({ onClose, product }: { onClose: () => void; produc
     { id: "product-question", sender: "ai", author: "TazaHat Assistant", text: `Hi! What would you like to know about ${product.name}? Ask me about its freshness, size, or how to prepare it.`, time: "Now", product },
   ] : initialMessages);
   const [message, setMessage] = useState("");
+  const [attachment, setAttachment] = useState<{ name: string; dataUrl: string } | null>(null);
+  const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null);
+  const [openMessageMenuId, setOpenMessageMenuId] = useState<string | null>(null);
+  const [attachmentError, setAttachmentError] = useState("");
   const [isReplying, setIsReplying] = useState(false);
   const [isTicketPromptOpen, setIsTicketPromptOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messageInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const replyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -182,11 +190,13 @@ export default function Chat({ onClose, product }: { onClose: () => void; produc
   const sendMessage = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const trimmed = message.trim();
-    if (!trimmed || isReplying || isClosing) return;
+    if ((!trimmed && !attachment) || isReplying || isClosing) return;
 
     const hasActiveOrder = messages.some((item) => item.orderStatus === "placed");
-    const reply = createReply(trimmed, hasActiveOrder);
+    const reply = createReply(trimmed || "shared an image", hasActiveOrder);
     const timestamp = Date.now();
+    const sentAttachment = attachment;
+    const sentReply = replyingTo;
 
     setMessages((current) => [
       ...current,
@@ -195,10 +205,15 @@ export default function Chat({ onClose, product }: { onClose: () => void; produc
         sender: "customer",
         author: "You",
         text: trimmed,
+        ...(sentAttachment ? { image: sentAttachment.dataUrl } : {}),
+        ...(sentReply ? { replyTo: { author: sentReply.author, text: sentReply.text, ...(sentReply.image ? { image: sentReply.image } : {}) } } : {}),
         time: currentTime(),
       },
     ]);
     setMessage("");
+    setAttachment(null);
+    setReplyingTo(null);
+    setAttachmentError("");
     setIsReplying(true);
 
     replyTimerRef.current = setTimeout(() => {
@@ -219,6 +234,39 @@ export default function Chat({ onClose, product }: { onClose: () => void; produc
       ]);
       setIsReplying(false);
     }, 750);
+  };
+
+  const pickImage = (file?: File) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setAttachmentError("Choose an image file.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setAttachmentError("Choose an image smaller than 5 MB.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        setAttachment({ name: file.name, dataUrl: reader.result });
+        setAttachmentError("");
+      }
+    };
+    reader.onerror = () => setAttachmentError("Could not read this image. Try another one.");
+    reader.readAsDataURL(file);
+  };
+
+  const startReply = (chatMessage: ChatMessage) => {
+    setReplyingTo(chatMessage);
+    setOpenMessageMenuId(null);
+    messageInputRef.current?.focus();
+  };
+
+  const deleteMessage = (id: string) => {
+    setMessages((current) => current.filter((item) => item.id !== id));
+    if (replyingTo?.id === id) setReplyingTo(null);
+    setOpenMessageMenuId(null);
   };
 
   return (
@@ -259,7 +307,26 @@ export default function Chat({ onClose, product }: { onClose: () => void; produc
         {messages.map((chatMessage) => (
           <article className={`chat-message chat-message--${chatMessage.sender}`} key={chatMessage.id}>
             <span className="chat-message-author">{chatMessage.author}</span>
-            <p>{chatMessage.text}</p>
+            <div className="chat-message-actions">
+              <button type="button" className="chat-message-menu-toggle" aria-label={`More options for ${chatMessage.author}'s message`} aria-expanded={openMessageMenuId === chatMessage.id} onClick={() => setOpenMessageMenuId((current) => current === chatMessage.id ? null : chatMessage.id)}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+              </button>
+              {openMessageMenuId === chatMessage.id && (
+                <div className="chat-message-menu" role="menu">
+                  <button type="button" role="menuitem" onClick={() => startReply(chatMessage)}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m9 14-5-5 5-5"/><path d="M4 9h9a7 7 0 0 1 7 7v3"/></svg>Reply</button>
+                  <button type="button" role="menuitem" onClick={() => deleteMessage(chatMessage.id)}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m4 4v6m6-6v6"/></svg>Delete</button>
+                </div>
+              )}
+            </div>
+            {chatMessage.replyTo && (
+              <div className="chat-quoted-message">
+                <strong>{chatMessage.replyTo.author}</strong>
+                {chatMessage.replyTo.image && <Image src={chatMessage.replyTo.image} alt="Replied image" width={80} height={80} unoptimized />}
+                <span>{chatMessage.replyTo.text || (chatMessage.replyTo.image ? "Photo" : "Message")}</span>
+              </div>
+            )}
+            {chatMessage.text && <p>{chatMessage.text}</p>}
+            {chatMessage.image && <Image className="chat-message-image" src={chatMessage.image} alt="Image shared in chat" width={640} height={480} unoptimized />}
             {chatMessage.product && (
               <Link className="chat-product-tag" href={`/productDetails?id=${encodeURIComponent(chatMessage.product.id)}`} aria-label={`View ${chatMessage.product.name} details`} onClick={closeChat}>
                 <span className="chat-product-tag-image"><Image src={chatMessage.product.image} alt="" fill sizes="42px" /></span>
@@ -311,16 +378,37 @@ export default function Chat({ onClose, product }: { onClose: () => void; produc
             <button className="chat-ticket-prompt-dismiss" type="button" aria-label="Dismiss ticket prompt" onClick={() => setIsTicketPromptOpen(false)}>×</button>
           </div>
         )}
+        {replyingTo && (
+          <div className="chat-composer-context chat-composer-reply">
+            <span className="chat-reply-accent" />
+            {replyingTo.image && <Image src={replyingTo.image} alt="" width={76} height={76} unoptimized />}
+            <span className="chat-composer-context-copy"><strong>Replying to {replyingTo.author}</strong><small>{replyingTo.text || (replyingTo.image ? "Photo" : "Message")}</small></span>
+            <button type="button" aria-label="Cancel reply" onClick={() => setReplyingTo(null)}>×</button>
+          </div>
+        )}
+        {attachment && (
+          <div className="chat-composer-context chat-image-attachment">
+            <Image src={attachment.dataUrl} alt="Selected image preview" width={76} height={76} unoptimized />
+            <span className="chat-composer-context-copy"><strong>Image ready to send</strong><small>{attachment.name}</small></span>
+            <button type="button" aria-label="Remove selected image" onClick={() => setAttachment(null)}>×</button>
+          </div>
+        )}
+        {attachmentError && <p className="chat-attachment-error" role="alert">{attachmentError}</p>}
+        <input ref={imageInputRef} className="chat-sr-only" type="file" accept="image/*" aria-label="Choose an image to send" onChange={(event) => { pickImage(event.target.files?.[0]); event.target.value = ""; }} />
         <label className="chat-sr-only" htmlFor="chat-message-input">Send a message to TazaHat support</label>
         <input
+          ref={messageInputRef}
           id="chat-message-input"
           value={message}
           onChange={(event) => setMessage(event.target.value)}
           placeholder="Message… try “order Rohu Fish x2” or “cancel order”"
           maxLength={1000}
-          disabled={isReplying}
+          disabled={isReplying || isClosing}
         />
-        <button type="submit" disabled={!message.trim() || isReplying} aria-label="Send message">
+        <button className="chat-attachment-button" type="button" disabled={isReplying || isClosing} aria-label="Pick an image" onClick={() => imageInputRef.current?.click()}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+        </button>
+        <button className="chat-send-button" type="submit" disabled={(!message.trim() && !attachment) || isReplying || isClosing} aria-label="Send message">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="m3 11 18-8-7 18-3-7-8-3Z" />
             <path d="m11 14 4-4" />

@@ -142,9 +142,14 @@ export default function Navbar({
       addCartItem(item);
       setIsCartOpen(true);
     };
+    const handleOpenCart = () => setIsCartOpen(true);
 
     window.addEventListener("tazahat:add-cart-item", handleSectionAddToCart);
-    return () => window.removeEventListener("tazahat:add-cart-item", handleSectionAddToCart);
+    window.addEventListener("tazahat:open-cart", handleOpenCart);
+    return () => {
+      window.removeEventListener("tazahat:add-cart-item", handleSectionAddToCart);
+      window.removeEventListener("tazahat:open-cart", handleOpenCart);
+    };
   }, [addCartItem]);
 
   const handleAddToCart = (product: (typeof productCatalog.products)[number]) => {

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import "./BottomNavigation.css";
@@ -13,14 +14,60 @@ const items = [
 
 export default function BottomNavigation() {
   const pathname = usePathname();
+  const [isHidden, setIsHidden] = useState(false);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = Math.max(0, window.scrollY);
+      const scrollDifference = currentScrollY - lastScrollY.current;
+
+      if (currentScrollY <= 8) {
+        setIsHidden(false);
+        lastScrollY.current = currentScrollY;
+        return;
+      }
+
+      if (Math.abs(scrollDifference) < 5) return;
+      setIsHidden(scrollDifference > 0);
+      lastScrollY.current = currentScrollY;
+    };
+
+    lastScrollY.current = Math.max(0, window.scrollY);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <nav className="mobile-bottom-navigation" aria-label="Mobile navigation">
-      {items.map(({ label, href, icon }) => (
-        <Link className={`mobile-bottom-navigation-item${(href === "/" ? pathname === "/" : pathname.startsWith(href)) ? " is-active" : ""}`} href={href} key={label} aria-current={(href === "/" ? pathname === "/" : pathname.startsWith(href)) ? "page" : undefined}>
+    <nav className={`mobile-bottom-navigation${isHidden ? " is-hidden" : ""}`} aria-label="Mobile navigation" aria-hidden={isHidden}>
+      {items.map(({ label, href, icon }) => {
+        const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
+        const content = <>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{icon}</svg>
           <span>{label}</span>
-        </Link>
-      ))}
+        </>;
+
+        if (label === "Cart") {
+          return (
+            <button
+              className={`mobile-bottom-navigation-item${isActive ? " is-active" : ""}`}
+              type="button"
+              key={label}
+              aria-label="Open cart"
+              tabIndex={isHidden ? -1 : undefined}
+              onClick={() => window.dispatchEvent(new Event("tazahat:open-cart"))}
+            >
+              {content}
+            </button>
+          );
+        }
+
+        return (
+          <Link className={`mobile-bottom-navigation-item${isActive ? " is-active" : ""}`} href={href} key={label} aria-current={isActive ? "page" : undefined} tabIndex={isHidden ? -1 : undefined}>
+            {content}
+          </Link>
+        );
+      })}
     </nav>
   );
 }

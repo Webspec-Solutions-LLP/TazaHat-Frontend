@@ -135,7 +135,7 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/return-refund" className="footer-link">
+                  <Link href="/privacyPolicy" className="footer-link">
                     Privacy & Policy
                   </Link>
                 </li>
