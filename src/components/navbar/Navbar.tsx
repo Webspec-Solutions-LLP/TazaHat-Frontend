@@ -588,7 +588,8 @@ export default function Navbar({
             </div>
           </div>
 
-          {/* Compare */}
+          {/* Compare: only while the list has something in it */}
+          {compareCount > 0 && (
           <button
             type="button"
             className="navbar-action-item"
@@ -616,6 +617,7 @@ export default function Navbar({
             </div>
             <span className="navbar-action-label">Compare</span>
           </button>
+          )}
 
           {/* Cart */}
           <button
