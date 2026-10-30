@@ -68,9 +68,9 @@ export default function PriceList() {
         <Swiper
           className="price-tabs"
           modules={[A11y, Keyboard, Mousewheel]}
-          slidesPerView={1.75}
+          slidesPerView={2.6}
           spaceBetween={8}
-          breakpoints={{ 600: { slidesPerView: 3.5, spaceBetween: 10 }, 1000: { slidesPerView: 7.2, spaceBetween: 10 } }}
+          breakpoints={{ 576: { slidesPerView: 3.5, spaceBetween: 10 }, 876: { slidesPerView: 5.2, spaceBetween: 10 }, 1100: { slidesPerView: 7.2, spaceBetween: 10 } }}
           keyboard={{ enabled: true, onlyInViewport: true }}
           mousewheel={{ forceToAxis: true }}
           a11y={{ containerMessage: text.headingHighlight, slideLabelMessage: "Category {{index}} of {{slidesLength}}" }}
@@ -88,7 +88,7 @@ export default function PriceList() {
         {categoryGroups.map(group => (
           <section key={group.id} id={`price-category-${group.id}`} className="price-category-section" aria-labelledby={`price-category-heading-${group.id}`}>
             <h2 id={`price-category-heading-${group.id}`} className="price-category-heading">{group.name}</h2>
-            <ol className="price-products">{group.products.map((product, index) => <li key={product.id} className="price-product"><div className="price-product-image"><Image src={product.image} alt={product.name} fill sizes="(max-width: 600px) 100px, 190px" /></div><div className="price-product-copy"><h3>{index + 1}. {product.name}</h3><div className="price-product-cost"><strong>{money.format(product.price)}<span>{text.perUnit.replace("{unit}", product.unit)}</span></strong><del>{money.format(product.originalPrice)}</del><span className="price-discount">{Math.round((1 - product.price / product.originalPrice) * 100)}% {text.off}</span></div></div><button type="button" className="price-product-order" onClick={() => { setSelected(product); dialog.current?.showModal(); }}><Icon kind="cart" />{text.orderNow}</button></li>)}</ol>
+            <ol className="price-products">{group.products.map((product, index) => <li key={product.id} className="price-product"><div className="price-product-image"><Image src={product.image} alt={product.name} fill sizes="(max-width: 600px) 100px, 190px" /></div><div className="price-product-copy"><h3><Link href={`/productDetails?id=${encodeURIComponent(product.id)}`}>{index + 1}. {product.name}</Link></h3><div className="price-product-cost"><strong>{money.format(product.price)}<span>{text.perUnit.replace("{unit}", product.unit)}</span></strong><del>{money.format(product.originalPrice)}</del><span className="price-discount">{Math.round((1 - product.price / product.originalPrice) * 100)}% {text.off}</span></div></div><button type="button" className="price-product-order" onClick={() => { setSelected(product); dialog.current?.showModal(); }}><Icon kind="cart" />{text.orderNow}</button></li>)}</ol>
             {!group.products.length && <p className="price-empty">{text.empty}</p>}
           </section>
         ))}

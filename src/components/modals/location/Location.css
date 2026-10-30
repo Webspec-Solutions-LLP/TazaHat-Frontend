@@ -197,26 +197,62 @@
 @keyframes location-chip-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes location-search-in { from { opacity: 0; transform: translateX(12px); max-width: 0; } to { opacity: 1; transform: translateX(0); max-width: 290px; } }
 
-@media (max-width: 540px) {
-  .location-backdrop { padding: 12px; }
-  .location-modal { border-radius: 6px; }
-  .location-modal { max-height: calc(100dvh - 24px); }
+@media (max-width: 575px) {
+  .location-backdrop { display: flex; align-items: stretch; justify-content: stretch; padding: 0; }
+  .location-modal { display: flex; width: 100%; height: 100vh; height: 100dvh; max-height: none; flex-direction: column; overflow: hidden; border-radius: 0; animation: location-sheet-in .58s cubic-bezier(.22,.72,.2,1) both; }
+  .location-backdrop.is-closing { animation-duration: .56s; }
+  .location-backdrop.is-closing .location-modal { animation: location-sheet-out .56s cubic-bezier(.4,0,.7,.3) both; }
   .location-modal-brand { min-height: 64px; padding: 8px 14px 8px 16px; gap: 8px; }
   .location-brand-mark { width: 40px; height: 40px; }
   .location-brand-name { font-size: 21px; }
   .location-login-link { padding: 7px 9px; font-size: 12px; }
   .location-close { width: 24px; height: 28px; flex-basis: 24px; font-size: 23px; }
-  .location-content { padding: 12px 17px 12px; }
+  .location-content { min-height: 0; flex: 1 1 auto; overflow-y: auto; overscroll-behavior: contain; padding: 12px 17px; }
   .location-modal-footer { padding: 10px 17px; }
   .location-copy h2 { max-width: 320px; }
   .location-map-section { margin: 9px 0 8px; }
-  .location-map { height: clamp(220px, 34vh, 280px); }
+  .location-map { height: clamp(280px, 38vh, 350px); }
   .location-map-search { right: 9px; bottom: 38px; gap: 6px; }
   .location-map-search-toggle { width: 38px; height: 38px; flex-basis: 38px; }
   .location-map-search-field { height: 38px; }
   .location-map-caption { right: 8px; bottom: 8px; font-size: 10px; }
   .location-popular-heading { margin-top: 8px; }
 }
+
+@media (max-width: 450px) {
+  .location-modal-brand { min-height: 56px; gap: 7px; padding: 7px 10px; }
+  .location-brand-mark { width: 34px; height: 34px; }
+  .location-brand-mark svg { width: 21px; height: 21px; }
+  .location-brand-name { font-size: 18px; }
+  .location-brand-tagline { font-size: 9px; }
+  .location-login-link { padding: 6px 8px; font-size: 10px; }
+  .location-close { width: 22px; height: 25px; flex-basis: 22px; font-size: 21px; }
+  .location-content { padding: 10px 11px; }
+  .location-eyebrow { font-size: 8px; letter-spacing: 1px; }
+  .location-copy h2 { margin-top: 4px; font-size: 20px; }
+  .location-copy p { font-size: 10px; }
+  .location-map-section { margin: 8px 0 7px; }
+  .location-map, .location-modal .location-map { height: clamp(300px, 46vh, 400px); }
+  .location-map-search { right: 7px; bottom: 35px; gap: 5px; }
+  .location-map-search-toggle { width: 35px; height: 35px; flex-basis: 35px; font-size: 19px; }
+  .location-map-search-toggle svg { width: 18px; height: 18px; }
+  .location-map-search-field { width: min(250px, calc(100vw - 120px)); height: 35px; padding-inline: 9px; }
+  .location-map-search-field input { font-size: 11px; }
+  .location-map-caption { right: 7px; bottom: 7px; padding: 6px 8px; font-size: 9px; }
+  .location-current { gap: 6px; margin-top: 7px; padding: 5px 7px; }
+  .location-current-icon { width: 25px; height: 25px; flex-basis: 25px; }
+  .location-current-icon svg { width: 16px; height: 16px; }
+  .location-current small { font-size: 8px; }
+  .location-current strong { font-size: 10px; }
+  .location-current-check { width: 17px; height: 17px; font-size: 10px; }
+  .location-popular-heading { margin: 7px 0 5px; font-size: 9px; }
+  .location-chips { gap: 4px; }
+  .location-chip { padding: 4px 7px; font-size: 9px; }
+  .location-modal-footer { gap: 5px; padding: 8px 11px; font-size: 9px; }
+}
+
+@keyframes location-sheet-in { from { opacity: .85; transform: translateY(100%); } to { opacity: 1; transform: translateY(0); } }
+@keyframes location-sheet-out { from { opacity: 1; transform: translateY(0); } to { opacity: .85; transform: translateY(100%); } }
 @media (prefers-reduced-motion: reduce) {
   .location-backdrop, .location-modal, .location-brand-mark, .location-chip, .location-map-search-field { animation-duration: .01ms; animation-delay: 0ms; }
   .location-close, .location-login-link, .location-chip { transition-duration: .01ms; }

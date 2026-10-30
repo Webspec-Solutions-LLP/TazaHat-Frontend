@@ -103,7 +103,8 @@ export default function Location({ deliveryLocation, onClose, onLogin }: Locatio
   const closeWithAnimation = useCallback((afterClose: () => void = onClose) => {
     if (isClosing) return;
     setIsClosing(true);
-    window.setTimeout(afterClose, 380);
+    const closeDuration = window.matchMedia("(max-width: 575px)").matches ? 560 : 380;
+    window.setTimeout(afterClose, closeDuration);
   }, [isClosing, onClose]);
 
   useEffect(() => {

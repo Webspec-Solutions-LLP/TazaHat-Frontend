@@ -1,5 +1,5 @@
 .price-page { color: #062756; background: transparent; }
-.price-container { width: calc(100% - 48px); max-width: 1320px; margin-inline: auto; }
+.price-container { box-sizing: border-box; width: calc(100% - 48px); max-width: 1320px; margin-inline: auto; }
 .price-hero { background-color: #034c85; background-position: center; background-size: cover; position: relative; color: white; }
 .price-hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, #002f5e55, transparent 65%); }
 .price-hero-inner { position: relative; min-height: 360px; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding-block: 24px 34px; }
@@ -51,6 +51,8 @@
 .price-product-image img { object-fit: contain; padding: 6px; }
 .price-product-copy { flex: 1; }
 .price-product h3 { margin: 0 0 16px; font-size: 17px; font-weight: 700; line-height: 1.3; }
+.price-product h3 a { color: inherit; text-decoration: none; }
+.price-product h3 a:hover { color: #075ca5; text-decoration: underline; text-underline-offset: 2px; }
 .price-product-cost { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .price-product-cost strong { font-size: 21px; }
 .price-product-cost strong span { font-size: 14px; }
@@ -68,34 +70,6 @@
 .price-dialog img { object-fit: contain; margin: 10px auto; }
 .price-dialog p { margin: 12px 0; font-size: 13px; color: #61758d; }
 .price-dialog a { color: #087cff; font-weight: 700; }
-@media (max-width: 1000px) {
- .price-hero-tagline { display: none; }
- .price-hero-copy { width: 65%; }
- .price-app > span { display: none; }
- .price-list-header { align-items: flex-start; flex-direction: column; }
-}
-@media (max-width: 600px) {
- .price-container { width: calc(100% - 32px); }
- .price-hero { background-position: 60% center; }
- .price-hero::before { background: #00356599; }
- .price-hero-inner { min-height: 340px; }
- .price-hero-copy { width: 100%; }
- .price-hero-seal { display: none; }
- .price-hero-benefits li { padding-inline: 6px; font-size: 10px; }
- .price-actions { flex-wrap: wrap; justify-content: center; gap: 12px; }
- .price-app img { width: 128px; }
- .price-order-main { font-size: 12px; padding: 10px 16px; }
- .price-browse { flex-basis: 100%; justify-content: center; }
- .price-product { gap: 10px; flex-wrap: wrap; padding: 10px; }
- .price-product-image { width: 90px; height: 90px; }
- .price-product h3 { font-size: 14px; margin-bottom: 8px; }
- .price-product-cost { gap: 6px; }
- .price-product-cost strong { font-size: 17px; }
- .price-discount { font-size: 10px; padding: 4px 8px; }
- .price-product-order { margin-left: auto; }
- .price-list-header > p { white-space: normal; flex-wrap: wrap; }
- .price-period-dates { font-size: 11px; }
-}
 
 /* Refined action strip and catalogue spacing. */
 .price-actions { display: grid; grid-template-columns: 1fr auto 1fr; padding-block: 14px; gap: 24px; }
@@ -116,14 +90,231 @@
 .price-product-image { height: 100px; background: #f4f9fc; }
 .price-product-order { border-radius: 6px; box-shadow: 0 2px 8px #0864b70d; color: #075ca5; }
 .price-discount { border-radius: 6px; background: #def4d9; font-size: 12px; }
-@media (max-width: 1000px) {
-  .price-actions { grid-template-columns: 1fr auto; }
-  .price-action-note { display: none; }
+
+@media (max-width: 1299px) {
+  .price-container { max-width: 1024px; }
 }
-@media (max-width: 600px) {
-  .price-actions { display: flex; flex-wrap: wrap; gap: 14px; }
-  .price-app-social { justify-content: center; gap: 14px; }
-  .price-product { padding: 10px; gap: 10px; }
-  .price-product-image { height: 90px; }
-  .price-product h3 { margin-bottom: 8px; }
+
+@media (max-width: 1099px) {
+  .price-container { width: 100%; max-width: none; padding-inline: 40px; }
+  .price-hero-inner { min-height: 330px; gap: 18px; }
+  .price-hero-copy { width: 58%; }
+  .price-region { font-size: clamp(24px, 3vw, 38px); }
+  .price-hero h1 { margin-bottom: 16px; font-size: clamp(38px, 5vw, 58px); }
+  .price-hero-benefits { max-width: 410px; }
+  .price-hero-benefits li { gap: 6px; padding-inline: 8px; font-size: 11px; }
+  .price-hero-benefits svg { width: 24px; height: 24px; }
+  .price-hero-tagline { width: 190px; font-size: 21px; }
+  .price-hero-seal { width: 118px; height: 118px; padding: 12px; }
+  .price-hero-seal strong { font-size: 21px; }
+  .price-hero-seal span { margin-top: 5px; font-size: 10px; }
+  .price-actions { grid-template-columns: 1fr auto; gap: 14px; padding-block: 12px; }
+  .price-action-note { display: none; }
+  .price-app-social { gap: 12px; }
+  .price-socials { gap: 7px; }
+  .price-social { width: 30px; height: 30px; }
+  .price-order-main { gap: 9px; padding: 10px 18px; font-size: 13px; }
+  .price-order-main svg { width: 21px; height: 21px; }
+  .price-catalog { padding-block: 22px 30px; }
+  .price-list-header h2 { font-size: clamp(21px, 2.5vw, 28px); }
+  .price-list-header > p { gap: 7px; padding: 6px 9px 6px 6px; font-size: 11px; }
+  .price-tabs { margin-bottom: 16px; }
+  .price-tabs button { min-height: 50px; gap: 6px; font-size: 11px; }
+  .price-category-heading { margin-bottom: 8px; font-size: 20px; }
+  .price-products { gap: 10px; }
+  .price-product { min-height: 108px; gap: 13px; padding: 8px 12px 8px 8px; }
+  .price-product-image { width: 140px; height: 88px; }
+  .price-product h3 { margin-bottom: 9px; font-size: 15px; }
+  .price-product-cost { gap: 9px; }
+  .price-product-cost strong { font-size: 19px; }
+  .price-product-cost strong span { font-size: 12px; }
+  .price-product-order { gap: 7px; padding: 9px 13px; font-size: 11px; }
+}
+
+@media (max-width: 875px) {
+  .price-hero-inner { min-height: 290px; gap: 13px; }
+  .price-hero-copy { width: 62%; }
+  .price-hero h1 { margin-bottom: 13px; font-size: clamp(34px, 5.3vw, 48px); }
+  .price-hero-tagline { display: none; }
+  .price-hero-seal { width: 100px; height: 100px; flex-basis: 100px; padding: 10px; }
+  .price-hero-seal strong { font-size: 18px; }
+  .price-hero-seal span { font-size: 9px; }
+  .price-app img { width: 128px; }
+  .price-list-header { align-items: flex-start; flex-direction: column; gap: 9px; }
+  .price-list-header > p { white-space: normal; flex-wrap: wrap; }
+  .price-period-dates { font-size: 10px; }
+  .price-product-image { width: 118px; height: 82px; }
+  .price-product h3 { font-size: 14px; }
+  .price-product-cost strong { font-size: 17px; }
+  .price-product-cost del { font-size: 11px; }
+  .price-discount { padding: 4px 9px; font-size: 10px; }
+  .price-product-order { padding: 8px 11px; font-size: 10px; }
+}
+
+@media (max-width: 677px) {
+  .price-hero { background-position: 60% center; }
+  .price-hero::before { background: #00356599; }
+  .price-hero-inner { min-height: 0; flex-direction: column; align-items: stretch; gap: 14px; padding-top: 24px; padding-bottom: 44px; }
+  .price-hero-copy { width: 100%; }
+  .price-region { margin-top: 5px; font-size: clamp(22px, 5vw, 30px); }
+  .price-hero h1 { margin-bottom: 12px; font-size: clamp(32px, 8vw, 46px); }
+  .price-hero-seal { display: none; }
+  .price-hero-benefits { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px 0; max-width: 360px; }
+  .price-hero-benefits li { flex-direction: row; justify-content: flex-start; gap: 6px; padding: 4px 8px; text-align: left; font-size: 9px; }
+  .price-hero-benefits li:nth-child(odd) { border-left: 0; }
+  .price-hero-benefits svg { width: 19px; height: 19px; }
+  .price-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding-block: 10px; }
+  .price-app-social { flex: 1 1 100%; justify-content: center; gap: 12px; }
+  .price-app img { width: 118px; }
+  .price-social { width: 28px; height: 28px; }
+  .price-social svg { width: 17px; height: 17px; }
+  .price-order-main { gap: 7px; padding: 9px 15px; font-size: 11px; }
+  .price-order-main svg { width: 18px; height: 18px; }
+  .price-catalog { padding-block: 8px 0; padding-inline: 15px; }
+  .price-list-header h2 { font-size: 22px; }
+  .price-list-header > p { align-items: flex-start; gap: 6px; padding: 5px 7px; font-size: 9px; }
+  .price-period-label { padding: 5px 7px; font-size: 8px; }
+  .price-period-dates { font-size: 9px; }
+  .price-demo-note { margin: 7px 0 12px; font-size: 9px; }
+  .price-tabs { margin-bottom: 14px; }
+  .price-tabs button { min-height: 44px; gap: 5px; padding: 6px; font-size: 10px; }
+  .price-category-image { width: 28px; height: 28px; }
+  .price-tabs button svg { width: 20px; height: 20px; }
+  .price-category-section { scroll-margin-top: 70px; }
+  .price-category-section + .price-category-section { margin-top: 18px; }
+  .price-category-heading { margin-bottom: 7px; padding-bottom: 5px; font-size: 18px; }
+  .price-products { gap: 8px; }
+  .price-product { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 7px 9px; min-height: 0; padding: 8px; }
+  .price-product-image { grid-column: 1; grid-row: 1 / 3; width: 76px; height: 76px; }
+  .price-product-copy { grid-column: 2; grid-row: 1; min-width: 0; }
+  .price-product h3 { margin: 0 0 6px; font-size: 12px; }
+  .price-product-cost { gap: 5px; }
+  .price-product-cost strong { font-size: 15px; }
+  .price-product-cost strong span { font-size: 10px; }
+  .price-product-cost del { font-size: 9px; }
+  .price-discount { padding: 3px 6px; font-size: 8px; }
+  .price-product-order { grid-column: 2; grid-row: 2; justify-self: start; gap: 5px; padding: 6px 9px; font-size: 9px; }
+  .price-product-order svg { width: 16px; height: 16px; }
+}
+
+@media (max-width: 575px) {
+  .price-hero-inner { gap: 12px; padding-top: 19px; padding-bottom: 38px; }
+  .price-region { font-size: 21px; }
+  .price-hero h1 { margin-bottom: 10px; font-size: clamp(29px, 8vw, 38px); }
+  .price-hero-benefits { gap: 5px 0; }
+  .price-hero-benefits li { gap: 5px; padding-inline: 5px; font-size: 8px; }
+  .price-hero-benefits svg { width: 17px; height: 17px; }
+  .price-app-social { gap: 9px; }
+  .price-app img { width: 105px; }
+  .price-social { width: 25px; height: 25px; }
+  .price-order-main { padding: 8px 12px; font-size: 10px; }
+  .price-list-header { gap: 7px; }
+  .price-list-header h2 { font-size: 19px; }
+  .price-list-header > p { gap: 5px; font-size: 8px; }
+  .price-period-label { padding: 4px 6px; font-size: 7px; }
+  .price-period-dates { font-size: 8px; }
+  .price-demo-note { font-size: 8px; }
+  .price-tabs button { min-height: 40px; gap: 4px; padding: 5px; font-size: 9px; }
+  .price-category-image { width: 24px; height: 24px; }
+  .price-tabs button svg { width: 18px; height: 18px; }
+  .price-category-heading { font-size: 16px; }
+  .price-product { grid-template-columns: 64px minmax(0, 1fr); gap: 6px 8px; padding: 7px; }
+  .price-product-image { width: 64px; height: 64px; }
+  .price-product h3 { margin-bottom: 4px; font-size: 11px; }
+  .price-product-cost { gap: 4px; }
+  .price-product-cost strong { font-size: 13px; }
+  .price-product-cost strong span { font-size: 9px; }
+  .price-product-cost del { font-size: 8px; }
+  .price-discount { padding: 3px 5px; font-size: 7px; }
+  .price-product-order { padding: 5px 7px; font-size: 8px; }
+}
+
+@media (max-width: 450px) {
+  .price-hero-inner { padding-top: 16px; padding-bottom: 34px; }
+  .price-hero h1 { font-size: 28px; }
+  .price-container { padding-inline: 10px; }
+  .price-actions { gap: 8px; }
+  .price-app-social { gap: 7px; }
+  .price-app img { width: 92px; }
+  .price-social { width: 23px; height: 23px; }
+  .price-order-main { gap: 5px; padding: 7px 9px; font-size: 9px; }
+  .price-order-main svg { width: 15px; height: 15px; }
+  .price-catalog { padding-block: 15px 20px; }
+  .price-list-header h2 { font-size: 17px; }
+  .price-list-header > p { align-items: flex-start; flex-direction: column; }
+  .price-demo-note { line-height: 1.35; }
+  .price-product { grid-template-columns: 56px minmax(0, 1fr); gap: 5px 7px; padding: 6px; }
+  .price-product-image { width: 56px; height: 56px; }
+  .price-product h3 { font-size: 10px; }
+  .price-product-cost { gap: 3px; }
+  .price-product-cost strong { font-size: 12px; }
+  .price-product-cost strong span { font-size: 8px; }
+  .price-discount { padding: 2px 4px; font-size: 7px; }
+  .price-product-order { gap: 4px; padding: 4px 6px; font-size: 8px; }
+  .price-product-order svg { width: 14px; height: 14px; }
+}
+
+/* Keep the catalog heading and action strip horizontal at every width. */
+.price-list-header {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.price-list-header h2 { min-width: 0; }
+.price-list-header > p { max-width: 52%; flex: 0 1 auto; }
+
+.price-actions {
+  display: flex;
+  flex-direction: row;
+}
+
+@media (max-width: 575px) {
+  .price-list-header { gap: 6px; }
+  .price-list-header h2 { flex: 1 1 auto; font-size: 16px; line-height: 1.15; }
+  .price-list-header > p { max-width: 48%; gap: 4px; padding: 4px 5px; font-size: 7px; }
+  .price-period-label { padding: 4px 5px; font-size: 6px; }
+  .price-period-dates { font-size: 7px; }
+  .price-tabs button { min-width: 0; gap: 3px; padding-inline: 4px; font-size: 8px; }
+  .price-tabs button span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .price-category-image { width: 21px; height: 21px; }
+  .price-tabs button svg { width: 16px; height: 16px; }
+}
+
+@media (max-width: 450px) {
+  .price-list-header h2 { min-width: 0; flex: 0 1 auto; font-size: clamp(10px, 3vw, 13px); letter-spacing: -.4px; white-space: nowrap; }
+  .price-list-header > p { flex-direction: row; max-width: 46%; gap: 2px; padding: 3px; }
+  .price-period-label { padding-inline: 4px; font-size: 6px; letter-spacing: 0; }
+  .price-period-dates { font-size: 6px; white-space: nowrap; }
+}
+
+@media (max-width: 677px) {
+  .price-actions { flex-wrap: nowrap; justify-content: space-between; gap: 7px; }
+  .price-app-social { flex: 0 1 auto; min-width: 0; gap: 6px; }
+  .price-app { min-width: 0; }
+  .price-app img { width: clamp(76px, 20vw, 118px); }
+  .price-socials { flex: 0 0 auto; gap: 5px; }
+  .price-social { width: 24px; height: 24px; }
+  .price-social svg { width: 15px; height: 15px; }
+  .price-order-main { flex: 0 0 auto; gap: 5px; padding: 7px 9px; font-size: 9px; }
+  .price-order-main svg { width: 15px; height: 15px; }
+}
+
+@media (max-width: 575px) {
+  .price-tabs button { min-height: 38px; }
+}
+
+@media (max-width: 450px) {
+  .price-hero-inner { padding-top: 12px; padding-bottom: 26px; }
+  .price-region { margin-top: 2px; font-size: 18px; letter-spacing: .6px; }
+  .price-hero h1 { margin-bottom: 8px; font-size: 24px; }
+  .price-hero-benefits { gap: 3px 0; }
+  .price-hero-benefits li { gap: 4px; padding: 2px 5px; font-size: 7px; }
+  .price-hero-benefits svg { width: 15px; height: 15px; }
+  .price-list-header > p { max-width: 48%; flex-direction: column; align-items: flex-start; gap: 3px; padding: 5px 7px; border-radius: 10px; white-space: normal; }
+  .price-period-label { padding: 4px 6px; font-size: 7px; letter-spacing: .1px; }
+  .price-period-dates { font-size: 7px; line-height: 1.25; white-space: nowrap; }
+  .price-product-image { border: 1px solid #d7e7f2; border-radius: 8px; background: linear-gradient(145deg, #f8fcff, #edf6fc); box-shadow: 0 2px 7px #0633611a, inset 0 1px #ffffff; }
 }
