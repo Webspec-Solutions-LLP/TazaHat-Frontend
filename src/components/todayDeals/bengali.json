@@ -1,0 +1,23 @@
+{
+  "language": "bn",
+  "locale": "bn-IN",
+  "currency": "INR",
+  "heading": "আজকের স্পেশাল ডিল",
+  "viewAll": "সব দেখুন",
+  "showLess": "কম দেখুন",
+  "viewDetails": "বিস্তারিত দেখুন",
+  "close": "বন্ধ করুন",
+  "save": "{name} পছন্দের তালিকায় যোগ করুন",
+  "unsave": "পছন্দের তালিকা থেকে {name} সরান",
+  "discount": "{percent}% ছাড়",
+  "rating": "{reviews}টি পর্যালোচনার মধ্যে ৫-এ {rating} রেটিং",
+  "demoNote": "ডেমো পণ্যের বিবরণ। মূল্য এবং প্রাপ্যতা উদাহরণস্বরূপ।",
+  "sliderLabel": "বিশেষ অফার। দেখতে সোয়াইপ করুন অথবা তীর কী ব্যবহার করুন।",
+  "columnLabel": "ডিল {{index}} / {{slidesLength}}",
+  "description": "সেরা মূল্যে টাটকা পণ্য",
+  "offerEnds": "অফার শেষ হতে বাকি",
+  "days": "দিন",
+  "hours": "ঘণ্টা",
+  "minutes": "মিনিট",
+  "seconds": "সেকেন্ড"
+}

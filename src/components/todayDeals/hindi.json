@@ -1,0 +1,23 @@
+{
+  "language": "hi",
+  "locale": "hi-IN",
+  "currency": "INR",
+  "heading": "आज के खास डील्स",
+  "viewAll": "सभी देखें",
+  "showLess": "कम देखें",
+  "viewDetails": "विवरण देखें",
+  "close": "बंद करें",
+  "save": "{name} को पसंदीदा में जोड़ें",
+  "unsave": "पसंदीदा से {name} हटाएं",
+  "discount": "{percent}% छूट",
+  "rating": "{reviews} समीक्षाओं में से 5 में {rating} रेटिंग",
+  "demoNote": "डेमो उत्पाद विवरण। मूल्य और उपलब्धता सांकेतिक हैं।",
+  "sliderLabel": "खास डील्स। एक्सप्लोर करने के लिए स्वाइप करें या तीर कुंजियों का उपयोग करें।",
+  "columnLabel": "डील {{index}} / {{slidesLength}}",
+  "description": "शानदार कीमतों पर ताज़ा उत्पाद",
+  "offerEnds": "ऑफ़र समाप्त होने में",
+  "days": "दिन",
+  "hours": "घंटे",
+  "minutes": "मिनट",
+  "seconds": "सेकंड"
+}
