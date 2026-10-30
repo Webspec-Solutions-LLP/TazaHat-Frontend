@@ -1,15 +1,23 @@
 "use client";
 
-import { Suspense, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import Products from "@/components/products/Products";
+import CompareList, {
+  COMPARE_CHANGE_EVENT,
+  COMPARE_STORAGE_KEY,
+  type CompareProduct,
+} from "@/components/modals/compareList/CompareList";
+import CompareDetails from "@/components/modals/compareDetails/CompareDetails";
+import Confermation from "@/components/modals/confermation/Confermation";
+import { readWishlistIds, toggleWishlistId } from "@/lib/wishlist";
 import productsText from "../priceList/english.json";
 import productCards from "@/components/products/english.json";
 import "./ProductDetails.css";
 
 const money = new Intl.NumberFormat(productsText.locale, { style: "currency", currency: productsText.currency, maximumFractionDigits: 0 });
-function Icon({ name }: { name: "fish" | "leaf" | "shield" | "flask" | "box" | "cart" | "heart" | "minus" | "plus" | "info" }) {
+function Icon({ name }: { name: "fish" | "leaf" | "shield" | "flask" | "box" | "cart" | "heart" | "minus" | "plus" | "info" | "compare" }) {
   const paths: Record<typeof name, React.ReactNode> = {
     fish: <><path d="M3 12C8 2 17 5 20 12c-3 7-12 10-17 0Zm0 0-2-4v8l2-4Z"/><circle cx="16" cy="11" r=".8"/></>,
     leaf: <><path d="M4 20C1 6 12 3 21 3c0 12-5 20-17 17ZM4 20 16 8"/><path d="m9 15 5-5"/></>,
@@ -20,6 +28,7 @@ function Icon({ name }: { name: "fish" | "leaf" | "shield" | "flask" | "box" | "
     heart: <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/>,
     minus: <path d="M5 12h14"/>, plus: <path d="M12 5v14M5 12h14" />,
     info: <><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></>,
+    compare: <><path d="M16 3l4 4-4 4" /><path d="M20 7H4" /><path d="M8 21l-4-4 4-4" /><path d="M4 17h16" /></>,
   };
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
 }
@@ -56,6 +65,97 @@ function ProductDetailsContent() {
   const [selectedWeightIndex, setSelectedWeightIndex] = useState(0);
   const [dressingType, setDressingType] = useState("");
   const [specialInstruction, setSpecialInstruction] = useState("");
+  const [isCompareOpen, setIsCompareOpen] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isCompareDetailsOpen, setIsCompareDetailsOpen] = useState(false);
+  const [compareDetailsProducts, setCompareDetailsProducts] = useState<CompareProduct[]>([]);
+  const [compareInitialSelectedIds, setCompareInitialSelectedIds] = useState<string[]>([]);
+  const [isCompared, setIsCompared] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(false);
+
+  useEffect(() => {
+    try {
+      setIsWishlisted(readWishlistIds().includes(product.id));
+    } catch {}
+  }, [product.id]);
+
+  useEffect(() => {
+    const checkComparison = () => {
+      try {
+        const stored = window.localStorage.getItem(COMPARE_STORAGE_KEY);
+        if (!stored) {
+          setIsCompared(false);
+          return;
+        }
+        const list = JSON.parse(stored);
+        if (Array.isArray(list)) {
+          setIsCompared(list.some((item: { id: string }) => item.id === product.id));
+        } else {
+          setIsCompared(false);
+        }
+      } catch {
+        setIsCompared(false);
+      }
+    };
+
+    checkComparison();
+
+    window.addEventListener(COMPARE_CHANGE_EVENT, checkComparison);
+    window.addEventListener("storage", checkComparison);
+    return () => {
+      window.removeEventListener(COMPARE_CHANGE_EVENT, checkComparison);
+      window.removeEventListener("storage", checkComparison);
+    };
+  }, [product.id]);
+
+  const handleToggleWishlist = () => {
+    try {
+      const next = toggleWishlistId(product.id);
+      setIsWishlisted(next.includes(product.id));
+    } catch {
+      setIsWishlisted(prev => !prev);
+    }
+  };
+
+  const handleAddToCompare = () => {
+    if (isCompared) return;
+
+    try {
+      const stored = window.localStorage.getItem(COMPARE_STORAGE_KEY);
+      const list = stored ? JSON.parse(stored) : [];
+      if (Array.isArray(list)) {
+        const otherProducts = list.filter((item: { id: string }) => item.id !== product.id);
+        if (otherProducts.length > 0) {
+          setIsConfirmOpen(true);
+          return;
+        }
+      }
+    } catch {}
+
+    setCompareInitialSelectedIds([]);
+    setIsCompared(true);
+    setIsCompareOpen(true);
+  };
+
+  const handleConfirmYes = () => {
+    setIsConfirmOpen(false);
+    setIsCompared(true);
+    setCompareInitialSelectedIds([product.id]);
+    setIsCompareOpen(true);
+  };
+
+  const handleConfirmNo = () => {
+    setIsConfirmOpen(false);
+    setIsCompared(true);
+    setCompareInitialSelectedIds([]);
+    setIsCompareOpen(true);
+  };
+
+  const handleContinueCompare = (selectedProducts: CompareProduct[]) => {
+    setIsCompareOpen(false);
+    setCompareDetailsProducts(selectedProducts);
+    setIsCompareDetailsOpen(true);
+  };
   const weightOptions = productCard?.variants?.length
     ? productCard.variants.map(variant => ({ label: variant.label, multiplier: variant.price / product.price }))
     : product.unit.toLowerCase() === "kg"
@@ -117,7 +217,25 @@ function ProductDetailsContent() {
               <output aria-live="polite" aria-label="Quantity">{quantity}</output>
               <button type="button" aria-label="Increase quantity" disabled={quantity >= 99} onClick={() => setQuantity(n => Math.min(99, n + 1))}><Icon name="plus" /></button>
             </div>
-            <button type="button" className="pd-wishlist"><Icon name="heart" /> Add to Wishlist</button>
+            <button
+              type="button"
+              className={`pd-wishlist${isWishlisted ? " is-active" : ""}`}
+              onClick={handleToggleWishlist}
+              title={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+            >
+              <Icon name="heart" />
+              <span>{isWishlisted ? "Wishlisted" : "Wishlist"}</span>
+            </button>
+            <button
+              type="button"
+              className={`pd-compare${isCompared ? " is-compared" : ""}`}
+              disabled={isCompared}
+              onClick={handleAddToCompare}
+              title={isCompared ? "Already added to compare" : "Add to compare"}
+            >
+              <Icon name="compare" />
+              <span>{isCompared ? "Added to Compare" : "Add to Compare"}</span>
+            </button>
           </div>
           <div className="pd-order-note"><span><Icon name="shield" /></span><p><strong>Freshness you can trust</strong><small>Carefully selected, hygienically handled and packed fresh for delivery.</small></p></div>
         </section>
@@ -133,5 +251,49 @@ function ProductDetailsContent() {
       </div>
       <div ref={relatedRef} className="pd-related"><Products heading="Related Products" products={relatedProducts} showViewAll={false} layout="related" /></div>
     </div>
+    {isCompareOpen && (
+      <CompareList
+        onClose={() => setIsCompareOpen(false)}
+        initialSelectedIds={compareInitialSelectedIds}
+        product={{
+          id: product.id,
+          name: product.name,
+          image: activeImage || product.image,
+          price: selectedPrice,
+          originalPrice: selectedOriginalPrice,
+          unit: product.unit,
+          rating: productCard?.rating ?? 4.5,
+          reviews: productCard?.reviews ?? 7,
+        }}
+        onContinueCompare={handleContinueCompare}
+        onRemoveItem={removedId => {
+          if (removedId === product.id) {
+            setIsCompared(false);
+          }
+        }}
+        onClearAll={() => {
+          setIsCompared(false);
+        }}
+      />
+    )}
+    {isCompareDetailsOpen && (
+      <CompareDetails
+        products={compareDetailsProducts}
+        onClose={() => setIsCompareDetailsOpen(false)}
+        onBackToList={() => {
+          setIsCompareDetailsOpen(false);
+          setIsCompareOpen(true);
+        }}
+      />
+    )}
+    {isConfirmOpen && (
+      <Confermation
+        onClose={() => setIsConfirmOpen(false)}
+        onYes={handleConfirmYes}
+        onNo={handleConfirmNo}
+        productName={product.name}
+        productImage={activeImage || product.image}
+      />
+    )}
   </main>;
 }

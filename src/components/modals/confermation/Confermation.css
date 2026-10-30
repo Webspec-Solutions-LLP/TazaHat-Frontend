@@ -1,0 +1,234 @@
+.confermation-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(6, 24, 44, 0.55);
+  backdrop-filter: blur(5px);
+  animation: confermation-fade-in 220ms ease both;
+}
+
+.confermation-backdrop.is-closing {
+  pointer-events: none;
+  animation: confermation-fade-out 180ms ease both;
+}
+
+.confermation-card {
+  position: relative;
+  width: min(400px, 100%);
+  padding: 24px 22px 20px;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #dce8f5;
+  box-shadow: 0 24px 60px rgba(0, 32, 68, 0.22);
+  text-align: center;
+  animation: confermation-scale-in 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  box-sizing: border-box;
+}
+
+.confermation-backdrop.is-closing .confermation-card {
+  animation: confermation-scale-out 180ms cubic-bezier(0.7, 0, 0.84, 0) both;
+}
+
+.confermation-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #64748b;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease, transform 150ms ease;
+}
+
+.confermation-close:hover {
+  background: #fee2e2;
+  color: #ef4444;
+  transform: scale(1.08);
+}
+
+.confermation-close svg {
+  width: 15px;
+  height: 15px;
+}
+
+.confermation-icon-wrap {
+  display: inline-grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin-bottom: 12px;
+  border-radius: 50%;
+  background: #eaf3fb;
+  color: #0875d1;
+  border: 1px solid #d3e5f6;
+}
+
+.confermation-icon-wrap svg {
+  width: 24px;
+  height: 24px;
+}
+
+.confermation-title {
+  margin: 0 0 6px;
+  color: #092650;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.confermation-preview {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 90%;
+  margin: 8px auto 4px;
+  padding: 4px 12px 4px 5px;
+  border-radius: 30px;
+  background: #f4f8fc;
+  border: 1px solid #e2edf6;
+}
+
+.confermation-preview-img {
+  position: relative;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #fff;
+  flex-shrink: 0;
+}
+
+.confermation-preview-name {
+  color: #164070;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.confermation-desc {
+  margin: 8px 0 20px;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.confermation-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.confermation-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 160ms ease;
+}
+
+.confermation-no-btn {
+  border: 1.5px solid #d0deec;
+  background: #fff;
+  color: #475569;
+}
+
+.confermation-no-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #1e293b;
+}
+
+.confermation-yes-btn {
+  border: 1.5px solid #0875d1;
+  background: #0875d1;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(8, 117, 209, 0.25);
+}
+
+.confermation-yes-btn:hover {
+  background: #065ca5;
+  border-color: #065ca5;
+  transform: translateY(-1px);
+}
+
+.confermation-btn:focus-visible,
+.confermation-close:focus-visible {
+  outline: 2px solid #0875d1;
+  outline-offset: 2px;
+}
+
+@keyframes confermation-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes confermation-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes confermation-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes confermation-scale-out {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.92) translateY(8px);
+  }
+}
+
+@media (max-width: 480px) {
+  .confermation-card {
+    padding: 20px 16px 18px;
+  }
+  .confermation-title {
+    font-size: 15px;
+  }
+  .confermation-btn {
+    min-height: 38px;
+    font-size: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .confermation-backdrop,
+  .confermation-card {
+    animation: none;
+    transition: none;
+  }
+}

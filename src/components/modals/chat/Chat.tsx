@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type FormEvent, type PointerEvent } from "react";
 import productCatalog from "@/components/products/english.json";
 import "./Chat.css";
 
@@ -151,6 +151,9 @@ export default function Chat({ onClose, product }: { onClose: () => void; produc
   const [attachment, setAttachment] = useState<{ name: string; dataUrl: string } | null>(null);
   const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null);
   const [openMessageMenuId, setOpenMessageMenuId] = useState<string | null>(null);
+  const [pinnedMessageId, setPinnedMessageId] = useState<string | null>(null);
+  const [swipingMessageId, setSwipingMessageId] = useState<string | null>(null);
+  const [swipeOffset, setSwipeOffset] = useState(0);
   const [attachmentError, setAttachmentError] = useState("");
   const [isReplying, setIsReplying] = useState(false);
   const [isTicketPromptOpen, setIsTicketPromptOpen] = useState(false);
@@ -158,6 +161,7 @@ export default function Chat({ onClose, product }: { onClose: () => void; produc
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const messagePointerStartRef = useRef<{ x: number; y: number; messageId: string } | null>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const replyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -263,11 +267,42 @@ export default function Chat({ onClose, product }: { onClose: () => void; produc
     messageInputRef.current?.focus();
   };
 
-  const deleteMessage = (id: string) => {
-    setMessages((current) => current.filter((item) => item.id !== id));
-    if (replyingTo?.id === id) setReplyingTo(null);
+  const togglePin = (chatMessage: ChatMessage) => {
+    setPinnedMessageId((current) => current === chatMessage.id ? null : chatMessage.id);
     setOpenMessageMenuId(null);
   };
+
+  const startMessageSwipe = (chatMessage: ChatMessage, event: PointerEvent<HTMLElement>) => {
+    if (event.button !== 0) return;
+    const target = event.target;
+    if (target instanceof Element && target.closest("button, a, input")) return;
+    messagePointerStartRef.current = { x: event.clientX, y: event.clientY, messageId: chatMessage.id };
+    setSwipingMessageId(chatMessage.id);
+    setSwipeOffset(0);
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const moveMessageSwipe = (event: PointerEvent<HTMLElement>) => {
+    const start = messagePointerStartRef.current;
+    if (!start) return;
+    const deltaX = event.clientX - start.x;
+    const deltaY = event.clientY - start.y;
+    if (deltaX > 0 && Math.abs(deltaX) > Math.abs(deltaY) * 1.1) setSwipeOffset(Math.min(deltaX, 72));
+  };
+
+  const finishMessageSwipe = (chatMessage: ChatMessage, event: PointerEvent<HTMLElement>) => {
+    const start = messagePointerStartRef.current;
+    messagePointerStartRef.current = null;
+    setSwipingMessageId(null);
+    setSwipeOffset(0);
+    if (!start) return;
+
+    const deltaX = event.clientX - start.x;
+    const deltaY = event.clientY - start.y;
+    if (start.messageId === chatMessage.id && deltaX > 36 && deltaX > Math.abs(deltaY) * 1.1) startReply(chatMessage);
+  };
+
+  const pinnedMessage = messages.find((item) => item.id === pinnedMessageId) ?? null;
 
   return (
     <section
@@ -303,18 +338,34 @@ export default function Chat({ onClose, product }: { onClose: () => void; produc
       </div>
 
       <div className="chat-messages" aria-live="polite" aria-relevant="additions text">
+        {pinnedMessage && (
+          <button className="chat-pinned-banner" type="button" onClick={() => document.getElementById(`chat-message-${pinnedMessage.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" })}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m16 3 5 5-4 1-4 4-1 5-2-2-4 4-2-2 4-4-2-2 5-1 4-4z" /></svg>
+            <span><strong>Pinned message · {pinnedMessage.author}</strong><small>{pinnedMessage.text || (pinnedMessage.image ? "Photo" : "Message")}</small></span>
+          </button>
+        )}
         <div className="chat-day-divider"><span>Today</span></div>
         {messages.map((chatMessage) => (
-          <article className={`chat-message chat-message--${chatMessage.sender}`} key={chatMessage.id}>
+          <article
+            id={`chat-message-${chatMessage.id}`}
+            className={`chat-message chat-message--${chatMessage.sender}${pinnedMessageId === chatMessage.id ? " is-pinned" : ""}${swipingMessageId === chatMessage.id ? " is-swiping" : ""}`}
+            key={chatMessage.id}
+            style={{ "--chat-swipe-offset": `${swipingMessageId === chatMessage.id ? swipeOffset : 0}px` } as CSSProperties}
+            onPointerDown={(event) => startMessageSwipe(chatMessage, event)}
+            onPointerMove={moveMessageSwipe}
+            onPointerUp={(event) => finishMessageSwipe(chatMessage, event)}
+            onPointerCancel={() => { messagePointerStartRef.current = null; setSwipingMessageId(null); setSwipeOffset(0); }}
+          >
             <span className="chat-message-author">{chatMessage.author}</span>
+            {swipingMessageId === chatMessage.id && swipeOffset > 8 && <span className="chat-swipe-reply-indicator" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m9 14-5-5 5-5"/><path d="M4 9h9a7 7 0 0 1 7 7v3"/></svg></span>}
             <div className="chat-message-actions">
-              <button type="button" className="chat-message-menu-toggle" aria-label={`More options for ${chatMessage.author}'s message`} aria-expanded={openMessageMenuId === chatMessage.id} onClick={() => setOpenMessageMenuId((current) => current === chatMessage.id ? null : chatMessage.id)}>
+              <button type="button" className="chat-message-menu-toggle" aria-label={`More options for ${chatMessage.author}'s message`} aria-haspopup="menu" aria-expanded={openMessageMenuId === chatMessage.id} onClick={() => setOpenMessageMenuId((current) => current === chatMessage.id ? null : chatMessage.id)}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
               </button>
               {openMessageMenuId === chatMessage.id && (
                 <div className="chat-message-menu" role="menu">
                   <button type="button" role="menuitem" onClick={() => startReply(chatMessage)}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m9 14-5-5 5-5"/><path d="M4 9h9a7 7 0 0 1 7 7v3"/></svg>Reply</button>
-                  <button type="button" role="menuitem" onClick={() => deleteMessage(chatMessage.id)}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m4 4v6m6-6v6"/></svg>Delete</button>
+                  <button type="button" role="menuitem" onClick={() => togglePin(chatMessage)}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m16 3 5 5-4 1-4 4-1 5-2-2-4 4-2-2 4-4-2-2 5-1 4-4z"/></svg>{pinnedMessageId === chatMessage.id ? "Unpin" : "Pin"}</button>
                 </div>
               )}
             </div>

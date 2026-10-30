@@ -4,6 +4,12 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Cart, { type CartItem } from "../modals/cart/Cart";
+import CompareList, {
+  COMPARE_CHANGE_EVENT,
+  COMPARE_STORAGE_KEY,
+  type CompareProduct,
+} from "../modals/compareList/CompareList";
+import CompareDetails from "../modals/compareDetails/CompareDetails";
 import AddToCart from "../modals/AddToCart/AddToCart";
 import Location from "../modals/location/Location";
 import Login from "../modals/login/Login";
@@ -34,6 +40,10 @@ export default function Navbar({
   const [savedProducts, setSavedProducts] = useState<string[]>([]);
   const [hasCustomCart, setHasCustomCart] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isCompareOpen, setIsCompareOpen] = useState(false);
+  const [isCompareDetailsOpen, setIsCompareDetailsOpen] = useState(false);
+  const [compareDetailsProducts, setCompareDetailsProducts] = useState<CompareProduct[]>([]);
+  const [compareCount, setCompareCount] = useState(0);
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
@@ -56,6 +66,32 @@ export default function Navbar({
     const refreshWishlist = () => setSavedProducts(readWishlistIds());
     refreshWishlist();
     return subscribeToWishlist(refreshWishlist);
+  }, []);
+  useEffect(() => {
+    const refreshCompareCount = () => {
+      try {
+        const stored = window.localStorage.getItem(COMPARE_STORAGE_KEY);
+        if (stored) {
+          const list = JSON.parse(stored);
+          if (Array.isArray(list)) {
+            setCompareCount(list.length);
+            return;
+          }
+        }
+        setCompareCount(0);
+      } catch {
+        setCompareCount(0);
+      }
+    };
+
+    refreshCompareCount();
+
+    window.addEventListener(COMPARE_CHANGE_EVENT, refreshCompareCount);
+    window.addEventListener("storage", refreshCompareCount);
+    return () => {
+      window.removeEventListener(COMPARE_CHANGE_EVENT, refreshCompareCount);
+      window.removeEventListener("storage", refreshCompareCount);
+    };
   }, []);
   const handleCartItemsChange = useCallback((items: CartItem[]) => {
     setHasCustomCart(true);
@@ -477,6 +513,35 @@ export default function Navbar({
             </div>
           </div>
 
+          {/* Compare */}
+          <button
+            type="button"
+            className="navbar-action-item"
+            aria-label={`Compare list with ${compareCount} items`}
+            onClick={() => setIsCompareOpen(true)}
+          >
+            <div className="navbar-action-icon-wrap">
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M16 3l4 4-4 4" />
+                <path d="M20 7H4" />
+                <path d="M8 21l-4-4 4-4" />
+                <path d="M4 17h16" />
+              </svg>
+              <span className="navbar-cart-badge">{compareCount}</span>
+            </div>
+            <span className="navbar-action-label">Compare</span>
+          </button>
+
           {/* Cart */}
           <button
             type="button"
@@ -511,6 +576,26 @@ export default function Navbar({
           onClose={() => setIsCartOpen(false)}
           items={hasCustomCart ? cartItems : undefined}
           onItemsChange={handleCartItemsChange}
+        />
+      )}
+      {isCompareOpen && (
+        <CompareList
+          onClose={() => setIsCompareOpen(false)}
+          onContinueCompare={(selected) => {
+            setIsCompareOpen(false);
+            setCompareDetailsProducts(selected);
+            setIsCompareDetailsOpen(true);
+          }}
+        />
+      )}
+      {isCompareDetailsOpen && (
+        <CompareDetails
+          products={compareDetailsProducts}
+          onClose={() => setIsCompareDetailsOpen(false)}
+          onBackToList={() => {
+            setIsCompareDetailsOpen(false);
+            setIsCompareOpen(true);
+          }}
         />
       )}
       {selectedProduct && (
