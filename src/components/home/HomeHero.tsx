@@ -4,9 +4,8 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { fallbackImage, isRemoteImage } from "@/lib/api";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { A11y, Autoplay, Pagination, Keyboard } from "swiper/modules";
+import { A11y, Autoplay, Keyboard } from "swiper/modules";
 import "swiper/css";
-import "swiper/css/pagination";
 
 const banners = [
   {
@@ -35,7 +34,7 @@ export interface HeroBanner { id: string; image: string; title: string | null; d
 
 type Slide = (typeof banners)[number] & { href?: string | null };
 
-/** Banners set up in the CRM (Sliders) for the visitor's city. The photo is theirs; the side picture and promo stay as designed. */
+/** Banners set up in the CRM (Sliders) for the city; the designed banners are shown when there are none. */
 export default function HomeHero({ items }: { items?: HeroBanner[] }) {
   const router = useRouter();
   const startShopping = () => {
@@ -63,11 +62,11 @@ export default function HomeHero({ items }: { items?: HeroBanner[] }) {
   return (
     <section className="home-hero" aria-label="Fresh food from TazaHaat">
       <div className="home-content-container">
-        <Swiper className="home-banner-slider" modules={[A11y, Autoplay, Pagination, Keyboard]} slidesPerView={1} spaceBetween={16} autoplay={{ delay: 5000, disableOnInteraction: false, pauseOnMouseEnter: true }} pagination={{ clickable: true }} keyboard={{ enabled: true, onlyInViewport: true }} rewind a11y={{ containerMessage: "Fresh food banners" }}>
+        <div className="home-banner-grid">
+        <Swiper className="home-banner-slider" modules={[A11y, Autoplay, Keyboard]} slidesPerView={1} spaceBetween={0} autoplay={{ delay: 5000, disableOnInteraction: false, pauseOnMouseEnter: true }} keyboard={{ enabled: true, onlyInViewport: true }} rewind a11y={{ containerMessage: "Fresh food banners" }}>
           {slides.map((banner, index) => (
             <SwiperSlide key={`${banner.image}-${index}`}>
-              <article className={`home-banner-grid${index === 1 ? " home-banner-grid--reverse-side" : ""}`}>
-                <div className="home-main-banner">
+              <article className="home-main-banner">
                   <Image
                     src={banner.image}
                     alt={banner.alt}
@@ -86,25 +85,21 @@ export default function HomeHero({ items }: { items?: HeroBanner[] }) {
                       {banner.action}<span aria-hidden="true">&rarr;</span>
                     </button>
                   </div>
-                </div>
-                <div className="home-banner-side-image">
-                  <Image
-                    src={banner.sideImage}
-                    alt={banner.sideAlt}
-                    fill
-                    sizes="(max-width: 700px) 50vw, 510px"
-                    className="home-banner-image"
-                  />
-                </div>
-                <button className={`home-banner-promo${index === 1 ? " home-banner-promo--reverse" : ""}`} type="button" onClick={startShopping}>
-                  <span className="home-banner-promo-kicker">Good food, made easy</span>
-                  <span className="home-banner-promo-title">Fresh picks for your family</span>
-                  <span className="home-banner-promo-link">Explore the market <b aria-hidden="true">&rarr;</b></span>
-                </button>
               </article>
             </SwiperSlide>
           ))}
         </Swiper>
+        <div className="home-banner-right-column">
+          <button className="home-banner-promo home-banner-promo--reverse" type="button" onClick={startShopping}>
+            <span className="home-banner-promo-kicker">Good food, made easy</span>
+            <span className="home-banner-promo-title">Fresh picks for your family</span>
+            <span className="home-banner-promo-link">Explore the market <b aria-hidden="true">&rarr;</b></span>
+          </button>
+          <div className="home-banner-side-image">
+            <Image src={banners[1].sideImage} alt={banners[1].sideAlt} fill sizes="(max-width: 700px) 50vw, 510px" className="home-banner-image" />
+          </div>
+        </div>
+        </div>
       </div>
     </section>
   );

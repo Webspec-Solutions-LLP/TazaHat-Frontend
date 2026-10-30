@@ -1,0 +1,179 @@
+{
+  "pageBadge": "LEGAL & COMPLIANCE",
+  "pageTitle": "Privacy Policy",
+  "pageSubtitle": "Learn how TazaHaat collects, protects, and manages your personal data across our hyperlocal fresh grocery platform.",
+  "lastUpdated": "Last updated: October 2026",
+  "effectiveDate": "Effective Date: October 15, 2026",
+  "searchPlaceholder": "Search policy points...",
+  "languageLabel": "Language",
+  "quickNavTitle": "Policy Index",
+  "contactHelpTitle": "Have Privacy Questions?",
+  "contactHelpDesc": "Contact our dedicated Agartala compliance & data privacy desk.",
+  "contactHelpBtn": "Contact Privacy Officer",
+  "noResultsText": "No matching policy sections found.",
+  "sections": [
+    {
+      "id": "introduction",
+      "number": "01",
+      "title": "Introduction & Scope",
+      "summary": "Overview of TazaHaat's commitment to customer data privacy across Tripura and Northeast India.",
+      "content": [
+        "Welcome to TazaHaat. We are deeply committed to protecting your personal privacy and ensuring that every piece of information you share with us is handled with high integrity, transparency, and care.",
+        "This Privacy Policy outlines how TazaHaat (\"we\", \"our\", or \"us\") collects, processes, stores, and safeguards personal data obtained from customers, local farmers, fishermen, vendors, and delivery partners using our mobile apps, web platform, and hyperlocal delivery network.",
+        "By accessing or using TazaHaat services, you acknowledge and agree to the information practices described in this policy."
+      ],
+      "highlights": [
+        "Applies across all TazaHaat web & mobile apps",
+        "Compliant with Indian Information Technology Act (2000) & DPDP guidelines",
+        "Zero sale of personal contact records to third-party ad brokers"
+      ]
+    },
+    {
+      "id": "data-collection",
+      "number": "02",
+      "title": "Information We Collect",
+      "summary": "Categories of personal, transaction, and device data gathered during service usage.",
+      "content": [
+        "We collect only the minimum necessary information required to deliver fresh river fish, organic produce, and groceries reliably to your doorstep.",
+        "Personal Identification: Your name, mobile number, delivery address, nearby landmark, and email address provided during registration or checkout.",
+        "Hyperlocal Location Coordinates: Real-time GPS location while placing an order or tracking your assigned delivery partner to guarantee delivery within 90 minutes across Agartala and nearby clusters.",
+        "Order & Transaction Details: Products ordered, basket choices, preferred delivery time slots, and payment method reference codes (card numbers, UPI PINs, and bank passwords are handled directly by RBI-authorized payment gateways and are never stored on TazaHaat servers)."
+      ],
+      "highlights": [
+        "Minimal data collection strictly for delivery fulfillment",
+        "PCI-DSS compliant encrypted payment gateway integration",
+        "Granular GPS location permissions you can control"
+      ]
+    },
+    {
+      "id": "data-usage",
+      "number": "03",
+      "title": "How We Use Your Information",
+      "summary": "Purposes of processing personal information for order dispatch, safety, and cold-chain routing.",
+      "content": [
+        "Order Fulfillment & Routing: Routing morning harvest from our Agartala central cold hub to your specific neighborhood with optimal temperature preservation.",
+        "Live Delivery Communications: Sending instant WhatsApp alerts, SMS notifications, and order tracking links regarding dispatch status and delivery rider contact.",
+        "Quality & Doorstep Guarantees: Processing open-box inspection feedback, replacement tickets, and instant refunds if you are dissatisfied with produce freshness.",
+        "Demand Forecasting AI: Analyzing aggregated, non-identifiable purchase trends to help local Tripura farmers harvest the right amount of vegetables and reduce food waste."
+      ],
+      "highlights": [
+        "Delivery rider only receives phone & address during active delivery",
+        "Predictive harvest analytics use strictly anonymized datasets",
+        "Customizable SMS & WhatsApp alert preferences in user profile"
+      ]
+    },
+    {
+      "id": "data-sharing",
+      "number": "04",
+      "title": "Data Sharing & Disclosures",
+      "summary": "Strict rules governing when your data is shared with trusted operational partners.",
+      "content": [
+        "We strictly do NOT sell, rent, monetize, or trade your personal information with external marketing agencies or brokers.",
+        "Delivery Associates: Our background-verified delivery executives receive temporary access to your delivery address and contact number solely for the duration of the delivery window.",
+        "Licensed Payment Aggregators: Tokenized transaction data is processed securely through RBI-compliant payment partners (UPI, Net Banking, Debit/Credit Cards).",
+        "Legal & Regulatory Compliance: We may disclose personal data if required by Indian law, law enforcement requests, or court orders to investigate fraud or security threats."
+      ],
+      "highlights": [
+        "Zero third-party marketing brokers or ad networks",
+        "Time-limited contact masking for delivery partners",
+        "Strict confidentiality agreements for all staff"
+      ]
+    },
+    {
+      "id": "data-security",
+      "number": "05",
+      "title": "Data Security & Storage",
+      "summary": "Technical encryption, cloud storage protocols, and access control mechanisms.",
+      "content": [
+        "All communications between your device and our servers are encrypted using modern Transport Layer Security (TLS 1.3 / SSL) with 256-bit encryption.",
+        "Role-Based Access Control: Customer account data is accessible solely by authenticated customer care and dispatch supervisors requiring it for task execution.",
+        "Data Localization: All user and transaction databases are stored securely in ISO-27001 certified cloud data centers located within India in compliance with national data residency rules."
+      ],
+      "highlights": [
+        "End-to-end 256-bit TLS data transmission encryption",
+        "Encrypted database backups with multi-factor authentication",
+        "Regular vulnerability scanning and security audits"
+      ]
+    },
+    {
+      "id": "cookies-tracking",
+      "number": "06",
+      "title": "Cookies & Device Tracking",
+      "summary": "How session tokens and storage improve your marketplace navigation.",
+      "content": [
+        "TazaHaat uses essential cookies and local storage tokens to preserve your active login session, cart contents, and selected delivery pincode.",
+        "Platform Analytics: We deploy privacy-focused telemetry to monitor app responsiveness, crash reports, and checkout completion speeds without tracking individual external browsing habits.",
+        "You can manage or disable non-essential cookies via your browser preferences without losing basic site browsing functionality."
+      ],
+      "highlights": [
+        "Fast session persistence for uninterrupted shopping",
+        "No invasive cross-site behavioral tracking cookies",
+        "Full browser-level cookie management support"
+      ]
+    },
+    {
+      "id": "user-rights",
+      "number": "07",
+      "title": "Your Privacy Rights & Controls",
+      "summary": "Your rights to view, modify, export, or permanently delete your account records.",
+      "content": [
+        "Right to Access & Edit: You can inspect and update your profile name, contact phone, and saved delivery addresses anytime from the account settings.",
+        "Right to Account Erasure: You have the right to request permanent deletion of your profile and historical data by emailing privacy@tazahaat.in or submitting a request via our Help Center.",
+        "Marketing Opt-Out: You can unsubscribe from non-essential promotional SMS, WhatsApp updates, and newsletters with a single tap in your communication preferences."
+      ],
+      "highlights": [
+        "Self-serve profile update via account dashboard",
+        "Account deletion fulfilled within 7 business days",
+        "Instant one-click opt-out for marketing broadcasts"
+      ]
+    },
+    {
+      "id": "children-privacy",
+      "number": "08",
+      "title": "Children's Privacy Protection",
+      "summary": "Protection policies concerning underage individuals.",
+      "content": [
+        "TazaHaat does not knowingly gather or solicit personal identification details from individuals under 18 years of age.",
+        "Our marketplace is intended for adult consumers and household managers. Minors may use the platform only under the direct supervision and consent of a parent or guardian.",
+        "If we discover that personal information of an unsupervised minor has been collected, we promptly remove the records from our active servers."
+      ],
+      "highlights": [
+        "Services designed for adult household managers",
+        "Immediate data purge upon notice of unauthorized minor accounts"
+      ]
+    },
+    {
+      "id": "policy-updates",
+      "number": "09",
+      "title": "Policy Changes & Notifications",
+      "summary": "How and when we communicate updates to this Privacy Policy.",
+      "content": [
+        "As we expand our distribution hubs, cold storage technology, and delivery reach across Northeast India, we may periodically revise this Privacy Policy.",
+        "Significant policy alterations will be highlighted via prominent app banners, email notices, or SMS announcements prior to the changes taking effect.",
+        "The date at the top of this document indicates the most recent update. Continued use of TazaHaat signifies agreement with the updated terms."
+      ],
+      "highlights": [
+        "Advance notice for material changes to data collection",
+        "Transparent revision archive maintained"
+      ]
+    },
+    {
+      "id": "contact-grievance",
+      "number": "10",
+      "title": "Grievance Officer & Contact Info",
+      "summary": "Direct contact details for privacy concerns, data inquiries, and grievance redressal.",
+      "content": [
+        "In accordance with the Information Technology Act 2000 and the Consumer Protection Rules, our designated Grievance Officer details are published below:",
+        "Grievance Officer: Mr. Debasish Roy | Data Protection & Compliance Lead",
+        "Email: privacy@tazahaat.in | grievance@tazahaat.in",
+        "Office: TazaHaat Central Cold Hub, Airport Road, Agartala, Tripura 799009, India.",
+        "Response Time: All privacy-related inquiries and grievance notices will be acknowledged within 24 hours and resolved within 15 business days."
+      ],
+      "highlights": [
+        "Designated compliance officer based in Agartala",
+        "24-hour initial acknowledgment SLA",
+        "Formal resolution guaranteed within 15 working days"
+      ]
+    }
+  ]
+}

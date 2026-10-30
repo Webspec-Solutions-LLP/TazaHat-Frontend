@@ -180,42 +180,198 @@
 .contact-dispatch-button:hover { transform: translateY(-1px); background: #079449; }
 .contact-call-button:focus-visible, .contact-dispatch-button:focus-visible { outline: 2px solid #a7d8ff; outline-offset: 3px; }
 
-@media (max-width: 900px) {
-  .contact-hero-inner, .contact-cards, .contact-support-layout, .contact-emergency-banner { width: calc(100% - 40px); }
-  .contact-hero-inner { gap: 20px; }
-  .contact-promises { flex-basis: 205px; }
-  .contact-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .contact-support-layout { grid-template-columns: 1fr; }
+@media (max-width: 1299px) {
+  .contact-hero-inner, .contact-cards, .contact-support-layout, .contact-emergency-banner { max-width: 1024px; }
 }
-@media (max-width: 600px) {
-  .contact-page { padding-bottom: 24px; }
-  .contact-hero { min-height: auto; }
-  .contact-hero-inner { width: calc(100% - 36px); min-height: 0; flex-direction: column; align-items: stretch; gap: 18px; padding: 30px 0 54px; }
-  .contact-support-layout { width: calc(100% - 36px); gap: 14px; margin-top: 18px; }
-  .contact-ticket-panel, .contact-hub-panel { padding: 18px 15px; }
-  .contact-panel-heading { align-items: flex-start; flex-direction: column; }
-  .contact-reply-promise { align-self: flex-start; }
-  .contact-issue-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .contact-issue-option { min-height: 67px; }
-  .contact-form-grid { column-gap: 9px; row-gap: 12px; }
-  .contact-form-bottom { align-items: flex-start; flex-direction: column; }
-  .contact-hub-row { gap: 7px; padding: 8px; }
-  .contact-hub-row > span { padding: 5px 6px; font-size: 8px; }
-  .contact-emergency-banner { width: calc(100% - 36px); align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-top: 18px; padding: 17px; }
-  .contact-emergency-icon { width: 44px; height: 44px; flex-basis: 44px; }
-  .contact-emergency-icon svg { width: 24px; height: 24px; }
-  .contact-emergency-copy { flex-basis: calc(100% - 60px); }
-  .contact-emergency-copy h2 { font-size: 17px; }
-  .contact-emergency-copy p { font-size: 11px; }
-  .contact-emergency-actions { width: 100%; margin-left: 56px; }
-  .contact-call-button, .contact-dispatch-button { min-height: 38px; flex: 1; padding-inline: 8px; font-size: 10px; }
-  .contact-hero h1 { font-size: clamp(26px, 7.1vw, 36px); letter-spacing: -1px; white-space: normal; }
-  .contact-hero-copy > p { font-size: 13px; }
-  .contact-promises { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; flex: initial; margin: 0; }
-  .contact-promise { gap: 8px; min-height: 54px; padding: 7px; }
-  .contact-promise-icon { width: 29px; height: 29px; flex-basis: 29px; }
-  .contact-promise strong { font-size: 11px; }
-  .contact-promise small { font-size: 8px; white-space: normal; }
-  .contact-cards { width: calc(100% - 36px); grid-template-columns: 1fr; gap: 11px; margin-top: -30px; }
+
+@media (max-width: 1099px) {
+  .contact-hero-inner, .contact-cards, .contact-support-layout, .contact-emergency-banner { box-sizing: border-box; width: 100%; max-width: none; padding-inline: 40px; }
+  .contact-hero-inner { gap: 24px; }
+  .contact-hero h1 { font-size: clamp(28px, 3.3vw, 37px); letter-spacing: -1px; }
+  .contact-promises { flex-basis: 205px; gap: 9px; }
+  .contact-promise { gap: 9px; min-height: 54px; padding: 7px 10px; }
+  .contact-promise strong { font-size: 13px; }
+  .contact-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .contact-card { min-height: 194px; padding: 15px 16px 12px; }
+  .contact-support-layout { grid-template-columns: minmax(0, 1fr); gap: 18px; margin-top: 20px; }
+  .contact-ticket-panel, .contact-hub-panel { padding: 21px 22px; }
+  .contact-emergency-banner { gap: 13px; padding: 19px 22px; }
+  .contact-call-button, .contact-dispatch-button { min-height: 38px; padding-inline: 11px; }
+}
+
+@media (max-width: 875px) {
+  .contact-page { padding-bottom: 30px; }
+  .contact-hero-inner, .contact-cards, .contact-support-layout, .contact-emergency-banner { padding-inline: 30px; }
+  .contact-hero-inner { min-height: 0; flex-direction: column; align-items: stretch; gap: 16px; padding-top: 24px; padding-bottom: 52px; }
+  .contact-hero-copy { max-width: 100%; }
+  .contact-live-label { gap: 6px; padding: 5px 11px; font-size: 8px; }
+  .contact-hero h1 { max-width: 720px; margin: 11px 0 8px; font-size: clamp(25px, 4.4vw, 34px); white-space: normal; }
+  .contact-hero-copy > p { max-width: 720px; font-size: 13px; }
+  .contact-promises { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; flex: initial; margin: 0; }
+  .contact-promise { gap: 8px; min-height: 48px; padding: 6px 9px; }
+  .contact-promise-icon { width: 30px; height: 30px; flex-basis: 30px; }
+  .contact-promise strong { font-size: 12px; }
+  .contact-promise small { font-size: 9px; white-space: normal; }
+  .contact-cards { gap: 10px; margin-top: -34px; }
+  .contact-card { min-height: 183px; padding: 13px 14px 11px; }
+  .contact-card-icon { width: 38px; height: 38px; flex-basis: 38px; }
+  .contact-card-icon svg { width: 20px; height: 20px; }
+  .contact-card-eyebrow { margin: 10px 0 5px; font-size: 8px; }
+  .contact-card h2 { font-size: 14px; }
+  .contact-card-description { min-height: 31px; margin: 4px 0 8px; font-size: 10px; }
+  .contact-card-action { min-height: 29px; padding-top: 6px; font-size: 10px; }
+  .contact-support-layout { gap: 14px; margin-top: 19px; }
+  .contact-ticket-panel, .contact-hub-panel { padding: 18px; border-radius: 10px; }
+  .contact-panel-heading, .contact-hub-heading { gap: 10px; }
+  .contact-panel-heading h2 { font-size: clamp(20px, 3vw, 25px); }
+  .contact-reply-promise { gap: 5px; padding: 7px 9px; font-size: 9px; }
+  .contact-form-rule { margin: 13px 0 16px; }
+  .contact-issue-fieldset legend, .contact-field > span:first-child { margin-bottom: 7px; font-size: 10px; }
+  .contact-issue-options { gap: 7px; }
+  .contact-issue-option { min-height: 65px; gap: 5px; font-size: 9px; }
+  .contact-form-grid { column-gap: 11px; row-gap: 12px; margin-top: 16px; }
+  .contact-input-wrap { height: 39px; gap: 8px; padding-inline: 9px; }
+  .contact-input-wrap input, .contact-message-field textarea { font-size: 11px; }
+  .contact-message-field { margin-top: 14px; }
+  .contact-message-field textarea { min-height: 72px; padding: 10px; }
+  .contact-upload-field { gap: 9px; min-height: 58px; margin-top: 13px; padding: 8px 10px; }
+  .contact-upload-icon { width: 32px; height: 32px; flex-basis: 32px; }
+  .contact-form-bottom { gap: 9px; margin-top: 15px; }
+  .contact-submit-button { min-height: 36px; gap: 9px; padding-inline: 15px; font-size: 11px; }
+  .contact-hub-column { gap: 13px; }
+  .contact-hub-panel { padding: 17px; }
+  .contact-hub-heading { padding-bottom: 11px; }
+  .contact-hub-heading h2 { font-size: 17px; }
+  .contact-hub-list { gap: 7px; padding-block: 11px 12px; }
+  .contact-hub-row { min-height: 48px; gap: 8px; padding: 8px; }
+  .contact-hub-row strong { font-size: 11px; }
+  .contact-hub-row small { font-size: 10px; }
+  .contact-hub-row > span { padding: 6px 8px; font-size: 10px; }
+  .contact-delivery-slots { gap: 6px; padding-block: 10px 12px; }
+  .contact-delivery-slots > div { gap: 4px; padding: 7px 3px; }
+  .contact-delivery-slots span, .contact-delivery-slots strong { font-size: 9px; }
+  .contact-whatsapp-escalation { min-height: 39px; font-size: 11px; }
+  .contact-guarantee-panel { gap: 10px; padding: 13px; }
+  .contact-guarantee-icon { width: 36px; height: 36px; flex-basis: 36px; }
+  .contact-guarantee-panel h2 { font-size: 13px; }
+  .contact-guarantee-panel p { font-size: 10px; }
+  .contact-emergency-banner { flex-wrap: wrap; gap: 11px; margin-top: 18px; padding-top: 16px; padding-bottom: 16px; }
+  .contact-emergency-icon { width: 44px; height: 44px; flex-basis: 44px; }
+  .contact-emergency-icon svg { width: 23px; height: 23px; }
+  .contact-emergency-copy { flex-basis: calc(100% - 58px); }
+  .contact-emergency-copy h2 { font-size: 18px; }
+  .contact-emergency-copy p { font-size: 11px; }
+  .contact-emergency-actions { gap: 8px; margin-left: 55px; }
+  .contact-call-button, .contact-dispatch-button { min-height: 35px; padding-inline: 10px; font-size: 10px; }
+}
+
+@media (max-width: 677px) {
+  .contact-hero-inner, .contact-cards, .contact-support-layout, .contact-emergency-banner { padding-inline: 15px; }
+  .contact-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  .contact-card { min-height: 176px; padding: 12px; }
+  .contact-card-badge { padding: 5px 7px; font-size: 8px; }
+  .contact-card h2 { font-size: 13px; }
+  .contact-card-description { font-size: 9px; }
+  .contact-card-action { gap: 5px; font-size: 9px; }
+  .contact-ticket-panel, .contact-hub-panel { padding: 15px; }
+  .contact-panel-heading h2 { font-size: 20px; }
+  .contact-reply-promise { white-space: normal; }
+  .contact-issue-option { min-height: 60px; }
+  .contact-upload-field { gap: 7px; padding-inline: 8px; }
+  .contact-upload-button { padding: 7px 8px; }
+  .contact-hub-row { gap: 7px; padding: 7px; }
+  .contact-hub-row > span { padding: 5px 6px; font-size: 8px; }
+  .contact-emergency-banner { gap: 9px; padding-top: 14px; padding-bottom: 14px; }
+  .contact-emergency-actions { width: 100%; margin-left: 53px; }
+  .contact-call-button, .contact-dispatch-button { flex: 1; padding-inline: 7px; font-size: 9px; }
+}
+
+@media (max-width: 575px) {
+  .contact-page { padding-bottom: 22px; }
+  .contact-hero-inner { gap: 13px; padding-top: 20px; padding-bottom: 48px; }
+  .contact-live-label { font-size: 7px; letter-spacing: .2px; }
+  .contact-hero h1 { margin: 9px 0 7px; font-size: clamp(22px, 6vw, 29px); letter-spacing: -.7px; }
+  .contact-hero-copy > p { font-size: 11px; line-height: 1.45; }
+  .contact-promises { gap: 6px; }
+  .contact-promise { gap: 6px; min-height: 43px; padding: 5px 6px; }
+  .contact-promise-icon { width: 26px; height: 26px; flex-basis: 26px; }
+  .contact-promise-icon svg { width: 16px; height: 16px; }
+  .contact-promise strong { font-size: 10px; }
+  .contact-promise small { font-size: 8px; }
+  .contact-cards { grid-template-columns: 1fr; gap: 8px; margin-top: -29px; }
+  .contact-card { min-height: 155px; padding: 11px 12px 10px; }
+  .contact-card-top { gap: 6px; }
+  .contact-card-icon { width: 34px; height: 34px; flex-basis: 34px; border-radius: 9px; }
+  .contact-card-icon svg { width: 18px; height: 18px; }
+  .contact-card-eyebrow { margin: 8px 0 4px; font-size: 7px; }
+  .contact-card h2 { font-size: 12px; }
+  .contact-card-description { min-height: 0; margin: 4px 0 7px; font-size: 9px; }
+  .contact-card-action { min-height: 26px; padding-top: 5px; font-size: 9px; }
+  .contact-support-layout { gap: 10px; margin-top: 14px; }
+  .contact-ticket-panel, .contact-hub-panel { padding: 12px; }
+  .contact-panel-heading, .contact-hub-heading { align-items: flex-start; flex-direction: column; gap: 7px; }
+  .contact-panel-heading h2 { margin-top: 3px; font-size: 18px; }
+  .contact-reply-promise { align-self: flex-start; padding: 6px 8px; font-size: 8px; }
+  .contact-form-rule { margin: 10px 0 12px; }
+  .contact-issue-fieldset legend, .contact-field > span:first-child { margin-bottom: 6px; font-size: 9px; }
+  .contact-issue-options { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .contact-issue-option { min-height: 54px; gap: 4px; padding: 6px 4px; font-size: 8px; }
+  .contact-issue-option svg { width: 17px; height: 17px; }
+  .contact-form-grid { grid-template-columns: 1fr; gap: 9px; margin-top: 12px; }
+  .contact-input-wrap { height: 36px; }
+  .contact-input-wrap input, .contact-message-field textarea { font-size: 10px; }
+  .contact-message-field { margin-top: 11px; }
+  .contact-message-field textarea { min-height: 66px; padding: 8px; }
+  .contact-upload-field { min-height: 51px; margin-top: 10px; padding: 7px; }
+  .contact-upload-icon { width: 29px; height: 29px; flex-basis: 29px; }
+  .contact-upload-copy strong { font-size: 9px; }
+  .contact-upload-copy small { font-size: 8px; }
+  .contact-upload-button { padding: 6px 7px; font-size: 9px; }
+  .contact-form-bottom { align-items: stretch; flex-direction: column; gap: 7px; margin-top: 12px; }
+  .contact-submit-button { min-height: 34px; font-size: 10px; }
+  .contact-sla-note { font-size: 9px; }
+  .contact-hub-heading h2 { font-size: 16px; }
+  .contact-hub-heading .contact-section-kicker { font-size: 7px; }
+  .contact-hub-list { gap: 6px; padding-block: 9px 10px; }
+  .contact-hub-row { min-height: 43px; gap: 6px; padding: 6px; }
+  .contact-hub-row > i { width: 6px; height: 6px; flex-basis: 6px; }
+  .contact-hub-row strong { font-size: 10px; }
+  .contact-hub-row small { font-size: 8px; }
+  .contact-hub-row > span { padding: 4px 5px; font-size: 7px; }
+  .contact-delivery-slots { gap: 4px; padding-block: 8px 9px; }
+  .contact-delivery-slots > div { gap: 3px; padding: 6px 2px; }
+  .contact-delivery-slots span, .contact-delivery-slots strong { font-size: 7px; }
+  .contact-whatsapp-escalation { min-height: 34px; font-size: 9px; }
+  .contact-guarantee-panel { gap: 8px; padding: 10px; }
+  .contact-guarantee-icon { width: 30px; height: 30px; flex-basis: 30px; }
+  .contact-guarantee-icon svg { width: 17px; height: 17px; }
+  .contact-guarantee-panel h2 { margin: 2px 0 4px; font-size: 11px; }
+  .contact-guarantee-panel p { font-size: 9px; }
+  .contact-emergency-banner { align-items: flex-start; gap: 8px; margin-top: 14px; padding-top: 12px; padding-bottom: 12px; }
+  .contact-emergency-icon { width: 36px; height: 36px; flex-basis: 36px; border-radius: 9px; }
+  .contact-emergency-icon svg { width: 19px; height: 19px; }
+  .contact-emergency-copy { flex-basis: calc(100% - 46px); }
+  .contact-urgent-label { gap: 4px; padding: 3px 7px; font-size: 7px; }
+  .contact-emergency-copy h2 { margin: 5px 0 3px; font-size: 15px; }
+  .contact-emergency-copy p { font-size: 9px; }
+  .contact-emergency-actions { gap: 6px; margin-left: 44px; }
+  .contact-call-button, .contact-dispatch-button { min-height: 32px; gap: 5px; padding-inline: 6px; font-size: 8px; }
+  .contact-call-button svg, .contact-dispatch-button svg { width: 13px; height: 13px; }
+}
+
+@media (max-width: 450px) {
+  .contact-hero-inner, .contact-cards, .contact-support-layout, .contact-emergency-banner { padding-inline: 10px; }
+  .contact-hero-inner { padding-top: 17px; padding-bottom: 44px; }
+  .contact-hero h1 { font-size: 22px; }
+  .contact-promises { grid-template-columns: 1fr; }
+  .contact-promise { min-height: 38px; }
+  .contact-card { min-height: 148px; }
+  .contact-ticket-panel, .contact-hub-panel { padding: 10px; }
+  .contact-upload-field { flex-wrap: wrap; }
+  .contact-upload-copy { flex-basis: calc(100% - 45px); }
+  .contact-upload-button { margin-left: 36px; }
+  .contact-hub-row > span { max-width: 76px; overflow: hidden; text-overflow: ellipsis; }
+  .contact-delivery-slots { grid-template-columns: 1fr; }
+  .contact-delivery-slots > div { flex-direction: row; justify-content: space-between; padding: 7px 8px; text-align: left; }
+  .contact-emergency-actions { flex-direction: column; }
 }

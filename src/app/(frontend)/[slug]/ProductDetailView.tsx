@@ -3,13 +3,16 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Products from "@/components/products/Products";
+import CompareList, { COMPARE_CHANGE_EVENT, COMPARE_STORAGE_KEY, type CompareProduct } from "@/components/modals/compareList/CompareList";
+import CompareDetails from "@/components/modals/compareDetails/CompareDetails";
+import Confermation from "@/components/modals/confermation/Confermation";
 import type { CartItem } from "@/components/modals/cart/Cart";
 import { cardToProduct, fallbackImage, isRemoteImage, mediaSrc, PLACEHOLDER_IMAGE, shortName, type ApiProductDetail } from "@/lib/api";
 import { readWishlistIds, subscribeToWishlist, toggleWishlistId } from "@/lib/wishlist";
 import "./ProductDetails.css";
 
 const money = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 });
-function Icon({ name }: { name: "fish" | "leaf" | "shield" | "flask" | "box" | "cart" | "heart" | "minus" | "plus" | "info" }) {
+function Icon({ name }: { name: "fish" | "leaf" | "shield" | "flask" | "box" | "cart" | "heart" | "minus" | "plus" | "info" | "compare" }) {
   const paths: Record<typeof name, React.ReactNode> = {
     fish: <><path d="M3 12C8 2 17 5 20 12c-3 7-12 10-17 0Zm0 0-2-4v8l2-4Z"/><circle cx="16" cy="11" r=".8"/></>,
     leaf: <><path d="M4 20C1 6 12 3 21 3c0 12-5 20-17 17ZM4 20 16 8"/><path d="m9 15 5-5"/></>,
@@ -20,6 +23,7 @@ function Icon({ name }: { name: "fish" | "leaf" | "shield" | "flask" | "box" | "
     heart: <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/>,
     minus: <path d="M5 12h14"/>, plus: <path d="M12 5v14M5 12h14" />,
     info: <><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></>,
+    compare: <><path d="M16 3l4 4-4 4" /><path d="M20 7H4" /><path d="M8 21l-4-4 4-4" /><path d="M4 17h16" /></>,
   };
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
 }
@@ -68,6 +72,52 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
   }, [detail.slug]);
 
   const pack = detail.packs[packIndex];
+
+  // Compare (from main): add this product to a compare list of up to a few products and open the side-by-side view
+  const [isCompareOpen, setIsCompareOpen] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isCompareDetailsOpen, setIsCompareDetailsOpen] = useState(false);
+  const [compareDetailsProducts, setCompareDetailsProducts] = useState<CompareProduct[]>([]);
+  const [compareInitialSelectedIds, setCompareInitialSelectedIds] = useState<string[]>([]);
+  const [isCompared, setIsCompared] = useState(false);
+  useEffect(() => {
+    const check = () => {
+      try {
+        const list: unknown = JSON.parse(window.localStorage.getItem(COMPARE_STORAGE_KEY) ?? "[]");
+        setIsCompared(Array.isArray(list) && list.some((item: { id: string }) => item.id === detail.slug));
+      } catch {
+        setIsCompared(false);
+      }
+    };
+    check();
+    window.addEventListener(COMPARE_CHANGE_EVENT, check);
+    window.addEventListener("storage", check);
+    return () => {
+      window.removeEventListener(COMPARE_CHANGE_EVENT, check);
+      window.removeEventListener("storage", check);
+    };
+  }, [detail.slug]);
+  const handleAddToCompare = () => {
+    if (isCompared) return;
+    try {
+      const list: unknown = JSON.parse(window.localStorage.getItem(COMPARE_STORAGE_KEY) ?? "[]");
+      if (Array.isArray(list) && list.some((item: { id: string }) => item.id !== detail.slug)) {
+        setIsConfirmOpen(true); // other products are already being compared: ask whether to include this one
+        return;
+      }
+    } catch {
+      // an unreadable list is treated as empty
+    }
+    setCompareInitialSelectedIds([]);
+    setIsCompared(true);
+    setIsCompareOpen(true);
+  };
+  const handleConfirm = (includeThis: boolean) => {
+    setIsConfirmOpen(false);
+    setIsCompared(true);
+    setCompareInitialSelectedIds(includeThis ? [detail.slug] : []);
+    setIsCompareOpen(true);
+  };
   const dressing = detail.cutting.find(c => c.id === dressingId);
   // the instruction box only appears when a custom cut is chosen
   const isCustomDressing = !!dressing && /custom/i.test(dressing.name);
@@ -148,6 +198,7 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
 
   const lineId = pack ? `${detail.slug}-${pack.label}${dressing ? `-${dressing.id}` : ""}` : "";
   const inCart = cartLines.find(line => line.id === lineId);
+  const compareProduct: CompareProduct = { id: detail.slug, name, image: mainImage, price: unitPrice, originalPrice: unitMrp, unit: pack?.label ?? detail.unit ?? "pack", rating: 0, reviews: 0 };
   const addToCart = () => {
     if (!pack || !pack.inStock) return;
     const item: CartItem = {
@@ -216,6 +267,7 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
               <button type="button" className="pd-add-cart" onClick={addToCart} disabled={!pack || !pack.inStock}><Icon name="cart" /> {pack && !pack.inStock ? "Out of stock" : "Add to Cart"}</button>
             )}
             <button type="button" className="pd-wishlist pd-wishlist--icon" aria-pressed={saved} aria-label={saved ? "Remove from wishlist" : "Add to wishlist"} title={saved ? "Remove from wishlist" : "Add to wishlist"} onClick={() => setSaved(toggleWishlistId(detail.slug).includes(detail.slug))}><Icon name="heart" /></button>
+            <button type="button" className={`pd-compare${isCompared ? " is-compared" : ""}`} disabled={isCompared} onClick={handleAddToCompare} title={isCompared ? "Already added to compare" : "Add to compare"}><Icon name="compare" /><span>{isCompared ? "Added to Compare" : "Add to Compare"}</span></button>
           </div>
           <div className="pd-order-note"><span><Icon name="shield" /></span><p><strong>Freshness you can trust</strong><small>Carefully selected, hygienically handled and packed fresh for delivery.</small></p></div>
         </section>
@@ -234,5 +286,19 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
       </section>}
       {detail.related.length > 0 && <div className="pd-related"><Products heading="Related Products" products={detail.related.map(cardToProduct)} showViewAll={false} layout="related" /></div>}
     </div>
+    {isCompareOpen && (
+      <CompareList
+        onClose={() => setIsCompareOpen(false)}
+        initialSelectedIds={compareInitialSelectedIds}
+        product={compareProduct}
+        onContinueCompare={(selected: CompareProduct[]) => { setIsCompareOpen(false); setCompareDetailsProducts(selected); setIsCompareDetailsOpen(true); }}
+        onRemoveItem={(removedId: string) => { if (removedId === detail.slug) setIsCompared(false); }}
+        onClearAll={() => setIsCompared(false)}
+      />
+    )}
+    {isCompareDetailsOpen && (
+      <CompareDetails products={compareDetailsProducts} onClose={() => setIsCompareDetailsOpen(false)} onBackToList={() => { setIsCompareDetailsOpen(false); setIsCompareOpen(true); }} />
+    )}
+    {isConfirmOpen && <Confermation onClose={() => setIsConfirmOpen(false)} onYes={() => handleConfirm(true)} onNo={() => handleConfirm(false)} productName={name} productImage={mainImage} />}
   </main>;
 }

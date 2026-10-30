@@ -7,6 +7,7 @@
 }
 
 .my-orders-container {
+  box-sizing: border-box;
   width: calc(100% - 48px);
   max-width: 1320px;
   margin: 0 auto;
@@ -74,37 +75,85 @@
 .my-orders-empty h2 { margin: 0 0 4px; color: #244560; font-size: 16px; }
 .my-orders-empty p { margin: 0; color: #8191a0; font-size: 12px; }
 
-@media (max-width: 800px) {
-  .my-order-summary { grid-template-columns: minmax(0, 1fr) minmax(0, .8fr) auto; gap: 10px 12px; }
+@media (max-width: 1299px) {
+  .my-orders-container { max-width: 1024px; }
+}
+
+@media (max-width: 1099px) {
+  .my-orders-container { width: 100%; max-width: none; padding-inline: 40px; }
+  .my-orders-heading { gap: 9px; margin-bottom: 15px; }
+  .my-orders-heading h1 { font-size: 26px; }
+  .my-orders-tabs { margin-bottom: 10px; }
+  .my-order-summary { grid-template-columns: minmax(130px, 1.2fr) minmax(105px, 1fr) minmax(70px, .65fr) minmax(95px, .8fr) minmax(95px, .75fr) 92px; gap: 10px; padding: 12px 16px; }
+  .my-order-summary > div > strong { font-size: 14px; }
+  .my-order-total > strong { font-size: 16px !important; }
+  .my-order-status { gap: 6px; padding: 7px 9px; font-size: 11px; }
+  .my-order-details-button { min-height: 36px; padding: 6px 9px; font-size: 12px; }
+}
+
+@media (max-width: 875px) {
+  .my-orders-page { padding-top: 20px; padding-bottom: 32px; }
+  .my-orders-container { padding-inline: 30px; }
+  .my-orders-heading { gap: 8px; margin-bottom: 12px; }
+  .my-orders-heading-icon { width: 36px; height: 36px; flex-basis: 36px; border-radius: 8px; }
+  .my-orders-heading-icon svg { width: 19px; height: 19px; }
+  .my-orders-heading h1 { font-size: 23px; }
+  .my-orders-tabs { gap: 3px; margin-bottom: 9px; padding: 3px; }
+  .my-orders-tab { min-height: 34px; gap: 5px; padding: 5px 10px; font-size: 11px; }
+  .my-orders-tab span { min-width: 17px; height: 17px; font-size: 9px; }
+  .my-orders-list { gap: 7px; }
+  .my-order-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px 12px; min-height: 0; padding: 11px 13px; }
   .my-order-number { grid-column: 1; grid-row: 1; }
   .my-order-date { grid-column: 2; grid-row: 1; }
   .my-order-quantity { grid-column: 3; grid-row: 1; }
   .my-order-total { grid-column: 1; grid-row: 2; }
   .my-order-status { grid-column: 2; grid-row: 2; justify-self: start; }
-  .my-order-details-button { grid-column: 3; grid-row: 2; }
+  .my-order-details-button { grid-column: 3; grid-row: 2; justify-self: stretch; }
+  .my-order-summary > div { gap: 3px; }
+  .my-order-summary > div > span { font-size: 10px; }
+  .my-order-summary > div > strong { font-size: 13px; }
+  .my-order-total > strong { font-size: 14px !important; }
+  .my-order-status { padding: 6px 8px; font-size: 10px; }
+  .my-order-details-button { min-height: 32px; padding: 5px 8px; font-size: 11px; }
 }
 
-@media (max-width: 520px) {
-  .my-orders-page { padding: 18px 0 30px; }
-  .my-orders-container { width: calc(100% - 32px); }
-  .my-orders-heading { gap: 9px; margin-bottom: 13px; }
-  .my-orders-heading-icon { width: 35px; height: 35px; flex-basis: 35px; border-radius: 8px; }
-  .my-orders-heading-icon svg { width: 19px; height: 19px; }
-  .my-orders-heading h1 { font-size: 25px; }
-  .my-orders-tabs { margin-bottom: 9px; }
-  .my-orders-tab { min-height: 34px; padding: 5px 10px; font-size: 11px; }
-  .my-order-summary { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; padding: 14px 12px; }
+@media (max-width: 677px) {
+  .my-orders-container { padding-inline: 15px; }
+  .my-orders-heading h1 { font-size: 21px; }
+  .my-orders-tabs { margin-bottom: 8px; }
+  .my-orders-tab { padding-inline: 8px; }
+  .my-order-summary { gap: 8px 10px; padding: 10px 11px; }
+}
+
+@media (max-width: 575px) {
+  .my-orders-page { padding-top: 16px; padding-bottom: 26px; }
+  .my-orders-heading { gap: 7px; margin-bottom: 10px; }
+  .my-orders-heading-icon { width: 32px; height: 32px; flex-basis: 32px; }
+  .my-orders-heading-icon svg { width: 17px; height: 17px; }
+  .my-orders-heading h1 { font-size: 19px; }
+  .my-orders-tabs { gap: 2px; padding: 3px; }
+  .my-orders-tab { min-height: 30px; gap: 4px; padding: 4px 7px; font-size: 10px; }
+  .my-orders-tab span { min-width: 15px; height: 15px; padding-inline: 3px; font-size: 8px; }
+  .my-order-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px 10px; padding: 10px; }
   .my-order-number { grid-column: 1; grid-row: 1; }
   .my-order-date { grid-column: 2; grid-row: 1; }
   .my-order-quantity { grid-column: 1; grid-row: 2; }
   .my-order-total { grid-column: 2; grid-row: 2; }
-  .my-order-summary > div > span { font-size: 11px; }
-  .my-order-summary > div > strong { font-size: 13px; }
-  .my-order-total > strong { font-size: 15px !important; }
-  .my-order-status { padding: 7px 9px; font-size: 11px; }
-  .my-order-details-button { min-height: 36px; font-size: 12px; }
   .my-order-status { grid-column: 1; grid-row: 3; }
-  .my-order-details-button { grid-column: 2; grid-row: 3; justify-self: end; }
+  .my-order-details-button { grid-column: 2; grid-row: 3; justify-self: end; min-height: 30px; font-size: 10px; }
+}
+
+@media (max-width: 450px) {
+  .my-orders-container { padding-inline: 10px; }
+  .my-orders-heading h1 { font-size: 18px; }
+  .my-orders-tabs { margin-inline: -2px; }
+  .my-orders-tab { min-height: 28px; gap: 3px; padding-inline: 6px; font-size: 9px; }
+  .my-order-summary { gap: 8px; padding: 9px; }
+  .my-order-summary > div > span { font-size: 9px; }
+  .my-order-summary > div > strong { font-size: 11px; }
+  .my-order-total > strong { font-size: 13px !important; }
+  .my-order-status { gap: 5px; padding: 5px 7px; font-size: 9px; }
+  .my-order-details-button { min-height: 28px; padding: 4px 7px; font-size: 9px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -71,3 +71,84 @@
   .variant-dialog { animation: none; }
   .variant-option, .variant-go-cart, .variant-close { transition: none; }
 }
+
+/* Selected size controls, dressing selector, and full-width cart action */
+.variant-option-list { gap: 7px; }
+.variant-choice { overflow: hidden; border: 1px solid #dce7f1; border-radius: 8px; background: #fff; transition: border-color 180ms ease, box-shadow 180ms ease; }
+.variant-choice.is-selected { border-color: #1672c1; background: linear-gradient(110deg, #edf6ff, #f7fbff); box-shadow: inset 0 0 0 1px #1672c118, 0 2px 8px #1672c11a; }
+.variant-choice.is-selected > .variant-option { border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.variant-choice-quantity { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 10px 8px; color: #526e8b; font-size: 12px; font-weight: 600; }
+.variant-choice-quantity { margin-top: 4px; padding-bottom: 5px; font-size: 11px; }
+.variant-quantity { height: 30px; }
+.variant-quantity button { height: 28px; font-size: 16px; }
+.variant-choice { display: flex; align-items: center; }
+.variant-option { flex: 1 1 auto; min-width: 0; }
+.variant-choice.is-selected { gap: 8px; padding: 4px 8px; }
+.variant-choice.is-selected > .variant-option { min-width: 0; min-height: 42px; padding: 3px 2px; }
+.variant-choice-side { display: flex; flex: 0 0 auto; align-items: center; gap: 8px; }
+.variant-choice-price { min-width: 56px; color: #0754a0; font-size: 13px; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+.variant-choice.is-selected .variant-choice-quantity { margin: 0; padding: 0; }
+.variant-choice.is-selected .variant-quantity { grid-template-columns: 1fr 22px 1fr; width: 78px; height: 28px; }
+.variant-choice.is-selected .variant-quantity button { height: 26px; font-size: 14px; }
+.variant-dressing-field { display: grid; gap: 7px; margin-top: 14px; color: #244e78; font-size: 13px; font-weight: 700; }
+.variant-dressing-field { position: relative; }
+.variant-dressing-field select { width: 100%; min-height: 42px; padding: 0 38px 0 13px; border: 1px solid #1683d8; border-radius: 9px; appearance: none; color: #16477e; background: #fff; font: inherit; font-weight: 400; cursor: pointer; transition: border-color 180ms ease, box-shadow 180ms ease; }
+.variant-dressing-field::after { position: absolute; right: 15px; bottom: 17px; width: 7px; height: 7px; border-right: 1.7px solid #16477e; border-bottom: 1.7px solid #16477e; content: ""; pointer-events: none; transform: rotate(45deg); transition: transform 220ms ease; }
+.variant-dressing-field:focus-within select { border-color: #0754a0; box-shadow: 0 0 0 3px #0754a018; }
+.variant-dressing-field select:focus-visible { outline: 2px solid #1683d8; outline-offset: 2px; }
+.variant-footer { display: block; margin-top: 14px; padding: 0; border: 0; background: transparent; }
+.variant-go-cart { width: 100%; min-height: 40px; justify-content: space-between; gap: 10px; padding: 8px 13px; border-radius: 8px; font-size: 13px; }
+.variant-go-cart small { color: #ffffffd9; font-size: 12px; font-weight: 600; }
+.variant-go-cart svg { flex: 0 0 18px; width: 18px; height: 18px; }
+.variant-close-chevron { display: none; }
+.variant-dialog.is-closing { animation: variant-dialog-out 500ms cubic-bezier(.4, 0, .2, 1) both; }
+
+@keyframes variant-dialog-out { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(8px) scale(.98); } }
+@keyframes variant-sheet-in { from { opacity: 0; transform: translateY(100%); } to { opacity: 1; transform: translateY(0); } }
+@keyframes variant-sheet-out { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(100%); } }
+
+@media (max-width: 575px) {
+  .variant-dialog { position: fixed; inset: auto 0 0; width: 100%; max-width: none; max-height: 88dvh; margin: 0; overflow-x: hidden; overflow-y: auto; border-right: 0; border-bottom: 0; border-left: 0; border-radius: 18px 18px 0 0; animation: variant-sheet-in 520ms cubic-bezier(.22, 1, .36, 1) both; }
+  .variant-dialog.is-closing { animation: variant-sheet-out 500ms cubic-bezier(.4, 0, .2, 1) both; }
+  .variant-panel { padding: 18px 16px 0; }
+  .variant-header { align-items: center; }
+  .variant-header h2 { font-size: 18px; }
+  .variant-close { flex-basis: 36px; }
+  .variant-close-x { display: none; }
+  .variant-close-chevron { display: block; }
+  .variant-option-list { gap: 6px; }
+  .variant-option { min-height: 40px; }
+  .variant-dressing-field { margin-top: 12px; }
+  .variant-footer { position: sticky; bottom: 0; z-index: 4; margin: 14px -16px 0; padding: 10px 16px max(10px, env(safe-area-inset-bottom)); background: #fff; box-shadow: 0 -8px 18px #08213b12; }
+  .variant-go-cart { min-height: 42px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .variant-dialog, .variant-dialog.is-closing { animation: none; }
+}
+
+/* Keep size rows consistent; expand only the active size for quantity. */
+.variant-choice { display: block; }
+.variant-choice.is-selected { display: block; gap: 0; padding: 0; }
+.variant-choice.is-selected > .variant-option { min-height: 42px; padding: 6px 10px; }
+.variant-choice-quantity { justify-content: space-between; margin: 0; padding: 0 10px 8px; }
+.variant-choice.is-selected .variant-quantity { width: 78px; height: 28px; }
+.variant-choice.is-selected .variant-quantity button { height: 26px; }
+.variant-choice-quantity { justify-content: flex-start; }
+.variant-go-cart { justify-content: flex-start; }
+.variant-go-cart-label { order: 1; display: inline-flex; align-items: center; gap: 8px; }
+.variant-go-cart > svg { order: 2; }
+.variant-go-cart-meta { order: 3; margin-left: auto; }
+
+/* Inline selected-size quantity: weight and count on the left, price and radio on the right. */
+.variant-choice { display: flex; min-height: 50px; align-items: center; gap: 8px; padding: 5px 10px; }
+.variant-choice.is-selected { display: flex; gap: 8px; padding: 5px 10px; background: linear-gradient(110deg, #edf6ff, #f7fbff); }
+.variant-choice > .variant-option,
+.variant-choice.is-selected > .variant-option { display: flex; flex: 0 1 auto; min-width: 0; min-height: 36px; align-items: center; padding: 0; border: 0; background: transparent; box-shadow: none; }
+.variant-choice .variant-option-copy { flex: 0 0 auto; }
+.variant-choice-quantity { flex: 0 0 auto; margin: 0; padding: 0; }
+.variant-choice-price { min-width: 56px; margin-left: auto; color: #0754a0; font-size: 13px; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+.variant-choice .variant-radio-mark { flex: 0 0 22px; }
+.variant-choice { cursor: pointer; }
+.variant-choice .variant-radio-mark { flex-basis: 18px; width: 18px; height: 18px; border: 1.5px solid #b8c9d9; border-radius: 50%; background: #fff; }
+.variant-choice.is-selected .variant-radio-mark { border: 5px solid #1269b4; background: #fff; }

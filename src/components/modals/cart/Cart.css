@@ -534,6 +534,46 @@
   }
 }
 
+@media (max-width: 450px) {
+  .cart-header { gap: 8px; padding: 10px 12px; }
+  .cart-close-btn { width: 32px; height: 32px; }
+  .cart-close-btn svg { width: 16px; height: 16px; }
+  .cart-header-title { font-size: 17px; }
+  .cart-header-count { padding: 3px 8px; font-size: 10px; }
+  .cart-body { padding: 10px 12px; }
+  .cart-items-list { gap: 7px; }
+  .cart-item-card { gap: 8px; padding: 8px; border-radius: 10px; }
+  .cart-item-image-wrap { width: 58px; height: 58px; border-radius: 7px; }
+  .cart-item-image { padding: 5px; }
+  .cart-item-content { gap: 4px; }
+  .cart-item-top-row { gap: 5px; }
+  .cart-item-name { font-size: 13px; }
+  .cart-item-weight { margin-top: 1px; font-size: 10px; }
+  .cart-item-delete-btn { width: 25px; height: 25px; }
+  .cart-item-delete-btn svg { width: 15px; height: 15px; }
+  .cart-item-bottom-row { gap: 6px; }
+  .cart-item-qty-section { gap: 6px; }
+  .cart-item-qty-text { font-size: 11px; }
+  .cart-qty-btn { width: 24px; height: 24px; font-size: 14px; }
+  .cart-item-price { font-size: 13px; }
+  .cart-item-unit-price { font-size: 9px; }
+  .cart-empty-state { padding: 38px 12px; }
+  .cart-empty-icon { width: 54px; height: 54px; margin-bottom: 12px; }
+  .cart-empty-icon svg { width: 27px; height: 27px; }
+  .cart-empty-state h3 { margin-bottom: 5px; font-size: 16px; }
+  .cart-empty-state p { margin-bottom: 14px; font-size: 11px; }
+  .cart-reset-btn { padding: 7px 12px; font-size: 11px; }
+  .cart-footer { padding: 9px 12px 11px; }
+  .cart-details-toggle { height: 21px; margin: -5px 0 3px; }
+  .cart-details-toggle svg { width: 16px; height: 16px; }
+  .cart-price-details.is-open { margin-bottom: 8px; }
+  .cart-price-details h3 { margin-bottom: 6px; font-size: 12px; }
+  .cart-price-row { gap: 8px; padding: 2px 0; font-size: 11px; }
+  .cart-price-total { margin-top: 3px; padding-top: 6px; font-size: 12px; }
+  .cart-checkout-btn { min-height: 42px; padding: 8px 12px; border-radius: 7px; font-size: 13px; }
+  .cart-checkout-price { padding: 3px 7px; border-radius: 5px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .cart-sidebar-dialog,
   .cart-sidebar-dialog.is-closing,

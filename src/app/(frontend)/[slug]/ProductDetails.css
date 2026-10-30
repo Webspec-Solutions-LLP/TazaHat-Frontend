@@ -32,11 +32,16 @@
 .pd-quantity button { display: grid; place-items: center; width: 45px; height: 100%; border: 0; color: #073b79; background: #f8fbfe; cursor: pointer; }
 .pd-quantity button:disabled { color: #a8b7c6; cursor: not-allowed; }
 .pd-quantity button svg { width: 18px; height: 18px; }.pd-quantity output { display: grid; place-items: center; flex: 1; height: 100%; border-inline: 1px solid #e4edf5; font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
-.pd-actions { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px; margin-top: 11px; }
-.pd-actions button { display: flex; min-height: 42px; align-items: center; justify-content: center; gap: 8px; border-radius: 9px; font-size: 12px; font-weight: 700; cursor: pointer; }
-.pd-actions svg { width: 20px; height: 20px; }
-.pd-wishlist { border: 1px solid #1682e8; color: #0768c2; background: #fff; }.pd-info-button { min-width: 82px; border: 1px solid #d2e3f2; color: #315c83; background: #f7fbff; }
-.pd-wishlist:hover, .pd-info-button:hover { background: #eaf5ff; }
+.pd-actions { display: flex; align-items: center; gap: 8px; margin-top: 11px; }
+.pd-actions button { display: flex; min-height: 42px; align-items: center; justify-content: center; gap: 7px; border-radius: 9px; font-size: 12px; font-weight: 700; cursor: pointer; transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, transform 150ms ease; }
+.pd-actions svg { width: 19px; height: 19px; }
+.pd-wishlist { flex: 1; min-width: 0; padding: 0 12px; border: 1px solid #1682e8; color: #0768c2; background: #fff; }
+.pd-wishlist:hover { background: #eaf5ff; }
+.pd-wishlist.is-active { background: #eaf5ff; border-color: #0768c2; color: #0657a3; }
+.pd-wishlist.is-active svg { fill: currentColor; }
+.pd-compare { flex: 1; min-width: 0; padding: 0 12px; border: 1px solid #0875d1; color: #0875d1; background: #f0f7ff; opacity: 1; filter: none; cursor: pointer; transition: opacity 220ms ease, filter 220ms ease, background-color 150ms ease, border-color 150ms ease, color 150ms ease; }
+.pd-compare:hover:not(:disabled) { background: #e2f0fd; color: #065ca5; }
+.pd-compare.is-compared, .pd-compare:disabled { opacity: 0.52; filter: grayscale(20%); background: #f0f4f9; border-color: #cdd9e5; color: #73889d; cursor: not-allowed; box-shadow: none; }
 .pd-order-note { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding: 10px 12px; border: 1px solid #dcece5; border-radius: 9px; background: linear-gradient(110deg, #f3fbf6, #fbfefc); }
 .pd-order-note > span { display: grid; width: 34px; height: 34px; flex: 0 0 34px; place-items: center; border-radius: 9px; color: #278150; background: #e3f4e9; }
 .pd-order-note svg { width: 19px; height: 19px; }
@@ -253,6 +258,8 @@
 
 @media (max-width: 450px) {
   .product-details-shell { padding-right: 10px; padding-left: 10px; }
+  .pd-actions { flex-wrap: wrap; }
+  .pd-quantity { flex: 0 0 100%; width: 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -328,3 +335,8 @@
 .pd-wishlist--icon[aria-pressed="true"] { border-color: #d6336c; background: #fff0f5; }
 .pd-wishlist--icon[aria-pressed="true"] svg { fill: currentColor; }
 @media (max-width: 575px) { .pd-actions .pd-add-cart, .pd-actions .pd-quantity, .pd-wishlist--icon { height: 42px; } .pd-wishlist--icon { width: 42px; min-width: 42px; } }
+
+/* compare button next to Add to Cart and the heart */
+.pd-actions { grid-template-columns: minmax(0, 1fr) auto auto; }
+.pd-actions .pd-compare { flex: 0 0 auto; height: 46px; padding: 0 14px; border-radius: 10px; font-size: 13px; }
+@media (max-width: 575px) { .pd-actions { grid-template-columns: minmax(0, 1fr) auto; } .pd-actions .pd-compare { grid-column: 1 / -1; height: 40px; } }

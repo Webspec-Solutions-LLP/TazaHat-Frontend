@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import "./Login.css";
@@ -12,6 +12,7 @@ export default function Login({ onClose }: LoginModalProps) {
   const [otp, setOtp] = useState(["", "", "", "", ""]);
   const [otpRequested, setOtpRequested] = useState(false);
   const [notice, setNotice] = useState("");
+  const [isClosing, setIsClosing] = useState(false);
   const otpRefs = useRef<Array<HTMLInputElement | null>>([]);
   const validMobile = /^\d{10}$/.test(mobile);
   const validOtp = otp.every(digit => /^\d$/.test(digit));
@@ -43,25 +44,27 @@ export default function Login({ onClose }: LoginModalProps) {
     setNotice("OTP delivery is not connected yet. Add an SMS service to receive a real code.");
   };
 
+  const closeWithAnimation = useCallback(() => {
+    if (isClosing) return;
+    setIsClosing(true);
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const closeDuration = reducedMotion ? 0 : window.matchMedia("(max-width: 575px)").matches ? 560 : 440;
+    window.setTimeout(onClose, closeDuration);
+  }, [isClosing, onClose]);
+
   useEffect(() => {
-    const closeOnEscape = (event: globalThis.KeyboardEvent) => { if (event.key === "Escape") onClose(); };
+    const closeOnEscape = (event: globalThis.KeyboardEvent) => { if (event.key === "Escape") closeWithAnimation(); };
     const oldOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     document.addEventListener("keydown", closeOnEscape);
     return () => { document.body.style.overflow = oldOverflow; document.removeEventListener("keydown", closeOnEscape); };
-  }, [onClose]);
+  }, [closeWithAnimation]);
 
   return (
-    <div className="login-modal-backdrop" onMouseDown={event => { if (event.target === event.currentTarget) onClose(); }}>
+    <div className={`login-modal-backdrop${isClosing ? " is-closing" : ""}`} onMouseDown={event => { if (event.target === event.currentTarget) closeWithAnimation(); }}>
       <div className="login-modal-dialog" role="dialog" aria-modal="true" aria-label="Login to TazaHaat">
-        <button className="login-modal-close" type="button" onClick={onClose} aria-label="Close login">×</button>
+        <button className="login-modal-close" type="button" onClick={closeWithAnimation} aria-label="Close login">×</button>
     <main className="login-page is-login-modal">
-      <div className="login-top-note" aria-label="Secure login">
-        <span className="login-top-wave" aria-hidden="true">〜</span>
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 20 5v6c0 5.2-3.5 8.7-8 11-4.5-2.3-8-5.8-8-11V5l8-3Z"/><path d="m8.5 12 2.2 2.2 4.8-5"/></svg>
-        <span>Secure Login</span>
-      </div>
-
       <section className="login-brand-panel" aria-label="TazaHat fresh groceries">
         <Link className="login-brand" href="/" aria-label="TazaHat home">
           <span className="login-brand-logo"><Image src="/images/logo.webp" alt="" width={100} height={100} priority /></span>

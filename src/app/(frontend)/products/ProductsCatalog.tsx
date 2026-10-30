@@ -46,6 +46,15 @@ export default function ProductsCatalog({ initial, total, categories, query, cit
   const busy = useRef(false);
 
   const [view, setView] = useState<'grid' | 'list'>('grid');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  useEffect(() => {
+    if (!isFilterOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsFilterOpen(false);
+    };
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [isFilterOpen]);
   const sortBy = query.sort ?? "";
   const [isSortOpen, setIsSortOpen] = useState(false);
   const sortRef = useRef<HTMLDivElement>(null);
@@ -149,8 +158,9 @@ export default function ProductsCatalog({ initial, total, categories, query, cit
 
   return (
     <main className={`products-section catalog-page${navigating ? " is-loading" : ""}`} aria-busy={navigating}>
-      <aside className="catalog-filters" aria-label="Product filters">
-        <div className="catalog-filter-title"><h2>Filter By</h2><button type="button" onClick={reset}>Reset</button></div>
+      {isFilterOpen && <button className="catalog-filter-backdrop" type="button" aria-label="Close filters" onClick={() => setIsFilterOpen(false)} />}
+      <aside className={`catalog-filters${isFilterOpen ? " is-open" : ""}`} aria-label="Product filters">
+        <div className="catalog-filter-title"><h2>Filter By</h2><button type="button" onClick={reset}>Reset</button><button className="catalog-filter-close" type="button" aria-label="Close filters" onClick={() => setIsFilterOpen(false)}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15" /></svg></button></div>
         <details open><summary>Filter by Category</summary><div className="catalog-filter-options">
           <label><input type="radio" name="category" checked={!query.category} onChange={() => go({ q: query.q, sort: query.sort, maxPrice: query.maxPrice })} />All categories</label>
           {categories.map(option => <label key={option.id}><input type="radio" name="category" checked={query.category === option.slug} onChange={() => go({ ...query, category: option.slug, sub: undefined })} />{shortName(option.name)}</label>)}
@@ -209,6 +219,10 @@ export default function ProductsCatalog({ initial, total, categories, query, cit
                 </div>
               </div>
             </div>
+            <button className="catalog-filter-trigger" type="button" aria-expanded={isFilterOpen} onClick={() => setIsFilterOpen(open => !open)}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 6h16M7 12h10m-7 6h4" /></svg>
+              <span>Filter</span>
+            </button>
             <div className="catalog-view-toggle" role="group" aria-label="Product display"><button type="button" aria-label="Grid view" aria-pressed={view === 'grid'} onClick={() => setView('grid')}><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button><button type="button" aria-label="List view" aria-pressed={view === 'list'} onClick={() => setView('list')}><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M9 5h12M9 12h12M9 19h12M3 5h2M3 12h2M3 19h2"/></svg></button></div>
           </div>
         </header>
