@@ -15,14 +15,16 @@ import AddToCart from "../modals/AddToCart/AddToCart";
 import Location from "../modals/location/Location";
 import Login from "../modals/login/Login";
 import { searchSuggestionsAction } from "@/app/actions";
-import { SearchSuggestionSkeleton } from "../skeleton/Skeletons";
+import { SearchHistorySkeleton, SearchSuggestionSkeleton } from "../skeleton/Skeletons";
 import { fallbackImage, isRemoteImage, type Product as CatalogProduct } from "@/lib/api";
 import { readWishlistIds, subscribeToWishlist, toggleWishlistId } from "../../lib/wishlist";
 import { OPEN_LOCATION_EVENT, useCity } from "../../lib/city";
 import "./Navbar.css";
 
 const SEARCH_HISTORY_KEY = "tazahat-search-history";
-const MAX_SEARCH_HISTORY = 8;
+const MAX_SEARCH_HISTORY = 30;
+const MIN_HISTORY_LENGTH = 4; // shorter searches are not remembered
+const HISTORY_PAGE_SIZE = 5;
 
 interface NavbarProps {
   cartCount?: number;
@@ -41,6 +43,10 @@ export default function Navbar({
   const [isSearchResultsOpen, setIsSearchResultsOpen] = useState(false);
   const [isCompactSearchOpen, setIsCompactSearchOpen] = useState(false);
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
+  // the history list shows 5 at a time; "More" swaps in the next 5 after a short skeleton
+  const [historyPage, setHistoryPage] = useState(0);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const historyTimer = useRef<number | undefined>(undefined);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<CatalogProduct | null>(null);
   const [savedProducts, setSavedProducts] = useState<string[]>([]);
@@ -76,7 +82,7 @@ export default function Navbar({
       if (storedHistory) {
         const parsedHistory: unknown = JSON.parse(storedHistory);
         if (Array.isArray(parsedHistory)) {
-          setSearchHistory(parsedHistory.filter((item): item is string => typeof item === "string").slice(0, MAX_SEARCH_HISTORY));
+          setSearchHistory(parsedHistory.filter((item): item is string => typeof item === "string" && item.length >= MIN_HISTORY_LENGTH).slice(0, MAX_SEARCH_HISTORY));
         }
       }
     } catch {
@@ -171,6 +177,7 @@ export default function Navbar({
   const rememberSearch = (value: string) => {
     const query = value.trim();
     if (!query) return;
+    if (query.length < MIN_HISTORY_LENGTH) return query;
     const nextHistory = [query, ...searchHistory.filter((item) => item.toLowerCase() !== query.toLowerCase())].slice(0, MAX_SEARCH_HISTORY);
     setSearchHistory(nextHistory);
     try {
@@ -197,8 +204,20 @@ export default function Navbar({
     goSearch(searchQuery);
   };
 
+  const historyPageCount = Math.max(1, Math.ceil(searchHistory.length / HISTORY_PAGE_SIZE));
+  const showNextHistory = () => {
+    window.clearTimeout(historyTimer.current);
+    setHistoryLoading(true);
+    historyTimer.current = window.setTimeout(() => {
+      setHistoryPage((page) => (page + 1 < historyPageCount ? page + 1 : 0));
+      setHistoryLoading(false);
+    }, 350);
+  };
+  useEffect(() => () => window.clearTimeout(historyTimer.current), []);
+
   const clearSearchHistory = () => {
     setSearchHistory([]);
+    setHistoryPage(0);
     try {
       window.localStorage.removeItem(SEARCH_HISTORY_KEY);
     } catch {
@@ -340,7 +359,7 @@ export default function Navbar({
               className="navbar-search-input"
               placeholder="Search for fish, meat, vegetables, fruits, dairy..."
               value={searchQuery}
-              onFocus={() => setIsSearchResultsOpen(true)}
+              onFocus={() => { setIsSearchResultsOpen(true); setHistoryPage(0); }}
               onChange={(e) => {
                 const query = e.target.value;
                 setSearchQuery(query);
@@ -394,7 +413,7 @@ export default function Navbar({
                     <span>Recent searches</span>
                     <button type="button" onClick={clearSearchHistory}>Clear</button>
                   </div>
-                  {searchHistory.map((query) => (
+                  {historyLoading ? <SearchHistorySkeleton rows={HISTORY_PAGE_SIZE} /> : searchHistory.slice(historyPage * HISTORY_PAGE_SIZE, (historyPage + 1) * HISTORY_PAGE_SIZE).map((query) => (
                     <button
                       className="navbar-search-history-item"
                       key={query}
@@ -405,6 +424,11 @@ export default function Navbar({
                       <span>{query}</span>
                     </button>
                   ))}
+                  {historyPageCount > 1 && !historyLoading && (
+                    <button type="button" className="navbar-search-history-more" onClick={showNextHistory}>
+                      {historyPage + 1 < historyPageCount ? "More" : "Back to latest"}
+                    </button>
+                  )}
                 </>
               ) : searchResults.length > 0 ? (
                 searchResults.map((product) => {

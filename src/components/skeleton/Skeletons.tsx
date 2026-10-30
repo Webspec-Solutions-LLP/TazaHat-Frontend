@@ -138,6 +138,16 @@ export function ProductPageSkeleton() {
   );
 }
 
+/** Rows for the navbar recent-searches list while the next page of history swaps in. */
+export function SearchHistorySkeleton({ rows = 5 }: { rows?: number }) {
+  return (
+    <div role="status" aria-label="Loading recent searches" aria-busy="true">
+      <span className="sr-only">Loading…</span>
+      {range(rows).map(i => <div className="sk-history" key={i} aria-hidden="true"><div className="sk sk-history-icon" /><div className="sk sk-line sk-line--mid" /></div>)}
+    </div>
+  );
+}
+
 /** Rows for the navbar search suggestions. */
 export function SearchSuggestionSkeleton({ rows = 3 }: { rows?: number }) {
   return (

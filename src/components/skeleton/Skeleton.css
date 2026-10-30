@@ -53,3 +53,8 @@
 .sk-suggest { display: flex; align-items: center; gap: 10px; padding: 7px; }
 .sk-suggest .sk:first-child { flex: 0 0 44px; width: 44px; height: 44px; border-radius: 6px; }
 .sk-suggest-text { display: flex; flex: 1; flex-direction: column; gap: 7px; }
+
+/* navbar recent-searches skeleton: same height as a .navbar-search-history-item row */
+.sk-history { display: flex; align-items: center; gap: 10px; padding: 9px; }
+.sk-history .sk-line { flex: 1; max-width: 160px; }
+.sk-history-icon { width: 15px; height: 15px; border-radius: 50%; flex: none; }
