@@ -284,3 +284,9 @@
 }
 
 @keyframes catalog-backdrop-in { to { opacity: 1; } }
+
+/* server-driven filters */
+.catalog-page.is-loading .catalog-results { opacity: 0.55; transition: opacity 0.15s; }
+.catalog-filter-hint { margin: 4px 0; color: #5d7690; font-size: 13px; }
+.catalog-more-status { margin: 20px 0 8px; text-align: center; color: #4b6a86; font-size: 14px; grid-column: 1 / -1; }
+.catalog-more-status button { margin-left: 6px; border: 0; background: none; color: #0b5cad; font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; }

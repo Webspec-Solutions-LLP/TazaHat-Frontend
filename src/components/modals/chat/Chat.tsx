@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type FormEvent, type PointerEvent } from "react";
 import productCatalog from "@/components/products/english.json";
 import "./Chat.css";
+import { fallbackImage, isRemoteImage } from "@/lib/api";
 
 type OrderLine = {
   id: string;
@@ -379,8 +380,8 @@ export default function Chat({ onClose, product }: { onClose: () => void; produc
             {chatMessage.text && <p>{chatMessage.text}</p>}
             {chatMessage.image && <Image className="chat-message-image" src={chatMessage.image} alt="Image shared in chat" width={640} height={480} unoptimized />}
             {chatMessage.product && (
-              <Link className="chat-product-tag" href={`/productDetails?id=${encodeURIComponent(chatMessage.product.id)}`} aria-label={`View ${chatMessage.product.name} details`} onClick={closeChat}>
-                <span className="chat-product-tag-image"><Image src={chatMessage.product.image} alt="" fill sizes="42px" /></span>
+              <Link className="chat-product-tag" href={`/${encodeURIComponent(chatMessage.product.id)}`} aria-label={`View ${chatMessage.product.name} details`} onClick={closeChat}>
+                <span className="chat-product-tag-image"><Image src={chatMessage.product.image} alt="" fill sizes="42px" unoptimized={isRemoteImage(chatMessage.product.image)} onError={fallbackImage} /></span>
                 <span className="chat-product-tag-copy"><small>PRODUCT</small><strong>{chatMessage.product.name}</strong></span>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
               </Link>
@@ -388,9 +389,9 @@ export default function Chat({ onClose, product }: { onClose: () => void; produc
             {chatMessage.order && (
               <div className="chat-order-card">
                 {chatMessage.order.map((item) => (
-                  <Link className="chat-order-line" key={item.id} href={`/productDetails?id=${encodeURIComponent(item.id)}`} onClick={closeChat} aria-label={`View ${item.name} product details`}>
+                  <Link className="chat-order-line" key={item.id} href={`/${encodeURIComponent(item.id)}`} onClick={closeChat} aria-label={`View ${item.name} product details`}>
                     <span className="chat-order-image">
-                      <Image src={item.image} alt="" fill sizes="38px" />
+                      <Image src={item.image} alt="" fill sizes="38px" unoptimized={isRemoteImage(item.image)} onError={fallbackImage} />
                     </span>
                     <span className="chat-order-product">
                       <strong>{item.name}</strong>

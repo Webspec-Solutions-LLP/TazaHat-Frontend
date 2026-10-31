@@ -11,7 +11,9 @@ import type { CartItem } from "../modals/cart/Cart";
 import catalog from "../products/english.json";
 import { readWishlistIds, subscribeToWishlist, toggleWishlistId } from "../../lib/wishlist";
 import text from "./english.json";
+import { fallbackImage, isRemoteImage } from "@/lib/api";
 import "./OfferLayout3.css";
+import VariantChips from "@/components/products/VariantChips";
 
 type Product = (typeof catalog.products)[number];
 
@@ -39,11 +41,18 @@ function Snowflake({ className }: { className: string }) {
   return <svg className={className} viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M24 3v42M5.8 13.5l36.4 21M5.8 34.5l36.4-21M18 8l6 6 6-6M18 40l6-6 6 6M7 21l8-1 2-8M41 27l-8 1-2 8M7 27l8 1 2 8M41 21l-8-1-2-8" /></svg>;
 }
 
-export default function OfferLayout3() {
+type DealView = { id: string; name: string; image: string; description: string; weight: string; rating: number; reviews: number; price: number; originalPrice: number };
+
+/** Deals from the API (`products`); without them the sample deals from english.json are shown. */
+export default function OfferLayout3({ products }: { products?: Product[] }) {
+  const items: { deal: DealView; product: Product }[] = products
+    ? products.map(p => ({ deal: { id: p.id, name: p.name, image: p.image, description: `${p.subcategory} · ${p.weight}`, weight: p.weight, rating: p.rating, reviews: p.reviews, price: p.price, originalPrice: p.originalPrice }, product: p }))
+    : text.deals.map(deal => ({ deal, product: dealProducts[deal.id] }));
+  const topDiscount = Math.max(0, ...items.map(({ deal }) => (deal.originalPrice > 0 ? Math.round((1 - deal.price / deal.originalPrice) * 100) : 0)));
   const [saved, setSaved] = useState<string[]>([]);
   const [selected, setSelected] = useState<Product | null>(null);
   const [variantProduct, setVariantProduct] = useState<Product | null>(null);
-  const [openVariant, setOpenVariant] = useState<string | null>(null);
+  const [variantIndexes, setVariantIndexes] = useState<Record<string, number>>({});
   useEffect(() => {
     const refreshWishlist = () => setSaved(readWishlistIds());
     refreshWishlist();
@@ -60,7 +69,7 @@ export default function OfferLayout3() {
           <p className="winter-editorial-description">{text.description}</p>
           <div className="winter-editorial-offer">
             <span>{text.offerLabel}</span>
-            <strong>{text.heroBadge}</strong>
+            <strong>{products && topDiscount > 0 ? `Up to ${topDiscount}% off` : text.heroBadge}</strong>
           </div>
           <p className="winter-editorial-note">{text.heroBadgeFoot}</p>
           <div className="winter-editorial-decoration" aria-hidden="true"><span /><span /><span /></div>
@@ -90,18 +99,19 @@ export default function OfferLayout3() {
             a11y={{ containerMessage: text.sliderLabel, slideLabelMessage: text.slideLabel }}
             tabIndex={0}
           >
-            {text.deals.map(deal => {
-              const product = dealProducts[deal.id];
+            {items.map(({ deal, product }) => {
               const isSaved = saved.includes(product.id);
               const variants = product.variants?.length ? product.variants : [{ label: deal.weight, amount: 1, unit: "pack", price: deal.price, originalPrice: deal.originalPrice }];
-              const variant = variants[0];
+              const initialVariant = Math.max(0, variants.findIndex(option => option.price === product.price));
+              const selectedIndex = variantIndexes[product.id] ?? initialVariant;
+              const variant = variants[selectedIndex] ?? variants[0];
               const discount = deal.originalPrice > 0 ? Math.round((1 - deal.price / deal.originalPrice) * 100) : 0;
 
               return (
                 <SwiperSlide key={deal.id} className="winter-product-slide">
                 <article className="winter-product-card">
                   <div className="winter-product-image">
-                    <Image src={deal.image} alt={deal.name} fill sizes="(max-width: 600px) 42vw, (max-width: 1023px) 28vw, 220px" draggable={false} />
+                    <Image src={deal.image} alt={deal.name} fill sizes="(max-width: 600px) 42vw, (max-width: 1023px) 28vw, 220px" draggable={false} unoptimized={isRemoteImage(deal.image)} onError={fallbackImage} />
                     <span className="winter-product-discount">{text.discount.replace("{percent}", String(discount))}</span>
                     <button
                       className="winter-product-save"
@@ -112,19 +122,12 @@ export default function OfferLayout3() {
                     >
                       <svg viewBox="0 0 24 24" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" /></svg>
                     </button>
-                    <span className="winter-product-rating" aria-label={text.rating.replace("{rating}", String(deal.rating)).replace("{reviews}", String(deal.reviews))}>★ {deal.rating}</span>
+                    {deal.rating > 0 && <span className="winter-product-rating" aria-label={text.rating.replace("{rating}", String(deal.rating)).replace("{reviews}", String(deal.reviews))}>★ {deal.rating}</span>}
                   </div>
                   <h4>{deal.name}</h4>
                   <p className="winter-product-description" title={deal.description}>{deal.description}</p>
                   <div className="winter-product-pricing"><strong>{money.format(variant.price)}</strong><del>{money.format(variant.originalPrice)}</del></div>
-                  <div className="winter-product-variant-wrap">
-                    <button type="button" className="winter-product-variant-trigger" aria-haspopup="listbox" aria-expanded={openVariant === deal.id} onClick={() => setOpenVariant(current => current === deal.id ? null : deal.id)}>
-                      <span>{variant.label}</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 7.5 5 5 5-5" /></svg>
-                    </button>
-                    {openVariant === deal.id && <div className="winter-product-variant-menu" role="listbox" aria-label={`Choose size for ${deal.name}`}>
-                      {variants.map((option, index) => <button type="button" role="option" aria-selected={index === 0} key={`${deal.id}-${option.label}`} onClick={() => setOpenVariant(null)}><span>{option.label}</span><span>{money.format(option.price)}</span></button>)}
-                    </div>}
-                  </div>
+                  <VariantChips name={deal.name} variants={variants} selected={selectedIndex} onSelect={index => setVariantIndexes(current => ({ ...current, [product.id]: index }))} onMore={() => setVariantProduct(product)} />
                   <div className="winter-product-actions">
                     <button className="winter-product-cart" type="button" onClick={() => setVariantProduct(product)}><CartIcon />{text.addToCart}</button>
                     <button className="winter-product-quick-view" type="button" aria-label={`View ${deal.name} details`} onClick={() => setSelected(product)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>

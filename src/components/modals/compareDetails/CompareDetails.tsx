@@ -73,8 +73,8 @@ export default function CompareDetails({
   const origPriceA = parseNumber(productA?.originalPrice);
   const origPriceB = parseNumber(productB?.originalPrice);
 
-  const ratingA = Number(productA?.rating ?? catalogA?.rating ?? 4.5);
-  const ratingB = Number(productB?.rating ?? catalogB?.rating ?? 4.5);
+  const ratingA = Number(productA?.rating ?? catalogA?.rating ?? 0);
+  const ratingB = Number(productB?.rating ?? catalogB?.rating ?? 0);
   const reviewsA = productA?.reviews ?? catalogA?.reviews ?? 7;
   const reviewsB = productB?.reviews ?? catalogB?.reviews ?? 7;
 
@@ -183,6 +183,7 @@ export default function CompareDetails({
               <h3 className="compare-product-title" title={productA.name}>
                 {productA.name}
               </h3>
+              {ratingA > 0 && (
               <div className="compare-rating-pill">
                 <span className="compare-star">★</span>
                 <strong>{ratingA.toFixed(1)}</strong>
@@ -191,6 +192,7 @@ export default function CompareDetails({
                   <span className="compare-winner-pill">Higher Rated</span>
                 )}
               </div>
+              )}
               <div className="compare-price-pill">
                 <strong className="compare-main-price">₹{priceA}</strong>
                 {origPriceA > priceA && <del>₹{origPriceA}</del>}
@@ -254,6 +256,7 @@ export default function CompareDetails({
               <h3 className="compare-product-title" title={productB.name}>
                 {productB.name}
               </h3>
+              {ratingB > 0 && (
               <div className="compare-rating-pill">
                 <span className="compare-star">★</span>
                 <strong>{ratingB.toFixed(1)}</strong>
@@ -262,6 +265,7 @@ export default function CompareDetails({
                   <span className="compare-winner-pill">Higher Rated</span>
                 )}
               </div>
+              )}
               <div className="compare-price-pill">
                 <strong className="compare-main-price">₹{priceB}</strong>
                 {origPriceB > priceB && <del>₹{origPriceB}</del>}

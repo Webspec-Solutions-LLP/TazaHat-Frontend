@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import text from "./english.json";
+import { fallbackImage, isRemoteImage } from "@/lib/api";
 import "./OfferLayout2.css";
 
 function FreshIcon({ kind }: { kind: string }) {
@@ -11,7 +12,9 @@ function FreshIcon({ kind }: { kind: string }) {
   </svg>;
 }
 
-export default function OfferLayout2() {
+export interface FreshPick { id: string; name: string; image: string; discount: number; theme: string; slug?: string }
+
+export default function OfferLayout2({ items = text.categories }: { items?: FreshPick[] }) {
   const router = useRouter();
   const shop = (category?: string) => {
     router.push(category ? `/products?category=${encodeURIComponent(category)}` : "/products");
@@ -34,10 +37,10 @@ export default function OfferLayout2() {
             <a href="#category-list" className="fresh-view-all">{text.viewAll}<span aria-hidden="true">→</span></a>
           </header>
           <div className="fresh-pick-cards">
-            {text.categories.map(category => <article className={`fresh-pick-card fresh-theme--${category.theme}`} key={category.id}>
+            {items.map(category => <article className={`fresh-pick-card fresh-theme--${category.theme}`} key={category.id}>
               <div className="fresh-pick-discount"><small>{text.upTo}</small><strong>{category.discount}%</strong><span>{text.off}</span></div>
-              <div className="fresh-pick-image"><Image src={`${category.image}?v=transparent-2`} alt={category.name} fill unoptimized sizes="(max-width: 600px) 40vw, 160px" /></div>
-              <div className="fresh-pick-details"><FreshIcon kind="leaf" /><h3><span>{text.fresh}</span>{category.name}</h3><button type="button" onClick={() => shop(category.name)}>{text.shopNow}<span aria-hidden="true">→</span></button></div>
+              <div className="fresh-pick-image"><Image src={isRemoteImage(category.image) ? category.image : `${category.image}?v=transparent-2`} alt={category.name} fill unoptimized onError={fallbackImage} sizes="(max-width: 600px) 40vw, 160px" /></div>
+              <div className="fresh-pick-details"><FreshIcon kind="leaf" /><h3><span>{text.fresh}</span>{category.name}</h3><button type="button" onClick={() => shop((category as FreshPick).slug ?? category.name)}>{text.shopNow}<span aria-hidden="true">→</span></button></div>
             </article>)}
           </div>
           <ul className="fresh-picks-benefits">{text.benefits.map(benefit => <li key={benefit.title}><FreshIcon kind={benefit.icon} /><div><strong>{benefit.title}</strong><span>{benefit.description}</span></div></li>)}</ul>

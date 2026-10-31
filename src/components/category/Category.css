@@ -215,3 +215,12 @@
   .category-count { padding-top: 3px; font-size: 7px; }
   .category-arrow { width: 17px; height: 17px; margin-top: 3px; font-size: 12px; }
 }
+
+/* desktop: up to 7 tiles in one centred row (the swipeable row is for phones and tablets) */
+.category-desktop-row { display: none; margin: 0; padding: 6px 0 8px; list-style: none; }
+@media (min-width: 1024px) {
+  .category-desktop-row { display: flex; flex-wrap: nowrap; justify-content: center; gap: 10px; }
+  .category-desktop-row > li { display: flex; flex: 0 0 calc((100% - 60px) / 7); max-width: 210px; min-width: 0; }
+  .category-desktop-row .category-card { flex: 1; width: 100%; }
+  .category-mobile-slider { display: none; }
+}

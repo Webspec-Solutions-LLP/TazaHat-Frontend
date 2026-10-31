@@ -11,7 +11,9 @@ import { A11y, Keyboard, Mousewheel } from "swiper/modules";
 import "swiper/css";
 import text from "./english.json";
 import { readWishlistIds, subscribeToWishlist, toggleWishlistId } from "../../lib/wishlist";
+import { fallbackImage, isRemoteImage } from "../../lib/api";
 import "./Products.css";
+import VariantChips from "@/components/products/VariantChips";
 
 type Product = (typeof text.products)[number];
 const money = new Intl.NumberFormat(text.locale, { style: "currency", currency: text.currency, maximumFractionDigits: 0 });
@@ -19,7 +21,7 @@ interface ProductsProps {
   heading?: string;
   products?: Product[];
   showViewAll?: boolean;
-  layout?: "catalog" | "related";
+  layout?: "catalog" | "related" | "grid";
 }
 
 function CartIcon() {
@@ -31,7 +33,6 @@ export default function Products({ heading, products = text.products, showViewAl
   const [selected, setSelected] = useState<Product | null>(null);
   const [variantProduct, setVariantProduct] = useState<Product | null>(null);
   const [variantIndexes, setVariantIndexes] = useState<Record<string, number>>({});
-  const [openVariant, setOpenVariant] = useState<string | null>(null);
   const closeDetails = useCallback(() => setSelected(null), []);
   useEffect(() => {
     const refreshWishlist = () => setSaved(readWishlistIds());
@@ -59,24 +60,17 @@ export default function Products({ heading, products = text.products, showViewAl
     return (
       <article className="product-card" key={product.id}>
         <div className="product-image">
-          <Image src={product.image} alt={product.name} fill sizes="(max-width: 600px) 45vw, (max-width: 1023px) 25vw, 180px" draggable={false} />
+          <Image src={product.image} alt={product.name} fill sizes="(max-width: 600px) 45vw, (max-width: 1023px) 25vw, 180px" draggable={false} unoptimized={isRemoteImage(product.image)} onError={fallbackImage} />
           <span className="product-discount-badge">{text.discount.replace("{percent}", String(discount))}</span>
-          <span className="product-image-rating" aria-label={text.rating.replace("{rating}", String(product.rating)).replace("{reviews}", String(product.reviews))}>★ {product.rating}</span>
+          {product.rating > 0 && <span className="product-image-rating" aria-label={text.rating.replace("{rating}", String(product.rating)).replace("{reviews}", String(product.reviews))}>★ {product.rating}</span>}
           <button type="button" className="product-save" aria-pressed={isSaved} aria-label={(isSaved ? text.unsave : text.save).replace("{name}", product.name)} onClick={() => setSaved(toggleWishlistId(product.id))}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" /></svg>
           </button>
         </div>
-        <h3><Link href={`/productDetails?id=${encodeURIComponent(product.id)}`}>{product.name}</Link></h3>
+        <h3><Link href={`/${encodeURIComponent(product.id)}`}>{product.name}</Link></h3>
         <p className="product-description" title={description}>{description}</p>
         <div className="product-pricing"><strong>{money.format(variant.price)}</strong><del>{money.format(variant.originalPrice)}</del></div>
-        <div className="product-variant-wrap">
-          <button type="button" className="product-variant-trigger" aria-haspopup="listbox" aria-expanded={openVariant === product.id} onClick={() => setOpenVariant(current => current === product.id ? null : product.id)}>
-            <span>{variant.label}</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 7.5 5 5 5-5" /></svg>
-          </button>
-          {openVariant === product.id && <div className="product-variant-menu" role="listbox" aria-label={`Choose size for ${product.name}`}>
-            {variants.map((option, index) => <button type="button" role="option" aria-selected={index === selectedIndex} key={`${product.id}-${option.label}`} onClick={() => { setVariantIndexes(current => ({ ...current, [product.id]: index })); setOpenVariant(null); }}><span>{option.label}</span><span>{money.format(option.price)}</span></button>)}
-          </div>}
-        </div>
+        <VariantChips name={product.name} variants={variants} selected={selectedIndex} onSelect={index => setVariantIndexes(current => ({ ...current, [product.id]: index }))} onMore={() => setVariantProduct(product)} />
         <div className="product-card-actions">
           <button className="product-details-button" type="button" onClick={() => setVariantProduct(product)}><CartIcon />Add to Cart</button>
           <button className="product-quick-view" type="button" aria-label={`View ${product.name} details`} onClick={() => setSelected(product)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
@@ -89,11 +83,11 @@ export default function Products({ heading, products = text.products, showViewAl
     <section className={`products-section${layout === "related" ? " products-related" : ""}`} aria-labelledby="products-heading" lang={text.language}>
       <div className="products-container">
         <div className="products-header"><h2 id="products-heading">{sectionHeading}</h2>{showViewAll && <Link href="/products" className="products-view-all">{text.viewAll}</Link>}</div>
-        <div id="products-list">
+        {layout === "grid" ? <div id="products-list" className="products-grid">{products.map(renderProduct)}</div> : <div id="products-list">
             <Swiper className="products-slider" modules={[A11y, Keyboard, Mousewheel]} slidesPerView={1.7} spaceBetween={8} breakpoints={{ 451: { slidesPerView: 2.1, spaceBetween: 9 }, 576: { slidesPerView: 2.7, spaceBetween: 10 }, 679: { slidesPerView: 3.5, spaceBetween: 10 }, 877: { slidesPerView: 4.5, spaceBetween: 12 }, 1300: { slidesPerView: 5.5, spaceBetween: 12 } }} keyboard={{ enabled: true, onlyInViewport: true }} mousewheel={{ forceToAxis: true }} a11y={{ containerMessage: sliderLabel, slideLabelMessage: text.columnLabel }} tabIndex={0}>
               {columns.map((column) => <SwiperSlide key={column[0].id}><div className="products-column">{column.map(renderProduct)}</div></SwiperSlide>)}
             </Swiper>
-        </div>
+        </div>}
       </div>
       {selected && <AddToCart key={selected.id} product={selected} locale={text.locale} currency={text.currency} saved={saved.includes(selected.id)} onToggleWishlist={() => setSaved(toggleWishlistId(selected.id))} onClose={closeDetails} onOpenProduct={setSelected} />}
       {variantProduct && <Variant product={variantProduct} currency={text.currency} onClose={() => setVariantProduct(null)} onGoToCart={(item: CartItem) => {

@@ -296,10 +296,11 @@ export default function CompareList({
                         </button>
                       </div>
 
+                      {Number(item.rating ?? 0) > 0 && (
                       <div className="compare-item-rating">
                         <span className="compare-stars" aria-hidden="true">★</span>
                         <strong className="compare-rating-val">
-                          {Number(item.rating ?? 4.5).toFixed(1)}
+                          {Number(item.rating ?? 0).toFixed(1)}
                         </strong>
                         {item.reviews !== undefined && (
                           <span className="compare-reviews-val">
@@ -307,6 +308,7 @@ export default function CompareList({
                           </span>
                         )}
                       </div>
+                      )}
 
                       <div className="compare-item-price-wrap">
                         <strong className="compare-price-val">

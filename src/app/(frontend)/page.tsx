@@ -1,51 +1,30 @@
-"use client";
-
-import { useState } from "react";
+import { Suspense } from "react";
 import HomeHero from "@/components/home/HomeHero";
 import HomeBenefits from "@/components/home/HomeBenefits";
-import Category from "@/components/category/Category";
-import Products from "@/components/products/Products";
-import TodalDeals from "@/components/todayDeals/TodalDeals";
+import CityPrompt from "@/components/home/CityPrompt";
+import NewsletterSection from "@/components/home/NewsletterSection";
+import { AllProductsSection, HeroSection, MiddleSections, TopSections } from "@/components/home/HomeSections";
 import OfferLayout1 from "@/components/offerLayout1/OfferLayout1";
-import OfferLayout2 from "@/components/offerLayout2/OfferLayout2";
-import OfferLayout3 from "@/components/offerLayout3/OfferLayout3";
-import OfferLayout4 from "@/components/offerLayout4/OfferLayout4";
-import BestSeller from "@/components/bestSeller/BestSeller";
+import { HeroSkeleton, HomeMiddleSkeleton, HomeTopSkeleton, ProductGridSkeleton } from "@/components/skeleton/Skeletons";
+import { readCityCookie } from "@/lib/server/city";
 import "./Home.css";
 
-export default function Home() {
-  const [newsletterMessage, setNewsletterMessage] = useState("");
+/**
+ * Server component. The page appears at once; every part that needs the city's products streams in behind its own skeleton, so
+ * the browser never calls the API and the visitor never stares at a blank page.
+ */
+export default async function Home() {
+  const city = await readCityCookie();
   return (
     <>
-      <HomeHero />
-      <TodalDeals />
-      <Category />
-      <Products />
+      {city ? <Suspense fallback={<HeroSkeleton />}><HeroSection cityId={city.id} /></Suspense> : <HomeHero />}
+      {!city && <CityPrompt />}
+      {city && <Suspense fallback={<HomeTopSkeleton />}><TopSections cityId={city.id} cityName={city.name} /></Suspense>}
       <OfferLayout1 />
       <HomeBenefits />
-      <BestSeller />
-      <OfferLayout2 />
-      <OfferLayout3 />
-      <OfferLayout4 />
-      <section className="home-newsletter" aria-labelledby="newsletter-heading">
-        <div className="home-newsletter-copy">
-          <span className="home-newsletter-icon" aria-hidden="true">
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m4 6 8 7 8-7" /></svg>
-          </span>
-          <div><h2 id="newsletter-heading">Get Updates &amp; Exclusive Offers</h2><p>Subscribe to our newsletter and never miss a deal.</p></div>
-        </div>
-        <form className="home-newsletter-form" onSubmit={event => {
-          event.preventDefault();
-          setNewsletterMessage("Newsletter subscriptions are coming soon. Please check back later.");
-        }}>
-          <div className="home-newsletter-fields">
-            <label className="sr-only" htmlFor="newsletter-email">Email address</label>
-            <input id="newsletter-email" name="email" type="email" autoComplete="email" placeholder="Enter your email address" required aria-describedby={newsletterMessage ? "newsletter-status" : undefined} />
-            <button type="submit">Subscribe</button>
-          </div>
-          <p id="newsletter-status" className="home-newsletter-status" role="status">{newsletterMessage}</p>
-        </form>
-      </section>
+      {city && <Suspense fallback={<HomeMiddleSkeleton />}><MiddleSections cityId={city.id} /></Suspense>}
+      <NewsletterSection />
+      {city && <Suspense fallback={<ProductGridSkeleton count={10} label="Loading all products" />}><AllProductsSection cityId={city.id} cityName={city.name} /></Suspense>}
     </>
   );
 }

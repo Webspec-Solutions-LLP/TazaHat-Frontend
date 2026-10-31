@@ -14,6 +14,12 @@ pipeline {
         LETSENCRYPT_HOSTS = "taza.webspec.in"
         LETSENCRYPT_EMAIL = "debnathtapash56@gmail.com"
         NODE_ENV = "production"
+        // The backend API (container on proxy-net, see the backend repository's Jenkinsfile). Server-side only: the browser never sees it.
+        API_BASE_URL = "http://tazahat-api-service:8000"
+        // File with the Google Maps key (created by the backend repository's deploy/server-setup.sh, inside Jenkins' home volume). It is
+        // used in the browser (map, build time) and on the server (address lookup, run time). Restrict the key in Google Cloud: by
+        // website for the browser, by server IP for the server.
+        GOOGLE_MAPS_KEY_FILE = "/var/jenkins_home/tazahat/google-maps-key"
     }
 
     options {
@@ -31,19 +37,36 @@ pipeline {
         }
 
         stage('Build Image') {
+            when {
+                anyOf {
+                    branch 'master'
+                    expression { env.GIT_BRANCH in ['master', 'origin/master'] }
+                }
+            }
             steps {
                 sh '''
-                  set -e
-                  docker version
-                  docker build --pull -t "${IMAGE_NAME}:${IMAGE_TAG}" .
-                '''
+                      set -e
+                      docker version
+                      GOOGLE_MAPS_KEY="$(cat "$GOOGLE_MAPS_KEY_FILE")"
+                      docker build --pull \
+                        --build-arg API_BASE_URL="$API_BASE_URL" \
+                        --build-arg NEXT_PUBLIC_GOOGLE_MAPS_API_KEY="$GOOGLE_MAPS_KEY" \
+                        -t "${IMAGE_NAME}:${IMAGE_TAG}" .
+                    '''
             }
         }
 
         stage('Deploy') {
+            when {
+                anyOf {
+                    branch 'master'
+                    expression { env.GIT_BRANCH in ['master', 'origin/master'] }
+                }
+            }
             steps {
                 sh '''
                   set -e
+                  GOOGLE_MAPS_KEY="$(cat "$GOOGLE_MAPS_KEY_FILE")"
                   docker network inspect "$NETWORK_NAME" >/dev/null 2>&1 || docker network create "$NETWORK_NAME"
 
                   for container_id in $(docker ps -aq --filter "name=${CONTAINER_NAME}"); do
@@ -59,6 +82,8 @@ pipeline {
                     -e PORT=3000 \
                     -e HOSTNAME=0.0.0.0 \
                     -e NODE_ENV="$NODE_ENV" \
+                    -e API_BASE_URL="$API_BASE_URL" \
+                    -e GOOGLE_MAPS_API_KEY="$GOOGLE_MAPS_KEY" \
                     -e VIRTUAL_HOST="$VIRTUAL_HOSTS" \
                     -e VIRTUAL_PORT=3000 \
                     -e LETSENCRYPT_HOST="$LETSENCRYPT_HOSTS" \
@@ -74,6 +99,12 @@ pipeline {
         }
 
         stage('Health Check') {
+            when {
+                anyOf {
+                    branch 'master'
+                    expression { env.GIT_BRANCH in ['master', 'origin/master'] }
+                }
+            }
             steps {
                 sh '''
                   set -e

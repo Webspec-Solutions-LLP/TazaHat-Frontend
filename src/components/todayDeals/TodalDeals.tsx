@@ -12,7 +12,9 @@ import { readWishlistIds, subscribeToWishlist, toggleWishlistId } from "../../li
 import AddToCart from "../modals/AddToCart/AddToCart";
 import Variant from "../modals/variant/Variant";
 import type { CartItem } from "../modals/cart/Cart";
+import { fallbackImage, isRemoteImage } from "../../lib/api";
 import "./TodayDeals.css";
+import VariantChips from "@/components/products/VariantChips";
 
 type Product = (typeof catalog.products)[number];
 const money = new Intl.NumberFormat(text.locale, { style: "currency", currency: text.currency, maximumFractionDigits: 0 });
@@ -21,7 +23,7 @@ function CartIcon() {
   return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M2 3h2l2.4 12.2a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6L22 8H5" /><circle cx="9" cy="21" r="1" /><circle cx="19" cy="21" r="1" /></svg>;
 }
 
-export default function TodalDeals() {
+export default function TodalDeals({ products = catalog.products }: { products?: Product[] }) {
   const [remaining, setRemaining] = useState<number | null>(null);
   const [showFloatingTimer, setShowFloatingTimer] = useState(false);
   const [navbarOffset, setNavbarOffset] = useState(72);
@@ -66,7 +68,6 @@ export default function TodalDeals() {
   const [selected, setSelected] = useState<Product | null>(null);
   const [variantProduct, setVariantProduct] = useState<Product | null>(null);
   const [variantIndexes, setVariantIndexes] = useState<Record<string, number>>({});
-  const [openVariant, setOpenVariant] = useState<string | null>(null);
   useEffect(() => {
     const refreshWishlist = () => setSaved(readWishlistIds());
     refreshWishlist();
@@ -84,24 +85,17 @@ export default function TodalDeals() {
     return (
       <article className="product-card" key={product.id}>
         <div className="product-image">
-          <Image src={product.image} alt={product.name} fill sizes="(max-width: 600px) 45vw, (max-width: 1023px) 25vw, 180px" draggable={false} />
+          <Image src={product.image} alt={product.name} fill sizes="(max-width: 600px) 45vw, (max-width: 1023px) 25vw, 180px" draggable={false} unoptimized={isRemoteImage(product.image)} onError={fallbackImage} />
           <span className="product-discount-badge">{text.discount.replace("{percent}", String(discount))}</span>
-          <span className="product-image-rating" aria-label={text.rating.replace("{rating}", String(product.rating)).replace("{reviews}", String(product.reviews))}>★ {product.rating}</span>
+          {product.rating > 0 && <span className="product-image-rating" aria-label={text.rating.replace("{rating}", String(product.rating)).replace("{reviews}", String(product.reviews))}>★ {product.rating}</span>}
           <button type="button" className="product-save" aria-pressed={isSaved} aria-label={(isSaved ? text.unsave : text.save).replace("{name}", product.name)} onClick={() => setSaved(toggleWishlistId(product.id))}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" /></svg>
           </button>
         </div>
-        <h3><Link href={`/productDetails?id=${encodeURIComponent(product.id)}`}>{product.name}</Link></h3>
+        <h3><Link href={`/${encodeURIComponent(product.id)}`}>{product.name}</Link></h3>
         <p className="product-description" title={description}>{description}</p>
         <div className="product-pricing"><strong>{money.format(variant.price)}</strong><del>{money.format(variant.originalPrice)}</del></div>
-        <div className="product-variant-wrap">
-          <button type="button" className="product-variant-trigger" aria-haspopup="listbox" aria-expanded={openVariant === product.id} onClick={() => setOpenVariant(current => current === product.id ? null : product.id)}>
-            <span>{variant.label}</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 7.5 5 5 5-5" /></svg>
-          </button>
-          {openVariant === product.id && <div className="product-variant-menu" role="listbox" aria-label={`Choose size for ${product.name}`}>
-            {variants.map((option, index) => <button type="button" role="option" aria-selected={index === selectedIndex} key={`${product.id}-${option.label}`} onClick={() => { setVariantIndexes(current => ({ ...current, [product.id]: index })); setOpenVariant(null); }}><span>{option.label}</span><span>{money.format(option.price)}</span></button>)}
-          </div>}
-        </div>
+        <VariantChips name={product.name} variants={variants} selected={selectedIndex} onSelect={index => setVariantIndexes(current => ({ ...current, [product.id]: index }))} onMore={() => setVariantProduct(product)} />
         <div className="product-card-actions">
           <button className="product-details-button" type="button" onClick={() => setVariantProduct(product)}><CartIcon />Add to Cart</button>
           <button className="product-quick-view" type="button" aria-label={`View ${product.name} details`} onClick={() => setSelected(product)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
@@ -119,7 +113,7 @@ export default function TodalDeals() {
         </div>
         <div id="deals-list">
           <Swiper className="products-slider" modules={[A11y, Keyboard, Mousewheel]} slidesPerView={1.7} spaceBetween={8} breakpoints={{ 451: { slidesPerView: 2.1, spaceBetween: 9 }, 576: { slidesPerView: 2.7, spaceBetween: 10 }, 679: { slidesPerView: 3.5, spaceBetween: 10 }, 877: { slidesPerView: 4.5, spaceBetween: 12 }, 1300: { slidesPerView: 5.5, spaceBetween: 12 } }} keyboard={{ enabled: true, onlyInViewport: true }} mousewheel={{ forceToAxis: true }} a11y={{ containerMessage: text.sliderLabel, slideLabelMessage: text.columnLabel }} tabIndex={0}>
-            {catalog.products.map(product => <SwiperSlide key={product.id}>{renderProduct(product)}</SwiperSlide>)}
+            {products.map(product => <SwiperSlide key={product.id}>{renderProduct(product)}</SwiperSlide>)}
           </Swiper>
         </div>
       </div>

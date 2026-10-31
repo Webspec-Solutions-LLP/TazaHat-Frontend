@@ -10,6 +10,7 @@ import Chat from "../chat/Chat";
 import "swiper/css";
 import catalog from "../../products/english.json";
 import "./AddToCart.css";
+import { fallbackImage, isRemoteImage } from "@/lib/api";
 
 type Product = (typeof catalog.products)[number];
 
@@ -105,12 +106,12 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
           <div className="add-cart-gallery">
             <div className="add-cart-photo" id="add-cart-main-image">
               <span className="add-cart-photo-badge"><DetailIcon kind="leaf" />Fresh picks</span>
-              <Image src={currentImage.src} alt={`${product.name} — ${currentImage.label}`} fill sizes="(max-width: 575px) 100vw, (max-width: 760px) 100vw, 380px" style={{ transform: `scale(${currentImage.scale})` }} />
+              <Image src={currentImage.src} alt={`${product.name} — ${currentImage.label}`} fill sizes="(max-width: 575px) 100vw, (max-width: 760px) 100vw, 380px" unoptimized={isRemoteImage(currentImage.src)} onError={fallbackImage} style={{ transform: `scale(${currentImage.scale})` }} />
               <span className="add-cart-photo-count">{activeImage + 1} / {galleryImages.length}</span>
             </div>
             <div className="add-cart-thumbnails" role="group" aria-label="Product images">
               {galleryImages.map((item, index) => <button key={`${item.src}-${index}`} type="button" className="add-cart-thumbnail" aria-label={`Show ${item.label.toLowerCase()} of ${product.name}`} aria-pressed={activeImage === index} aria-controls="add-cart-main-image" onClick={() => setActiveImage(index)}>
-                <span className="add-cart-thumbnail-image"><Image src={item.src} alt="" fill sizes="76px" style={{ transform: `scale(${item.scale})` }} /></span>
+                <span className="add-cart-thumbnail-image"><Image src={item.src} alt="" fill sizes="76px" unoptimized={isRemoteImage(item.src)} onError={fallbackImage} style={{ transform: `scale(${item.scale})` }} /></span>
                 <span>{item.label}</span>
               </button>)}
             </div>
@@ -123,7 +124,7 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
           <div className="add-cart-details">
             <span className="add-cart-category">{product.category}</span>
             <h2 id="add-cart-title">{product.name}</h2>
-            <p className="add-cart-rating"><span aria-hidden="true">★</span> {product.rating} <span>({product.reviews} Reviews)</span></p>
+            {product.rating > 0 && <p className="add-cart-rating"><span aria-hidden="true">★</span> {product.rating} <span>({product.reviews} Reviews)</span></p>}
             {discount > 0 && <span className="add-cart-discount">{discount}% OFF</span>}
             <div className="add-cart-price" aria-live="polite" aria-atomic="true"><del>{money.format(selectedOriginalPrice)}</del><strong>{money.format(selectedPrice)}</strong><span>/ {variant.label} × {quantity}</span><small>{money.format(unitPrice)} / {variant.unit}</small></div>
             <div className="add-cart-benefits">
@@ -189,7 +190,7 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
             </section>
           </div>
         </div>
-        <section className="add-cart-related" aria-labelledby="add-cart-related-title">
+        {relatedProducts.length > 0 && <section className="add-cart-related" aria-labelledby="add-cart-related-title">
           <h2 id="add-cart-related-title">Related Products</h2>
           <Swiper
             className="add-cart-related-slider"
@@ -213,14 +214,14 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
                 <SwiperSlide key={related.id}>
                   <article className="add-cart-related-card">
                     <div className="add-cart-related-image">
-                      <Image src={related.image} alt={related.name} fill sizes="(max-width: 600px) 42vw, 220px" />
+                      <Image src={related.image} alt={related.name} fill sizes="(max-width: 600px) 42vw, 220px" unoptimized={isRemoteImage(related.image)} onError={fallbackImage} />
                       {relatedDiscount > 0 && <span className="add-cart-related-discount">{relatedDiscount}% OFF</span>}
                       <button type="button" className="add-cart-related-save" aria-label={`${isRelatedSaved ? "Remove" : "Save"} ${related.name} ${isRelatedSaved ? "from" : "to"} wishlist`} aria-pressed={isRelatedSaved} onClick={() => setRelatedSaved(current => isRelatedSaved ? current.filter(id => id !== related.id) : [...current, related.id])}>
                         <DetailIcon kind="heart" />
                       </button>
-                      <span className="add-cart-related-rating">★ {related.rating}</span>
+                      {related.rating > 0 && <span className="add-cart-related-rating">★ {related.rating}</span>}
                     </div>
-                    <h3><Link href={`/productDetails?id=${encodeURIComponent(related.id)}`}>{related.name}</Link></h3>
+                    <h3><Link href={`/${encodeURIComponent(related.id)}`}>{related.name}</Link></h3>
                     <p className="add-cart-related-description" title={description}>{description}</p>
                     <div className="add-cart-related-prices"><strong>{relatedMoney.format(relatedVariant.price)}</strong><del>{relatedMoney.format(relatedVariant.originalPrice)}</del></div>
                     <label className="add-cart-related-variant-label">
@@ -235,7 +236,7 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
               );
             })}
           </Swiper>
-        </section>
+        </section>}
       </div>
     </dialog>
     {isChatOpen && <Chat onClose={() => { setIsChatOpen(false); setClosing(true); }} product={product} />}

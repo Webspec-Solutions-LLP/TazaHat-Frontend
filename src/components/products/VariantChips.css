@@ -1,0 +1,12 @@
+/* pack sizes as plain text, "300 gm, 500 gm, 750 gm" (max two lines, "+N" for the rest) */
+.variant-chips { display: flex; flex-wrap: wrap; gap: 2px 5px; margin: 6px 0 2px; min-height: 18px; align-content: flex-start; font-size: 12px; line-height: 1.4; }
+.variant-chips.is-measuring { visibility: hidden; }
+.variant-chip { max-width: 100%; padding: 0; border: 0; border-radius: 0; background: none; color: #5d7690; font: inherit; white-space: nowrap; cursor: pointer; }
+.variant-comma { color: #5d7690; font-weight: 400; }
+/* section styles put hover effects on button::before / ::after: not on these */
+.variant-chips .variant-chip::before, .variant-chips .variant-chip::after { content: none !important; display: none !important; }
+.variant-chip:hover { color: #0b5cad; }
+.variant-chip.is-selected { color: #0b3f7a; font-weight: 700; }
+.variant-chip--more { color: #0b5cad; font-weight: 600; }
+.variant-chip:focus-visible { outline: 2px solid #0875d1; outline-offset: 1px; }
+@media (max-width: 575px) { .variant-chips { gap: 2px 4px; font-size: 11px; } }

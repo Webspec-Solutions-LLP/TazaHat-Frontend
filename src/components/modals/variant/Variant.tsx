@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import type { CartItem } from "../cart/Cart";
 import "./Variant.css";
+import { fallbackImage, isRemoteImage } from "@/lib/api";
 
 export type VariantOption = {
   label: string;
@@ -102,7 +103,7 @@ export default function Variant({ product, currency, onClose, onGoToCart }: Vari
           </button>
         </header>
         <div className="variant-product-summary">
-          <div className="variant-product-image"><Image src={product.image} alt="" fill sizes="72px" /></div>
+          <div className="variant-product-image"><Image src={product.image} alt="" fill sizes="72px" unoptimized={isRemoteImage(product.image)} onError={fallbackImage} /></div>
           <div className="variant-selected-size"><span>Selected size</span><strong>{selected.label}</strong><small>{money.format(unitPrice)} / {unitLabel}</small></div>
           <strong className="variant-selected-price">{money.format(selected.price * quantity)}</strong>
         </div>
