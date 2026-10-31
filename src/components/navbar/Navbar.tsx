@@ -289,40 +289,41 @@ export default function Navbar({
       style={{ backgroundColor: "#00366b", color: "#ffffff" }}
     >
       <div className="tazahat-navbar-container">
-        {/* Left: Brand Logo & Tagline */}
+        {/* Left: Brand and delivery location */}
         <div className="navbar-brand">
-          <Link href="/" className="navbar-logo-link" aria-label="TazaHaat Home">
-            <Image
-              src="/images/logo.webp"
-              alt="TazaHaat Logo"
-              width={48}
-              height={48}
-              sizes="48px"
-              priority
-              className="navbar-logo-img"
-            />
-            <span className="navbar-brand-copy">
-              <span className="navbar-brand-name">{t.brandName}<span>{t.brandNameHighlight}</span></span>
-              <span className="navbar-tagline">
-                {t.brandTagline}
-              </span>
-            </span>
-          </Link>
+          <div className="navbar-brand-stack">
+            <Link href="/" className="navbar-logo-link" aria-label="TazaHaat Home">
+              <Image
+                src="/images/logo.webp"
+                alt="TazaHaat Logo"
+                width={38}
+                height={38}
+                sizes="38px"
+                priority
+                className="navbar-logo-img"
+              />
+            </Link>
+            <div className="navbar-brand-details">
+              <Link href="/" className="navbar-brand-name-link" aria-label="TazaHaat Home">
+                <span className="navbar-brand-name">{t.brandName}<span>{t.brandNameHighlight}</span></span>
+              </Link>
+              <button type="button" className="navbar-location" aria-label={t.deliverTo} onClick={() => setIsLocationOpen(true)}>
+                <span className="navbar-location-icon-wrap">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/><circle cx="12" cy="10" r="3"/></svg>
+                </span>
+                <span className="navbar-location-text">
+                  <span className="navbar-location-label">{t.deliverTo}</span>
+                  <span className="navbar-location-val-wrap">
+                    <span className="navbar-location-city">{deliveryLocation || t.defaultDeliveryLocation}</span>
+                    <svg className="navbar-location-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9" /></svg>
+                  </span>
+                </span>
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Center: Search Bar */}
-        <button
-          type="button"
-          className="navbar-compact-search-toggle"
-          aria-label={t.searchOpenAria}
-          aria-expanded={isCompactSearchOpen}
-          onClick={() => {
-            setIsCompactSearchOpen(true);
-            window.requestAnimationFrame(() => searchInputRef.current?.focus());
-          }}
-        >
-          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"/><path d="m16.5 16.5 4 4"/></svg>
-        </button>
         {isCompactSearchOpen && <button type="button" className="navbar-search-backdrop" aria-label={t.searchCloseAria} onClick={() => setIsCompactSearchOpen(false)} />}
         <form className={`navbar-search-form${isCompactSearchOpen ? " is-compact-open" : ""}`} onSubmit={handleSearchSubmit} role="search">
           <div className="navbar-search-box">
@@ -469,46 +470,55 @@ export default function Navbar({
           )}
         </form>
 
-        {/* Deliver-To / Location Selector */}
-        <button type="button" className="navbar-location" aria-label={t.deliverTo} onClick={() => setIsLocationOpen(true)}>
-          <div className="navbar-location-icon-wrap">
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z" />
-              <circle cx="12" cy="10" r="3" />
+        {/* Right Navigation Actions */}
+        <nav className="navbar-actions" aria-label="User navigation">
+          {/* Compact Search Toggle (visible on screens <= 876px) */}
+          <button
+            type="button"
+            className="navbar-compact-search-toggle"
+            aria-label={t.searchOpenAria}
+            aria-expanded={isCompactSearchOpen}
+            onClick={() => {
+              setIsCompactSearchOpen(true);
+              window.requestAnimationFrame(() => searchInputRef.current?.focus());
+            }}
+          >
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="7.5" />
+              <path d="m16.5 16.5 4 4" />
             </svg>
-          </div>
-          <div className="navbar-location-text">
-            <span className="navbar-location-label">{t.deliverTo}</span>
-            <div className="navbar-location-val-wrap">
-              <span className="navbar-location-city">{deliveryLocation || t.defaultDeliveryLocation}</span>
+          </button>
+
+          {/* Compare (placed directly next to search toggle) */}
+          <button
+            type="button"
+            className="navbar-action-item navbar-compare-action"
+            aria-label={`${t.compare} (${compareCount})`}
+            onClick={() => setIsCompareOpen(true)}
+          >
+            <div className="navbar-action-icon-wrap">
               <svg
-                className="navbar-location-arrow"
-                width="14"
-                height="14"
+                width="22"
+                height="22"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="2.5"
+                strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                aria-hidden="true"
               >
-                <polyline points="6 9 12 15 18 9" />
+                <path d="M16 3l4 4-4 4" />
+                <path d="M20 7H4" />
+                <path d="M8 21l-4-4 4-4" />
+                <path d="M4 17h16" />
               </svg>
+              <span className="navbar-cart-badge">{compareCount}</span>
             </div>
-          </div>
-        </button>
+            <span className="navbar-action-label">{t.compare}</span>
+          </button>
 
-        {/* Right Navigation Actions */}
-        <nav className="navbar-actions" aria-label="User navigation">
+          {/* Delivery */}
           <Link href="/deliveryService" className="navbar-compact-delivery" aria-label={t.deliveryService}>
             <svg viewBox="0 0 28 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M2 5.5h14v12H2z"/><path d="M16 10h5l4 4.25v3.25h-9z"/><path d="M21 10v4.5h4"/><circle cx="6.5" cy="19" r="2.25"/><circle cx="21" cy="19" r="2.25"/><path d="M3 8h5"/></svg>
             <span>{t.deliveryCompact}</span>
@@ -603,39 +613,10 @@ export default function Navbar({
             </div>
           </div>
 
-          {/* Compare */}
-          <button
-            type="button"
-            className="navbar-action-item"
-            aria-label={`${t.compare} (${compareCount})`}
-            onClick={() => setIsCompareOpen(true)}
-          >
-            <div className="navbar-action-icon-wrap">
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M16 3l4 4-4 4" />
-                <path d="M20 7H4" />
-                <path d="M8 21l-4-4 4-4" />
-                <path d="M4 17h16" />
-              </svg>
-              <span className="navbar-cart-badge">{compareCount}</span>
-            </div>
-            <span className="navbar-action-label">{t.compare}</span>
-          </button>
-
           {/* Cart */}
           <button
             type="button"
-            className="navbar-action-item"
+            className="navbar-action-item navbar-cart-action"
             aria-label={`${t.cart} (${visibleCartCount})`}
             onClick={() => setIsCartOpen(true)}
           >

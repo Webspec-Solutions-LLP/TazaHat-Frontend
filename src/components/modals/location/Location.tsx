@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Circle as LeafletCircle, Map as LeafletMap, Marker as LeafletMarker } from "leaflet";
+import type { Map as LeafletMap, Marker as LeafletMarker } from "leaflet";
 import "./Location.css";
 
 interface LocationProps {
@@ -39,7 +39,6 @@ export default function Location({ deliveryLocation, onClose, onLogin }: Locatio
   const mapElementRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const markerRef = useRef<LeafletMarker | null>(null);
-  const radiusRef = useRef<LeafletCircle | null>(null);
   const initialCityRef = useRef(cityMapPoints.find(({ city }) => deliveryLocation.toLowerCase().includes(city.toLowerCase())) ?? cityMapPoints[0]);
 
   useEffect(() => {
@@ -58,13 +57,6 @@ export default function Location({ deliveryLocation, onClose, onLogin }: Locatio
       }).addTo(map);
       leaflet.control.zoom({ position: "topright" }).addTo(map);
 
-      const radius = leaflet.circle(initialPosition, {
-        radius: 20000,
-        color: "#0878ff",
-        weight: 3,
-        fillColor: "#0878ff",
-        fillOpacity: 0.12,
-      }).addTo(map);
       const marker = leaflet.marker(initialPosition, {
         draggable: true,
         icon: leaflet.divIcon({
@@ -75,7 +67,6 @@ export default function Location({ deliveryLocation, onClose, onLogin }: Locatio
         }),
       }).addTo(map);
 
-      marker.on("drag", () => radius.setLatLng(marker.getLatLng()));
       marker.on("dragend", () => {
         const position = marker.getLatLng();
         const city = nearestCity(position.lat, position.lng);
@@ -85,8 +76,9 @@ export default function Location({ deliveryLocation, onClose, onLogin }: Locatio
 
       mapRef.current = map;
       markerRef.current = marker;
-      radiusRef.current = radius;
       window.requestAnimationFrame(() => map?.invalidateSize());
+      setTimeout(() => map?.invalidateSize(), 200);
+      setTimeout(() => map?.invalidateSize(), 500);
     }).catch((error: unknown) => {
       console.error("Unable to load the delivery map.", error);
     });
@@ -96,7 +88,6 @@ export default function Location({ deliveryLocation, onClose, onLogin }: Locatio
       map?.remove();
       mapRef.current = null;
       markerRef.current = null;
-      radiusRef.current = null;
     };
   }, []);
 
@@ -123,31 +114,73 @@ export default function Location({ deliveryLocation, onClose, onLogin }: Locatio
     setSelectedCity(location);
     setCurrentLocation(`${location}, West Bengal`);
     const city = cityMapPoints.find(({ city: cityName }) => cityName === location);
-    if (!city || !mapRef.current || !markerRef.current || !radiusRef.current) return;
+    if (!city || !mapRef.current || !markerRef.current) return;
 
     const position: [number, number] = [city.latitude, city.longitude];
     markerRef.current.setLatLng(position);
-    radiusRef.current.setLatLng(position);
     mapRef.current.flyTo(position, 11);
   };
 
   return (
     <div className={`location-backdrop${isClosing ? " is-closing" : ""}`} onMouseDown={(event) => { if (event.target === event.currentTarget) closeWithAnimation(); }}>
       <section className="location-modal" role="dialog" aria-modal="true" aria-labelledby="location-title">
-        <div className="location-modal-brand">
-          <span className="location-brand-mark" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="9" r="2.5"/></svg>
-          </span>
-          <div className="location-brand-copy"><span className="location-brand-name">Taza<span>Haat</span></span><span className="location-brand-tagline">Freshness Delivered</span></div>
-          <button type="button" className="location-login-link" onClick={() => closeWithAnimation(onLogin)}>Login</button>
-          <button type="button" className="location-close" onClick={() => closeWithAnimation()} aria-label="Close location selector">×</button>
-        </div>
+        <header className="location-modal-header">
+          <div className="location-header-main">
+            <span className="location-header-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z" />
+                <circle cx="12" cy="9" r="2.5" />
+              </svg>
+            </span>
+            <div className="location-header-copy">
+              <h2 id="location-title" className="location-header-title">
+                Fresh picks, <span>closer to home.</span>
+              </h2>
+              <p className="location-header-subtitle">Choose where you’d like your TazaHaat order delivered.</p>
+            </div>
+          </div>
+
+          <div className="location-header-actions">
+            <button type="button" className="location-login-link" onClick={() => closeWithAnimation(onLogin)}>Login</button>
+            <button type="button" className="location-close" onClick={() => closeWithAnimation()} aria-label="Close location selector">×</button>
+          </div>
+        </header>
 
         <div className="location-content">
-          <div className="location-copy">
-            <span className="location-eyebrow">YOUR DELIVERY ADDRESS</span>
-            <h2 id="location-title">Fresh picks, <span>closer to home.</span></h2>
-            <p>Choose where you’d like your TazaHaat order delivered.</p>
+          <div className="location-search-bar">
+            <span className="location-search-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="7" />
+                <path d="m20 20-4-4" />
+              </svg>
+            </span>
+            <input
+              type="text"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  const trimmed = query.trim().toLowerCase();
+                  const match = cityMapPoints.find((item) => item.city.toLowerCase() === trimmed)
+                    || cityMapPoints.find((item) => item.city.toLowerCase().includes(trimmed));
+                  if (match) {
+                    selectLocation(match.city);
+                  }
+                }
+              }}
+              placeholder="Search city or area..."
+              aria-label="Search city or area"
+            />
+            {query && (
+              <button
+                type="button"
+                className="location-search-clear"
+                onClick={() => setQuery("")}
+                aria-label="Clear search"
+              >
+                ×
+              </button>
+            )}
           </div>
 
           <section className="location-map-section" aria-label="City map">
