@@ -18,13 +18,16 @@ import { searchSuggestionsAction } from "@/app/actions";
 import { SearchHistorySkeleton, SearchSuggestionSkeleton } from "../skeleton/Skeletons";
 import { fallbackImage, isRemoteImage, type Product as CatalogProduct } from "@/lib/api";
 import { readWishlistIds, subscribeToWishlist, toggleWishlistId } from "../../lib/wishlist";
+import { OPEN_LOCATION_EVENT, useCity } from "../../lib/city";
 import englishText from "./english.json";
 import bengaliText from "./bengali.json";
 import hindiText from "./hindi.json";
 import "./Navbar.css";
 
 const SEARCH_HISTORY_KEY = "tazahat-search-history";
-const MAX_SEARCH_HISTORY = 8;
+const MAX_SEARCH_HISTORY = 30;
+const MIN_HISTORY_LENGTH = 4; // shorter searches are not remembered
+const HISTORY_PAGE_SIZE = 5;
 export const LANGUAGE_STORAGE_KEY = "tazahat-language";
 export const LANGUAGE_CHANGE_EVENT = "tazahat:change-language";
 
@@ -35,13 +38,6 @@ const textMap: Record<SupportedLang, typeof englishText> = {
   bn: bengaliText,
   hi: hindiText,
 };
-import { OPEN_LOCATION_EVENT, useCity } from "../../lib/city";
-import "./Navbar.css";
-
-const SEARCH_HISTORY_KEY = "tazahat-search-history";
-const MAX_SEARCH_HISTORY = 30;
-const MIN_HISTORY_LENGTH = 4; // shorter searches are not remembered
-const HISTORY_PAGE_SIZE = 5;
 
 interface NavbarProps {
   cartCount?: number;
@@ -58,19 +54,14 @@ export default function Navbar({
 }: NavbarProps) {
   const [currentLang, setCurrentLang] = useState<SupportedLang>(() => {
     if (lang) return lang;
-    if (typeof window !== "undefined") {
-      try {
-        const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY) as SupportedLang | null;
-        if (stored && (stored === "en" || stored === "bn" || stored === "hi")) {
-          return stored;
-        }
-      } catch {
-        // Fallback to default English
-      }
+    try {
+      const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY) as SupportedLang | null;
+      if (stored === "en" || stored === "bn" || stored === "hi") return stored;
+    } catch {
+      // Use English when localStorage is unavailable.
     }
     return "en";
   });
-
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -78,7 +69,20 @@ export default function Navbar({
   const searchFormRef = useRef<HTMLFormElement>(null);
   const [isSearchResultsOpen, setIsSearchResultsOpen] = useState(false);
   const [isCompactSearchOpen, setIsCompactSearchOpen] = useState(false);
-  const [searchHistory, setSearchHistory] = useState<string[]>([]);
+  const [searchHistory, setSearchHistory] = useState<string[]>(() => {
+    try {
+      const storedHistory = window.localStorage.getItem(SEARCH_HISTORY_KEY);
+      if (!storedHistory) return [];
+      const parsedHistory: unknown = JSON.parse(storedHistory);
+      return Array.isArray(parsedHistory)
+        ? parsedHistory
+            .filter((item): item is string => typeof item === "string" && item.length >= MIN_HISTORY_LENGTH)
+            .slice(0, MAX_SEARCH_HISTORY)
+        : [];
+    } catch {
+      return [];
+    }
+  });
   // the history list shows 5 at a time; "More" swaps in the next 5 after a short skeleton
   const [historyPage, setHistoryPage] = useState(0);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -113,11 +117,7 @@ export default function Navbar({
   const accountMenuRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (lang) {
-      setCurrentLang(lang);
-    }
-  }, [lang]);
+  const activeLang = lang || currentLang;
 
   useEffect(() => {
     const handleLanguageChange = (event: Event) => {
@@ -141,21 +141,8 @@ export default function Navbar({
     onLanguageChange?.(newLang);
   };
 
-  const t = textMap[currentLang] || englishText;
+  const t = textMap[activeLang] || englishText;
 
-  useEffect(() => {
-    try {
-      const storedHistory = window.localStorage.getItem(SEARCH_HISTORY_KEY);
-      if (storedHistory) {
-        const parsedHistory: unknown = JSON.parse(storedHistory);
-        if (Array.isArray(parsedHistory)) {
-          setSearchHistory(parsedHistory.filter((item): item is string => typeof item === "string" && item.length >= MIN_HISTORY_LENGTH).slice(0, MAX_SEARCH_HISTORY));
-        }
-      }
-    } catch {
-      // Ignore unavailable storage or malformed history and keep search usable.
-    }
-  }, []);
   useEffect(() => {
     const refreshWishlist = () => setSavedProducts(readWishlistIds());
     refreshWishlist();
@@ -416,21 +403,7 @@ export default function Navbar({
           </div>
         </div>
 
-        {/* Center: Search Bar */}
-        {isCompactSearchOpen && <button type="button" className="navbar-search-backdrop" aria-label={t.searchCloseAria} onClick={() => setIsCompactSearchOpen(false)} />}
-        <form className={`navbar-search-form${isCompactSearchOpen ? " is-compact-open" : ""}`} onSubmit={handleSearchSubmit} role="search">
-        <button
-          type="button"
-          className="navbar-compact-search-toggle"
-          aria-label="Open search"
-          aria-expanded={isCompactSearchOpen}
-          onClick={() => {
-            setIsCompactSearchOpen(true);
-            window.requestAnimationFrame(() => searchInputRef.current?.focus());
-          }}
-        >
-          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"/><path d="m16.5 16.5 4 4"/></svg>
-        </button>
+        {/* Search Bar */}
         {isCompactSearchOpen && <button type="button" className="navbar-search-backdrop" aria-label="Close search" onClick={() => setIsCompactSearchOpen(false)} />}
         <form ref={searchFormRef} className={`navbar-search-form${isCompactSearchOpen ? " is-compact-open" : ""}`} onSubmit={handleSearchSubmit} role="search">
           <div className="navbar-search-box">
@@ -447,7 +420,6 @@ export default function Navbar({
                 setSearchQuery(query);
                 setIsSearchResultsOpen(Boolean(query.trim()));
               }}
-              aria-label={t.searchInputAria}
               onKeyDown={(e) => { if (e.key === "Escape") { setIsSearchResultsOpen(false); searchInputRef.current?.blur(); } }}
               autoComplete="off"
               aria-label="Search products"
@@ -579,7 +551,6 @@ export default function Navbar({
               ) : isSearching ? (
                 <SearchSuggestionSkeleton />
               ) : (
-                <p className="navbar-search-empty">{t.searchNoResults}</p>
                 <p className="navbar-search-empty">No products found for “{searchQuery.trim()}” in your city.</p>
               )}
               {searchQuery.trim() && searchResults.length > 0 && (
@@ -591,76 +562,7 @@ export default function Navbar({
 
         {/* Right Navigation Actions */}
         <nav className="navbar-actions" aria-label="User navigation">
-          {/* Compact Search Toggle (visible on screens <= 876px) */}
-          <Link href="/deliveryService" className="navbar-compact-delivery" aria-label="Delivery Service">
-            <svg viewBox="0 0 28 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M2 5.5h14v12H2z"/><path d="M16 10h5l4 4.25v3.25h-9z"/><path d="M21 10v4.5h4"/><circle cx="6.5" cy="19" r="2.25"/><circle cx="21" cy="19" r="2.25"/><path d="M3 8h5"/></svg>
-            <span>Delivery</span>
-          </Link>
-          <Link
-            href="/deliveryService"
-            className="navbar-delivery-service"
-            aria-label="Delivery Service"
-          >
-            <span className="navbar-delivery-icon-wrap">
-              <svg
-                viewBox="0 0 32 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M2 5h17v13H2z" />
-                <path d="M19 9h5l5 5v4H19z" />
-                <circle cx="8" cy="19" r="2.5" />
-                <circle cx="24" cy="19" r="2.5" />
-                <path d="M5 9h8M5 13h6M22 11h2l3 3h-5z" />
-              </svg>
-            </span>
-            <span className="navbar-delivery-copy">
-              <span className="navbar-delivery-label">Delivery Service</span>
-              <span className="navbar-delivery-caption">Book a pickup</span>
-            </span>
-            <span className="navbar-delivery-badge">New</span>
-          </Link>
-
-          {/* Account */}
-          <div className="navbar-account-menu" ref={accountMenuRef}>
-            <button
-              type="button"
-              className="navbar-action-item"
-              aria-label="Account menu"
-              aria-haspopup="menu"
-              aria-expanded={isAccountOpen}
-              onClick={() => setIsAccountOpen(open => !open)}
-            >
-              <div className="navbar-action-icon-wrap">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
-              </div>
-              <span className="navbar-action-label">Account</span>
-            </button>
-            <div className={`navbar-account-dropdown${isAccountOpen ? " is-open" : ""}`} role="menu" aria-label="Account options" aria-hidden={!isAccountOpen}>
-              <button type="button" role="menuitem" tabIndex={isAccountOpen ? 0 : -1} onClick={() => { setIsAccountOpen(false); setIsLoginOpen(true); }}>
-                <span className="navbar-account-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M14 4h5a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-5"/><path d="M10 16l4-4-4-4M14 12H3"/></svg></span>Login
-              </button>
-              <Link href="/wishlist" role="menuitem" tabIndex={isAccountOpen ? 0 : -1} onClick={() => setIsAccountOpen(false)}>
-                <span className="navbar-account-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20.8 8.7c0 5.1-8.8 10.2-8.8 10.2S3.2 13.8 3.2 8.7A4.7 4.7 0 0 1 12 6.1a4.7 4.7 0 0 1 8.8 2.6Z"/></svg></span>Wishlist
-              </Link>
-              <Link href="/myOrders" role="menuitem" tabIndex={isAccountOpen ? 0 : -1} onClick={() => setIsAccountOpen(false)}>
-                <span className="navbar-account-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 3h12l2 3v15H4V6l2-3Z"/><path d="M4 6h16M9 10v7l3-2 3 2v-7"/></svg></span>My Orders
-              </Link>
-              <Link href="/myprofile" role="menuitem" tabIndex={isAccountOpen ? 0 : -1} onClick={() => setIsAccountOpen(false)}>
-                <span className="navbar-account-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="7.5" r="3.5"/><path d="M5 20v-1.2a7 7 0 0 1 14 0V20Z"/></svg></span>My Profile
-              </Link>
-            </div>
-          </div>
-
-          {/* Compare: only while the list has something in it */}
-          {compareCount > 0 && (
+          {/* Compact search */}
           <button
             type="button"
             className="navbar-compact-search-toggle"
@@ -677,7 +579,8 @@ export default function Navbar({
             </svg>
           </button>
 
-          {/* Compare (placed directly next to search toggle) */}
+          {/* Compare: only while the list has something in it */}
+          {compareCount > 0 && (
           <button
             type="button"
             className="navbar-action-item navbar-compare-action"

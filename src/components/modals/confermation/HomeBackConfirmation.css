@@ -1,0 +1,596 @@
+/* ==========================================================================
+   HomeBackConfirmation: Advanced Modern Exit-Intent / Back-Guard Modal
+   ========================================================================== */
+
+.home-back-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1400;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: radial-gradient(circle at 50% 40%, rgba(12, 33, 62, 0.72) 0%, rgba(3, 14, 28, 0.82) 100%);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  animation: home-back-fade-in 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  box-sizing: border-box;
+  touch-action: none;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: auto;
+}
+
+.home-back-backdrop.is-closing {
+  pointer-events: none;
+  animation: home-back-fade-out 200ms cubic-bezier(0.7, 0, 0.84, 0) both;
+}
+
+/* Card Container */
+.home-back-card {
+  position: relative;
+  width: min(440px, 100%);
+  max-height: calc(100dvh - 36px);
+  border-radius: 24px;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 65%, #f4f8fd 100%);
+  border: 1px solid rgba(215, 230, 246, 0.95);
+  box-shadow:
+    0 24px 64px -12px rgba(2, 32, 68, 0.35),
+    0 4px 16px rgba(8, 117, 209, 0.08),
+    0 0 0 1px rgba(255, 255, 255, 0.95) inset;
+  padding: 30px 26px 24px;
+  text-align: center;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  animation: home-back-scale-in 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.home-back-card::-webkit-scrollbar {
+  display: none;
+}
+
+.home-back-backdrop.is-closing .home-back-card {
+  animation: home-back-scale-out 190ms cubic-bezier(0.7, 0, 0.84, 0) both;
+}
+
+/* Top Decorative Ambient Glow & Gradient Strip */
+.home-back-top-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4.5px;
+  background: linear-gradient(90deg, #0875d1 0%, #15a4c7 40%, #52be3d 75%, #8bd331 100%);
+}
+
+.home-back-ambient-bg {
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 320px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(8, 117, 209, 0.12) 0%, rgba(139, 211, 49, 0.06) 45%, transparent 70%);
+  pointer-events: none;
+  border-radius: 50%;
+}
+
+/* Close Button */
+.home-back-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid #e1ebf5;
+  border-radius: 50%;
+  background: rgba(243, 248, 254, 0.85);
+  color: #5d758e;
+  cursor: pointer;
+  transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 2;
+}
+
+.home-back-close:hover {
+  background: #fee2e2;
+  border-color: #fecaca;
+  color: #ef4444;
+  transform: rotate(90deg) scale(1.06);
+}
+
+.home-back-close:focus-visible {
+  outline: 2px solid #0875d1;
+  outline-offset: 2px;
+}
+
+.home-back-close svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Hero Badge */
+.home-back-hero {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 6px auto 14px;
+}
+
+.home-back-hero-halo {
+  position: absolute;
+  width: 82px;
+  height: 82px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(8, 117, 209, 0.18) 0%, rgba(139, 211, 49, 0.1) 50%, transparent 72%);
+  animation: home-back-pulse 2.8s ease-in-out infinite alternate;
+}
+
+.home-back-hero-badge {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #ffffff 0%, #e9f4ff 100%);
+  border: 1.5px solid #cce5fd;
+  box-shadow:
+    0 10px 24px -4px rgba(8, 117, 209, 0.22),
+    0 2px 6px rgba(0, 0, 0, 0.04),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+  color: #0875d1;
+}
+
+.home-back-hero-badge svg {
+  width: 30px;
+  height: 30px;
+  filter: drop-shadow(0 2px 4px rgba(8, 117, 209, 0.18));
+}
+
+.home-back-hero-leaf {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8bd331, #62b516);
+  border: 2px solid #ffffff;
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(98, 181, 22, 0.35);
+}
+
+.home-back-hero-leaf svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* Eyebrow Pill */
+.home-back-eyebrow-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.home-back-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: rgba(8, 117, 209, 0.08);
+  border: 1px solid rgba(8, 117, 209, 0.16);
+  color: #065ca5;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.home-back-pulse-dot {
+  position: relative;
+  display: inline-block;
+  width: 6.5px;
+  height: 6.5px;
+  border-radius: 50%;
+  background: #0875d1;
+}
+
+.home-back-pulse-dot::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1.5px solid #0875d1;
+  opacity: 0.6;
+  animation: home-back-ping 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* Title & Description */
+.home-back-title {
+  margin: 0 0 8px;
+  color: #072346;
+  font-size: 21px;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+}
+
+.home-back-desc {
+  margin: 0 auto 18px;
+  max-width: 360px;
+  color: #5c728a;
+  font-size: 13px;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+
+/* Perks Grid */
+.home-back-perks {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 22px;
+  text-align: left;
+}
+
+.home-back-perk-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+  padding: 10px 6px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #e3eef9;
+  box-shadow: 0 2px 6px rgba(6, 35, 66, 0.03);
+  transition: transform 160ms ease, border-color 160ms ease;
+}
+
+.home-back-perk-item:hover {
+  transform: translateY(-2px);
+  border-color: #badcfb;
+}
+
+.home-back-perk-icon-wrap {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #edf6fe;
+  color: #0875d1;
+}
+
+.home-back-perk-icon-wrap svg {
+  width: 15px;
+  height: 15px;
+}
+
+.home-back-perk-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #16365a;
+  line-height: 1.2;
+}
+
+.home-back-perk-sub {
+  font-size: 9.5px;
+  color: #7189a2;
+  line-height: 1.2;
+}
+
+/* Action Buttons */
+.home-back-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.home-back-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+.home-back-btn:focus-visible {
+  outline: 2px solid #0875d1;
+  outline-offset: 2px;
+}
+
+/* Stay Button (Primary) */
+.home-back-stay-btn {
+  position: relative;
+  border: 1px solid #0875d1;
+  background: linear-gradient(135deg, #097cdb 0%, #065da7 100%);
+  color: #ffffff;
+  box-shadow:
+    0 8px 22px -3px rgba(8, 117, 209, 0.38),
+    0 2px 4px rgba(0, 0, 0, 0.08),
+    0 1px 0 rgba(255, 255, 255, 0.3) inset;
+  overflow: hidden;
+}
+
+.home-back-stay-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+  transform: skewX(-20deg);
+  transition: left 600ms ease;
+}
+
+.home-back-stay-btn:hover {
+  background: linear-gradient(135deg, #0a84e9 0%, #0866b8 100%);
+  box-shadow:
+    0 12px 28px -4px rgba(8, 117, 209, 0.48),
+    0 2px 6px rgba(0, 0, 0, 0.12),
+    0 1px 0 rgba(255, 255, 255, 0.4) inset;
+  transform: translateY(-1.5px);
+}
+
+.home-back-stay-btn:hover::before {
+  left: 140%;
+}
+
+.home-back-stay-btn:active {
+  transform: translateY(0);
+}
+
+.home-back-stay-btn svg {
+  width: 16px;
+  height: 16px;
+  transition: transform 180ms ease;
+}
+
+.home-back-stay-btn:hover svg {
+  transform: translateX(2px);
+}
+
+/* Leave Button (Secondary Ghost) */
+.home-back-leave-btn {
+  border: 1.5px solid #dce8f5;
+  background: #ffffff;
+  color: #556e88;
+}
+
+.home-back-leave-btn:hover {
+  border-color: #fca5a5;
+  background: #fff5f5;
+  color: #dc2626;
+  transform: translateY(-1px);
+}
+
+.home-back-leave-btn:active {
+  transform: translateY(0);
+}
+
+.home-back-leave-btn svg {
+  width: 15px;
+  height: 15px;
+  transition: transform 180ms ease;
+}
+
+.home-back-leave-btn:hover svg {
+  transform: translateX(-2px);
+}
+
+/* Drag Handle (Mobile Bottom Sheet) */
+.home-back-drag-handle {
+  display: none;
+}
+
+/* Reassurance Note */
+.home-back-footer-note {
+  margin: 14px auto 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #7b93ab;
+  font-size: 11px;
+}
+
+.home-back-footer-note svg {
+  width: 13px;
+  height: 13px;
+  color: #8bd331;
+}
+
+/* Animations */
+@keyframes home-back-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes home-back-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes home-back-scale-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(18px);
+  }
+  60% {
+    transform: scale(1.015) translateY(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes home-back-scale-out {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.92) translateY(14px);
+  }
+}
+
+/* Mobile Bottom Sheet Slow-Motion Slide Up & Down */
+@keyframes home-back-sheet-up {
+  0% {
+    opacity: 0.3;
+    transform: translateY(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes home-back-sheet-down {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0.2;
+    transform: translateY(100%);
+  }
+}
+
+@keyframes home-back-pulse {
+  0% {
+    transform: scale(0.96);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+@keyframes home-back-ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/* Mobile Responsiveness (480px / 450px and down) */
+@media (max-width: 480px) {
+  .home-back-backdrop {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .home-back-drag-handle {
+    display: block;
+    width: 42px;
+    height: 4.5px;
+    margin: 0 auto 14px;
+    border-radius: 3px;
+    background: #cbd5e1;
+    opacity: 0.85;
+  }
+
+  .home-back-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 28px 28px 0 0;
+    border-bottom: 0;
+    border-left: 0;
+    border-right: 0;
+    padding: 14px 20px max(24px, env(safe-area-inset-bottom, 24px));
+    max-height: 90dvh;
+    animation: home-back-sheet-up 500ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .home-back-backdrop.is-closing .home-back-card {
+    animation: home-back-sheet-down 400ms cubic-bezier(0.32, 0, 0.67, 0) both;
+  }
+
+  .home-back-title {
+    font-size: 19px;
+  }
+
+  .home-back-desc {
+    font-size: 12px;
+    margin-bottom: 14px;
+  }
+
+  .home-back-hero-badge {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+  }
+
+  .home-back-hero-badge svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .home-back-perks {
+    gap: 6px;
+    margin-bottom: 18px;
+  }
+
+  .home-back-perk-item {
+    padding: 8px 4px;
+  }
+
+  .home-back-perk-title {
+    font-size: 10px;
+  }
+
+  .home-back-perk-sub {
+    font-size: 8.5px;
+  }
+
+  .home-back-btn {
+    min-height: 44px;
+    font-size: 13px;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .home-back-backdrop,
+  .home-back-card,
+  .home-back-hero-halo,
+  .home-back-pulse-dot::after,
+  .home-back-stay-btn::before,
+  .home-back-close,
+  .home-back-btn,
+  .home-back-perk-item {
+    animation: none !important;
+    transition: none !important;
+  }
+}

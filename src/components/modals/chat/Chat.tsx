@@ -144,7 +144,13 @@ function createReply(text: string, activeOrder: boolean): Omit<ChatMessage, "id"
 
 type ChatProduct = Pick<(typeof productCatalog.products)[number], "id" | "name" | "image">;
 
-export default function Chat({ onClose, product }: { onClose: () => void; product?: ChatProduct }) {
+export interface ChatProps {
+  onClose: () => void;
+  product?: ChatProduct;
+  requestCloseRef?: { current: (() => void) | null };
+}
+
+export default function Chat({ onClose, product, requestCloseRef }: ChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>(() => product ? [
     { id: "product-question", sender: "ai", author: "TazaHat Assistant", text: `Hi! What would you like to know about ${product.name}? Ask me about its freshness, size, or how to prepare it.`, time: "Now", product },
   ] : initialMessages);
@@ -171,6 +177,15 @@ export default function Chat({ onClose, product }: { onClose: () => void; produc
     setIsClosing(true);
     closeTimerRef.current = setTimeout(onClose, 380);
   }, [isClosing, onClose]);
+
+  useEffect(() => {
+    if (requestCloseRef) {
+      requestCloseRef.current = closeChat;
+      return () => {
+        requestCloseRef.current = null;
+      };
+    }
+  }, [closeChat, requestCloseRef]);
 
   useEffect(() => {
     const closeOnEscape = (event: KeyboardEvent) => {

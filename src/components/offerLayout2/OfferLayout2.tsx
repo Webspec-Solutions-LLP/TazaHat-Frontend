@@ -39,7 +39,7 @@ export default function OfferLayout2({ items = text.categories }: { items?: Fres
           <div className="fresh-pick-cards">
             {items.map(category => <article className={`fresh-pick-card fresh-theme--${category.theme}`} key={category.id}>
               <div className="fresh-pick-discount"><small>{text.upTo}</small><strong>{category.discount}%</strong><span>{text.off}</span></div>
-              <div className="fresh-pick-image"><Image src={isRemoteImage(category.image) ? category.image : `${category.image}?v=transparent-2`} alt={category.name} fill unoptimized onError={fallbackImage} sizes="(max-width: 600px) 40vw, 160px" /></div>
+              <div className="fresh-pick-image"><span className="fresh-pick-image-art"><Image src={isRemoteImage(category.image) ? category.image : `${category.image}?v=transparent-2`} alt={category.name} fill unoptimized onError={fallbackImage} sizes="(max-width: 600px) 40vw, 160px" /></span></div>
               <div className="fresh-pick-details"><FreshIcon kind="leaf" /><h3><span>{text.fresh}</span>{category.name}</h3><button type="button" onClick={() => shop((category as FreshPick).slug ?? category.name)}>{text.shopNow}<span aria-hidden="true">→</span></button></div>
             </article>)}
           </div>

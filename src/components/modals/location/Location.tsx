@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Map as LeafletMap, Marker as LeafletMarker } from "leaflet";
 import { useRouter } from "next/navigation";
 import { checkLocationAction, listCitiesAction, locateCityAction, selectCityAction } from "@/app/actions";
 import type { ApiCity } from "@/lib/api";
@@ -25,7 +24,6 @@ export default function Location({ onClose, onLogin }: LocationProps) {
   const [cities, setCities] = useState<ApiCity[]>([]);
   const [citiesError, setCitiesError] = useState("");
   const [isClosing, setIsClosing] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [mapsReady, setMapsReady] = useState(false);
   const [mapError, setMapError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -33,54 +31,9 @@ export default function Location({ onClose, onLogin }: LocationProps) {
   const [address, setAddress] = useState(savedCity ? `${savedCity.name}` : "");
   const [verdict, setVerdict] = useState<Verdict | null>(savedCity ? { serviceable: true, city: savedCity } : null);
   const mapElementRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<LeafletMap | null>(null);
-  const markerRef = useRef<LeafletMarker | null>(null);
-  const initialCityRef = useRef(cityMapPoints.find(({ city }) => deliveryLocation.toLowerCase().includes(city.toLowerCase())) ?? cityMapPoints[0]);
-
-  useEffect(() => {
-    let isCancelled = false;
-    let map: LeafletMap | undefined;
-
-    void import("leaflet").then((leaflet) => {
-      if (isCancelled || !mapElementRef.current) return;
-
-      const initialCity = initialCityRef.current;
-      const initialPosition: [number, number] = [initialCity.latitude, initialCity.longitude];
-      map = leaflet.map(mapElementRef.current, { center: initialPosition, zoom: 11, zoomControl: false });
-      leaflet.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors',
-        maxZoom: 19,
-      }).addTo(map);
-      leaflet.control.zoom({ position: "topright" }).addTo(map);
-
-      const marker = leaflet.marker(initialPosition, {
-        draggable: true,
-        icon: leaflet.divIcon({
-          className: "location-pin-icon",
-          html: '<span class="location-pin-head"><span></span></span>',
-          iconSize: [42, 52],
-          iconAnchor: [21, 49],
-        }),
-      }).addTo(map);
-
-      marker.on("dragend", () => {
-        const position = marker.getLatLng();
-        const city = nearestCity(position.lat, position.lng);
-        setSelectedCity(city.city);
-        setCurrentLocation(`${city.city}, West Bengal`);
-      });
-
-      mapRef.current = map;
-      markerRef.current = marker;
-      window.requestAnimationFrame(() => map?.invalidateSize());
-      setTimeout(() => map?.invalidateSize(), 200);
-      setTimeout(() => map?.invalidateSize(), 500);
-    }).catch((error: unknown) => {
-      console.error("Unable to load the delivery map.", error);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
   const markerRef = useRef<google.maps.Marker | null>(null);
-  const radiusRef = useRef<google.maps.Circle | null>(null);
   const autoAsked = useRef(false);
   const requestRef = useRef(0);
   const savedCityRef = useRef(savedCity);
@@ -97,7 +50,6 @@ export default function Location({ onClose, onLogin }: LocationProps) {
 
   const moveTo = useCallback((position: google.maps.LatLngLiteral, zoom?: number) => {
     markerRef.current?.setPosition(position);
-    radiusRef.current?.setCenter(position);
     mapRef.current?.panTo(position);
     if (zoom) mapRef.current?.setZoom(zoom);
   }, []);
@@ -127,25 +79,21 @@ export default function Location({ onClose, onLogin }: LocationProps) {
           center: INDIA_CENTER, zoom: 11, disableDefaultUI: true, zoomControl: true, gestureHandling: "greedy", clickableIcons: false,
         });
         const marker = new g.maps.Marker({ map, position: INDIA_CENTER, draggable: true, title: "Drag to choose your delivery location" });
-        const radius = new g.maps.Circle({ map, center: INDIA_CENTER, radius: 20000, strokeColor: "#0878ff", strokeWeight: 3, fillColor: "#0878ff", fillOpacity: 0.12, clickable: false });
-        marker.addListener("drag", () => { const p = marker.getPosition(); if (p) radius.setCenter(p); });
         marker.addListener("dragend", () => { const p = marker.getPosition(); if (p) void pick(p.toJSON()); });
         map.addListener("click", (event: google.maps.MapMouseEvent) => {
           if (!event.latLng) return;
           const p = event.latLng.toJSON();
           marker.setPosition(p);
-          radius.setCenter(p);
           void pick(p);
         });
         mapRef.current = map;
         markerRef.current = marker;
-        radiusRef.current = radius;
         setMapsReady(true);
         // start on the city chosen before
         const saved = savedCityRef.current;
         if (saved) {
           void locateCityAction(saved.name).then((spot) => {
-            if (spot && !cancelled) { marker.setPosition(spot); radius.setCenter(spot); map.setCenter(spot); }
+            if (spot && !cancelled) { marker.setPosition(spot); map.setCenter(spot); }
           });
         }
       })
@@ -155,7 +103,6 @@ export default function Location({ onClose, onLogin }: LocationProps) {
     return () => {
       cancelled = true;
       markerRef.current?.setMap(null);
-      radiusRef.current?.setMap(null);
       mapRef.current = null;
       markerRef.current = null;
     };
@@ -163,7 +110,7 @@ export default function Location({ onClose, onLogin }: LocationProps) {
 
   // Google place search on the map's search box
   useEffect(() => {
-    if (!mapsReady || !isSearchOpen || !searchInputRef.current || !window.google?.maps?.places) return;
+    if (!mapsReady || !searchInputRef.current || !window.google?.maps?.places) return;
     const autocomplete = new google.maps.places.Autocomplete(searchInputRef.current, { componentRestrictions: { country: "in" }, fields: ["geometry", "formatted_address"] });
     const listener = autocomplete.addListener("place_changed", () => {
       const spot = autocomplete.getPlace().geometry?.location?.toJSON();
@@ -172,7 +119,7 @@ export default function Location({ onClose, onLogin }: LocationProps) {
       void pick(spot);
     });
     return () => google.maps.event.removeListener(listener);
-  }, [mapsReady, isSearchOpen, moveTo, pick]);
+  }, [mapsReady, moveTo, pick]);
 
   const closeWithAnimation = useCallback((afterClose: () => void = onClose) => {
     if (isClosing) return;
@@ -193,15 +140,6 @@ export default function Location({ onClose, onLogin }: LocationProps) {
     };
   }, [closeWithAnimation]);
 
-  const selectLocation = (location: string) => {
-    setSelectedCity(location);
-    setCurrentLocation(`${location}, West Bengal`);
-    const city = cityMapPoints.find(({ city: cityName }) => cityName === location);
-    if (!city || !mapRef.current || !markerRef.current) return;
-
-    const position: [number, number] = [city.latitude, city.longitude];
-    markerRef.current.setLatLng(position);
-    mapRef.current.flyTo(position, 11);
   const chooseCity = async (city: ApiCity) => {
     requestRef.current++;
     setBusy(false);
@@ -283,60 +221,16 @@ export default function Location({ onClose, onLogin }: LocationProps) {
         </header>
 
         <div className="location-content">
-          <div className="location-search-bar">
-            <span className="location-search-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="11" cy="11" r="7" />
-                <path d="m20 20-4-4" />
-              </svg>
-            </span>
-            <input
-              type="text"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  const trimmed = query.trim().toLowerCase();
-                  const match = cityMapPoints.find((item) => item.city.toLowerCase() === trimmed)
-                    || cityMapPoints.find((item) => item.city.toLowerCase().includes(trimmed));
-                  if (match) {
-                    selectLocation(match.city);
-                  }
-                }
-              }}
-              placeholder="Search city or area..."
-              aria-label="Search city or area"
-            />
-            {query && (
-              <button
-                type="button"
-                className="location-search-clear"
-                onClick={() => setQuery("")}
-                aria-label="Clear search"
-              >
-                ×
-              </button>
-            )}
-          <div className="location-copy">
-            <span className="location-eyebrow">YOUR DELIVERY ADDRESS</span>
-            <h2 id="location-title">Fresh picks, <span>closer to home.</span></h2>
-            <p>Drag the pin to your address, or pick your city. We show products available at your nearby store.</p>
-          </div>
-
           <section className="location-map-section" aria-label="Delivery map">
+            <div className="location-map-search">
+              <label className="location-map-search-field">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+                <input ref={searchInputRef} placeholder="Search area, street or landmark" aria-label="Search area, street or landmark" />
+              </label>
+            </div>
             <div className="location-map">
               <div ref={mapElementRef} className="location-map-canvas" role="application" aria-label="Interactive delivery map. Drag the pin to choose a location." />
               {mapError && <p className="location-map-error">{mapError} You can still pick a city below.</p>}
-              <div className={`location-map-search${isSearchOpen ? " is-open" : ""}`}>
-                {isSearchOpen && (
-                  <label className="location-map-search-field">
-                    <input ref={searchInputRef} placeholder="Search area, street or landmark" aria-label="Search area, street or landmark" autoFocus />
-                  </label>
-                )}
-                <button type="button" className="location-map-search-toggle" onClick={() => setIsSearchOpen((isOpen) => !isOpen)} aria-label={isSearchOpen ? "Close search" : "Search a place"} aria-expanded={isSearchOpen}>
-                  {isSearchOpen ? <span aria-hidden="true">×</span> : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>}
-                </button>
-              </div>
               <button type="button" className="location-map-locate" onClick={() => void detectLocation()} disabled={busy}>Use my current location</button>
               <span className="location-map-caption">{busy ? "Checking this location…" : verdict?.serviceable ? `Delivery area · ${verdict.city.name}` : "Drag the pin to your address"}</span>
             </div>

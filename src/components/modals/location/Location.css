@@ -281,28 +281,32 @@
 }
 
 .location-map-search {
-  position: absolute;
+  position: relative;
   z-index: 1100;
-  right: 13px;
-  bottom: 42px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  width: 100%;
+  justify-content: stretch;
+  margin-bottom: 9px;
 }
 
 .location-map-search-field {
+  box-sizing: border-box;
   display: flex;
-  width: min(290px, calc(100vw - 150px));
+  width: 100%;
+  min-width: 0;
+  max-width: none;
   height: 42px;
   align-items: center;
   gap: 6px;
-  padding: 0 10px 0 13px;
+  padding: 0 12px;
   border: 1px solid #e1e8e4;
   border-radius: 8px;
   background: #fff;
   box-shadow: 0 5px 18px rgb(14 42 29 / 18%);
-  animation: location-search-in .55s cubic-bezier(.2,.75,.25,1) both;
 }
+
+.location-map-search-field > svg { width: 18px; height: 18px; flex: 0 0 18px; color: #6a8296; }
 
 .location-map-search-field input {
   width: 100%;
@@ -689,8 +693,12 @@
     height: clamp(310px, 44vh, 390px);
   }
   .location-map-search {
-    display: none !important;
+    display: flex !important;
+    position: relative;
+    inset: auto;
+    margin-bottom: 9px;
   }
+  .location-map-search-field { width: 100%; }
   .location-map-caption {
     right: 8px;
     bottom: 8px;
