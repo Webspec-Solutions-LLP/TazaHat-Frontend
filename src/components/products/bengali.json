@@ -1,0 +1,586 @@
+{
+  "language": "bn",
+  "locale": "bn-IN",
+  "currency": "INR",
+  "heading": "সেরা বিক্রিত পণ্য",
+  "viewAll": "সব দেখুন",
+  "showLess": "কম দেখুন",
+  "viewDetails": "বিস্তারিত দেখুন",
+  "close": "বন্ধ করুন",
+  "save": "{name} পছন্দের তালিকায় যোগ করুন",
+  "unsave": "পছন্দের তালিকা থেকে {name} সরান",
+  "discount": "{percent}% ছাড়",
+  "rating": "{reviews}টি পর্যালোচনার মধ্যে ৫-এ {rating} রেটিং",
+  "demoNote": "ডেমো পণ্যের বিবরণ। মূল্য এবং প্রাপ্যতা উদাহরণস্বরূপ।",
+  "sliderLabel": "সেরা বিক্রিত পণ্য। দেখতে সোয়াইপ করুন অথবা তীর কী ব্যবহার করুন।",
+  "columnLabel": "পণ্য কলাম {{index}} / {{slidesLength}}",
+  "products": [
+    {
+      "id": "rohu",
+      "name": "রুই মাছ - টাটকা",
+      "image": "/images/products/product--2.png",
+      "price": 180,
+      "originalPrice": 220,
+      "weight": "500 g - 1 kg",
+      "rating": 4.6,
+      "reviews": 120,
+      "category": "মাছ ও সামুদ্রিক খাবার",
+      "subcategory": "টাটকা মাছ",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 0.25,
+          "unit": "kg",
+          "price": 90,
+          "originalPrice": 110
+        },
+        {
+          "label": "500 g",
+          "amount": 0.5,
+          "unit": "kg",
+          "price": 180,
+          "originalPrice": 220
+        },
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 360,
+          "originalPrice": 440
+        }
+      ]
+    },
+    {
+      "id": "chicken",
+      "name": "চিকেন কারি কাট",
+      "image": "/images/products/product--1.png",
+      "price": 220,
+      "originalPrice": 260,
+      "weight": "500 g",
+      "rating": 4.6,
+      "reviews": 98,
+      "category": "মাংস ও পোল্ট্রি",
+      "subcategory": "চিকেন",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 0.25,
+          "unit": "kg",
+          "price": 110,
+          "originalPrice": 130
+        },
+        {
+          "label": "500 g",
+          "amount": 0.5,
+          "unit": "kg",
+          "price": 220,
+          "originalPrice": 260
+        },
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 440,
+          "originalPrice": 520
+        }
+      ]
+    },
+    {
+      "id": "tomato",
+      "name": "টাটকা টমেটো",
+      "image": "/images/products/product--3.png",
+      "price": 30,
+      "originalPrice": 40,
+      "weight": "1 kg",
+      "rating": 4.4,
+      "reviews": 210,
+      "category": "শাকসবজি",
+      "subcategory": "টাটকা সবজি",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 0.25,
+          "unit": "kg",
+          "price": 7.5,
+          "originalPrice": 10
+        },
+        {
+          "label": "500 g",
+          "amount": 0.5,
+          "unit": "kg",
+          "price": 15,
+          "originalPrice": 20
+        },
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 30,
+          "originalPrice": 40
+        }
+      ]
+    },
+    {
+      "id": "milk",
+      "name": "টাটকা দুধ",
+      "image": "/images/products/product--4.png",
+      "price": 60,
+      "originalPrice": 70,
+      "weight": "1 L",
+      "rating": 4.5,
+      "reviews": 85,
+      "category": "দুগ্ধজাত ও ডিম",
+      "subcategory": "দুধ",
+      "variants": [
+        {
+          "label": "500 ml",
+          "amount": 0.5,
+          "unit": "L",
+          "price": 30,
+          "originalPrice": 35
+        },
+        {
+          "label": "1 L",
+          "amount": 1,
+          "unit": "L",
+          "price": 60,
+          "originalPrice": 70
+        },
+        {
+          "label": "2 L",
+          "amount": 2,
+          "unit": "L",
+          "price": 120,
+          "originalPrice": 140
+        }
+      ]
+    },
+    {
+      "id": "apple",
+      "name": "টাটকা আপেল",
+      "image": "/images/products/product--5.png",
+      "price": 90,
+      "originalPrice": 120,
+      "weight": "500 g",
+      "rating": 4.6,
+      "reviews": 76,
+      "category": "ফলমূল",
+      "subcategory": "টাটকা ফল",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 0.25,
+          "unit": "kg",
+          "price": 45,
+          "originalPrice": 60
+        },
+        {
+          "label": "500 g",
+          "amount": 0.5,
+          "unit": "kg",
+          "price": 90,
+          "originalPrice": 120
+        },
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 180,
+          "originalPrice": 240
+        }
+      ]
+    },
+    {
+      "id": "prawn",
+      "name": "চিংড়ি (মাঝারি)",
+      "image": "/images/products/product--6.png",
+      "price": 320,
+      "originalPrice": 395,
+      "weight": "500 g",
+      "rating": 4.6,
+      "reviews": 75,
+      "category": "মাছ ও সামুদ্রিক খাবার",
+      "subcategory": "শেলফিশ",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 0.25,
+          "unit": "kg",
+          "price": 160,
+          "originalPrice": 197.5
+        },
+        {
+          "label": "500 g",
+          "amount": 0.5,
+          "unit": "kg",
+          "price": 320,
+          "originalPrice": 395
+        },
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 640,
+          "originalPrice": 790
+        }
+      ]
+    },
+    {
+      "id": "mutton",
+      "name": "খাসির মাংস কারি কাট",
+      "image": "/images/products/product--7.png",
+      "price": 480,
+      "originalPrice": 560,
+      "weight": "500 g",
+      "rating": 4.7,
+      "reviews": 64,
+      "category": "মাংস ও পোল্ট্রি",
+      "subcategory": "খাসির মাংস",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 0.25,
+          "unit": "kg",
+          "price": 240,
+          "originalPrice": 280
+        },
+        {
+          "label": "500 g",
+          "amount": 0.5,
+          "unit": "kg",
+          "price": 480,
+          "originalPrice": 560
+        },
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 960,
+          "originalPrice": 1120
+        }
+      ]
+    },
+    {
+      "id": "cucumber",
+      "name": "টাটকা শসা",
+      "image": "/images/products/product--8.png",
+      "price": 35,
+      "originalPrice": 45,
+      "weight": "500 g",
+      "rating": 4.5,
+      "reviews": 92,
+      "category": "শাকসবজি",
+      "subcategory": "টাটকা সবজি",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 0.25,
+          "unit": "kg",
+          "price": 17.5,
+          "originalPrice": 22.5
+        },
+        {
+          "label": "500 g",
+          "amount": 0.5,
+          "unit": "kg",
+          "price": 35,
+          "originalPrice": 45
+        },
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 70,
+          "originalPrice": 90
+        }
+      ]
+    },
+    {
+      "id": "paneer",
+      "name": "টাটকা পনির",
+      "image": "/images/products/product--9.png",
+      "price": 95,
+      "originalPrice": 120,
+      "weight": "200 g",
+      "rating": 4.7,
+      "reviews": 113,
+      "category": "দুগ্ধজাত ও ডিম",
+      "subcategory": "পনির",
+      "variants": [
+        {
+          "label": "200 g",
+          "amount": 0.2,
+          "unit": "kg",
+          "price": 95,
+          "originalPrice": 120
+        },
+        {
+          "label": "500 g",
+          "amount": 0.5,
+          "unit": "kg",
+          "price": 237.5,
+          "originalPrice": 300
+        },
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 475,
+          "originalPrice": 600
+        }
+      ]
+    },
+    {
+      "id": "potato",
+      "name": "টাটকা আলু",
+      "image": "/images/products/product--10.png",
+      "price": 28,
+      "originalPrice": 35,
+      "weight": "1 kg",
+      "rating": 4.4,
+      "reviews": 184,
+      "category": "শাকসবজি",
+      "subcategory": "মূল জাতীয় সবজি",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 0.25,
+          "unit": "kg",
+          "price": 7,
+          "originalPrice": 8.75
+        },
+        {
+          "label": "500 g",
+          "amount": 0.5,
+          "unit": "kg",
+          "price": 14,
+          "originalPrice": 17.5
+        },
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 28,
+          "originalPrice": 35
+        }
+      ]
+    },
+    {
+      "id": "chicken-family",
+      "name": "চিকেন ফ্যামিলি প্যাক",
+      "image": "/images/products/product--1.png",
+      "price": 420,
+      "originalPrice": 500,
+      "weight": "1 kg",
+      "rating": 4.6,
+      "reviews": 82,
+      "category": "মাংস ও পোল্ট্রি",
+      "subcategory": "চিকেন",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 0.25,
+          "unit": "kg",
+          "price": 105,
+          "originalPrice": 125
+        },
+        {
+          "label": "500 g",
+          "amount": 0.5,
+          "unit": "kg",
+          "price": 210,
+          "originalPrice": 250
+        },
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 420,
+          "originalPrice": 500
+        }
+      ]
+    },
+    {
+      "id": "rohu-family",
+      "name": "রুই মাছ ফ্যামিলি প্যাক",
+      "image": "/images/products/product--2.png",
+      "price": 340,
+      "originalPrice": 400,
+      "weight": "1 kg",
+      "rating": 4.7,
+      "reviews": 59,
+      "category": "মাছ ও সামুদ্রিক খাবার",
+      "subcategory": "টাটকা মাছ",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 0.25,
+          "unit": "kg",
+          "price": 85,
+          "originalPrice": 100
+        },
+        {
+          "label": "500 g",
+          "amount": 0.5,
+          "unit": "kg",
+          "price": 170,
+          "originalPrice": 200
+        },
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 340,
+          "originalPrice": 400
+        }
+      ]
+    },
+    {
+      "id": "apple-family",
+      "name": "আপেল ফ্যামিলি প্যাক",
+      "image": "/images/products/product--5.png",
+      "price": 170,
+      "originalPrice": 220,
+      "weight": "1 kg",
+      "rating": 4.5,
+      "reviews": 67,
+      "category": "ফলমূল",
+      "subcategory": "টাটকা ফল",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 0.25,
+          "unit": "kg",
+          "price": 42.5,
+          "originalPrice": 55
+        },
+        {
+          "label": "500 g",
+          "amount": 0.5,
+          "unit": "kg",
+          "price": 85,
+          "originalPrice": 110
+        },
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 170,
+          "originalPrice": 220
+        }
+      ]
+    },
+    {
+      "id": "prawn-family",
+      "name": "চিংড়ি ফ্যামিলি প্যাক",
+      "image": "/images/products/product--6.png",
+      "price": 610,
+      "originalPrice": 750,
+      "weight": "1 kg",
+      "rating": 4.8,
+      "reviews": 42,
+      "category": "মাছ ও সামুদ্রিক খাবার",
+      "subcategory": "শেলফিশ",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 0.25,
+          "unit": "kg",
+          "price": 152.5,
+          "originalPrice": 187.5
+        },
+        {
+          "label": "500 g",
+          "amount": 0.5,
+          "unit": "kg",
+          "price": 305,
+          "originalPrice": 375
+        },
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 610,
+          "originalPrice": 750
+        }
+      ]
+    },
+    {
+      "id": "paneer-family",
+      "name": "পনির ফ্যামিলি প্যাক",
+      "image": "/images/products/product--9.png",
+      "price": 225,
+      "originalPrice": 280,
+      "weight": "500 g",
+      "rating": 4.7,
+      "reviews": 88,
+      "category": "দুগ্ধজাত ও ডিম",
+      "subcategory": "পনির",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 0.25,
+          "unit": "kg",
+          "price": 112.5,
+          "originalPrice": 140
+        },
+        {
+          "label": "500 g",
+          "amount": 0.5,
+          "unit": "kg",
+          "price": 225,
+          "originalPrice": 280
+        },
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 450,
+          "originalPrice": 560
+        }
+      ]
+    },
+    {
+      "id": "tomato-family",
+      "name": "টমেটো ভ্যালু প্যাক",
+      "image": "/images/products/product--3.png",
+      "price": 55,
+      "originalPrice": 75,
+      "weight": "2 kg",
+      "rating": 4.4,
+      "reviews": 106,
+      "category": "শাকসবজি",
+      "subcategory": "টাটকা সবজি",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 0.25,
+          "unit": "kg",
+          "price": 6.88,
+          "originalPrice": 9.38
+        },
+        {
+          "label": "500 g",
+          "amount": 0.5,
+          "unit": "kg",
+          "price": 13.75,
+          "originalPrice": 18.75
+        },
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 27.5,
+          "originalPrice": 37.5
+        },
+        {
+          "label": "2 kg",
+          "amount": 2,
+          "unit": "kg",
+          "price": 55,
+          "originalPrice": 75
+        }
+      ]
+    }
+  ]
+}

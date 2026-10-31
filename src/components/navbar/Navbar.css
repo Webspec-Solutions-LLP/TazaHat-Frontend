@@ -298,6 +298,48 @@
 .navbar-account-dropdown button[role="menuitem"]:hover, .navbar-account-dropdown button[role="menuitem"]:focus-visible { outline: none; background: #edf7ff; color: #0068c9; }
 .navbar-account-option-icon { display: grid; flex: 0 0 25px; width: 25px; height: 25px; place-items: center; border-radius: 6px; background: #eaf5ff; color: #07569b; }
 .navbar-account-option-icon svg { width: 17px; height: 17px; stroke-width: 2.8; }
+.navbar-account-lang-divider {
+  height: 1px;
+  margin: 6px 4px;
+  background-color: #e5edf5;
+}
+.navbar-account-lang-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 6px;
+}
+.navbar-account-lang-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+}
+.navbar-account-lang-buttons {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.navbar-lang-pill {
+  padding: 2px 7px;
+  border: 1px solid #cbdde9;
+  border-radius: 4px;
+  background: #f8fafc;
+  color: #123b65;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 140ms ease;
+}
+.navbar-lang-pill:hover {
+  background: #eef6fc;
+  border-color: #0875d1;
+  color: #0875d1;
+}
+.navbar-lang-pill.is-active {
+  background: #0875d1;
+  border-color: #0875d1;
+  color: #ffffff;
+}
 .navbar-action-icon-wrap {
   position: relative;
   display: flex;

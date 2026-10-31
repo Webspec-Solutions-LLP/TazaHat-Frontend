@@ -1,0 +1,37 @@
+{
+  "language": "hi",
+  "badge": "फार्म फ्रेश",
+  "heroTitle": "खेतों से सीधा",
+  "heroHighlight": " आपके घर",
+  "heroDescription": "ताज़ा। प्राकृतिक। पौष्टिक।",
+  "heroButton": "अभी खरीदें",
+  "farmNote": "सीधा",
+  "farmHighlight": "खेतों से आप तक",
+  "heading": "आज के ताज़ा उत्पाद",
+  "description": "खास कीमतों पर चुने गए ताज़ा उत्पाद",
+  "viewAll": "सभी देखें",
+  "shopNow": "अभी खरीदें",
+  "fresh": "ताज़ा ",
+  "upTo": "तक",
+  "off": "छूट",
+  "whyHeading": "ताज़ा उत्पाद क्यों चुनें?",
+  "background": "/images/offer2Background.webp",
+  "categories": [
+    { "id": "vegetables", "name": "सब्जियां", "image": "/images/category/category2.webp", "discount": 30, "theme": "green" },
+    { "id": "fruits", "name": "फल", "image": "/images/category/category3.webp", "discount": 25, "theme": "yellow" },
+    { "id": "meat", "name": "मीट और पोल्ट्री", "image": "/images/category/category5.webp", "discount": 20, "theme": "pink" },
+    { "id": "fish", "name": "मछली और सीफ़ूड", "image": "/images/category/category1.png", "discount": 18, "theme": "blue" }
+  ],
+  "benefits": [
+    { "icon": "leaf", "title": "फार्म फ्रेश", "description": "सीधे खेतों से" },
+    { "icon": "shield", "title": "स्वच्छ", "description": "और सुरक्षित" },
+    { "icon": "truck", "title": "तेज़", "description": "डिलीवरी" },
+    { "icon": "leaf", "title": "विशाल", "description": "विविधता" }
+  ],
+  "reasons": [
+    { "icon": "leaf", "title": "बेहतर पोषण", "description": "प्राकृतिक गुणों से भरपूर", "theme": "green" },
+    { "icon": "heart", "title": "सहायक", "description": "स्वस्थ जीवनशैली में", "theme": "orange" },
+    { "icon": "leaf", "title": "कृत्रिम संरक्षक", "description": "से पूरी तरह मुक्त", "theme": "blue" },
+    { "icon": "smile", "title": "ताज़ा चुना गया", "description": "हर दिन", "theme": "pink" }
+  ]
+}

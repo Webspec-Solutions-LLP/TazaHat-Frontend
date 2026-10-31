@@ -1,0 +1,417 @@
+{
+  "language": "hi",
+  "locale": "hi-IN",
+  "currency": "INR",
+  "heading": "स्टील डील्स",
+  "subtitle": "कोई भी 10 आइटम जोड़ें",
+  "addToCart": "कार्ट में जोड़ें",
+  "save": "{name} को पसंदीदा में जोड़ें",
+  "unsave": "पसंदीदा से {name} हटाएं",
+  "discount": "{percent}% छूट",
+  "rating": "{reviews} समीक्षाओं में से 5 में {rating} रेटिंग",
+  "close": "बंद करें",
+  "demoNote": "डेमो उत्पाद विवरण। मूल्य और उपलब्धता सांकेतिक हैं।",
+  "sliderLabel": "स्टील डील्स कैरोसेल। नेविगेट करने के लिए स्वाइप करें या एरो कीज का उपयोग करें।",
+  "slideLabel": "डील {{index}} / {{slidesLength}}",
+  "navPrev": "पिछली डील्स",
+  "navNext": "अगली डील्स",
+  "tabs": [
+    {
+      "id": "trending",
+      "label": "ट्रेंडिंग",
+      "type": "trending",
+      "badge": "हॉट आइटम"
+    },
+    {
+      "id": "store-9",
+      "priceTag": "₹9",
+      "label": "स्टोर",
+      "type": "price",
+      "maxPrice": 9
+    },
+    {
+      "id": "store-19",
+      "priceTag": "₹19",
+      "label": "स्टोर",
+      "type": "price",
+      "maxPrice": 19
+    },
+    {
+      "id": "store-29",
+      "priceTag": "₹29",
+      "label": "स्टোর",
+      "type": "price",
+      "maxPrice": 29
+    }
+  ],
+  "deals": [
+    {
+      "id": "steal-1",
+      "name": "ब्रिटानिया लिटिल हार्ट्स क्लासिक",
+      "image": "/images/products/product--5.png",
+      "price": 9,
+      "originalPrice": 30,
+      "weight": "75 g",
+      "rating": 4.8,
+      "reviews": 142,
+      "category": "स्नैक्स और नमकीन",
+      "subcategory": "बिस्कुट और कुकीज़",
+      "tag": "store-9",
+      "description": "कुरकुरे, चीनी की परत वाले दिल के आकार के मीठे बिस्कुट।",
+      "variants": [
+        {
+          "label": "75 g",
+          "amount": 75,
+          "unit": "g",
+          "price": 9,
+          "originalPrice": 30
+        }
+      ]
+    },
+    {
+      "id": "steal-2",
+      "name": "ताज़ा क्रंची खीरा पैक",
+      "image": "/images/products/product--8.png",
+      "price": 9,
+      "originalPrice": 25,
+      "weight": "250 g",
+      "rating": 4.6,
+      "reviews": 88,
+      "category": "सब्जियां",
+      "subcategory": "दैनिक सब्जियां",
+      "tag": "store-9",
+      "description": "ताज़ा और कुरकुरे स्थानीय रूप से उगाए गए खीरे।",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 250,
+          "unit": "g",
+          "price": 9,
+          "originalPrice": 25
+        }
+      ]
+    },
+    {
+      "id": "steal-3",
+      "name": "ताज़ा पुदीना और धनिया पत्ती का गुच्छा",
+      "image": "/images/products/product--3.png",
+      "price": 9,
+      "originalPrice": 20,
+      "weight": "100 g",
+      "rating": 4.7,
+      "reviews": 95,
+      "category": "सब्जियां",
+      "subcategory": "जड़ी-बूटियाँ और मसाले",
+      "tag": "store-9",
+      "description": "ताज़ा सुगंधित धनिया और पुदीना पत्तियों का गुच्छा।",
+      "variants": [
+        {
+          "label": "100 g",
+          "amount": 100,
+          "unit": "g",
+          "price": 9,
+          "originalPrice": 20
+        }
+      ]
+    },
+    {
+      "id": "steal-4",
+      "name": "ताज़ा हरी मिर्च पैक",
+      "image": "/images/products/product11.png",
+      "price": 9,
+      "originalPrice": 22,
+      "weight": "100 g",
+      "rating": 4.5,
+      "reviews": 64,
+      "category": "सब्जियां",
+      "subcategory": "मसाले और मिर्च",
+      "tag": "store-9",
+      "description": "खेत से ताज़ा तोड़ी गई तीखी हरी मिर्च।",
+      "variants": [
+        {
+          "label": "100 g",
+          "amount": 100,
+          "unit": "g",
+          "price": 9,
+          "originalPrice": 22
+        }
+      ]
+    },
+    {
+      "id": "steal-5",
+      "name": "ताज़ा नींबू वैल्यू बंच",
+      "image": "/images/products/product12.png",
+      "price": 9,
+      "originalPrice": 20,
+      "weight": "4 pcs",
+      "rating": 4.7,
+      "reviews": 110,
+      "category": "फल",
+      "subcategory": "खट्टे फल",
+      "tag": "store-9",
+      "description": "विटामिन सी से भरपूर रसीले और खट्टे पीले नींबू।",
+      "variants": [
+        {
+          "label": "4 pcs",
+          "amount": 4,
+          "unit": "pcs",
+          "price": 9,
+          "originalPrice": 20
+        }
+      ]
+    },
+    {
+      "id": "steal-6",
+      "name": "ताज़ा अदरक",
+      "image": "/images/products/product13.png",
+      "price": 9,
+      "originalPrice": 24,
+      "weight": "100 g",
+      "rating": 4.6,
+      "reviews": 78,
+      "category": "सब्जियां",
+      "subcategory": "कंदमूल सब्जियां",
+      "tag": "store-9",
+      "description": "दैनिक खाना पकाने और चाय के लिए सुगंधित ताज़ा अदरक।",
+      "variants": [
+        {
+          "label": "100 g",
+          "amount": 100,
+          "unit": "g",
+          "price": 9,
+          "originalPrice": 24
+        }
+      ]
+    },
+    {
+      "id": "steal-7",
+      "name": "ताज़ा देसी टमाटर पैक",
+      "image": "/images/products/product--3.png",
+      "price": 19,
+      "originalPrice": 40,
+      "weight": "500 g",
+      "rating": 4.6,
+      "reviews": 156,
+      "category": "सब्जियां",
+      "subcategory": "दैनिक सब्जियां",
+      "tag": "store-19",
+      "description": "स्वाद से भरपूर रसीले और पके हुए देसी टमाटर।",
+      "variants": [
+        {
+          "label": "500 g",
+          "amount": 500,
+          "unit": "g",
+          "price": 19,
+          "originalPrice": 40
+        }
+      ]
+    },
+    {
+      "id": "steal-8",
+      "name": "फार्म फ्रेश आलू क्लासिक",
+      "image": "/images/products/product--10.png",
+      "price": 19,
+      "originalPrice": 38,
+      "weight": "1 kg",
+      "rating": 4.7,
+      "reviews": 204,
+      "category": "सब्जियां",
+      "subcategory": "कंदमूल सब्जियां",
+      "tag": "store-19",
+      "description": "दैनिक पकाने के लिए उपयुक्त बहुमुखी सुनहरे आलू।",
+      "variants": [
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 19,
+          "originalPrice": 38
+        }
+      ]
+    },
+    {
+      "id": "steal-9",
+      "name": "ताज़ा लाल प्याज वैल्यू बैग",
+      "image": "/images/products/product14.png",
+      "price": 19,
+      "originalPrice": 45,
+      "weight": "500 g",
+      "rating": 4.5,
+      "reviews": 130,
+      "category": "सब्जियां",
+      "subcategory": "दैनिक सब्जियां",
+      "tag": "store-19",
+      "description": "करी, सलाद और गार्निशिंग के लिए कुरकुरा लाल प्याज।",
+      "variants": [
+        {
+          "label": "500 g",
+          "amount": 500,
+          "unit": "g",
+          "price": 19,
+          "originalPrice": 45
+        }
+      ]
+    },
+    {
+      "id": "steal-10",
+      "name": "ताज़ा लहसुन की कलियां",
+      "image": "/images/products/product15.png",
+      "price": 19,
+      "originalPrice": 42,
+      "weight": "200 g",
+      "rating": 4.8,
+      "reviews": 92,
+      "category": "सब्जियां",
+      "subcategory": "मसाले और सुगंधित सामग्री",
+      "tag": "store-19",
+      "description": "जैविक खेतों से प्राप्त स्वादिष्ट लहसुन की कलियां।",
+      "variants": [
+        {
+          "label": "200 g",
+          "amount": 200,
+          "unit": "g",
+          "price": 19,
+          "originalPrice": 42
+        }
+      ]
+    },
+    {
+      "id": "steal-11",
+      "name": "ज़ॉफ सोया चंक्स - प्रोटीन युक्त",
+      "image": "/images/products/product16.png",
+      "price": 29,
+      "originalPrice": 60,
+      "weight": "200 g",
+      "rating": 4.7,
+      "reviews": 175,
+      "category": "स्नैक्स और नमकीन",
+      "subcategory": "प्लांट प्रोटीन",
+      "tag": "store-29",
+      "description": "बेहद नरम और प्रोटीन से भरपूर 100% शाकाहारी सोया चंक्स।",
+      "variants": [
+        {
+          "label": "200 g",
+          "amount": 200,
+          "unit": "g",
+          "price": 29,
+          "originalPrice": 60
+        }
+      ]
+    },
+    {
+      "id": "steal-12",
+      "name": "फार्म फ्रेश दूध पाउच",
+      "image": "/images/products/product--4.png",
+      "price": 29,
+      "originalPrice": 36,
+      "weight": "500 ml",
+      "rating": 4.9,
+      "reviews": 310,
+      "category": "डेयरी और अंडे",
+      "subcategory": "ताज़ा दूध",
+      "tag": "store-29",
+      "description": "प्राकृतिक मलाई से भरपूर पाश्चुरीकृत पौष्टिक गाय का दूध।",
+      "variants": [
+        {
+          "label": "500 ml",
+          "amount": 500,
+          "unit": "ml",
+          "price": 29,
+          "originalPrice": 36
+        }
+      ]
+    },
+    {
+      "id": "steal-13",
+      "name": "ताज़ा हरी मटर",
+      "image": "/images/products/product17.png",
+      "price": 29,
+      "originalPrice": 55,
+      "weight": "250 g",
+      "rating": 4.6,
+      "reviews": 84,
+      "category": "सब्जियां",
+      "subcategory": "मौसमी सब्जियां",
+      "tag": "store-29",
+      "description": "मीठी, कोमल और ताज़ा छीली गई हरी मटर।",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 250,
+          "unit": "g",
+          "price": 29,
+          "originalPrice": 55
+        }
+      ]
+    },
+    {
+      "id": "steal-14",
+      "name": "ताज़ा दही कप",
+      "image": "/images/products/product18.png",
+      "price": 29,
+      "originalPrice": 40,
+      "weight": "400 g",
+      "rating": 4.8,
+      "reviews": 160,
+      "category": "डेयरी और अंडे",
+      "subcategory": "दही और योगर्ट",
+      "tag": "store-29",
+      "description": "गाढ़ा, मलाईदार और प्राकृतिक रूप से जमाया हुआ प्रोबायोटिक दही।",
+      "variants": [
+        {
+          "label": "400 g",
+          "amount": 400,
+          "unit": "g",
+          "price": 29,
+          "originalPrice": 40
+        }
+      ]
+    },
+    {
+      "id": "steal-15",
+      "name": "रेड बुल एनर्जी ड्रिंक",
+      "image": "/images/products/product--9.png",
+      "price": 399,
+      "originalPrice": 480,
+      "weight": "4 x 250 ml",
+      "rating": 4.9,
+      "reviews": 280,
+      "category": "कोल्ड ड्रिंक्स और जूस",
+      "subcategory": "एनर्जी ड्रिंक्स",
+      "tag": "trending",
+      "description": "शरीर और दिमाग को ऊर्जावान बनाने वाला प्रीमियम एनर्जी ड्रिंक।",
+      "variants": [
+        {
+          "label": "4 x 250 ml",
+          "amount": 4,
+          "unit": "pack",
+          "price": 399,
+          "originalPrice": 480
+        }
+      ]
+    },
+    {
+      "id": "steal-16",
+      "name": "क्रिस्पी रॉयल गाला सेब",
+      "image": "/images/products/product--5.png",
+      "price": 79,
+      "originalPrice": 120,
+      "weight": "500 g",
+      "rating": 4.8,
+      "reviews": 195,
+      "category": "फल",
+      "subcategory": "सेब और नाशपाती",
+      "tag": "trending",
+      "description": "पहाड़ों से हाथ से तोड़े गए मीठे, कुरकुरे और ताज़ा सेब।",
+      "variants": [
+        {
+          "label": "500 g",
+          "amount": 500,
+          "unit": "g",
+          "price": 79,
+          "originalPrice": 120
+        }
+      ]
+    }
+  ]
+}

@@ -15,22 +15,54 @@ import Location from "../modals/location/Location";
 import Login from "../modals/login/Login";
 import productCatalog from "../products/english.json";
 import { readWishlistIds, subscribeToWishlist, toggleWishlistId } from "../../lib/wishlist";
+import englishText from "./english.json";
+import bengaliText from "./bengali.json";
+import hindiText from "./hindi.json";
 import "./Navbar.css";
 
 const SEARCH_HISTORY_KEY = "tazahat-search-history";
 const MAX_SEARCH_HISTORY = 8;
+export const LANGUAGE_STORAGE_KEY = "tazahat-language";
+export const LANGUAGE_CHANGE_EVENT = "tazahat:change-language";
+
+export type SupportedLang = "en" | "bn" | "hi";
+
+const textMap: Record<SupportedLang, typeof englishText> = {
+  en: englishText,
+  bn: bengaliText,
+  hi: hindiText,
+};
 
 interface NavbarProps {
   cartCount?: number;
   deliveryLocation?: string;
   onSearch?: (query: string) => void;
+  lang?: SupportedLang;
+  onLanguageChange?: (lang: SupportedLang) => void;
 }
 
 export default function Navbar({
   cartCount = 0,
   deliveryLocation = "Kolkata, West Bengal",
   onSearch,
+  lang,
+  onLanguageChange,
 }: NavbarProps) {
+  const [currentLang, setCurrentLang] = useState<SupportedLang>(() => {
+    if (lang) return lang;
+    if (typeof window !== "undefined") {
+      try {
+        const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY) as SupportedLang | null;
+        if (stored && (stored === "en" || stored === "bn" || stored === "hi")) {
+          return stored;
+        }
+      } catch {
+        // Fallback to default English
+      }
+    }
+    return "en";
+  });
+
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchResultsOpen, setIsSearchResultsOpen] = useState(false);
   const [isCompactSearchOpen, setIsCompactSearchOpen] = useState(false);
@@ -49,6 +81,37 @@ export default function Navbar({
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (lang) {
+      setCurrentLang(lang);
+    }
+  }, [lang]);
+
+  useEffect(() => {
+    const handleLanguageChange = (event: Event) => {
+      const newLang = (event as CustomEvent<SupportedLang>).detail;
+      if (newLang && (newLang === "en" || newLang === "bn" || newLang === "hi")) {
+        setCurrentLang(newLang);
+      }
+    };
+    window.addEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange);
+    return () => window.removeEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange);
+  }, []);
+
+  const changeLanguage = (newLang: SupportedLang) => {
+    setCurrentLang(newLang);
+    try {
+      window.localStorage.setItem(LANGUAGE_STORAGE_KEY, newLang);
+      window.dispatchEvent(new CustomEvent(LANGUAGE_CHANGE_EVENT, { detail: newLang }));
+    } catch {
+      // Ignore if localStorage unavailable
+    }
+    onLanguageChange?.(newLang);
+  };
+
+  const t = textMap[currentLang] || englishText;
+
   useEffect(() => {
     try {
       const storedHistory = window.localStorage.getItem(SEARCH_HISTORY_KEY);
@@ -239,9 +302,9 @@ export default function Navbar({
               className="navbar-logo-img"
             />
             <span className="navbar-brand-copy">
-              <span className="navbar-brand-name">Taza<span>Haat</span></span>
+              <span className="navbar-brand-name">{t.brandName}<span>{t.brandNameHighlight}</span></span>
               <span className="navbar-tagline">
-                Freshness Delivered
+                {t.brandTagline}
               </span>
             </span>
           </Link>
@@ -251,7 +314,7 @@ export default function Navbar({
         <button
           type="button"
           className="navbar-compact-search-toggle"
-          aria-label="Open search"
+          aria-label={t.searchOpenAria}
           aria-expanded={isCompactSearchOpen}
           onClick={() => {
             setIsCompactSearchOpen(true);
@@ -260,7 +323,7 @@ export default function Navbar({
         >
           <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"/><path d="m16.5 16.5 4 4"/></svg>
         </button>
-        {isCompactSearchOpen && <button type="button" className="navbar-search-backdrop" aria-label="Close search" onClick={() => setIsCompactSearchOpen(false)} />}
+        {isCompactSearchOpen && <button type="button" className="navbar-search-backdrop" aria-label={t.searchCloseAria} onClick={() => setIsCompactSearchOpen(false)} />}
         <form className={`navbar-search-form${isCompactSearchOpen ? " is-compact-open" : ""}`} onSubmit={handleSearchSubmit} role="search">
           <div className="navbar-search-box">
             <span className="navbar-search-overlay-icon" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7.5"/><path d="m16.5 16.5 4 4"/></svg></span>
@@ -268,7 +331,7 @@ export default function Navbar({
               ref={searchInputRef}
               type="text"
               className="navbar-search-input"
-              placeholder="Search for fish, meat, vegetables, fruits, dairy..."
+              placeholder={t.searchPlaceholder}
               value={searchQuery}
               onFocus={() => setIsSearchResultsOpen(true)}
               onChange={(e) => {
@@ -277,14 +340,14 @@ export default function Navbar({
                 setIsSearchResultsOpen(Boolean(query.trim()));
                 if (query.trim()) rememberSearch(query);
               }}
-              aria-label="Search products"
+              aria-label={t.searchInputAria}
               aria-controls="navbar-search-results"
             />
             {searchQuery.trim() ? (
               <button
                 type="button"
                 className="navbar-search-btn"
-                aria-label="Clear search"
+                aria-label={t.searchClearAria}
                 onClick={() => {
                   setSearchQuery("");
                   setIsSearchResultsOpen(false);
@@ -296,7 +359,7 @@ export default function Navbar({
                 </svg>
               </button>
             ) : (
-              <button type="submit" className="navbar-search-btn" aria-label="Submit search">
+              <button type="submit" className="navbar-search-btn" aria-label={t.searchSubmitAria}>
                 <svg
                   width="18"
                   height="18"
@@ -313,15 +376,15 @@ export default function Navbar({
                 </svg>
               </button>
             )}
-            <button type="button" className="navbar-search-overlay-close" aria-label="Close search" onClick={() => setIsCompactSearchOpen(false)}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+            <button type="button" className="navbar-search-overlay-close" aria-label={t.searchCloseAria} onClick={() => setIsCompactSearchOpen(false)}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
           </div>
           {isSearchResultsOpen && (searchQuery.trim() || searchHistory.length > 0) && (
-            <div className="navbar-search-results" id="navbar-search-results" role="list" aria-label="Search results">
+            <div className="navbar-search-results" id="navbar-search-results" role="list" aria-label={t.searchResultsAria}>
               {!searchQuery.trim() ? (
                 <>
                   <div className="navbar-search-history-heading">
-                    <span>Recent searches</span>
-                    <button type="button" onClick={clearSearchHistory}>Clear</button>
+                    <span>{t.searchRecent}</span>
+                    <button type="button" onClick={clearSearchHistory}>{t.searchClearHistory}</button>
                   </div>
                   {searchHistory.map((query) => (
                     <button
@@ -393,21 +456,21 @@ export default function Navbar({
                           }}
                           aria-label={`Add ${product.name} to cart`}
                         >
-                          Add
+                          {t.searchAddBtn}
                         </button>
                       )}
                     </div>
                   );
                 })
               ) : (
-                <p className="navbar-search-empty">No matching products found.</p>
+                <p className="navbar-search-empty">{t.searchNoResults}</p>
               )}
             </div>
           )}
         </form>
 
         {/* Deliver-To / Location Selector */}
-        <button type="button" className="navbar-location" aria-label="Select delivery location" onClick={() => setIsLocationOpen(true)}>
+        <button type="button" className="navbar-location" aria-label={t.deliverTo} onClick={() => setIsLocationOpen(true)}>
           <div className="navbar-location-icon-wrap">
             <svg
               width="22"
@@ -424,9 +487,9 @@ export default function Navbar({
             </svg>
           </div>
           <div className="navbar-location-text">
-            <span className="navbar-location-label">Deliver to</span>
+            <span className="navbar-location-label">{t.deliverTo}</span>
             <div className="navbar-location-val-wrap">
-              <span className="navbar-location-city">{deliveryLocation}</span>
+              <span className="navbar-location-city">{deliveryLocation || t.defaultDeliveryLocation}</span>
               <svg
                 className="navbar-location-arrow"
                 width="14"
@@ -446,14 +509,14 @@ export default function Navbar({
 
         {/* Right Navigation Actions */}
         <nav className="navbar-actions" aria-label="User navigation">
-          <Link href="/deliveryService" className="navbar-compact-delivery" aria-label="Delivery Service">
+          <Link href="/deliveryService" className="navbar-compact-delivery" aria-label={t.deliveryService}>
             <svg viewBox="0 0 28 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M2 5.5h14v12H2z"/><path d="M16 10h5l4 4.25v3.25h-9z"/><path d="M21 10v4.5h4"/><circle cx="6.5" cy="19" r="2.25"/><circle cx="21" cy="19" r="2.25"/><path d="M3 8h5"/></svg>
-            <span>Delivery</span>
+            <span>{t.deliveryCompact}</span>
           </Link>
           <Link
             href="/deliveryService"
             className="navbar-delivery-service"
-            aria-label="Delivery Service"
+            aria-label={t.deliveryService}
           >
             <span className="navbar-delivery-icon-wrap">
               <svg
@@ -473,10 +536,10 @@ export default function Navbar({
               </svg>
             </span>
             <span className="navbar-delivery-copy">
-              <span className="navbar-delivery-label">Delivery Service</span>
-              <span className="navbar-delivery-caption">Book a pickup</span>
+              <span className="navbar-delivery-label">{t.deliveryService}</span>
+              <span className="navbar-delivery-caption">{t.deliveryCaption}</span>
             </span>
-            <span className="navbar-delivery-badge">New</span>
+            <span className="navbar-delivery-badge">{t.deliveryBadge}</span>
           </Link>
 
           {/* Account */}
@@ -484,7 +547,7 @@ export default function Navbar({
             <button
               type="button"
               className="navbar-action-item"
-              aria-label="Account menu"
+              aria-label={t.account}
               aria-haspopup="menu"
               aria-expanded={isAccountOpen}
               onClick={() => setIsAccountOpen(open => !open)}
@@ -495,21 +558,48 @@ export default function Navbar({
                   <circle cx="12" cy="7" r="4" />
                 </svg>
               </div>
-              <span className="navbar-action-label">Account</span>
+              <span className="navbar-action-label">{t.account}</span>
             </button>
-            <div className={`navbar-account-dropdown${isAccountOpen ? " is-open" : ""}`} role="menu" aria-label="Account options" aria-hidden={!isAccountOpen}>
+            <div className={`navbar-account-dropdown${isAccountOpen ? " is-open" : ""}`} role="menu" aria-label={t.account} aria-hidden={!isAccountOpen}>
               <button type="button" role="menuitem" tabIndex={isAccountOpen ? 0 : -1} onClick={() => { setIsAccountOpen(false); setIsLoginOpen(true); }}>
-                <span className="navbar-account-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M14 4h5a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-5"/><path d="M10 16l4-4-4-4M14 12H3"/></svg></span>Login
+                <span className="navbar-account-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M14 4h5a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-5"/><path d="M10 16l4-4-4-4M14 12H3"/></svg></span>{t.login}
               </button>
               <Link href="/wishlist" role="menuitem" tabIndex={isAccountOpen ? 0 : -1} onClick={() => setIsAccountOpen(false)}>
-                <span className="navbar-account-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20.8 8.7c0 5.1-8.8 10.2-8.8 10.2S3.2 13.8 3.2 8.7A4.7 4.7 0 0 1 12 6.1a4.7 4.7 0 0 1 8.8 2.6Z"/></svg></span>Wishlist
+                <span className="navbar-account-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20.8 8.7c0 5.1-8.8 10.2-8.8 10.2S3.2 13.8 3.2 8.7A4.7 4.7 0 0 1 12 6.1a4.7 4.7 0 0 1 8.8 2.6Z"/></svg></span>{t.wishlist}
               </Link>
               <Link href="/myOrders" role="menuitem" tabIndex={isAccountOpen ? 0 : -1} onClick={() => setIsAccountOpen(false)}>
-                <span className="navbar-account-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 3h12l2 3v15H4V6l2-3Z"/><path d="M4 6h16M9 10v7l3-2 3 2v-7"/></svg></span>My Orders
+                <span className="navbar-account-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 3h12l2 3v15H4V6l2-3Z"/><path d="M4 6h16M9 10v7l3-2 3 2v-7"/></svg></span>{t.myOrders}
               </Link>
               <Link href="/myprofile" role="menuitem" tabIndex={isAccountOpen ? 0 : -1} onClick={() => setIsAccountOpen(false)}>
-                <span className="navbar-account-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="7.5" r="3.5"/><path d="M5 20v-1.2a7 7 0 0 1 14 0V20Z"/></svg></span>My Profile
+                <span className="navbar-account-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="7.5" r="3.5"/><path d="M5 20v-1.2a7 7 0 0 1 14 0V20Z"/></svg></span>{t.myProfile}
               </Link>
+              <div className="navbar-account-lang-divider" />
+              <div className="navbar-account-lang-box">
+                <span className="navbar-account-lang-label">Language:</span>
+                <div className="navbar-account-lang-buttons">
+                  <button
+                    type="button"
+                    className={`navbar-lang-pill${currentLang === "en" ? " is-active" : ""}`}
+                    onClick={() => changeLanguage("en")}
+                  >
+                    EN
+                  </button>
+                  <button
+                    type="button"
+                    className={`navbar-lang-pill${currentLang === "bn" ? " is-active" : ""}`}
+                    onClick={() => changeLanguage("bn")}
+                  >
+                    বাং
+                  </button>
+                  <button
+                    type="button"
+                    className={`navbar-lang-pill${currentLang === "hi" ? " is-active" : ""}`}
+                    onClick={() => changeLanguage("hi")}
+                  >
+                    हिं
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -517,7 +607,7 @@ export default function Navbar({
           <button
             type="button"
             className="navbar-action-item"
-            aria-label={`Compare list with ${compareCount} items`}
+            aria-label={`${t.compare} (${compareCount})`}
             onClick={() => setIsCompareOpen(true)}
           >
             <div className="navbar-action-icon-wrap">
@@ -539,14 +629,14 @@ export default function Navbar({
               </svg>
               <span className="navbar-cart-badge">{compareCount}</span>
             </div>
-            <span className="navbar-action-label">Compare</span>
+            <span className="navbar-action-label">{t.compare}</span>
           </button>
 
           {/* Cart */}
           <button
             type="button"
             className="navbar-action-item"
-            aria-label={`Cart with ${visibleCartCount} items`}
+            aria-label={`${t.cart} (${visibleCartCount})`}
             onClick={() => setIsCartOpen(true)}
           >
             <div className="navbar-action-icon-wrap">
@@ -566,7 +656,7 @@ export default function Navbar({
               </svg>
               <span className="navbar-cart-badge">{visibleCartCount}</span>
             </div>
-            <span className="navbar-action-label">Cart</span>
+            <span className="navbar-action-label">{t.cart}</span>
           </button>
         </nav>
       </div>

@@ -1,0 +1,417 @@
+{
+  "language": "bn",
+  "locale": "bn-IN",
+  "currency": "INR",
+  "heading": "স্টিল ডিলস",
+  "subtitle": "যেকোনো ১০টি পণ্য যোগ করুন",
+  "addToCart": "কার্টে যোগ করুন",
+  "save": "{name} পছন্দের তালিকায় যোগ করুন",
+  "unsave": "পছন্দের তালিকা থেকে {name} সরান",
+  "discount": "{percent}% ছাড়",
+  "rating": "{reviews}টি পর্যালোচনার মধ্যে ৫-এ {rating} রেটিং",
+  "close": "বন্ধ করুন",
+  "demoNote": "ডেমো পণ্যের বিবরণ। মূল্য এবং প্রাপ্যতা উদাহরণস্বরূপ।",
+  "sliderLabel": "স্টিল ডিলস ক্যারোজেল। দেখতে সোয়াইপ করুন অথবা তীর কী ব্যবহার করুন।",
+  "slideLabel": "ডিল {{index}} / {{slidesLength}}",
+  "navPrev": "পূর্ববর্তী ডিল",
+  "navNext": "পরবর্তী ডিল",
+  "tabs": [
+    {
+      "id": "trending",
+      "label": "ট্রেন্ডিং",
+      "type": "trending",
+      "badge": "হট আইটেম"
+    },
+    {
+      "id": "store-9",
+      "priceTag": "₹9",
+      "label": "স্টোর",
+      "type": "price",
+      "maxPrice": 9
+    },
+    {
+      "id": "store-19",
+      "priceTag": "₹19",
+      "label": "স্টোর",
+      "type": "price",
+      "maxPrice": 19
+    },
+    {
+      "id": "store-29",
+      "priceTag": "₹29",
+      "label": "স্টোর",
+      "type": "price",
+      "maxPrice": 29
+    }
+  ],
+  "deals": [
+    {
+      "id": "steal-1",
+      "name": "ব্রিটানিয়া লিটল হার্টস ক্লাসিক",
+      "image": "/images/products/product--5.png",
+      "price": 9,
+      "originalPrice": 30,
+      "weight": "75 g",
+      "rating": 4.8,
+      "reviews": 142,
+      "category": "স্ন্যাক্স ও মাঞ্চিস",
+      "subcategory": "বিস্কুট ও কুকিজ",
+      "tag": "store-9",
+      "description": "মুচমুচে, সুগার-গ্লেজড হৃদয় আকৃতির মিষ্টি বিস্কুট।",
+      "variants": [
+        {
+          "label": "75 g",
+          "amount": 75,
+          "unit": "g",
+          "price": 9,
+          "originalPrice": 30
+        }
+      ]
+    },
+    {
+      "id": "steal-2",
+      "name": "টাটকা ক্রাঞ্চি শসা প্যাক",
+      "image": "/images/products/product--8.png",
+      "price": 9,
+      "originalPrice": 25,
+      "weight": "250 g",
+      "rating": 4.6,
+      "reviews": 88,
+      "category": "শাকসবজি",
+      "subcategory": "নিত্যদিনের সবজি",
+      "tag": "store-9",
+      "description": "স্থানীয় বাগানে উৎপাদিত সতেজ এবং মুচমুচে শসা।",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 250,
+          "unit": "g",
+          "price": 9,
+          "originalPrice": 25
+        }
+      ]
+    },
+    {
+      "id": "steal-3",
+      "name": "টাটকা পুদিনা ও ধনেপাতা বান্ডিল",
+      "image": "/images/products/product--3.png",
+      "price": 9,
+      "originalPrice": 20,
+      "weight": "100 g",
+      "rating": 4.7,
+      "reviews": 95,
+      "category": "শাকসবজি",
+      "subcategory": "ভেষজ ও মশলা",
+      "tag": "store-9",
+      "description": "সুগন্ধি টাটকা ধনেপাতা ও পুদিনা পাতার বান্ডিল।",
+      "variants": [
+        {
+          "label": "100 g",
+          "amount": 100,
+          "unit": "g",
+          "price": 9,
+          "originalPrice": 20
+        }
+      ]
+    },
+    {
+      "id": "steal-4",
+      "name": "টাটকা কাঁচা লঙ্কা প্যাক",
+      "image": "/images/products/product11.png",
+      "price": 9,
+      "originalPrice": 22,
+      "weight": "100 g",
+      "rating": 4.5,
+      "reviews": 64,
+      "category": "শাকসবজি",
+      "subcategory": "মশলা ও লঙ্কা",
+      "tag": "store-9",
+      "description": "খামার থেকে তোলা টাটকা ঝাল কাঁচা লঙ্কা।",
+      "variants": [
+        {
+          "label": "100 g",
+          "amount": 100,
+          "unit": "g",
+          "price": 9,
+          "originalPrice": 22
+        }
+      ]
+    },
+    {
+      "id": "steal-5",
+      "name": "টাটকা লেবু ভ্যালু বান্ডিল",
+      "image": "/images/products/product12.png",
+      "price": 9,
+      "originalPrice": 20,
+      "weight": "4 pcs",
+      "rating": 4.7,
+      "reviews": 110,
+      "category": "ফলমূল",
+      "subcategory": "সাইট্রাস ফল",
+      "tag": "store-9",
+      "description": "ভিটামিন সি সমৃদ্ধ রসালো টক হলুদ পাতিলেবু।",
+      "variants": [
+        {
+          "label": "4 pcs",
+          "amount": 4,
+          "unit": "pcs",
+          "price": 9,
+          "originalPrice": 20
+        }
+      ]
+    },
+    {
+      "id": "steal-6",
+      "name": "টাটকা আদা",
+      "image": "/images/products/product13.png",
+      "price": 9,
+      "originalPrice": 24,
+      "weight": "100 g",
+      "rating": 4.6,
+      "reviews": 78,
+      "category": "শাকসবজি",
+      "subcategory": "মূল জাতীয় সবজি",
+      "tag": "store-9",
+      "description": "প্রতিদিনের রান্না এবং চায়ের জন্য সুবাসিত টাটকা আদা।",
+      "variants": [
+        {
+          "label": "100 g",
+          "amount": 100,
+          "unit": "g",
+          "price": 9,
+          "originalPrice": 24
+        }
+      ]
+    },
+    {
+      "id": "steal-7",
+      "name": "টাটকা দেশি টমেটো প্যাক",
+      "image": "/images/products/product--3.png",
+      "price": 19,
+      "originalPrice": 40,
+      "weight": "500 g",
+      "rating": 4.6,
+      "reviews": 156,
+      "category": "শাকসবজি",
+      "subcategory": "নিত্যদিনের সবজি",
+      "tag": "store-19",
+      "description": "স্বাদে ভরপুর রসালো ও পাকা দেশি টমেটো।",
+      "variants": [
+        {
+          "label": "500 g",
+          "amount": 500,
+          "unit": "g",
+          "price": 19,
+          "originalPrice": 40
+        }
+      ]
+    },
+    {
+      "id": "steal-8",
+      "name": "ফার্ম ফ্রেশ ক্লাসিক আলু",
+      "image": "/images/products/product--10.png",
+      "price": 19,
+      "originalPrice": 38,
+      "weight": "1 kg",
+      "rating": 4.7,
+      "reviews": 204,
+      "category": "শাকসবজি",
+      "subcategory": "মূল জাতীয় সবজি",
+      "tag": "store-19",
+      "description": "প্রতিদিনের রান্নার জন্য উপযুক্ত সোনালী গোল আলু।",
+      "variants": [
+        {
+          "label": "1 kg",
+          "amount": 1,
+          "unit": "kg",
+          "price": 19,
+          "originalPrice": 38
+        }
+      ]
+    },
+    {
+      "id": "steal-9",
+      "name": "টাটকা লাল পেঁয়াজ ভ্যালু ব্যাগ",
+      "image": "/images/products/product14.png",
+      "price": 19,
+      "originalPrice": 45,
+      "weight": "500 g",
+      "rating": 4.5,
+      "reviews": 130,
+      "category": "শাকসবজি",
+      "subcategory": "নিত্যদিনের সবজি",
+      "tag": "store-19",
+      "description": "তরকারি, সালাদ এবং রান্নার জন্য ক্রিস্পি লাল পেঁয়াজ।",
+      "variants": [
+        {
+          "label": "500 g",
+          "amount": 500,
+          "unit": "g",
+          "price": 19,
+          "originalPrice": 45
+        }
+      ]
+    },
+    {
+      "id": "steal-10",
+      "name": "টাটকা রসুন কোয়া",
+      "image": "/images/products/product15.png",
+      "price": 19,
+      "originalPrice": 42,
+      "weight": "200 g",
+      "rating": 4.8,
+      "reviews": 92,
+      "category": "শাকসবজি",
+      "subcategory": "মশলা ও সুগন্ধি",
+      "tag": "store-19",
+      "description": "অর্গানিক খামার থেকে সংগৃহীত সুস্বাদু রসুনের কোয়া।",
+      "variants": [
+        {
+          "label": "200 g",
+          "amount": 200,
+          "unit": "g",
+          "price": 19,
+          "originalPrice": 42
+        }
+      ]
+    },
+    {
+      "id": "steal-11",
+      "name": "জফ সয়া চাঙ্কস - প্রোটিন সমৃদ্ধ",
+      "image": "/images/products/product16.png",
+      "price": 29,
+      "originalPrice": 60,
+      "weight": "200 g",
+      "rating": 4.7,
+      "reviews": 175,
+      "category": "স্ন্যাক্স ও মাঞ্চিস",
+      "subcategory": "উদ্ভিজ্জ প্রোটিন",
+      "tag": "store-29",
+      "description": "অত্যন্ত নরম এবং প্রোটিনে ভরপুর ১০০% নিরামিষ সয়া চাঙ্কস।",
+      "variants": [
+        {
+          "label": "200 g",
+          "amount": 200,
+          "unit": "g",
+          "price": 29,
+          "originalPrice": 60
+        }
+      ]
+    },
+    {
+      "id": "steal-12",
+      "name": "ফার্ম ফ্রেশ দুধ পাউচ",
+      "image": "/images/products/product--4.png",
+      "price": 29,
+      "originalPrice": 36,
+      "weight": "500 ml",
+      "rating": 4.9,
+      "reviews": 310,
+      "category": "দুগ্ধজাত ও ডিম",
+      "subcategory": "টাটকা দুধ",
+      "tag": "store-29",
+      "description": "প্রাকৃতিক ক্রিমের সমৃদ্ধ স্বাদযুক্ত পাস্তুরিত পুষ্টিকর গরুর দুধ।",
+      "variants": [
+        {
+          "label": "500 ml",
+          "amount": 500,
+          "unit": "ml",
+          "price": 29,
+          "originalPrice": 36
+        }
+      ]
+    },
+    {
+      "id": "steal-13",
+      "name": "টাটকা কড়াইশুঁটি / সবুজ মটর",
+      "image": "/images/products/product17.png",
+      "price": 29,
+      "originalPrice": 55,
+      "weight": "250 g",
+      "rating": 4.6,
+      "reviews": 84,
+      "category": "শাকসবজি",
+      "subcategory": "মৌসুমি সবজি",
+      "tag": "store-29",
+      "description": "মিষ্টি, নরম এবং বাগান থেকে সংগৃহীত টাটকা সবুজ কড়াইশুঁটি।",
+      "variants": [
+        {
+          "label": "250 g",
+          "amount": 250,
+          "unit": "g",
+          "price": 29,
+          "originalPrice": 55
+        }
+      ]
+    },
+    {
+      "id": "steal-14",
+      "name": "টাটকা দই কাপ",
+      "image": "/images/products/product18.png",
+      "price": 29,
+      "originalPrice": 40,
+      "weight": "400 g",
+      "rating": 4.8,
+      "reviews": 160,
+      "category": "দুগ্ধজাত ও ডিম",
+      "subcategory": "দই ও ইয়োগার্ট",
+      "tag": "store-29",
+      "description": "ঘন, ক্রিমি এবং প্রাকৃতিকভাবে তৈরি প্রোবায়োটিক দই।",
+      "variants": [
+        {
+          "label": "400 g",
+          "amount": 400,
+          "unit": "g",
+          "price": 29,
+          "originalPrice": 40
+        }
+      ]
+    },
+    {
+      "id": "steal-15",
+      "name": "রেড বুল এনার্জি ড্রিংক",
+      "image": "/images/products/product--9.png",
+      "price": 399,
+      "originalPrice": 480,
+      "weight": "4 x 250 ml",
+      "rating": 4.9,
+      "reviews": 280,
+      "category": "কোল্ড ড্রিংকস ও জুস",
+      "subcategory": "এনার্জি ড্রিংকস",
+      "tag": "trending",
+      "description": "প্রিমিয়াম এনার্জি ব্লেন্ড যা শরীর ও মনকে করে সতেজ।",
+      "variants": [
+        {
+          "label": "4 x 250 ml",
+          "amount": 4,
+          "unit": "pack",
+          "price": 399,
+          "originalPrice": 480
+        }
+      ]
+    },
+    {
+      "id": "steal-16",
+      "name": "ক্রিস্পি রয়্যাল গালা আপেল",
+      "image": "/images/products/product--5.png",
+      "price": 79,
+      "originalPrice": 120,
+      "weight": "500 g",
+      "rating": 4.8,
+      "reviews": 195,
+      "category": "ফলমূল",
+      "subcategory": "আপেল ও নাশপাতি",
+      "tag": "trending",
+      "description": "পাহাড় থেকে সরাসরি তোলা মিষ্টি, মুচমুচে টাটকা আপেল।",
+      "variants": [
+        {
+          "label": "500 g",
+          "amount": 500,
+          "unit": "g",
+          "price": 79,
+          "originalPrice": 120
+        }
+      ]
+    }
+  ]
+}

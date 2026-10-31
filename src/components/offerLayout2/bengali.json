@@ -1,0 +1,37 @@
+{
+  "language": "bn",
+  "badge": "ফার্ম ফ্রেশ",
+  "heroTitle": "খামার থেকে",
+  "heroHighlight": " আপনার ঘরে",
+  "heroDescription": "টাটকা। প্রাকৃতিক। পুষ্টিকর।",
+  "heroButton": "এখনই অর্ডার করুন",
+  "farmNote": "সরাসরি",
+  "farmHighlight": "খামার থেকে আপনার কাছে",
+  "heading": "আজকের ফ্রেশ কালেকশন",
+  "description": "বিশেষ মূল্যে সংগৃহীত তাজা ও সেরা পণ্য",
+  "viewAll": "সব দেখুন",
+  "shopNow": "এখনই কিনুন",
+  "fresh": "টাটকা ",
+  "upTo": "সর্বোচ্চ",
+  "off": "ছাড়",
+  "whyHeading": "কেন তাজা পণ্য বেছে নেবেন?",
+  "background": "/images/offer2Background.webp",
+  "categories": [
+    { "id": "vegetables", "name": "শাকসবজি", "image": "/images/category/category2.webp", "discount": 30, "theme": "green" },
+    { "id": "fruits", "name": "ফলমূল", "image": "/images/category/category3.webp", "discount": 25, "theme": "yellow" },
+    { "id": "meat", "name": "মাংস ও পোল্ট্রি", "image": "/images/category/category5.webp", "discount": 20, "theme": "pink" },
+    { "id": "fish", "name": "মাছ ও সামুদ্রিক খাবার", "image": "/images/category/category1.png", "discount": 18, "theme": "blue" }
+  ],
+  "benefits": [
+    { "icon": "leaf", "title": "ফার্ম ফ্রেশ", "description": "সরাসরি খামার থেকে" },
+    { "icon": "shield", "title": "স্বাস্থ্যকর", "description": "ও সুরক্ষিত" },
+    { "icon": "truck", "title": "দ্রুত", "description": "ডেলিভারি" },
+    { "icon": "leaf", "title": "বিশাল", "description": "সমাহার" }
+  ],
+  "reasons": [
+    { "icon": "leaf", "title": "উন্নত পুষ্টি", "description": "প্রাকৃতিক গুণে ভরপুর", "theme": "green" },
+    { "icon": "heart", "title": "সহায়ক", "description": "স্বাস্থ্যকর জীবনযাপনে", "theme": "orange" },
+    { "icon": "leaf", "title": "কৃত্রিম প্রিজারভেটিভ", "description": "সম্পূর্ণ মুক্ত", "theme": "blue" },
+    { "icon": "smile", "title": "টাটকা সংগৃহীত", "description": "প্রতিদিন", "theme": "pink" }
+  ]
+}
