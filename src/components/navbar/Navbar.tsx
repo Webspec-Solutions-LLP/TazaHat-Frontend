@@ -46,6 +46,8 @@ interface NavbarProps {
   onSearch?: (query: string) => void;
   lang?: SupportedLang;
   onLanguageChange?: (lang: SupportedLang) => void;
+  /** the strip under the header (product names drifting past and shortcuts); it sticks with the header */
+  ticker?: React.ReactNode;
 }
 
 export default function Navbar({
@@ -53,6 +55,7 @@ export default function Navbar({
   onSearch,
   lang,
   onLanguageChange,
+  ticker,
 }: NavbarProps) {
   const [currentLang, setCurrentLang] = useState<SupportedLang>(() => {
     if (lang) return lang;
@@ -747,6 +750,7 @@ export default function Navbar({
           </button>
         </nav>
       </div>
+      {ticker}
 
       {isCartOpen && (
         <Cart

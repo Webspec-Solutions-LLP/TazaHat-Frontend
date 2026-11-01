@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Navbar from "@/components/navbar/Navbar";
+import HeaderTicker, { HeaderTickerFallback } from "@/components/navbar/HeaderTicker";
 import Footer from "@/components/footer/Footer";
 import FloatingMessageButton from "@/components/floatingMessage/FloatingMessageButton";
 import BottomNavigation from "@/components/bottomNavigation/BottomNavigation";
@@ -26,7 +28,7 @@ export default async function RootLayout({
       <body className="min-h-screen flex flex-col">
         <CityProvider value={city}>
         <AuthProvider>
-        <Navbar />
+        <Navbar ticker={city ? <Suspense fallback={<HeaderTickerFallback />}><HeaderTicker cityId={city.id} /></Suspense> : null} />
         <main className="flex-1 frontend-layout-main">{children}</main>
         <Footer />
         <FloatingMessageButton />
