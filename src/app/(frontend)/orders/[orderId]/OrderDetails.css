@@ -204,3 +204,5 @@
 .order-item-edit .order-item-remove { border: 1px solid #efc9c5; padding: 0 12px; }
 @media (max-width: 600px) { .order-product-row { grid-template-columns: 64px minmax(0, 1fr) !important; } .order-product-amounts { grid-column: 2; justify-items: start; text-align: left; } }
 .order-edit-bar { margin-bottom: 12px; }
+.order-amount-saved { margin: 8px 0 0; color: #21804d; font-size: 12px; font-weight: 600; text-align: right; }
+.order-amount-paid { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #e1e9f0; }

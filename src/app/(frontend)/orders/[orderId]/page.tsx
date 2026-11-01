@@ -108,6 +108,9 @@ function Details({ reference }: { reference: string }) {
   const estimatedItems = active.reduce((n, i) => n + i.estimatedLinePaisa - i.dressingUnitPaisa * i.quantity, 0);
   const finalItems = active.reduce((n, i) => n + (i.finalLinePaisa ?? i.estimatedLinePaisa) - i.dressingUnitPaisa * i.quantity, 0);
   const due = Math.max(0, t.billTotalPaisa - order.paidPaisa);
+  // fees that were waived or adjusted by the shop: whatever makes the rows add up to the total, so nothing looks unexplained
+  const estOther = t.estimatedTotalPaisa - (estimatedItems + t.cuttingFeePaisa + t.deliveryFeePaisa + t.convenienceFeePaisa + t.deliveryTimeFeePaisa - t.couponDiscountPaisa);
+  const finalOther = t.billTotalPaisa - (finalItems + t.cuttingFeePaisa + t.deliveryFeePaisa + t.convenienceFeePaisa + t.deliveryTimeFeePaisa + t.adjustmentPaisa - t.discountPaisa);
   const row = (label: string, paisa: number, show = true) => (show ? <div key={label}><span>{label}</span><span>{money(paisa)}</span></div> : null);
 
   return (
@@ -159,10 +162,11 @@ function Details({ reference }: { reference: string }) {
               {row("Delivery fee", t.deliveryFeePaisa, t.deliveryFeePaisa > 0)}
               {row("Convenience fee", t.convenienceFeePaisa, t.convenienceFeePaisa > 0)}
               {row("Fast processing charge", t.deliveryTimeFeePaisa, t.deliveryTimeFeePaisa > 0)}
-              {row("You saved", t.discountPaisa, t.discountPaisa > 0)}
               {row("Coupon", -t.couponDiscountPaisa, t.couponDiscountPaisa > 0)}
+              {row("Waived / adjusted", estOther, Math.abs(estOther) >= 1)}
             </div>
             <div className="order-amount-total"><span>Estimated total</span><strong>{money(t.estimatedTotalPaisa)}</strong></div>
+            {t.discountPaisa > 0 && <p className="order-amount-saved">You saved {money(t.discountPaisa)} on this order</p>}
           </section>
           <section className={`order-details-card order-amount-card${billed ? "" : " is-waiting"}`} aria-label="Final amount">
             <h2>Final <small>after packing and weighing</small></h2>
@@ -175,11 +179,11 @@ function Details({ reference }: { reference: string }) {
                   {row("Convenience fee", t.convenienceFeePaisa, t.convenienceFeePaisa > 0)}
                   {row("Fast processing charge", t.deliveryTimeFeePaisa, t.deliveryTimeFeePaisa > 0)}
                   {row("Adjustment", t.adjustmentPaisa, t.adjustmentPaisa !== 0)}
-                  {row("You saved", t.discountPaisa, t.discountPaisa > 0)}
-                  {row("Paid", order.paidPaisa, order.paidPaisa > 0)}
-                  {row("Due", due)}
+                  {row("Discount", -t.discountPaisa, t.discountPaisa > 0)}
+                  {row("Waived / adjusted", finalOther, Math.abs(finalOther) >= 1)}
                 </div>
                 <div className="order-amount-total"><span>Final total</span><strong>{money(t.billTotalPaisa)}</strong></div>
+                <div className="order-amount-rows order-amount-paid">{row("Paid", order.paidPaisa, order.paidPaisa > 0)}{row("Due", due)}</div>
               </>
             ) : (
               <p className="order-amount-wait">{order.status === "CANCELLED" ? "This order was cancelled, so there is no final bill." : "Your final bill is made after your order is packed and weighed. We bill on the actual weight of the products, so it can differ a little from the estimate."}</p>
