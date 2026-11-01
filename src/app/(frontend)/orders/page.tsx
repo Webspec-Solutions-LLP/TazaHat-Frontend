@@ -48,6 +48,26 @@ function MyOrdersContent() {
   }, []);
   useEffect(() => { setOrders(null); void load(1, activeTab); }, [load, activeTab]);
   useEffect(() => { myOrderCountsAction().then(c => c && setCounts(c)); }, []);
+  // the shop changed one of these orders (or one was placed): the loaded pages are read again in place, without a refresh
+  const pageNow = useRef(page); pageNow.current = page;
+  useEffect(() => {
+    const again = async () => {
+      if (activeTab === "refund") return;
+      const ticket = ++asked.current;
+      const all: MyOrder[] = [];
+      let last: Awaited<ReturnType<typeof myOrdersAction>> = null;
+      for (let p = 1; p <= pageNow.current; p++) {
+        last = await myOrdersAction(p, activeTab);
+        if (!last || ticket !== asked.current) return;
+        all.push(...last.orders);
+      }
+      if (!last) return;
+      setOrders(all); setTotal(last.total);
+      void myOrderCountsAction().then(c => c && setCounts(c));
+    };
+    window.addEventListener("tazahat:order-changed", again);
+    return () => window.removeEventListener("tazahat:order-changed", again);
+  }, [activeTab]);
   const list = orders ?? [];
   const filteredOrders = list;
   // the next 30 orders load by themselves when the end of the list comes into view

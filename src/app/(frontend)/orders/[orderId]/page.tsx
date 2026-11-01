@@ -2,7 +2,7 @@
 
 import RequireLogin from "@/components/auth/RequireLogin";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -64,6 +64,22 @@ function Details({ reference }: { reference: string }) {
   }, [notice]);
 
   const refresh = async () => setOrder(await myOrderAction(reference));
+  // the shop changed this order: show it at once (if a dialog is open, when it closes)
+  const dialogOpen = panel || adding || !!editing || !!cancelling;
+  const waitingChange = useRef(false);
+  const dialogRef = useRef(dialogOpen); dialogRef.current = dialogOpen;
+  useEffect(() => {
+    const again = (e: Event) => {
+      const d = (e as CustomEvent<{ id?: string; number?: string }>).detail;
+      if (d?.id !== reference && d?.number !== reference && d?.id !== order?.id) return;
+      if (dialogRef.current) waitingChange.current = true; else void refresh();
+    };
+    window.addEventListener("tazahat:order-changed", again);
+    return () => window.removeEventListener("tazahat:order-changed", again);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reference, order?.id]);
+  useEffect(() => { if (!dialogOpen && waitingChange.current) { waitingChange.current = false; void refresh(); } // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dialogOpen]);
   /** one change to the order; the server prices the whole order again, then the page shows the new state */
   const change = async (edit: OrderEditInput, done?: string): Promise<string | null> => {
     setBusy(true);

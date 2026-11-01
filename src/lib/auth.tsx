@@ -96,8 +96,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     source.onerror = () => setLive(false);
     source.onmessage = (event) => {
       try {
-        const message = JSON.parse(event.data) as { event?: string; notification?: Record<string, unknown> };
+        const message = JSON.parse(event.data) as { event?: string; notification?: Record<string, unknown>; id?: string; number?: string };
         if (message.event === "notification" && message.notification) onLive(message.notification);
+        // an order of this customer changed (the shop updated it, or it was placed elsewhere): My Orders and the open order page read it again
+        else if (message.event === "order") window.dispatchEvent(new CustomEvent("tazahat:order-changed", { detail: message }));
       } catch { /* not for us */ }
     };
     return () => { source.close(); setLive(false); };
