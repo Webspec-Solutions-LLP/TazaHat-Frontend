@@ -870,3 +870,6 @@
 .navbar-notify-head { flex: none; }
 .navbar-notify-viewall { flex: none; margin-top: 4px; padding: 11px; border: 0; border-top: 1px solid #e3edf6; border-radius: 0 0 8px 8px; background: transparent; color: #0b5cad; font: inherit; font-size: 13px; font-weight: 700; text-align: center; cursor: pointer; }
 .navbar-notify-viewall:hover { background: #f1f7fc; }
+
+/* phones: the bell is only its icon (the "Alerts" word stays on desktop and tablet) */
+@media (max-width: 575px) { .navbar-action-item .navbar-action-label.navbar-bell-label { display: none; } }
