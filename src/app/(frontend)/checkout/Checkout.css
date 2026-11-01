@@ -38,9 +38,9 @@
 .checkout-chevron::before { position: absolute; top: 2px; left: 2px; width: 7px; height: 7px; border-right: 1.8px solid currentColor; border-bottom: 1.8px solid currentColor; content: ""; transform: rotate(45deg); }
 .checkout-address-choice.is-open .checkout-chevron { transform: rotate(180deg); }
 .checkout-address-list { display: grid; gap: 4px; margin-top: 7px; padding: 6px; border: 1px solid #d7e8f8; border-radius: 11px; background: #fff; box-shadow: 0 10px 24px #183d5c14; }
-.checkout-address-option { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 10px; border: 0; border-radius: 7px; background: transparent; color: #294766; text-align: left; font-size: 12px; cursor: pointer; }
+.checkout-address-option { display: flex; align-items: center; gap: 6px; width: 100%; padding: 0 6px 0 0; border-radius: 7px; background: transparent; color: #294766; text-align: left; font-size: 12px; }
 .checkout-address-option:hover, .checkout-address-option.selected { background: #f0f8ff; }
-.checkout-address-option > span:last-child { flex: 1; }
+
 .checkout-date-grid { display: grid; grid-auto-columns: 112px; grid-auto-flow: column; grid-template-columns: none; gap: 10px; margin-top: 14px; overflow-x: auto; overscroll-behavior-x: contain; padding: 2px 1px 6px; scroll-snap-type: x proximity; scrollbar-width: none; -ms-overflow-style: none; -webkit-overflow-scrolling: touch; }
 .checkout-date-grid::-webkit-scrollbar { display: none; }
 .checkout-date { position: relative; display: flex; width: 112px; min-height: 82px; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border: 1px solid #d1e0ef; border-radius: 8px; background: linear-gradient(#fff, #f4f9fd); color: #123b6d; cursor: pointer; scroll-snap-align: start; transition: border-color .18s ease, background .18s ease, transform .18s ease; }
@@ -236,3 +236,16 @@
 .checkout-price-rows.is-updating { opacity: .6; transition: opacity .15s; }
 .checkout-proceed:disabled { opacity: .55; cursor: not-allowed; }
 .checkout-address-option strong { font-weight: 700; }
+
+/* address list: pick area + edit icon, city in bold at the end, other cities dimmed below */
+.checkout-address-pick { display: flex; flex: 1; align-items: center; gap: 12px; min-width: 0; padding: 11px 10px; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.checkout-address-edit { display: grid; flex: 0 0 32px; width: 32px; height: 32px; place-items: center; border: 1px solid #cfe3f6; border-radius: 8px; background: #fff; color: #1683f8; cursor: pointer; }
+.checkout-address-edit:hover { background: #eaf5ff; border-color: #1683f8; }
+.checkout-address-city { font-weight: 800; color: #0b3d75; }
+.checkout-address-option.other-city .checkout-address-pick { opacity: .7; }
+
+/* payment: the online button is wider so its "Coming soon" tag fits, both stretch with the row */
+.checkout-payment-options { flex-wrap: wrap; }
+.checkout-payment-options .checkout-choice { width: auto; flex: 1 1 200px; max-width: 320px; }
+.checkout-payment-options .checkout-choice.is-disabled { flex: 1.5 1 280px; max-width: 420px; }
+@media (max-width: 800px) { .checkout-payment-options .checkout-choice, .checkout-payment-options .checkout-choice.is-disabled { width: auto; flex: 1 1 100%; max-width: none; } }

@@ -6,6 +6,8 @@ import { userApi } from "@/lib/server/session";
 /** Checkout: what the city offers (dates, time slots, pickup stores, payment choices) and the server's price for the cart. Prices are never computed in the browser. */
 
 export interface CheckoutOptions {
+  /** the city the customer is shopping in (the cookie): its addresses are listed first */
+  cityId?: string;
   dates: { date: string; label: string; short: string }[];
   slots: { id: string; name: string; time: string | null; chargePaisa: number }[];
   pickupStores: { id: string; name: string; areaName: string | null; pincode: string | null; phone: string }[];
@@ -27,7 +29,7 @@ export async function checkoutOptionsAction(): Promise<CheckoutOptions | null> {
   const city = await readCityCookie();
   if (!city) return null;
   const res = await userApi<CheckoutOptions>(`/checkout/options?cityId=${encodeURIComponent(city.id)}`);
-  return res.ok ? res.data : null;
+  return res.ok ? { ...res.data, cityId: city.id } : null;
 }
 
 export async function checkoutQuoteAction(input: CheckoutQuoteInput): Promise<{ ok: true; quote: CheckoutQuote } | { ok: false; error: string }> {

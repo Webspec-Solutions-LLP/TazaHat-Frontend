@@ -2,7 +2,7 @@
 
 import RequireLogin from "@/components/auth/RequireLogin";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Address, { type AddressFormValues } from "@/components/modals/address/Address";
@@ -14,8 +14,15 @@ import "./Checkout.css";
 
 const CART_STORAGE_KEY = "tazahat-cart-v1";
 const money = (paisa: number) => `₹${(paisa / 100).toFixed(2)}`;
-const addressText = (a: SavedAddress) =>
-  [a.label ? `${a.label} :` : "", [a.contactName, a.apartmentNumber, a.line1, a.line2, a.landmark, a.locality, a.cityName, a.pincode].filter(Boolean).join(", ")].filter(Boolean).join(" ");
+/** the address as one line; the city comes last, in bold */
+function AddressLine({ a }: { a: SavedAddress }) {
+  const text = [a.contactName, a.apartmentNumber, a.line1, a.line2, a.landmark, a.locality, a.pincode].filter(Boolean).join(", ");
+  return <>{a.label ? `${a.label} : ` : ""}{text}{a.cityName && <>, <b className="checkout-address-city">{a.cityName}</b></>}</>;
+}
+const toFormValues = (a: SavedAddress): AddressFormValues => ({
+  addressType: a.label ?? "", recipient: a.contactName, phone: a.phone, alternatePhone: a.altPhone ?? "", locality: a.locality ?? "", addressLine1: a.line1,
+  addressLine2: a.line2 ?? "", houseNumber: a.apartmentNumber ?? "", landmark: a.landmark ?? "", pincode: a.pincode ?? "",
+});
 const dayParts = (iso: string) => {
   const d = new Date(`${iso}T00:00:00Z`);
   return { month: d.toLocaleDateString("en-IN", { month: "long", timeZone: "UTC" }), date: d.getUTCDate(), day: d.toLocaleDateString("en-IN", { weekday: "long", timeZone: "UTC" }) };
@@ -59,6 +66,7 @@ function CheckoutContent() {
   const [useWallet, setUseWallet] = useState(false);
   const [isAddressListOpen, setIsAddressListOpen] = useState(false);
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+  const [editing, setEditing] = useState<SavedAddress | null>(null);
   const [coupon, setCoupon] = useState("");
   const [couponMessage, setCouponMessage] = useState("");
   const [placeMessage, setPlaceMessage] = useState("");
@@ -97,16 +105,31 @@ function CheckoutContent() {
   }, [linesKey, deliveryType, addressId, slotId, useWallet]);
 
   const saveAddress = useCallback(async (values: AddressFormValues) => {
+    const editId = editing?.id;
     const res = await saveAddressAction({
       label: values.addressType, contactName: values.recipient, phone: values.phone, altPhone: values.alternatePhone || undefined, line1: values.addressLine1,
       line2: values.addressLine2 || undefined, apartmentNumber: values.houseNumber || undefined, landmark: values.landmark || undefined, locality: values.locality || undefined,
-      pincode: values.pincode, makeDefault: true,
-    });
+      pincode: values.pincode, ...(editId ? {} : { makeDefault: true }),
+    }, editId);
     if (!res.ok) return res.error;
     setAddresses(await listAddressesAction());
+    picked.current = true;
     setAddressId(res.data.id);
     return null;
-  }, []);
+  }, [editing]);
+
+  // the addresses in the city the customer is shopping in come first (that is where this order can be delivered)
+  const shownAddresses = useMemo(() => {
+    const here = (a: SavedAddress) => (a.cityId && options?.cityId ? (a.cityId === options.cityId ? 0 : 1) : 1);
+    return [...(addresses ?? [])].sort((x, y) => here(x) - here(y) || Number(y.isDefault) - Number(x.isDefault));
+  }, [addresses, options?.cityId]);
+
+  // until the customer picks one, the first address of the shopping city (the default one first) is the chosen one
+  const picked = useRef(false);
+  useEffect(() => {
+    if (picked.current || !options || !shownAddresses.length) return;
+    setAddressId(shownAddresses[0].id);
+  }, [shownAddresses, options]);
 
   const selectedAddress = addresses?.find(a => a.id === addressId);
   const itemCount = quote ? quote.lines.filter(l => !l.problem).reduce((n, l) => n + l.quantity, 0) : (cart ?? []).reduce((n, i) => n + i.quantity, 0);
@@ -148,10 +171,13 @@ function CheckoutContent() {
 
           {deliveryType === "HOME_DELIVERY" ? <section className="checkout-section checkout-address">
             <div className="checkout-section-heading"><span className="checkout-icon"><Icon name="pin" /></span><div><h1>Delivery Address <b>*</b></h1><p>Select your delivery address or add a new one</p></div></div>
-            <button className="checkout-add-address" type="button" onClick={() => setIsAddressModalOpen(true)}><span>＋</span> Add Address</button>
+            <button className="checkout-add-address" type="button" onClick={() => { setEditing(null); setIsAddressModalOpen(true); }}><span>＋</span> Add Address</button>
             {addresses === null ? <p className="checkout-empty-items">Loading your addresses…</p> : addresses.length === 0 ? <p className="checkout-empty-items">You have no saved address yet. Add one to get your order delivered.</p> : <>
-              <button className={`checkout-address-choice${isAddressListOpen ? " is-open" : ""}`} type="button" aria-expanded={isAddressListOpen} onClick={() => setIsAddressListOpen(open => !open)}><span className="checkout-radio checked"/><span className="checkout-home-icon">⌂</span><strong>{selectedAddress ? addressText(selectedAddress) : "Select an address"}</strong><span className="checkout-chevron" aria-hidden="true"/></button>
-              {isAddressListOpen && <div className="checkout-address-list" role="listbox" aria-label="Saved delivery addresses">{addresses.map(a => <button key={a.id} type="button" role="option" aria-selected={addressId === a.id} className={`checkout-address-option${addressId === a.id ? " selected" : ""}`} onClick={() => { setAddressId(a.id); setIsAddressListOpen(false); }}><span className={`checkout-radio${addressId === a.id ? " checked" : ""}`}/><span>{addressText(a)}</span></button>)}</div>}
+              <button className={`checkout-address-choice${isAddressListOpen ? " is-open" : ""}`} type="button" aria-expanded={isAddressListOpen} onClick={() => setIsAddressListOpen(open => !open)}><span className="checkout-radio checked"/><span className="checkout-home-icon">⌂</span><strong>{selectedAddress ? <AddressLine a={selectedAddress} /> : "Select an address"}</strong><span className="checkout-chevron" aria-hidden="true"/></button>
+              {isAddressListOpen && <div className="checkout-address-list" role="listbox" aria-label="Saved delivery addresses">{shownAddresses.map(a => <div key={a.id} role="option" aria-selected={addressId === a.id} className={`checkout-address-option${addressId === a.id ? " selected" : ""}${options?.cityId && a.cityId !== options.cityId ? " other-city" : ""}`}>
+                <button type="button" className="checkout-address-pick" onClick={() => { picked.current = true; setAddressId(a.id); setIsAddressListOpen(false); }}><span className={`checkout-radio${addressId === a.id ? " checked" : ""}`}/><span><AddressLine a={a} /></span></button>
+                <button type="button" className="checkout-address-edit" aria-label={`Edit ${a.label || "address"}`} title="Edit address" onClick={() => { setEditing(a); setIsAddressModalOpen(true); }}><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>
+              </div>)}</div>}
             </>}
           </section> : <section className="checkout-section checkout-address">
             <div className="checkout-section-heading"><span className="checkout-icon"><Icon name="pin" /></span><div><h1>Pick up from our store</h1><p>No delivery fee and no minimum order. Pay when you collect.</p></div></div>
@@ -201,7 +227,7 @@ function CheckoutContent() {
           <div className="checkout-promo-art"><div className="checkout-promo-copy">Fresh<br/>From River<br/>To Your Table</div><Image src="/images/products/product--2.png" alt="Fresh fish" fill sizes="(max-width: 800px) 40vw, 300px"/></div>
         </aside>
       </div>
-      {isAddressModalOpen && <Address onClose={() => setIsAddressModalOpen(false)} onSave={saveAddress} />}
+      {isAddressModalOpen && <Address key={editing?.id ?? "new"} initialValues={editing ? toFormValues(editing) : undefined} onClose={() => { setIsAddressModalOpen(false); setEditing(null); }} onSave={saveAddress} />}
     </main>
   );
 }
