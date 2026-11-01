@@ -2,26 +2,15 @@
 
 import RequireLogin from "@/components/auth/RequireLogin";
 
-import Link from "next/link";
-import { useState } from "react";
-import orderData from "./orderData.json";
+import { useCallback, useEffect, useState } from "react";
+import { myOrdersAction, type MyOrder } from "@/app/checkout-actions";
 import "./MyOrders.css";
 
 type OrderStatus = "upcoming" | "complete" | "cancel" | "refund";
-const orders = orderData.orders;
-const money = new Intl.NumberFormat("en-IN", {
-  style: "currency",
-  currency: "INR",
-  maximumFractionDigits: 0,
-});
-
-function getOrderItemCount(order: (typeof orders)[number]) {
-  return order.products.reduce((count, product) => count + product.quantity, 0);
-}
-
-function getOrderTotal(order: (typeof orders)[number]) {
-  return order.products.reduce((total, product) => total + product.quantity * product.price, 0);
-}
+const money = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 2 });
+const tabOf = (o: MyOrder): OrderStatus => (o.status === "DELIVERED" ? "complete" : o.status === "CANCELLED" ? "cancel" : "upcoming");
+const STATUS_TEXT: Record<MyOrder["status"], string> = { PENDING: "Order placed", IN_PROGRESS: "In progress", PROCESSING: "Processing", PACKAGING: "Packing", OUT_FOR_DELIVERY: "Out for delivery", DELIVERED: "Delivered", CANCELLED: "Cancelled" };
+const dateText = (iso: string) => new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric", timeZone: "Asia/Kolkata" });
 
 type OrderTab = "all" | OrderStatus;
 
@@ -35,10 +24,36 @@ const tabs: { id: OrderTab; label: string }[] = [
 
 function MyOrdersContent() {
   const [activeTab, setActiveTab] = useState<OrderTab>("all");
-  const filteredOrders = orders.filter(order => activeTab === "all" || order.status === activeTab);
+  const [orders, setOrders] = useState<MyOrder[] | null>(null);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const load = useCallback(async (next: number) => {
+    const res = await myOrdersAction(next);
+    if (!res) { setOrders(current => current ?? []); return; }
+    setTotal(res.total);
+    setPage(res.page);
+    setOrders(current => (next === 1 ? res.orders : [...(current ?? []), ...res.orders]));
+  }, []);
+  useEffect(() => { void load(1); }, [load]);
+  // a message left by the page we came from (the order was placed)
+  const [flash, setFlash] = useState("");
+  useEffect(() => {
+    try {
+      const text = window.sessionStorage.getItem("tazahat-flash");
+      if (!text) return;
+      window.sessionStorage.removeItem("tazahat-flash");
+      setFlash(text);
+      const t = window.setTimeout(() => setFlash(""), 4500);
+      return () => window.clearTimeout(t);
+    } catch { /* no storage: no message */ }
+  }, []);
+  const list = orders ?? [];
+  const filteredOrders = list.filter(order => activeTab === "all" || tabOf(order) === activeTab);
 
   return (
     <main className="my-orders-page">
+      {flash && <div className="my-orders-flash" role="status">{flash}</div>}
       <div className="my-orders-container">
         <header className="my-orders-heading">
           <span className="my-orders-heading-icon" aria-hidden="true">
@@ -52,9 +67,7 @@ function MyOrdersContent() {
 
         <div className="my-orders-tabs" role="tablist" aria-label="Filter orders by status">
           {tabs.map(tab => {
-            const count = tab.id === "all"
-              ? orders.length
-              : orders.filter(order => order.status === tab.id).length;
+            const count = tab.id === "all" ? list.length : list.filter(order => tabOf(order) === tab.id).length;
             return (
               <button
                 className="my-orders-tab"
@@ -80,44 +93,40 @@ function MyOrdersContent() {
           aria-labelledby={`orders-tab-${activeTab}`}
           aria-live="polite"
         >
-          {filteredOrders.length ? filteredOrders.map(order => {
-            return (
-              <article className="my-order-card" key={order.id}>
-                <div className="my-order-summary">
-                  <div className="my-order-number">
-                    <span>Order ID</span>
-                    <strong>{order.id}</strong>
-                  </div>
-                  <div className="my-order-date">
-                    <span>Order date</span>
-                    <strong>{order.date}</strong>
-                  </div>
-                  <div className="my-order-quantity">
-                    <span>Items</span>
-                    <strong>{getOrderItemCount(order)} {getOrderItemCount(order) === 1 ? "item" : "items"}</strong>
-                  </div>
-                  <div className="my-order-total">
-                    <span>Order total</span>
-                    <strong>{money.format(getOrderTotal(order))}</strong>
-                  </div>
-                  <span className={`my-order-status my-order-status--${order.status}`}>
-                    <span aria-hidden="true" />
-                    {order.status}
-                  </span>
-                  <Link
-                    className="my-order-details-button"
-                    href={`/myOrders/orderDetails?orderId=${encodeURIComponent(order.id)}`}
-                  >
-                    View order
-                  </Link>
+          {orders === null ? <div className="my-orders-empty"><p>Loading your orders…</p></div> : filteredOrders.length ? filteredOrders.map(order => (
+            <article className="my-order-card" key={order.id}>
+              <div className="my-order-summary">
+                <div className="my-order-number">
+                  <span>Order ID</span>
+                  <strong>{order.orderNumber}</strong>
                 </div>
-              </article>
-            );
-          }) : (
+                <div className="my-order-date">
+                  <span>Order date</span>
+                  <strong>{dateText(order.placedAt)}</strong>
+                </div>
+                <div className="my-order-quantity">
+                  <span>{order.deliveryType === "STORE_PICKUP" ? "Pickup" : "Delivery"}</span>
+                  <strong>{dateText(order.deliveryDate)}</strong>
+                </div>
+                <div className="my-order-total">
+                  <span>Order total</span>
+                  <strong>{money.format((order.billTotalPaisa || order.estimatedTotalPaisa) / 100)}</strong>
+                </div>
+                <span className={`my-order-status my-order-status--${tabOf(order)}`}>
+                  <span aria-hidden="true" />
+                  {STATUS_TEXT[order.status]}
+                </span>
+              </div>
+              <p className="my-order-items-line">{order.totalItem} {order.totalItem === 1 ? "item" : "items"}: {order.preview.map(p => p.name).join(", ")}{order.totalItem > order.preview.length ? "…" : ""}</p>
+            </article>
+          )) : (
             <div className="my-orders-empty">
-              <h2>No {activeTab} orders yet</h2>
+              <h2>No {activeTab === "all" ? "" : `${activeTab} `}orders yet</h2>
               <p>Your orders in this category will show up here.</p>
             </div>
+          )}
+          {orders !== null && list.length < total && (
+            <button type="button" className="my-orders-more" disabled={loadingMore} onClick={async () => { setLoadingMore(true); await load(page + 1); setLoadingMore(false); }}>{loadingMore ? "Loading…" : "Load more orders"}</button>
           )}
         </section>
       </div>

@@ -15,7 +15,10 @@ export interface CheckoutOptions {
   walletBalancePaisa: number;
 }
 export interface CheckoutLineInput { variantId: string; cuttingTypeId?: string | null; quantity: number; instruction?: string | null }
-export interface CheckoutQuoteInput { lines: CheckoutLineInput[]; deliveryType: "HOME_DELIVERY" | "STORE_PICKUP"; addressId?: string | null; slotId?: string | null; useWallet?: boolean }
+export interface CheckoutQuoteInput { lines: CheckoutLineInput[]; deliveryType: "HOME_DELIVERY" | "STORE_PICKUP"; addressId?: string | null; storeId?: string | null; deliveryDate?: string | null; slotId?: string | null; useWallet?: boolean }
+export type CheckoutPopup =
+  | { type: "availability"; title: string; icon: "warning"; submittable: true; availability: { name: string; date: string | null; notes: string[] }[]; advance: { name: string; date: string; note: string }[] }
+  | { type: "delivery"; title: string; icon: "info" | "success"; submittable: boolean; message: string };
 export interface QuoteLine {
   variantId: string; cuttingTypeId: string | null; quantity: number; instruction: string | null; name: string; slug: string | null; image: string | null;
   packLabel: string | null; grams: number | null; dressingName: string | null; unitPaisa: number; mrpUnitPaisa: number; dressingUnitPaisa: number; linePaisa: number; problem: string | null;
@@ -23,6 +26,8 @@ export interface QuoteLine {
 export interface CheckoutQuote {
   lines: QuoteLine[]; itemsPaisa: number; dressingPaisa: number; discountPaisa: number; deliveryPaisa: number; convenienceFeePaisa: number; slotFeePaisa: number;
   totalPaisa: number; walletBalancePaisa: number; walletUsedPaisa: number; payablePaisa: number; blockers: string[]; notes: string[];
+  slot: { id: string; name: string; time: string | null; chargePaisa: number } | null;
+  popup: CheckoutPopup | null; today: { isToday: boolean; processingHours: number };
 }
 
 export async function checkoutOptionsAction(): Promise<CheckoutOptions | null> {
@@ -32,17 +37,45 @@ export async function checkoutOptionsAction(): Promise<CheckoutOptions | null> {
   return res.ok ? { ...res.data, cityId: city.id } : null;
 }
 
-export async function checkoutQuoteAction(input: CheckoutQuoteInput): Promise<{ ok: true; quote: CheckoutQuote } | { ok: false; error: string }> {
-  const city = await readCityCookie();
-  if (!city) return { ok: false, error: "Choose your delivery city first." };
+/** what the order API is sent: the cart's lines and the choices made on the page (never prices) */
+function orderBody(cityId: string, input: CheckoutQuoteInput) {
   const lines = (Array.isArray(input.lines) ? input.lines : []).slice(0, 100).map((l) => ({
     variantId: String(l.variantId).slice(0, 60), cuttingTypeId: l.cuttingTypeId ? String(l.cuttingTypeId).slice(0, 60) : null,
     quantity: Math.max(1, Math.min(99, Math.floor(Number(l.quantity)) || 1)), instruction: l.instruction ? String(l.instruction).slice(0, 200) : null,
   }));
-  if (!lines.length) return { ok: false, error: "Your cart is empty." };
-  const res = await userApi<CheckoutQuote>("/checkout/quote", {
-    method: "POST",
-    body: { cityId: city.id, lines, deliveryType: input.deliveryType === "STORE_PICKUP" ? "STORE_PICKUP" : "HOME_DELIVERY", addressId: input.addressId ?? null, slotId: input.slotId ?? null, useWallet: !!input.useWallet },
-  });
+  return {
+    cityId, lines, deliveryType: input.deliveryType === "STORE_PICKUP" ? "STORE_PICKUP" : "HOME_DELIVERY", addressId: input.addressId ?? null, storeId: input.storeId ?? null,
+    deliveryDate: /^\d{4}-\d{2}-\d{2}$/.test(input.deliveryDate ?? "") ? input.deliveryDate : null, slotId: input.slotId ?? null, useWallet: !!input.useWallet,
+  };
+}
+
+export async function checkoutQuoteAction(input: CheckoutQuoteInput): Promise<{ ok: true; quote: CheckoutQuote } | { ok: false; error: string }> {
+  const city = await readCityCookie();
+  if (!city) return { ok: false, error: "Choose your delivery city first." };
+  const body = orderBody(city.id, input);
+  if (!body.lines.length) return { ok: false, error: "Your cart is empty." };
+  const res = await userApi<CheckoutQuote>("/checkout/quote", { method: "POST", body });
   return res.ok ? { ok: true, quote: res.data } : { ok: false, error: res.message };
+}
+
+/** Sends the order. The server prices it again and refuses anything the page should not have allowed. */
+export async function placeOrderAction(input: CheckoutQuoteInput & { paymentMethod: "COD" | "ONLINE" }): Promise<{ ok: true; orderNumber: string } | { ok: false; error: string }> {
+  const city = await readCityCookie();
+  if (!city) return { ok: false, error: "Choose your delivery city first." };
+  const body = orderBody(city.id, input);
+  if (!body.lines.length) return { ok: false, error: "Your cart is empty." };
+  const res = await userApi<{ orderNumber: string }>("/orders", { method: "POST", body: { ...body, paymentMethod: input.paymentMethod === "ONLINE" ? "ONLINE" : "COD" } });
+  return res.ok ? { ok: true, orderNumber: res.data.orderNumber } : { ok: false, error: res.message };
+}
+
+export interface MyOrder {
+  id: string; orderNumber: string; status: "PENDING" | "IN_PROGRESS" | "PROCESSING" | "PACKAGING" | "OUT_FOR_DELIVERY" | "DELIVERED" | "CANCELLED";
+  placedAt: string; deliveryDate: string; deliverySlotName: string | null; deliverySlotLabel: string | null; deliveryType: string; paymentMethod: string;
+  totalItem: number; estimatedTotalPaisa: number; billTotalPaisa: number; preview: { name: string; image: string | null }[];
+}
+
+/** the signed-in customer's orders, newest first (30 at a time) */
+export async function myOrdersAction(page = 1): Promise<{ orders: MyOrder[]; total: number; page: number; limit: number } | null> {
+  const res = await userApi<{ orders: MyOrder[]; total: number; page: number; limit: number }>(`/orders?page=${Math.max(1, Math.floor(page) || 1)}&limit=30`);
+  return res.ok ? res.data : null;
 }

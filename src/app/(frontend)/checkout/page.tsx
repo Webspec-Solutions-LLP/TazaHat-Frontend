@@ -5,9 +5,11 @@ import RequireLogin from "@/components/auth/RequireLogin";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import CheckoutDialog, { type DialogSpec } from "@/components/checkout/CheckoutDialog";
 import Address, { type AddressFormValues } from "@/components/modals/address/Address";
 import { listAddressesAction, saveAddressAction, type SavedAddress } from "@/app/address-actions";
-import { checkoutOptionsAction, checkoutQuoteAction, type CheckoutOptions, type CheckoutQuote } from "@/app/checkout-actions";
+import { checkoutOptionsAction, checkoutQuoteAction, placeOrderAction, type CheckoutOptions, type CheckoutPopup, type CheckoutQuote } from "@/app/checkout-actions";
 import type { CartItem } from "@/components/modals/cart/Cart";
 import { fallbackImage, isRemoteImage } from "@/lib/api";
 import "./Checkout.css";
@@ -51,7 +53,26 @@ function Icon({ name }: { name: string }) {
   return <svg {...common}>{paths[name] ?? paths.box}</svg>;
 }
 
+/** the cart is the browser's: write it and tell the header (same tab) to read it again */
+const writeCart = (items: CartItem[]) => {
+  try { window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items)); } catch { /* private mode */ }
+  window.dispatchEvent(new StorageEvent("storage", { key: CART_STORAGE_KEY }));
+};
+const longDate = (iso: string) => new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric", weekday: "long", timeZone: "UTC" });
+
 function CheckoutContent() {
+  const router = useRouter();
+  const [toast, setToast] = useState<{ text: string; tone: "error" | "success" } | null>(null);
+  const [dialog, setDialog] = useState<DialogSpec | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [storeId, setStoreId] = useState("");
+  const showToast = useCallback((text: string, tone: "error" | "success" = "error") => setToast({ text, tone }), []);
+  useEffect(() => {
+    if (!toast) return;
+    const t = window.setTimeout(() => setToast(null), 4200);
+    return () => window.clearTimeout(t);
+  }, [toast]);
+
   const [cart, setCart] = useState<CartItem[] | null>(null);
   const [options, setOptions] = useState<CheckoutOptions | null>(null);
   const [addresses, setAddresses] = useState<SavedAddress[] | null>(null);
@@ -69,7 +90,6 @@ function CheckoutContent() {
   const [editing, setEditing] = useState<SavedAddress | null>(null);
   const [coupon, setCoupon] = useState("");
   const [couponMessage, setCouponMessage] = useState("");
-  const [placeMessage, setPlaceMessage] = useState("");
 
   // the cart is the browser's own (the same one the cart sidebar shows); the address book and the city's choices come from the server
   useEffect(() => {
@@ -79,6 +99,7 @@ function CheckoutContent() {
       if (o) {
         setDate(current => current || o.dates[0]?.date || "");
         setSlotId(current => current || o.slots.find(s => s.chargePaisa === 0)?.id || o.slots[0]?.id || "");
+        setStoreId(current => current || o.pickupStores[0]?.id || "");
       }
     });
     listAddressesAction().then(list => {
@@ -95,14 +116,14 @@ function CheckoutContent() {
     if (!lines.length) { setQuote(null); return; }
     let cancelled = false;
     setQuoting(true);
-    checkoutQuoteAction({ lines, deliveryType, addressId: deliveryType === "HOME_DELIVERY" ? addressId || null : null, slotId: slotId || null, useWallet }).then(res => {
+    checkoutQuoteAction({ lines, deliveryType, addressId: deliveryType === "HOME_DELIVERY" ? addressId || null : null, storeId: deliveryType === "STORE_PICKUP" ? storeId || null : null, deliveryDate: date || null, slotId: slotId || null, useWallet }).then(res => {
       if (cancelled) return;
       setQuoting(false);
       if (res.ok) { setQuote(res.quote); setQuoteError(""); } else setQuoteError(res.error);
     });
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [linesKey, deliveryType, addressId, slotId, useWallet]);
+  }, [linesKey, deliveryType, addressId, storeId, date, slotId, useWallet]);
 
   const saveAddress = useCallback(async (values: AddressFormValues) => {
     const editId = editing?.id;
@@ -131,13 +152,82 @@ function CheckoutContent() {
     setAddressId(shownAddresses[0].id);
   }, [shownAddresses, options]);
 
+  const updateCart = (next: CartItem[]) => { setCart(next); writeCart(next); };
+  const changeQuantity = (variantId: string, cuttingTypeId: string | null, delta: number) =>
+    updateCart((cart ?? []).map(i => (i.variantId === variantId && (i.cuttingTypeId ?? null) === cuttingTypeId ? { ...i, quantity: Math.max(1, Math.min(99, i.quantity + delta)) } : i)));
+  const removeLine = (variantId: string, cuttingTypeId: string | null) =>
+    updateCart((cart ?? []).filter(i => !(i.variantId === variantId && (i.cuttingTypeId ?? null) === cuttingTypeId)));
+
   const selectedAddress = addresses?.find(a => a.id === addressId);
   const itemCount = quote ? quote.lines.filter(l => !l.problem).reduce((n, l) => n + l.quantity, 0) : (cart ?? []).reduce((n, i) => n + i.quantity, 0);
-  const missing: string[] = [];
-  if (!date) missing.push("Choose a delivery date.");
-  if (!slotId) missing.push("Choose a delivery time.");
-  const blockers = [...(quote?.blockers ?? []), ...missing];
-  const canPlace = !!quote && !quoting && blockers.length === 0;
+  const blockers = quote?.blockers ?? [];
+  // the minimum-order message is put as a pop-up when the button is pressed, like the old site; the other problems stay on the page
+  const showBlockers = quote?.popup && !quote.popup.submittable ? [] : blockers;
+  const goShopping = () => router.push("/products");
+
+  const submit = async () => {
+    if (submitting) return;
+    setSubmitting(true);
+    const res = await placeOrderAction({ lines, deliveryType, addressId: deliveryType === "HOME_DELIVERY" ? addressId || null : null, storeId: deliveryType === "STORE_PICKUP" ? storeId || null : null, deliveryDate: date, slotId, useWallet, paymentMethod: payment });
+    if (!res.ok) { setSubmitting(false); showToast(`Error: ${res.error}`); return; }
+    writeCart([]);
+    try { window.sessionStorage.setItem("tazahat-flash", "Order Submit Successfully."); } catch { /* shown only when storage works */ }
+    router.push("/myOrders");
+  };
+
+  /** the server's question (availability alert / delivery fee information / free delivery), then the order goes */
+  const askPopup = (popup: CheckoutPopup) => {
+    if (popup.type === "availability") {
+      setDialog({
+        title: popup.title, icon: popup.icon, onClose: () => undefined,
+        body: <>
+          <p>Seems some of your selected items might not be available per your selected delivery date/time.</p>
+          <p>You can replace/remove the items listed below or change the delivery date/time. Or you can still submit without any change and we can deliver as per your preferred time but few item(s) might not be available as we would be waiting for the stock.</p>
+          {popup.availability.length > 0 && <><h3>Products available for selected delivery date/time:</h3><ol>{popup.availability.map(a => <li key={a.name}><strong>{a.name}</strong>: <span>{a.date ?? ""}{a.notes.length ? ` (${a.notes.join("; ")})` : ""}</span></li>)}</ol></>}
+          {popup.advance.length > 0 && <><h3>Products need advance order:</h3><ol>{popup.advance.map(a => <li key={a.name}><strong>{a.name}</strong>: <span>{a.date} ({a.note})</span></li>)}</ol></>}
+        </>,
+        buttons: [
+          { label: "Continue Without Any Change", tone: "primary", onClick: submit },
+          { label: "Edit Order", tone: "success", onClick: goShopping },
+          { label: "Change Service Date", tone: "plain", onClick: () => document.querySelector(".checkout-date-grid")?.scrollIntoView({ behavior: "smooth", block: "center" }) },
+        ],
+      });
+      return;
+    }
+    setDialog({
+      title: popup.title, icon: popup.icon, onClose: () => undefined, body: <p>{popup.message}</p>,
+      buttons: popup.submittable
+        ? [{ label: "Continue Without Any Change", tone: "primary", onClick: submit }, { label: "Add Item", tone: "success", onClick: goShopping }]
+        : [{ label: "Change order details", tone: "primary", onClick: () => { setIsAddressListOpen(true); document.querySelector(".checkout-address")?.scrollIntoView({ behavior: "smooth", block: "center" }); } }, { label: "Add Item", tone: "success", onClick: goShopping }],
+    });
+  };
+
+  const afterToday = () => { if (quote?.popup) askPopup(quote.popup); else void submit(); };
+
+  const proceed = () => {
+    if (!cart?.length) return showToast("Your cart is empty.");
+    if (deliveryType === "HOME_DELIVERY" && !addressId) return showToast("Please select a delivery address.");
+    if (!date) return showToast("Please select a delivery date.");
+    if (!slotId) return showToast("Please select a delivery schedule.");
+    if (!quote || quoting) return showToast("Please wait, we are updating your prices.");
+    if (quote.popup && !quote.popup.submittable) return askPopup(quote.popup);
+    if (blockers.length) return showToast(blockers[0]);
+    if (quote.today.isToday) {
+      const pickup = deliveryType === "STORE_PICKUP";
+      setDialog({
+        title: "Warning Message?", icon: "warning",
+        body: <>
+          <p>Most of our clients prefer to order at-least a day ahead to choose from a wide variety of products.</p>
+          <p>Are you sure, you want the {pickup ? "Pickup" : "Delivery"} <b className="is-today">Today?</b></p>
+          <p><b>{longDate(date)}<br />{quote.slot?.time ?? quote.slot?.name}</b></p>
+          {!pickup && <p>As per your delivery address looks like we might need approx {quote.today.processingHours} hour to process your order. Please Confirm?</p>}
+        </>,
+        buttons: [{ label: "Yes", tone: "success", onClick: afterToday }, { label: "Cancel", tone: "danger", onClick: () => undefined }],
+      });
+      return;
+    }
+    afterToday();
+  };
   const applyCoupon = () => setCouponMessage(coupon.trim() ? "Coupons are not available yet." : "Enter a coupon code to apply.");
   const onlinePay = options?.payments.find(p => p.id === "ONLINE");
   const fee = (paisa: number) => (paisa > 0 ? money(paisa) : "Free");
@@ -156,7 +246,12 @@ function CheckoutContent() {
                 <div className="checkout-product-info"><h3>{item.name}</h3>
                   <p>{[item.packLabel, item.dressingName ? `${item.dressingName}${item.dressingUnitPaisa > 0 ? ` (+${money(item.dressingUnitPaisa)} dressing)` : ""}` : ""].filter(Boolean).join(" · ")}</p>
                   {item.instruction && <p>“{item.instruction}”</p>}
-                  <span>Qty: {item.quantity}</span>
+                  <span className="checkout-qty" role="group" aria-label={`Quantity of ${item.name}`}>
+                    <button type="button" aria-label="Decrease quantity" disabled={item.quantity <= 1} onClick={() => changeQuantity(item.variantId, item.cuttingTypeId, -1)}>−</button>
+                    <b aria-live="polite">{item.quantity}</b>
+                    <button type="button" aria-label="Increase quantity" disabled={item.quantity >= 99} onClick={() => changeQuantity(item.variantId, item.cuttingTypeId, 1)}>+</button>
+                    <button type="button" className="checkout-qty-remove" onClick={() => removeLine(item.variantId, item.cuttingTypeId)}>Remove</button>
+                  </span>
                   {item.problem && <em className="checkout-product-problem">{item.problem} <Link href="/products">Change</Link></em>}</div>
                 <strong className="checkout-product-price">{item.problem ? "—" : money(item.linePaisa)}</strong>
               </article>;
@@ -180,8 +275,8 @@ function CheckoutContent() {
               </div>)}</div>}
             </>}
           </section> : <section className="checkout-section checkout-address">
-            <div className="checkout-section-heading"><span className="checkout-icon"><Icon name="pin" /></span><div><h1>Pick up from our store</h1><p>No delivery fee and no minimum order. Pay when you collect.</p></div></div>
-            {options === null ? null : options.pickupStores.length ? <div className="checkout-address-list" aria-label="Pickup stores">{options.pickupStores.map(st => <div key={st.id} className="checkout-address-option selected"><span className="checkout-radio checked"/><span><strong>{st.name}</strong>{[st.areaName, st.pincode].filter(Boolean).length ? ` — ${[st.areaName, st.pincode].filter(Boolean).join(", ")}` : ""}{st.phone ? ` · ${st.phone}` : ""}</span></div>)}</div> : <p className="checkout-empty-items">We will tell you the pickup address when your order is confirmed.</p>}
+            <div className="checkout-section-heading"><span className="checkout-icon"><Icon name="pin" /></span><div><h1>Pick up from our store</h1><p>No delivery fee and no minimum order. Pay when you collect.{(options?.pickupStores.length ?? 0) > 1 ? " Choose the store you will visit." : ""}</p></div></div>
+            {options === null ? null : options.pickupStores.length ? <div className="checkout-address-list" role="radiogroup" aria-label="Pickup stores">{options.pickupStores.map(st => <div key={st.id} role="radio" aria-checked={storeId === st.id} className={`checkout-address-option${storeId === st.id ? " selected" : ""}`}><button type="button" className="checkout-address-pick" onClick={() => setStoreId(st.id)}><span className={`checkout-radio${storeId === st.id ? " checked" : ""}`}/><span><strong>{st.name}</strong>{[st.areaName, st.pincode].filter(Boolean).length ? ` — ${[st.areaName, st.pincode].filter(Boolean).join(", ")}` : ""}{st.phone ? ` · ${st.phone}` : ""}</span></button></div>)}</div> : <p className="checkout-empty-items">We will tell you the pickup address when your order is confirmed.</p>}
           </section>}
 
           <section className="checkout-section">
@@ -221,12 +316,13 @@ function CheckoutContent() {
           {quote?.notes.map(n => <p className="checkout-hint" key={n}>{n}</p>)}
           <div className="checkout-total"><span>₹</span><strong>{(quote?.walletUsedPaisa ?? 0) > 0 ? "To Pay" : "Total Amount"}</strong><b>{money(quote?.payablePaisa ?? 0)}</b></div>
           {quoteError && <p className="checkout-blocker" role="alert">{quoteError}</p>}
-          {blockers.map(b => <p className="checkout-blocker" role="alert" key={b}>{b}</p>)}
-          <button type="button" className="checkout-proceed" disabled={!canPlace} onClick={() => setPlaceMessage("Your order details are ready. Placing orders is being switched on.")}><span>🛒</span>{quoting ? "UPDATING…" : "PLACE ORDER"}<span>›</span></button>
-          {placeMessage && <p className="checkout-order-message" role="status">{placeMessage}</p>}
+          {showBlockers.map(b => <p className="checkout-blocker" role="alert" key={b}>{b}</p>)}
+          <button type="button" className="checkout-proceed" disabled={quoting || submitting || !cart?.length} onClick={proceed}><span>🛒</span>{submitting ? "PLACING ORDER…" : quoting ? "UPDATING…" : "PLACE ORDER"}<span>›</span></button>
           <div className="checkout-promo-art"><div className="checkout-promo-copy">Fresh<br/>From River<br/>To Your Table</div><Image src="/images/products/product--2.png" alt="Fresh fish" fill sizes="(max-width: 800px) 40vw, 300px"/></div>
         </aside>
       </div>
+      {dialog && <CheckoutDialog spec={dialog} onDismiss={() => setDialog(null)} />}
+      {toast && <div className={`checkout-toast is-${toast.tone}`} role="alert">{toast.text}</div>}
       {isAddressModalOpen && <Address key={editing?.id ?? "new"} initialValues={editing ? toFormValues(editing) : undefined} onClose={() => { setIsAddressModalOpen(false); setEditing(null); }} onSave={saveAddress} />}
     </main>
   );
