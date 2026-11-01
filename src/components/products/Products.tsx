@@ -17,6 +17,7 @@ import { readWishlistIds, subscribeToWishlist, toggleWishlistId } from "../../li
 import { fallbackImage, isRemoteImage } from "../../lib/api";
 import "./Products.css";
 import VariantChips from "@/components/products/VariantChips";
+import { ProductCardSkeleton } from "@/components/skeleton/Skeletons";
 
 const money = new Intl.NumberFormat(text.locale, { style: "currency", currency: text.currency, maximumFractionDigits: 0 });
 interface ProductsProps {
@@ -24,13 +25,17 @@ interface ProductsProps {
   products?: Product[];
   showViewAll?: boolean;
   layout?: "catalog" | "related" | "grid";
+  /** the shelf reached its last card: load more (the home page shelves of upcoming / sold out products add 10 at a time) */
+  onReachEnd?: () => void;
+  /** more cards are on their way: a skeleton column waits at the end */
+  loadingMore?: boolean;
 }
 
 function CartIcon() {
   return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M2 3h2l2.4 12.2a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6L22 8H5" /><circle cx="9" cy="21" r="1" /><circle cx="19" cy="21" r="1" /></svg>;
 }
 
-export default function Products({ heading, products = text.products, showViewAll = true, layout = "catalog" }: ProductsProps) {
+export default function Products({ heading, products = text.products, showViewAll = true, layout = "catalog", onReachEnd, loadingMore = false }: ProductsProps) {
   const [saved, setSaved] = useState<string[]>([]);
   const [selected, setSelected] = useState<Product | null>(null);
   const [variantProduct, setVariantProduct] = useState<Product | null>(null);
@@ -86,8 +91,9 @@ export default function Products({ heading, products = text.products, showViewAl
       <div className="products-container">
         <div className="products-header"><h2 id="products-heading">{sectionHeading}</h2>{showViewAll && <Link href="/products" className="products-view-all">{text.viewAll}</Link>}</div>
         {layout === "grid" ? <div id="products-list" className="products-grid">{products.map(renderProduct)}</div> : <div id="products-list">
-            <Swiper className="products-slider" modules={[A11y, Keyboard, Mousewheel]} slidesPerView={1.7} spaceBetween={8} breakpoints={{ 451: { slidesPerView: 2.1, spaceBetween: 9 }, 576: { slidesPerView: 2.7, spaceBetween: 10 }, 679: { slidesPerView: 3.5, spaceBetween: 10 }, 877: { slidesPerView: 4.5, spaceBetween: 12 }, 1300: { slidesPerView: 5.5, spaceBetween: 12 } }} keyboard={{ enabled: true, onlyInViewport: true }} mousewheel={{ forceToAxis: true }} a11y={{ containerMessage: sliderLabel, slideLabelMessage: text.columnLabel }} tabIndex={0}>
+            <Swiper className="products-slider" modules={[A11y, Keyboard, Mousewheel]} slidesPerView={1.7} spaceBetween={8} breakpoints={{ 451: { slidesPerView: 2.1, spaceBetween: 9 }, 576: { slidesPerView: 2.7, spaceBetween: 10 }, 679: { slidesPerView: 3.5, spaceBetween: 10 }, 877: { slidesPerView: 4.5, spaceBetween: 12 }, 1300: { slidesPerView: 5.5, spaceBetween: 12 } }} keyboard={{ enabled: true, onlyInViewport: true }} mousewheel={{ forceToAxis: true }} a11y={{ containerMessage: sliderLabel, slideLabelMessage: text.columnLabel }} tabIndex={0} onReachEnd={() => onReachEnd?.()} onAfterInit={swiper => { if (swiper.isEnd) onReachEnd?.(); }}>
               {columns.map((column) => <SwiperSlide key={column[0].id}><div className="products-column">{column.map(renderProduct)}</div></SwiperSlide>)}
+              {loadingMore && <SwiperSlide key="loading-more"><div className="products-column" role="status" aria-label="Loading more products"><ProductCardSkeleton /><ProductCardSkeleton /></div></SwiperSlide>}
             </Swiper>
         </div>}
       </div>

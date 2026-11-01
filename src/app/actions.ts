@@ -108,6 +108,22 @@ export async function loadCatalogPageAction(query: CatalogQuery, page: number): 
   }
 }
 
+const SHELF_PAGE_SIZE = 10;
+
+/** The next 10 products of a home page shelf: the ones that start selling on a later day, or the sold out ones. */
+export async function loadAvailabilityAction(kind: "upcoming" | "soldout", page: number): Promise<{ products: Product[]; hasMore: boolean; total: number } | { error: string }> {
+  const city = await readCityCookie();
+  if (!city) return { error: "Choose your delivery city first." };
+  if (kind !== "upcoming" && kind !== "soldout") return { error: "Unknown list." };
+  const p = Math.max(1, Math.floor(Number(page)) || 1);
+  try {
+    const res = await getShopCatalog(city.id, { availability: kind }, p, SHELF_PAGE_SIZE);
+    return { products: res.items.map(cardToProduct), hasMore: res.page * res.limit < res.total, total: res.total };
+  } catch {
+    return { error: "We could not load more products. Please try again." };
+  }
+}
+
 /** Search-as-you-type suggestions for the navbar. */
 export async function searchSuggestionsAction(q: string): Promise<Product[]> {
   const city = await readCityCookie();

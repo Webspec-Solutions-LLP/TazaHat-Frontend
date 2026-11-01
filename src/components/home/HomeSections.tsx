@@ -1,4 +1,5 @@
 import AllProducts from "@/components/home/AllProducts";
+import AvailabilityShelf from "@/components/home/AvailabilityShelf";
 import HomeHero, { type HeroBanner } from "@/components/home/HomeHero";
 import ReloadButton from "@/components/home/ReloadButton";
 import Category, { type CategoryTile } from "@/components/category/Category";
@@ -10,6 +11,7 @@ import OfferLayout4, { type StealTab } from "@/components/offerLayout4/OfferLayo
 import BestSeller, { type BestSellerGroup } from "@/components/bestSeller/BestSeller";
 import { cardToProduct, categoryToItem, mediaSrc, shortName, type ApiCard, type Product } from "@/lib/api";
 import { loadFirstPage, loadHome } from "@/lib/server/home";
+import { getShopCatalog } from "@/lib/server/api";
 
 /**
  * The data-driven parts of the home page. Each one is a server component that waits for the city's data, so the page can show
@@ -71,6 +73,20 @@ export async function MiddleSections({ cityId }: Pick<City, "cityId">) {
       {freshPicks.length > 0 && <OfferLayout2 items={freshPicks} />}
       {dealShelf.length > 0 && <OfferLayout3 products={dealShelf} />}
       {stealPool.length > 0 && <OfferLayout4 products={stealPool} tabs={STEAL_TABS} />}
+    </>
+  );
+}
+
+/** Under the newsletter: products that start selling on a later day, and the ones that are sold out (10 at first, more while scrolling). */
+export async function AvailabilitySections({ cityId }: Pick<City, "cityId">) {
+  const [upcoming, soldout] = await Promise.all(
+    (["upcoming", "soldout"] as const).map((availability) => getShopCatalog(cityId, { availability }, 1, 10).catch(() => null)),
+  );
+  const hasMore = (r: typeof upcoming) => !!r && r.page * r.limit < r.total;
+  return (
+    <>
+      {upcoming && upcoming.items.length > 0 && <AvailabilityShelf kind="upcoming" heading="Upcoming Products" initial={upcoming.items.map(cardToProduct)} hasMore={hasMore(upcoming)} />}
+      {soldout && soldout.items.length > 0 && <AvailabilityShelf kind="soldout" heading="Out of Stock Products" initial={soldout.items.map(cardToProduct)} hasMore={hasMore(soldout)} />}
     </>
   );
 }
