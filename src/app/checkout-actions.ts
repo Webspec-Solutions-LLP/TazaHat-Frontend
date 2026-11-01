@@ -71,12 +71,15 @@ export async function placeOrderAction(input: CheckoutQuoteInput & { paymentMeth
 export interface MyOrder {
   id: string; orderNumber: string; status: "PENDING" | "IN_PROGRESS" | "PROCESSING" | "PACKAGING" | "OUT_FOR_DELIVERY" | "DELIVERED" | "CANCELLED";
   placedAt: string; deliveryDate: string; deliverySlotName: string | null; deliverySlotLabel: string | null; deliveryType: string; paymentMethod: string;
-  totalItem: number; estimatedTotalPaisa: number; billTotalPaisa: number; preview: { name: string; image: string | null }[];
+  totalItem: number; estimatedTotalPaisa: number; billTotalPaisa: number; preview: { name: string; image: string | null; quantity: number; pack: string | null }[];
 }
 
 /** the signed-in customer's orders, newest first (30 at a time) */
-export async function myOrdersAction(page = 1): Promise<{ orders: MyOrder[]; total: number; page: number; limit: number } | null> {
-  const res = await userApi<{ orders: MyOrder[]; total: number; page: number; limit: number }>(`/orders?page=${Math.max(1, Math.floor(page) || 1)}&limit=30`);
+export type OrderGroup = "all" | "upcoming" | "complete" | "cancel";
+
+export async function myOrdersAction(page = 1, group: OrderGroup = "all"): Promise<{ orders: MyOrder[]; total: number; page: number; limit: number } | null> {
+  const g: OrderGroup = group === "upcoming" || group === "complete" || group === "cancel" ? group : "all";
+  const res = await userApi<{ orders: MyOrder[]; total: number; page: number; limit: number }>(`/orders?page=${Math.max(1, Math.floor(page) || 1)}&limit=30&group=${g}`);
   return res.ok ? res.data : null;
 }
 
@@ -91,5 +94,11 @@ export interface MyOrderDetail {
 export async function myOrderAction(ref: string): Promise<MyOrderDetail | null> {
   if (!/^[\w-]{1,60}$/.test(ref)) return null;
   const res = await userApi<MyOrderDetail>(`/orders/${encodeURIComponent(ref)}`);
+  return res.ok ? res.data : null;
+}
+
+/** how many orders the customer has in each tab */
+export async function myOrderCountsAction(): Promise<{ all: number; upcoming: number; complete: number; cancel: number; refund: number } | null> {
+  const res = await userApi<{ all: number; upcoming: number; complete: number; cancel: number; refund: number }>("/orders/counts");
   return res.ok ? res.data : null;
 }

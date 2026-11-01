@@ -3,9 +3,12 @@
 import RequireLogin from "@/components/auth/RequireLogin";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
+import { fallbackImage, isRemoteImage } from "@/lib/api";
 import { STATUS_TEXT, statusGroup } from "@/lib/orderStatus";
-import { myOrdersAction, type MyOrder } from "@/app/checkout-actions";
+import { myOrderCountsAction, myOrdersAction, type MyOrder } from "@/app/checkout-actions";
+import { OrderCardsSkeleton } from "@/components/skeleton/Skeletons";
 import "./MyOrders.css";
 
 type OrderStatus = "upcoming" | "complete" | "cancel" | "refund";
@@ -29,14 +32,24 @@ function MyOrdersContent() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
-  const load = useCallback(async (next: number) => {
-    const res = await myOrdersAction(next);
+  const [counts, setCounts] = useState<Record<OrderTab, number> | null>(null);
+  const asked = useRef(0);
+  // a tab (and its first 30 orders) is asked from the server: the tab counts and the list are the customer's real orders
+  const load = useCallback(async (next: number, tab: OrderTab) => {
+    const ticket = ++asked.current;
+    // nothing is refunded yet: that tab is simply empty
+    if (tab === "refund") { setTotal(0); setPage(1); setOrders([]); return; }
+    const res = await myOrdersAction(next, tab);
+    if (ticket !== asked.current) return;
     if (!res) { setOrders(current => current ?? []); return; }
     setTotal(res.total);
     setPage(res.page);
     setOrders(current => (next === 1 ? res.orders : [...(current ?? []), ...res.orders]));
   }, []);
-  useEffect(() => { void load(1); }, [load]);
+  useEffect(() => { setOrders(null); void load(1, activeTab); }, [load, activeTab]);
+  useEffect(() => { myOrderCountsAction().then(c => c && setCounts(c)); }, []);
+  const list = orders ?? [];
+  const filteredOrders = list;
   // the next 30 orders load by themselves when the end of the list comes into view
   const sentinel = useRef<HTMLDivElement>(null);
   const busy = useRef(false);
@@ -48,13 +61,13 @@ function MyOrdersContent() {
       if (!entries[0].isIntersecting || busy.current) return;
       busy.current = true;
       setLoadingMore(true);
-      await load(page + 1);
+      await load(page + 1, activeTab);
       setLoadingMore(false);
       busy.current = false;
     }, { rootMargin: "300px" });
     watcher.observe(el);
     return () => watcher.disconnect();
-  }, [hasMore, page, load]);
+  }, [hasMore, page, load, activeTab]);
   // a message left by the page we came from (the order was placed)
   const [flash, setFlash] = useState("");
   useEffect(() => {
@@ -67,8 +80,6 @@ function MyOrdersContent() {
       return () => window.clearTimeout(t);
     } catch { /* no storage: no message */ }
   }, []);
-  const list = orders ?? [];
-  const filteredOrders = list.filter(order => activeTab === "all" || tabOf(order) === activeTab);
 
   return (
     <main className="my-orders-page">
@@ -86,7 +97,7 @@ function MyOrdersContent() {
 
         <div className="my-orders-tabs" role="tablist" aria-label="Filter orders by status">
           {tabs.map(tab => {
-            const count = tab.id === "all" ? list.length : list.filter(order => tabOf(order) === tab.id).length;
+            const count = counts ? counts[tab.id] : null;
             return (
               <button
                 className="my-orders-tab"
@@ -99,7 +110,7 @@ function MyOrdersContent() {
                 onClick={() => setActiveTab(tab.id)}
               >
                 {tab.label}
-                <span>{count}</span>
+                <span>{count ?? "–"}</span>
               </button>
             );
           })}
@@ -112,9 +123,9 @@ function MyOrdersContent() {
           aria-labelledby={`orders-tab-${activeTab}`}
           aria-live="polite"
         >
-          {orders === null ? <div className="my-orders-empty"><p>Loading your orders…</p></div> : filteredOrders.length ? filteredOrders.map(order => (
+          {orders === null ? <OrderCardsSkeleton count={4} /> : filteredOrders.length ? filteredOrders.map(order => (
             <article className="my-order-card" key={order.id}>
-              <Link className="my-order-card-link" href={`/myOrders/orderDetails?orderId=${encodeURIComponent(order.orderNumber)}`} aria-label={`View order ${order.orderNumber}`} />
+              <Link className="my-order-card-link" href={`/orders/${encodeURIComponent(order.orderNumber)}`} aria-label={`View order ${order.orderNumber}`} />
               <div className="my-order-summary">
                 <div className="my-order-number">
                   <span>Order ID</span>
@@ -138,7 +149,16 @@ function MyOrdersContent() {
                 </span>
                 <span className="my-order-details-button">View order</span>
               </div>
-              <p className="my-order-items-line">{order.totalItem} {order.totalItem === 1 ? "item" : "items"}: {order.preview.map(p => p.name).join(", ")}{order.totalItem > order.preview.length ? "…" : ""}</p>
+              <ul className="my-order-items" aria-label="Items in this order">
+                {order.preview.map((item, index) => (
+                  <li key={index}>
+                    <span className="my-order-item-image">{item.image && <Image src={item.image} alt="" fill sizes="44px" unoptimized={isRemoteImage(item.image)} onError={fallbackImage} />}</span>
+                    <span className="my-order-item-name">{item.name}</span>
+                    <span className="my-order-item-qty">{[item.pack, `Qty ${item.quantity}`].filter(Boolean).join(" · ")}</span>
+                  </li>
+                ))}
+                {order.totalItem > order.preview.length && <li className="my-order-items-more">+{order.totalItem - order.preview.length} more</li>}
+              </ul>
             </article>
           )) : (
             <div className="my-orders-empty">
@@ -146,7 +166,7 @@ function MyOrdersContent() {
               <p>Your orders in this category will show up here.</p>
             </div>
           )}
-          {hasMore && <div ref={sentinel} className="my-orders-more" role="status">{loadingMore ? "Loading more orders…" : ""}</div>}
+          {hasMore && <div ref={sentinel} className="my-orders-more">{loadingMore ? <OrderCardsSkeleton count={2} label="Loading more orders" /> : null}</div>}
         </section>
       </div>
     </main>

@@ -172,7 +172,7 @@ function CheckoutContent() {
     if (!res.ok) { setSubmitting(false); showToast(`Error: ${res.error}`); return; }
     writeCart([]);
     try { window.sessionStorage.setItem("tazahat-flash", "Order Submit Successfully."); } catch { /* shown only when storage works */ }
-    router.push("/myOrders");
+    router.push("/orders");
   };
 
   /** the server's question (availability alert / delivery fee information / free delivery), then the order goes */

@@ -168,3 +168,13 @@
 .my-order-card-link { position: absolute; inset: 0; z-index: 1; border-radius: inherit; }
 .my-order-card:hover { box-shadow: 0 6px 18px #183d5c14; }
 .my-orders-more { min-height: 28px; margin: 10px auto 0; color: #5a6f85; font-size: 12px; text-align: center; }
+
+/* the items of an order: two of them as a small list, then "+N more" */
+.my-order-items { display: grid; gap: 6px; margin: 0; padding: 12px 20px 14px; border-top: 1px solid #edf1f5; list-style: none; }
+.my-order-items li { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; align-items: center; gap: 12px; }
+.my-order-item-image { position: relative; width: 44px; aspect-ratio: 1; overflow: hidden; border: 1px solid #edf1f4; border-radius: 8px; background: #f7fafc; }
+.my-order-item-image img { object-fit: contain; padding: 3px; }
+.my-order-item-name { overflow: hidden; color: #25445e; font-size: 13px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.my-order-item-qty { color: #6b7f92; font-size: 12px; white-space: nowrap; }
+.my-order-items .my-order-items-more { display: block; padding-left: 56px; color: #087cff; font-size: 12px; font-weight: 700; }
+@media (max-width: 560px) { .my-order-items { padding: 10px 14px 12px; } .my-order-items li { grid-template-columns: 40px minmax(0, 1fr); } .my-order-item-qty { grid-column: 2; } }

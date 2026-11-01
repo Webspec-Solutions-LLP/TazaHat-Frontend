@@ -2,12 +2,13 @@
 
 import RequireLogin from "@/components/auth/RequireLogin";
 
-import { Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { myOrderAction, type MyOrderDetail } from "@/app/checkout-actions";
 import { fallbackImage, isRemoteImage } from "@/lib/api";
+import { OrderDetailsSkeleton } from "@/components/skeleton/Skeletons";
 import { STATUS_TEXT, statusGroup } from "@/lib/orderStatus";
 import "./OrderDetails.css";
 
@@ -34,11 +35,11 @@ function Details({ reference }: { reference: string }) {
     return () => { cancelled = true; };
   }, [reference]);
 
-  if (order === undefined) return <main className="order-details-page"><div className="order-details-container"><p className="order-details-note">Loading your order…</p></div></main>;
+  if (order === undefined) return <main className="order-details-page"><div className="order-details-container"><OrderDetailsSkeleton /></div></main>;
   if (order === null) {
     return (
       <main className="order-details-page"><div className="order-details-container">
-        <div className="order-details-card"><h2>Order not found</h2><p className="order-details-note">We could not find this order in your account.</p><Link className="order-details-back" href="/myOrders">Back to My Orders</Link></div>
+        <div className="order-details-card"><h2>Order not found</h2><p className="order-details-note">We could not find this order in your account.</p><Link className="order-details-back" href="/orders">Back to My Orders</Link></div>
       </div></main>
     );
   }
@@ -136,11 +137,12 @@ function Details({ reference }: { reference: string }) {
 }
 
 function OrderDetailsInner() {
-  const ref = useSearchParams().get("orderId") ?? "";
+  const raw = useParams<{ orderId?: string | string[] }>().orderId;
+  const ref = decodeURIComponent((Array.isArray(raw) ? raw[0] : raw) ?? "");
   return <Details reference={ref} key={ref} />;
 }
 
 /** Needs a login: without one the page asks the visitor to log in. */
 export default function OrderDetailsPage() {
-  return <RequireLogin what="your order"><Suspense fallback={null}><OrderDetailsInner /></Suspense></RequireLogin>;
+  return <RequireLogin what="your order"><OrderDetailsInner /></RequireLogin>;
 }

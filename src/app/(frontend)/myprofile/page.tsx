@@ -8,10 +8,8 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import Products from "@/components/products/Products";
 import Address, { type AddressFormValues } from "@/components/modals/address/Address";
-import orderData from "../myOrders/orderData.json";
+import { myOrderCountsAction } from "@/app/checkout-actions";
 import "./MyProfile.css";
-
-const orders = orderData.orders;
 
 const supportTickets = [
   {
@@ -100,7 +98,7 @@ const stats = [
     id: "total",
     label: "Total orders",
     detail: "View all your orders",
-    count: orders.length,
+    key: "all" as const,
     tone: "blue",
     icon: <><circle cx="12" cy="8" r="3.5" /><path d="M5 20v-1.5a7 7 0 0 1 14 0V20" /></>,
   },
@@ -108,7 +106,7 @@ const stats = [
     id: "delivered",
     label: "Delivered",
     detail: "Orders completed",
-    count: orders.filter((order) => order.status === "complete").length,
+    key: "complete" as const,
     tone: "green",
     icon: <><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z" /><path d="m4.5 7.8 7.5 4.3 7.5-4.3M12 12v8.5" /><path d="m9 12 2 2 4-4" /></>,
   },
@@ -116,7 +114,7 @@ const stats = [
     id: "pending",
     label: "Pending",
     detail: "Orders in process",
-    count: orders.filter((order) => order.status === "upcoming").length,
+    key: "upcoming" as const,
     tone: "amber",
     icon: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
   },
@@ -124,7 +122,7 @@ const stats = [
     id: "cancelled",
     label: "Cancelled",
     detail: "Cancelled orders",
-    count: orders.filter((order) => order.status === "cancel").length,
+    key: "cancel" as const,
     tone: "red",
     icon: <><circle cx="12" cy="12" r="9" /><path d="m9 9 6 6m0-6-6 6" /></>,
   },
@@ -160,6 +158,9 @@ function GroceryIllustration() {
 }
 
 function MyProfileContent() {
+  // the real number of orders in each state (asked from the server)
+  const [orderCounts, setOrderCounts] = useState<Record<"all" | "complete" | "upcoming" | "cancel", number> | null>(null);
+  useEffect(() => { myOrderCountsAction().then(c => c && setOrderCounts(c)); }, []);
   const { products: likedProducts } = useWishlistProducts();
   const [avatarUrl, setAvatarUrl] = useState("");
   const [profile, setProfile] = useState({ name: "Joydeep Barik", email: "customer@tazahat.in", phone: "+91 90000 00000" });
@@ -276,14 +277,14 @@ function MyProfileContent() {
           {stats.map((stat) => (
             <Link
               className={`profile-stat-card profile-stat-card--${stat.tone}`}
-              href="/myOrders"
+              href="/orders"
               key={stat.id}
-              aria-label={`${stat.label}: ${stat.count}. ${stat.detail}`}
+              aria-label={`${stat.label}: ${orderCounts ? orderCounts[stat.key] : "loading"}. ${stat.detail}`}
             >
               <span className="profile-stat-icon"><ProfileIcon>{stat.icon}</ProfileIcon></span>
               <span className="profile-stat-copy">
                 <span>{stat.label}</span>
-                <strong>{stat.count}</strong>
+                <strong>{orderCounts ? orderCounts[stat.key] : <span className="sk" style={{ display: "inline-block", width: 28, height: 20 }} aria-hidden="true" />}</strong>
                 <small>{stat.detail}{stat.id === "total" && <b aria-hidden="true"> →</b>}</small>
               </span>
             </Link>
@@ -293,7 +294,7 @@ function MyProfileContent() {
         <section className="profile-next-step">
           <span className="profile-next-step-icon"><ProfileIcon><path d="M3 7h18v13H3z" /><path d="M3 7 12 2l9 5M8 12h8m-8 4h5" /></ProfileIcon></span>
           <span><strong>Your orders, all in one place</strong><small>Check delivery progress, order history, and more.</small></span>
-          <Link href="/myOrders">View my orders <span aria-hidden="true">→</span></Link>
+          <Link href="/orders">View my orders <span aria-hidden="true">→</span></Link>
         </section>
 
         <section className="profile-addresses" aria-labelledby="profile-addresses-heading">

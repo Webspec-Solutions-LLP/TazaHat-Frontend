@@ -157,3 +157,52 @@ export function SearchSuggestionSkeleton({ rows = 3 }: { rows?: number }) {
     </div>
   );
 }
+
+/** the order list while it loads: cards with the same rows as a real order (summary line + two items) */
+export function OrderCardsSkeleton({ count = 3, label = "Loading your orders" }: { count?: number; label?: string }) {
+  return (
+    <div className="sk-orders" role="status" aria-label={label}>
+      {Array.from({ length: count }, (_, i) => (
+        <div className="sk-order" key={i}>
+          <div className="sk-order-top">
+            <div className="sk-order-field"><span className="sk sk-line sk-line--short" /><span className="sk sk-line sk-order-big" /></div>
+            <div className="sk-order-field"><span className="sk sk-line sk-line--short" /><span className="sk sk-line sk-order-big" /></div>
+            <div className="sk-order-field sk-order-hide"><span className="sk sk-line sk-line--short" /><span className="sk sk-line sk-order-big" /></div>
+            <div className="sk-order-field"><span className="sk sk-line sk-line--short" /><span className="sk sk-line sk-order-big" /></div>
+            <span className="sk sk-order-pill" />
+          </div>
+          {[0, 1].map(row => (
+            <div className="sk-order-item" key={row}>
+              <span className="sk sk-order-thumb" />
+              <span className="sk sk-line sk-line--mid" />
+              <span className="sk sk-line sk-order-qty" />
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** the order details page while it loads */
+export function OrderDetailsSkeleton() {
+  return (
+    <div className="sk-orders sk-order-details" role="status" aria-label="Loading your order">
+      <div className="sk-order"><span className="sk sk-line sk-line--short" /><span className="sk sk-title" /></div>
+      <div className="sk-order">
+        <span className="sk sk-title" />
+        <div className="sk-order-grid">{Array.from({ length: 6 }, (_, i) => <div className="sk-order-field" key={i}><span className="sk sk-line sk-line--short" /><span className="sk sk-line sk-order-big" /></div>)}</div>
+      </div>
+      <div className="sk-order">
+        <span className="sk sk-title" />
+        {[0, 1, 2].map(row => (
+          <div className="sk-order-item sk-order-item--tall" key={row}>
+            <span className="sk sk-order-thumb sk-order-thumb--big" />
+            <div className="sk-order-lines"><span className="sk sk-line sk-line--mid" /><span className="sk sk-line sk-line--short" /></div>
+            <span className="sk sk-line sk-order-qty" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

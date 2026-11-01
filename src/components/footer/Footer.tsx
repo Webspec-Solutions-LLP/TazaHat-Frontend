@@ -123,7 +123,7 @@ export default async function Footer() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/myOrders" className="footer-link">
+                  <Link href="/orders" className="footer-link">
                     My Orders
                   </Link>
                 </li>

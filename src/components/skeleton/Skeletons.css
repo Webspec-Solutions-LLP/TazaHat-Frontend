@@ -1,0 +1,16 @@
+
+/* orders */
+.sk-orders { display: grid; gap: 12px; width: 100%; }
+.sk-order { display: grid; gap: 12px; padding: 16px 20px; border: 1px solid #e5ecf2; border-radius: 9px; background: #fff; }
+.sk-order-top { display: grid; grid-template-columns: minmax(155px, 1.35fr) minmax(115px, 1fr) minmax(80px, .7fr) minmax(110px, .85fr) 110px; align-items: center; gap: 14px; }
+.sk-order-field { display: grid; gap: 8px; }
+.sk-order-big { width: 70%; height: 16px; }
+.sk-order-pill { height: 30px; border-radius: 20px; }
+.sk-order-item { display: grid; grid-template-columns: 44px minmax(0, 1fr) 90px; align-items: center; gap: 12px; }
+.sk-order-item--tall { grid-template-columns: 76px minmax(0, 1fr) 90px; padding: 6px 0; }
+.sk-order-thumb { width: 44px; height: 44px; border-radius: 8px; }
+.sk-order-thumb--big { width: 76px; height: 76px; }
+.sk-order-qty { width: 100%; }
+.sk-order-lines { display: grid; gap: 9px; }
+.sk-order-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 24px; }
+@media (max-width: 760px) { .sk-order-top { grid-template-columns: 1fr 1fr; } .sk-order-hide { display: none; } .sk-order-pill { grid-column: 1 / -1; } .sk-order-item { grid-template-columns: 40px minmax(0, 1fr); } .sk-order-qty { display: none; } }
