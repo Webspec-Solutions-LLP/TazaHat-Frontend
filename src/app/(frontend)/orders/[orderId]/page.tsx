@@ -6,7 +6,10 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { myOrderAction, type MyOrderDetail } from "@/app/checkout-actions";
+import { cancelOrderAction, editOrderAction, myOrderAction, type MyOrderDetail, type OrderEditInput } from "@/app/checkout-actions";
+import AddToOrderDialog from "@/components/orders/AddToOrderDialog";
+import CheckoutDialog, { type DialogSpec } from "@/components/checkout/CheckoutDialog";
+import type { CartItem } from "@/components/modals/cart/Cart";
 import { fallbackImage, isRemoteImage } from "@/lib/api";
 import { OrderDetailsSkeleton } from "@/components/skeleton/Skeletons";
 import { STATUS_TEXT, statusGroup } from "@/lib/orderStatus";
@@ -34,6 +37,41 @@ function Details({ reference }: { reference: string }) {
     myOrderAction(reference).then(o => { if (!cancelled) setOrder(o); });
     return () => { cancelled = true; };
   }, [reference]);
+
+  const [busy, setBusy] = useState(false);
+  const [notice, setNotice] = useState<{ text: string; tone: "ok" | "bad" } | null>(null);
+  const [dialog, setDialog] = useState<DialogSpec | null>(null);
+  const [adding, setAdding] = useState(false);
+  useEffect(() => {
+    if (!notice) return;
+    const t = window.setTimeout(() => setNotice(null), 5000);
+    return () => window.clearTimeout(t);
+  }, [notice]);
+
+  /** one change to the order; the server prices the whole order again, then the page shows the new state */
+  const change = async (edit: OrderEditInput, done?: string): Promise<string | null> => {
+    setBusy(true);
+    const res = await editOrderAction(reference, edit);
+    if (res.ok) {
+      setOrder(await myOrderAction(reference));
+      if (done) setNotice({ text: done, tone: "ok" });
+    } else setNotice({ text: res.error, tone: "bad" });
+    setBusy(false);
+    return res.ok ? null : res.error;
+  };
+  const askRemove = (id: string, name: string) => setDialog({
+    title: "Remove this item?", icon: "warning", body: <p>{name} will be taken out of your order.</p>,
+    buttons: [{ label: "Yes, remove", tone: "danger", onClick: () => void change({ remove: [id] }, `${name} was removed from your order.`) }, { label: "Keep it", tone: "plain", onClick: () => undefined }],
+  });
+  const askCancel = () => setDialog({
+    title: "Cancel this order?", icon: "warning", body: <p>The whole order will be cancelled. This cannot be undone.</p>,
+    buttons: [{ label: "Yes, cancel order", tone: "danger", onClick: async () => {
+      setBusy(true);
+      const res = await cancelOrderAction(reference);
+      if (res.ok) { setOrder(await myOrderAction(reference)); setNotice({ text: "Your order was cancelled.", tone: "ok" }); } else setNotice({ text: res.error, tone: "bad" });
+      setBusy(false);
+    } }, { label: "Keep my order", tone: "plain", onClick: () => undefined }],
+  });
 
   if (order === undefined) return <main className="order-details-page"><div className="order-details-container"><OrderDetailsSkeleton /></div></main>;
   if (order === null) {
@@ -81,6 +119,14 @@ function Details({ reference }: { reference: string }) {
           </dl>
         </section>
 
+        {notice && <p className={`order-edit-notice is-${notice.tone}`} role="status">{notice.text}</p>}
+        {order.editable && (
+          <section className="order-edit-bar" aria-label="Change this order">
+            <p><strong>You can still change this order.</strong> Change the quantity, remove items or add more until we start processing it.</p>
+            <button type="button" disabled={busy} onClick={() => setAdding(true)}>+ Add items</button>
+          </section>
+        )}
+
         <section className="order-products-card" aria-labelledby="order-products-heading">
           <div className="order-products-heading">
             <div>
@@ -108,6 +154,14 @@ function Details({ reference }: { reference: string }) {
                       {weighed ? <><span>·</span>billed {item.billedMeasurement} gm</> : null}
                     </p>
                     {(item.dressing || item.instruction) && <p>{[item.dressing, item.instruction ? `“${item.instruction}”` : ""].filter(Boolean).join(" · ")}</p>}
+                    {order.editable && item.status !== "CANCELLED" && (
+                      <div className="order-item-edit" role="group" aria-label={`Change ${item.name}`}>
+                        <button type="button" aria-label="Decrease quantity" disabled={busy || item.quantity <= 1} onClick={() => void change({ setQuantity: [{ itemId: item.id, quantity: item.quantity - 1 }] })}>−</button>
+                        <b aria-live="polite">{item.quantity}</b>
+                        <button type="button" aria-label="Increase quantity" disabled={busy || item.quantity >= 99} onClick={() => void change({ setQuantity: [{ itemId: item.id, quantity: item.quantity + 1 }] })}>+</button>
+                        <button type="button" className="order-item-remove" disabled={busy || order.items.filter(i => i.status !== "CANCELLED").length <= 1} title={order.items.filter(i => i.status !== "CANCELLED").length <= 1 ? "An order needs at least one item. Cancel the order instead." : undefined} onClick={() => askRemove(item.id, item.name)}>Remove</button>
+                      </div>
+                    )}
                   </div>
                   <strong className="order-product-price">{money(item.status === "CANCELLED" ? 0 : billed ? item.linePaisa : item.estimatedLinePaisa)}</strong>
                   <span className={`order-product-status order-product-status--${itemGroup}`}>
@@ -129,9 +183,19 @@ function Details({ reference }: { reference: string }) {
             <span>{billed ? "Order total" : "Estimated total"}</span>
             <strong>{money(billed ? t.billTotalPaisa : t.estimatedTotalPaisa)}</strong>
           </footer>
+          {order.editable && <div className="order-cancel-row"><button type="button" disabled={busy} onClick={askCancel}>Cancel order</button></div>}
           {!billed && order.status !== "CANCELLED" && <p className="order-details-note order-bill-note">We bill on the actual weight of the products, so the final amount can change a little when your order is packed.</p>}
         </section>
       </div>
+      {adding && (
+        <AddToOrderDialog
+          orderLabel={order.orderNumber}
+          orderSlugs={order.items.map(i => i.slug).filter((x): x is string => !!x)}
+          onClose={() => setAdding(false)}
+          onAdd={(item: CartItem) => change({ add: [{ variantId: item.variantId ?? "", cuttingTypeId: item.cuttingTypeId ?? null, quantity: item.quantity, instruction: item.instruction ?? null }] })}
+        />
+      )}
+      {dialog && <CheckoutDialog spec={dialog} onDismiss={() => setDialog(null)} />}
     </main>
   );
 }

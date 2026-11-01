@@ -1,0 +1,26 @@
+.ato-dialog { position: fixed; inset: 0 0 0 auto; width: min(560px, 100vw); max-width: 100vw; height: 100dvh; max-height: 100dvh; margin: 0; padding: 0; border: 0; background: #fff; color: #1d3a57; box-shadow: -12px 0 40px #0a233f40; animation: ato-in .28s ease; }
+.ato-dialog.is-closing { animation: ato-out .25s ease forwards; }
+.ato-dialog::backdrop { background: #0a233f66; }
+@keyframes ato-in { from { transform: translateX(100%); } }
+@keyframes ato-out { to { transform: translateX(100%); } }
+.ato-panel { display: flex; height: 100%; flex-direction: column; padding: 18px 18px 14px; }
+.ato-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.ato-header h2 { margin: 0; font-size: 18px; font-weight: 800; }
+.ato-header p { margin: 4px 0 0; color: #6b7f92; font-size: 12px; }
+.ato-close { border: 0; background: none; color: #6b7f92; font-size: 28px; line-height: 1; cursor: pointer; }
+.ato-search { box-sizing: border-box; width: 100%; margin-top: 14px; padding: 11px 14px; border: 1px solid #cfe3f6; border-radius: 10px; font-size: 14px; }
+.ato-message { margin: 10px 0 0; padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; }
+.ato-message.is-ok { background: #e8f7ef; color: #21804d; }
+.ato-message.is-bad { background: #fdecea; color: #a12622; }
+.ato-sub { margin: 14px 0 6px; color: #45627a; font-size: 13px; font-weight: 700; }
+.ato-list { display: grid; flex: 1; align-content: start; gap: 8px; min-height: 0; overflow-y: auto; }
+.ato-card { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 8px; border: 1px solid #e3edf6; border-radius: 10px; }
+.ato-image { position: relative; width: 56px; aspect-ratio: 1; overflow: hidden; border-radius: 8px; background: #f2f6fa; }
+.ato-image img { object-fit: cover; }
+.ato-name { display: grid; gap: 2px; overflow: hidden; font-size: 13px; font-weight: 700; }
+.ato-name small { color: #5a6f85; font-size: 12px; font-weight: 600; }
+.ato-card button, .ato-footer button { padding: 8px 18px; border: 0; border-radius: 8px; background: #087cff; color: #fff; font-weight: 700; cursor: pointer; }
+.ato-card button:disabled { opacity: .5; cursor: wait; }
+.ato-empty { margin: 14px 0; color: #6b7f92; font-size: 13px; }
+.ato-footer { display: flex; justify-content: flex-end; padding-top: 10px; border-top: 1px solid #edf1f5; }
+.ato-footer button { background: #123b6d; }
