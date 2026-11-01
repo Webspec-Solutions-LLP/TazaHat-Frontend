@@ -121,22 +121,40 @@ export default function TodalDeals({ products = catalog.products }: { products?:
         </div>
       </div>
       {showFloatingTimer && (
-        <button
-          type="button"
-          className="deals-floating-timer"
-          style={{ top: navbarOffset }}
-          aria-label="Return to today's deals"
-          onClick={() => dealsSection.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
-        >
-          <span className="deals-floating-label"><strong>Today&apos;s Deal</strong><small>{text.offerEnds}</small></span>
-          <span className="deals-floating-clock">
-            {clock.map(unit => <span className="deals-floating-time" key={unit.label}>
-              <strong>{unit.value === null ? "--" : String(unit.value).padStart(2, "0")}</strong>
-              <small>{unit.label}</small>
-            </span>)}
-          </span>
-          <span className="deals-floating-cta">Shop deals <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 10h13m-5-5 5 5-5 5" /></svg></span>
-        </button>
+        <div className="deals-floating-timer" style={{ top: navbarOffset }} role="region" aria-label="Today's deals">
+          <div className="deals-floating-inner">
+            {/* left: the names of the products in today's deals drift slowly from right to left (a link each); still when motion is reduced */}
+            <div className="deals-floating-names">
+              <div className="deals-floating-track" style={{ ["--ticker-seconds" as string]: `${Math.max(40, products.length * 6.5)}s` }}>
+                {[false, true].map(copy => (
+                  <ul className="deals-floating-list" key={String(copy)} aria-hidden={copy || undefined}>
+                    {products.map(product => (
+                      <li key={product.id}>
+                        {/* picture, name and arrow are one link, so the arrow reads as part of the name */}
+                        <Link href={`/${encodeURIComponent(product.id)}`} tabIndex={copy ? -1 : undefined}>
+                          <span className="deals-floating-thumb"><Image src={product.image} alt="" fill sizes="22px" unoptimized={isRemoteImage(product.image)} onError={fallbackImage} /></span>
+                          <span>{product.name}</span>
+                          <svg className="deals-floating-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                ))}
+              </div>
+            </div>
+            {/* right: Today's Deal, the countdown and the way back to the deals */}
+            <button type="button" className="deals-floating-action" aria-label="Return to today's deals" onClick={() => dealsSection.current?.scrollIntoView({ behavior: "smooth", block: "start" })}>
+              <span className="deals-floating-label"><strong>Today&apos;s Deal</strong><small>{text.offerEnds}</small></span>
+              <span className="deals-floating-clock">
+                {clock.map(unit => <span className="deals-floating-time" key={unit.label}>
+                  <strong>{unit.value === null ? "--" : String(unit.value).padStart(2, "0")}</strong>
+                  <small>{unit.label}</small>
+                </span>)}
+              </span>
+              <span className="deals-floating-cta">Shop deals <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 10h13m-5-5 5 5-5 5" /></svg></span>
+            </button>
+          </div>
+        </div>
       )}
       {selected && <AddToCart key={selected.id} product={selected} locale={catalog.locale} currency={catalog.currency} saved={saved.includes(selected.id)} onToggleWishlist={() => setSaved(toggleWishlistId(selected.id))} onClose={() => setSelected(null)} onOpenProduct={setSelected} />}
       {variantProduct && <Variant product={variantProduct} currency={catalog.currency} onClose={() => setVariantProduct(null)} onGoToCart={(item: CartItem) => {
