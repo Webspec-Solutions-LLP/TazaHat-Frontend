@@ -41,6 +41,12 @@ async function refresh(): Promise<string | null> {
   return json.data.token;
 }
 
+/** the customer's access token (the cookie, or a fresh one from the refresh token); null when nobody is signed in. For route handlers and server actions. */
+export async function currentAccessToken(): Promise<string | null> {
+  const jar = await cookies();
+  return jar.get(ACCESS)?.value ?? (await refresh());
+}
+
 export type UserCall<T> = { ok: true; data: T } | { ok: false; status: number; message: string };
 
 /** a call to the backend as the signed-in customer (refreshes the tokens once when needed). Use it from server actions only. */

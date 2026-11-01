@@ -67,6 +67,16 @@ export default function NotificationsPanel({ unread, onClose, onChanged }: { unr
     return () => observer.disconnect();
   }, [loadMore, hasMore, failed, items.length]);
 
+  // a notification pushed by the server while the panel is open goes to the top of the list
+  useEffect(() => {
+    const onLive = (event: Event) => {
+      const n = (event as CustomEvent<AppNotification>).detail;
+      setItems((current) => (current.some((x) => x.id === n.id) ? current : [n, ...current]));
+    };
+    window.addEventListener("tazahat:notification", onLive);
+    return () => window.removeEventListener("tazahat:notification", onLive);
+  }, []);
+
   const markAll = async () => {
     if (marking) return;
     setMarking(true);

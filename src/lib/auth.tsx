@@ -49,6 +49,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [waiting, setWaiting] = useState<ReadonlySet<string>>(new Set());
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [unread, setUnread] = useState(0);
+  const [live, setLive] = useState(false);
+  const [toast, setToast] = useState<AppNotification | null>(null);
   const afterLogin = useRef<(() => void) | null>(null);
 
   const reloadNotifications = useCallback(async () => {
@@ -72,14 +74,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => { cancelled = true; };
   }, [loadAccount]);
 
-  // new notifications show up without a reload: look again every minute while the tab is open, and when the tab comes back
+  // a notification that arrives while the page is open (pushed by the server): into the bell at once, a small card announces it
+  const onLive = useCallback((raw: Record<string, unknown>) => {
+    if (typeof raw.id !== "string" || typeof raw.title !== "string") return;
+    const n: AppNotification = {
+      id: raw.id, title: raw.title, body: typeof raw.body === "string" ? raw.body : "", type: typeof raw.type === "string" ? raw.type : null,
+      data: raw.data && typeof raw.data === "object" ? (raw.data as Record<string, string>) : null, isRead: false,
+      createdAt: typeof raw.createdAt === "string" ? raw.createdAt : new Date().toISOString(),
+    };
+    setNotifications((current) => (current.some((x) => x.id === n.id) ? current : [n, ...current].slice(0, 20)));
+    setUnread((count) => count + 1);
+    setToast(n);
+    window.dispatchEvent(new CustomEvent("tazahat:notification", { detail: n })); // the side panel, when it is open, adds it to its list
+  }, []);
+
+  // the live stream (Server-Sent Events from this site's own server, which holds the websocket to the backend); the browser reconnects by itself
   useEffect(() => {
-    if (!user) return;
+    if (!user || typeof EventSource === "undefined") return;
+    const source = new EventSource("/api/realtime");
+    source.onopen = () => setLive(true);
+    source.onerror = () => setLive(false);
+    source.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data) as { event?: string; notification?: Record<string, unknown> };
+        if (message.event === "notification" && message.notification) onLive(message.notification);
+      } catch { /* not for us */ }
+    };
+    return () => { source.close(); setLive(false); };
+  }, [user, onLive]);
+  useEffect(() => {
+    if (!toast) return;
+    const timer = window.setTimeout(() => setToast(null), 7000);
+    return () => window.clearTimeout(timer);
+  }, [toast]);
+
+  // without the live stream (it could not connect): look again every minute while the tab is open, and when the tab comes back
+  useEffect(() => {
+    if (!user || live) return;
     const look = () => { if (document.visibilityState === "visible") void reloadNotifications(); };
     const timer = window.setInterval(look, POLL_MS);
     document.addEventListener("visibilitychange", look);
     return () => { window.clearInterval(timer); document.removeEventListener("visibilitychange", look); };
-  }, [user, reloadNotifications]);
+  }, [user, live, reloadNotifications]);
 
   const openLogin = useCallback((after?: () => void) => { afterLogin.current = after ?? null; setLoginOpen(true); }, []);
 
@@ -127,6 +163,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider value={value}>
       {children}
+      {toast && (
+        <div className="notif-toast" role="status" aria-live="polite">
+          <button type="button" className="notif-toast-body" onClick={() => { setToast(null); setNotificationsOpen(true); }}>
+            <span className="notif-toast-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.7 21a2 2 0 0 1-3.4 0" /></svg></span>
+            <span><strong>{toast.title}</strong><small>{toast.body}</small></span>
+          </button>
+          <button type="button" className="notif-toast-close" aria-label="Dismiss" onClick={() => setToast(null)}>×</button>
+        </div>
+      )}
       {notificationsOpen && user && <NotificationsPanel unread={unread} onClose={() => setNotificationsOpen(false)} onChanged={() => void reloadNotifications()} />}
       {loginOpen && <Login onClose={() => { afterLogin.current = null; setLoginOpen(false); }} onLoggedIn={onLoggedIn} />}
     </AuthContext.Provider>

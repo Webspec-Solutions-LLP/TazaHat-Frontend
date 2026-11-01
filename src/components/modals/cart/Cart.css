@@ -3,7 +3,7 @@
 .cart-sidebar-dialog {
   position: fixed;
   inset: 0 0 0 auto;
-  width: min(400px, 100vw);
+  width: min(540px, 100vw);
   max-width: 100vw;
   height: 100dvh;
   max-height: none;
@@ -168,8 +168,8 @@
 /* Product Image thumbnail (square box) */
 .cart-item-image-wrap {
   position: relative;
-  width: 68px;
-  height: 68px;
+  width: 88px;
+  height: 88px;
   flex-shrink: 0;
   border: 1px solid #dce9f2;
   border-radius: 8px;
