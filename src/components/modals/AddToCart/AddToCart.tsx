@@ -12,6 +12,7 @@ import catalog from "../../products/english.json";
 import "./AddToCart.css";
 import { cardToProduct, fallbackImage, isRemoteImage, mediaSrc, shortName, type ApiProductDetail, type Product as ShopProduct } from "@/lib/api";
 import { getProductDetailAction } from "@/app/actions";
+import { useImageZoom } from "@/lib/useImageZoom";
 import PackAction, { AvailabilityNote, StockRibbon, firstOrderable, packStatus } from "@/components/availability/PackAction";
 
 type Product = ShopProduct;
@@ -71,14 +72,11 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
   const isCustomDressing = !!dressing && /custom/i.test(dressing.name);
   const dressingCharge = Math.round((dressing?.chargePaisa ?? 0) / 100);
   const imageSources = detail && detail.images.length ? detail.images.map(mediaSrc) : [product.image];
-  const galleryImages = imageSources.length > 1
-    ? imageSources.map((src, index) => ({ src, scale: 1, label: `Image ${index + 1}` }))
-    : [
-      { src: product.image, scale: 1, label: "Full view" },
-      { src: product.image, scale: 1.3, label: "Close-up" },
-      { src: product.image, scale: 1.65, label: "Detail" },
-    ];
-  const currentImage = galleryImages[activeImage] ?? galleryImages[0];
+  const galleryImages = imageSources.map((src, index) => ({ src, label: `Image ${index + 1}` }));
+  const hasThumbs = galleryImages.length > 1;
+  const currentImage = galleryImages[Math.min(activeImage, galleryImages.length - 1)] ?? galleryImages[0];
+  // hover zoom (lens + preview beside the picture) and tap zoom: the same as the product page
+  const { galleryRef, lens, shownSrc, containerProps, imageProps, reset } = useImageZoom<HTMLDivElement>(hasThumbs);
   const money = new Intl.NumberFormat(locale, { style: "currency", currency, minimumFractionDigits: 0, maximumFractionDigits: 2 });
   const discount = variant.originalPrice > 0 ? Math.round((1 - variant.price / variant.originalPrice) * 100) : 0;
   const selectedPrice = (variant.price + dressingCharge) * quantity;
@@ -131,19 +129,22 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
       <button autoFocus type="button" className="add-cart-close" aria-label="Close product details" onClick={() => setClosing(true)}><DetailIcon kind="arrow" /></button>
       <div className="add-cart-panel">
         <div className="add-cart-layout">
-          <div className="add-cart-gallery">
-            <div className="add-cart-photo" id="add-cart-main-image">
+          <div className="add-cart-gallery" ref={galleryRef}>
+            <div className={`add-cart-photo${lens ? " is-zooming" : ""}${imageProps.style ? " is-tap-zoom" : ""}${hasThumbs ? " has-thumbs" : ""}`} id="add-cart-main-image" {...containerProps}>
               <span className="add-cart-photo-badge"><DetailIcon kind="leaf" />Fresh picks</span>
               <StockRibbon pack={variant} />
-              <Image src={currentImage.src} alt={`${product.name} — ${currentImage.label}`} fill sizes="(max-width: 575px) 100vw, (max-width: 760px) 100vw, 380px" unoptimized={isRemoteImage(currentImage.src)} onError={fallbackImage} style={{ transform: `scale(${currentImage.scale})` }} />
-              <span className="add-cart-photo-count">{activeImage + 1} / {galleryImages.length}</span>
+              <Image src={currentImage.src} alt={`${product.name} — ${currentImage.label}`} fill sizes="(max-width: 575px) 100vw, 440px" unoptimized={isRemoteImage(currentImage.src)} onError={fallbackImage} {...imageProps} />
+              {lens && <span className="add-cart-zoom-lens" aria-hidden="true" style={lens.lens} />}
+              {hasThumbs && <div className="add-cart-thumbnails" role="group" aria-label="Product images">
+                {galleryImages.map((item, index) => <button key={`${item.src}-${index}`} type="button" className="add-cart-thumbnail" aria-label={`Show picture ${index + 1} of ${product.name}`} aria-pressed={activeImage === index} aria-controls="add-cart-main-image" onClick={() => { setActiveImage(index); reset(); }}>
+                  <Image src={item.src} alt="" fill sizes="64px" unoptimized={isRemoteImage(item.src)} onError={fallbackImage} />
+                </button>)}
+              </div>}
             </div>
-            <div className="add-cart-thumbnails" role="group" aria-label="Product images">
-              {galleryImages.map((item, index) => <button key={`${item.src}-${index}`} type="button" className="add-cart-thumbnail" aria-label={`Show ${item.label.toLowerCase()} of ${product.name}`} aria-pressed={activeImage === index} aria-controls="add-cart-main-image" onClick={() => setActiveImage(index)}>
-                <span className="add-cart-thumbnail-image"><Image src={item.src} alt="" fill sizes="76px" unoptimized={isRemoteImage(item.src)} onError={fallbackImage} style={{ transform: `scale(${item.scale})` }} /></span>
-                <span>{item.label}</span>
-              </button>)}
-            </div>
+            {lens && <div className="add-cart-zoom-pane" aria-hidden="true" style={lens.pane}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={shownSrc ?? currentImage.src} alt="" style={{ position: "absolute", maxWidth: "none", ...lens.img }} />
+            </div>}
             <section className="add-cart-gallery-promise" aria-label="TazaHat quality promise">
               <span className="add-cart-gallery-promise-icon"><DetailIcon kind="shield" /></span>
               <span><strong>Freshness, checked daily</strong><small>Selected with care and packed to order.</small></span>
@@ -213,15 +214,15 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
               <button type="button" className="add-cart-wishlist add-cart-wishlist--icon" aria-pressed={saved} aria-label={saved ? "Remove from wishlist" : "Add to wishlist"} title={saved ? "Remove from wishlist" : "Add to wishlist"} onClick={onToggleWishlist}><DetailIcon kind="heart" /></button>
               <button type="button" className="add-cart-info" onClick={() => { dialog.current?.close(); document.body.style.overflow = previousOverflow.current; setIsChatOpen(true); }}><DetailIcon kind="info" />Info</button>
             </div>
-            <section ref={descriptionRef} id="add-cart-description" className="add-cart-description" aria-labelledby="add-cart-description-title">
-              <h3 id="add-cart-description-title">Description</h3>
-              {detail ? <>
-                <p>{plainText(detail.shortDescription) || (plainText(detail.description).length > 260 ? `${plainText(detail.description).slice(0, 260).trimEnd()}…` : plainText(detail.description)) || `${product.name} is selected for freshness and quality, then carefully packed to arrive ready for your kitchen.`}</p>
-                {detail.description && <div className="add-cart-description-html" dangerouslySetInnerHTML={{ __html: detail.description }} />}
-              </> : <p>{product.name} is a quality pick from our {product.category.toLowerCase()} range, selected for your everyday meals.</p>}
-            </section>
           </div>
         </div>
+    <section ref={descriptionRef} id="add-cart-description" className="add-cart-description add-cart-description--full" aria-labelledby="add-cart-description-title">
+      <h3 id="add-cart-description-title">Description</h3>
+      {detail ? <>
+        <p>{plainText(detail.shortDescription) || (plainText(detail.description).length > 260 ? `${plainText(detail.description).slice(0, 260).trimEnd()}…` : plainText(detail.description)) || `${product.name} is selected for freshness and quality, then carefully packed to arrive ready for your kitchen.`}</p>
+        {detail.description && <div className="add-cart-description-html" dangerouslySetInnerHTML={{ __html: detail.description }} />}
+      </> : <p>{product.name} is a quality pick from our {product.category.toLowerCase()} range, selected for your everyday meals.</p>}
+    </section>
         {relatedProducts.length > 0 && <section className="add-cart-related" aria-labelledby="add-cart-related-title">
           <h2 id="add-cart-related-title">Related Products</h2>
           <Swiper

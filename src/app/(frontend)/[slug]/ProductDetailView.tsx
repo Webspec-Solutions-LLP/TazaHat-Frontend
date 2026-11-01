@@ -10,6 +10,7 @@ import Confermation from "@/components/modals/confermation/Confermation";
 import type { CartItem } from "@/components/modals/cart/Cart";
 import { cardToProduct, fallbackImage, isRemoteImage, mediaSrc, PLACEHOLDER_IMAGE, shortName, type ApiProductDetail } from "@/lib/api";
 import { readWishlistIds, subscribeToWishlist, toggleWishlistId } from "@/lib/wishlist";
+import { useImageZoom } from "@/lib/useImageZoom";
 import "./ProductDetails.css";
 
 const money = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 });
@@ -132,10 +133,8 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
 
   // Zoom. Mouse on a wide screen: a lens follows the pointer over the picture and a larger preview opens beside it (Amazon / Flipkart
   // style). Touch or narrow screens: tap the picture to zoom in at that spot, tap again to zoom out.
-  const ZOOM = 2.6;
-  const THUMB_STRIP = 88; // px kept free on the left of the picture for the thumbnails
   const hasThumbs = gallery.length > 1;
-  const galleryRef = useRef<HTMLElement>(null);
+  const { galleryRef, lens, shownSrc, containerProps, imageProps, reset } = useImageZoom<HTMLElement>(hasThumbs);
   const leftRef = useRef<HTMLDivElement>(null);
   const overviewRef = useRef<HTMLDivElement>(null);
   const extraRef = useRef<HTMLElement>(null);
@@ -156,47 +155,6 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
     window.addEventListener("resize", measure);
     return () => { observer.disconnect(); window.removeEventListener("resize", measure); };
   }, []);
-  const [natural, setNatural] = useState<{ w: number; h: number } | null>(null);
-  // the picture that is really on screen (the logo when the product's own file is missing), so the preview shows the same one
-  const [shownSrc, setShownSrc] = useState<string | null>(null);
-  const [tapZoom, setTapZoom] = useState<{ x: number; y: number } | null>(null);
-  const [lens, setLens] = useState<null | {
-    lens: { left: number; top: number; width: number; height: number };
-    pane: { left: number; top: number; width: number; height: number };
-    img: { left: number; top: number; width: number; height: number };
-  }>(null);
-  const spot = (e: React.PointerEvent<HTMLDivElement>) => {
-    const r = e.currentTarget.getBoundingClientRect();
-    return { r, cx: e.clientX - r.left, cy: e.clientY - r.top };
-  };
-  const moveLens = (e: React.PointerEvent<HTMLDivElement>) => {
-    const gallery = galleryRef.current;
-    if (e.pointerType === "touch" || !gallery || !natural || window.innerWidth < 877) return;
-    const { r, cx, cy } = spot(e);
-    // where the picture really sits inside the box: shown "contain", 12px padding, and room for the thumbnail strip on the left
-    const padL = hasThumbs ? THUMB_STRIP : 12;
-    const availW = r.width - padL - 12, availH = r.height - 24;
-    const scale = Math.min(availW / natural.w, availH / natural.h);
-    const dw = natural.w * scale, dh = natural.h * scale;
-    const ox = padL + (availW - dw) / 2, oy = 12 + (availH - dh) / 2;
-    if (cx < ox || cx > ox + dw || cy < oy || cy > oy + dh) return setLens(null);
-    const g = gallery.getBoundingClientRect();
-    // The preview is a popup beside the picture: a little taller (above and below it) and wider than the picture, kept inside the window
-    const paneH = Math.min(r.height + 96, window.innerHeight - 110);
-    const paneW = Math.min(r.width * 1.3, window.innerWidth - r.right - 36);
-    const paneTopInWindow = Math.max(88, Math.min(r.top - (paneH - r.height) / 2, window.innerHeight - paneH - 14));
-    const pane = { left: r.right - g.left + 16, top: paneTopInWindow - g.top, width: paneW, height: paneH };
-    if (pane.width < 260) return setLens(null);
-    const lw = pane.width / ZOOM, lh = pane.height / ZOOM;
-    const lx = Math.min(Math.max(cx - lw / 2, ox), ox + dw - lw), ly = Math.min(Math.max(cy - lh / 2, oy), oy + dh - lh);
-    const iw = dw * ZOOM, ih = dh * ZOOM;
-    setLens({
-      lens: { left: lx, top: ly, width: lw, height: lh },
-      pane,
-      img: { width: iw, height: ih, left: -((lx - ox) / dw) * iw, top: -((ly - oy) / dh) * ih },
-    });
-  };
-
   const lineId = pack ? `${detail.slug}-${pack.label}${dressing ? `-${dressing.id}` : ""}` : "";
   const inCart = cartLines.find(line => line.id === lineId);
   const compareProduct: CompareProduct = { id: detail.slug, name, image: mainImage, price: unitPrice, originalPrice: unitMrp, unit: pack?.label ?? detail.unit ?? "pack", rating: 0, reviews: 0 };
@@ -220,17 +178,14 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
       <div className="pd-layout">
         <div className="pd-left-column" ref={leftRef}><section className="pd-gallery" aria-label="Product images" ref={galleryRef}>
 
-          <div className={`pd-main-image${lens ? " is-zooming" : ""}${tapZoom ? " is-tap-zoom" : ""}${hasThumbs ? " has-thumbs" : ""}`}
-            onPointerMove={moveLens} onPointerLeave={e => { if (e.pointerType !== "touch") setLens(null); }}
-            onPointerUp={e => { if (e.pointerType === "touch" || window.innerWidth < 877) { const { r, cx, cy } = spot(e); setTapZoom(current => current ? null : { x: (cx / r.width) * 100, y: (cy / r.height) * 100 }); } }}>
-            <Image src={mainImage} alt={name} fill priority sizes="(max-width: 900px) 100vw, 40vw" unoptimized={isRemoteImage(mainImage)} onError={fallbackImage}
-              onLoad={e => { setNatural({ w: e.currentTarget.naturalWidth || 1, h: e.currentTarget.naturalHeight || 1 }); setShownSrc(e.currentTarget.currentSrc || null); }}
-              style={tapZoom ? { transform: "scale(2.2)", transformOrigin: `${tapZoom.x}% ${tapZoom.y}%` } : undefined} />
+          <div className={`pd-main-image${lens ? " is-zooming" : ""}${imageProps.style ? " is-tap-zoom" : ""}${hasThumbs ? " has-thumbs" : ""}`}
+            {...containerProps}>
+            <Image src={mainImage} alt={name} fill priority sizes="(max-width: 900px) 100vw, 40vw" unoptimized={isRemoteImage(mainImage)} onError={fallbackImage} {...imageProps} />
             {lens && <span className="pd-zoom-lens" aria-hidden="true" style={lens.lens} />}
             <StockRibbon pack={pack} />
             {isFish ? <span className="pd-fresh">🐟 &nbsp;Fresh Catch</span> : <span className="pd-fresh">🌿 &nbsp;Fresh &amp; Quality Checked</span>}<span className="pd-natural">◉ &nbsp;100% Fresh &amp; Natural</span>
           </div>
-          {hasThumbs && <div className="pd-thumbnails" role="tablist" aria-label="Product pictures">{gallery.map((src, index) => <button key={`${src}-${index}`} className={mainImage === src ? "is-active" : ""} onClick={() => { setActiveImage(index); setLens(null); setTapZoom(null); }} aria-label={`Show product image ${index + 1}`} role="tab" aria-selected={mainImage === src}><Image src={src} alt={`${name} - picture ${index + 1}`} fill sizes="76px" unoptimized={isRemoteImage(src)} onError={fallbackImage} /></button>)}</div>}
+          {hasThumbs && <div className="pd-thumbnails" role="tablist" aria-label="Product pictures">{gallery.map((src, index) => <button key={`${src}-${index}`} className={mainImage === src ? "is-active" : ""} onClick={() => { setActiveImage(index); reset(); }} aria-label={`Show product image ${index + 1}`} role="tab" aria-selected={mainImage === src}><Image src={src} alt={`${name} - picture ${index + 1}`} fill sizes="76px" unoptimized={isRemoteImage(src)} onError={fallbackImage} /></button>)}</div>}
           {lens && <div className="pd-zoom-pane" aria-hidden="true" style={lens.pane}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={shownSrc ?? mainImage} alt="" style={{ position: "absolute", maxWidth: "none", ...lens.img }} />
