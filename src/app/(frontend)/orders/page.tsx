@@ -152,7 +152,7 @@ function MyOrdersContent() {
               <ul className="my-order-items" aria-label="Items in this order">
                 {order.preview.map((item, index) => (
                   <li key={index}>
-                    <span className="my-order-item-image">{item.image && <Image src={item.image} alt="" fill sizes="44px" unoptimized={isRemoteImage(item.image)} onError={fallbackImage} />}</span>
+                    <span className="my-order-item-image">{item.image && <Image src={item.image} alt="" fill sizes="32px" unoptimized={isRemoteImage(item.image)} onError={fallbackImage} />}</span>
                     <span className="my-order-item-name">{item.name}</span>
                     <span className="my-order-item-qty">{[item.pack, `Qty ${item.quantity}`].filter(Boolean).join(" · ")}</span>
                   </li>

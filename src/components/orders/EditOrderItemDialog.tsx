@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { getProductDetailAction } from "@/app/actions";
 import type { MyOrderDetail } from "@/app/checkout-actions";
-import { shortName, type ApiProductDetail } from "@/lib/api";
+import Image from "next/image";
+import { fallbackImage, isRemoteImage, shortName, type ApiProductDetail } from "@/lib/api";
 import { useBackClose } from "@/lib/backLayers";
 import "./AddToOrderDialog.css";
 import "./EditOrderItemDialog.css";
@@ -15,7 +16,9 @@ const money = (paisa: number) => `₹${(paisa / 100).toFixed(2)}`;
  * Change one item of an order that is not processed yet: another size, another dressing, the quantity, the note. The choices are
  * what the shop offers right now (sizes in stock in the city, the product's dressing types), like on the product page.
  */
-export default function EditOrderItemDialog({ item, onSave, onClose }: {
+export default function EditOrderItemDialog({ item, cityId, onSave, onClose }: {
+  /** the order's own city: its shop is what the item can be changed to */
+  cityId?: string;
   item: Item;
   /** send the change; return an error text when it was refused */
   onSave: (change: { variantId: string; cuttingTypeId: string | null; quantity: number; instruction: string | null }) => Promise<string | null>;
@@ -42,9 +45,9 @@ export default function EditOrderItemDialog({ item, onSave, onClose }: {
   useEffect(() => {
     let cancelled = false;
     if (!item.slug) { setDetail(null); return; }
-    getProductDetailAction(item.slug).then(d => { if (!cancelled) setDetail(d); });
+    getProductDetailAction(item.slug, cityId).then(d => { if (!cancelled) setDetail(d); });
     return () => { cancelled = true; };
-  }, [item.slug]);
+  }, [item.slug, cityId]);
 
   const packs = detail?.packs ?? [];
   const pack = packs.find(p => p.id === variantId);
@@ -73,9 +76,13 @@ export default function EditOrderItemDialog({ item, onSave, onClose }: {
     <dialog ref={ref} className={`ato-dialog${closing ? " is-closing" : ""}`} aria-label={`Edit ${item.name}`} onCancel={e => { e.preventDefault(); close(); }} onClick={e => { if (e.target === e.currentTarget) close(); }}>
       <section className="ato-panel">
         <header className="ato-header">
-          <div><h2>Edit item</h2><p>{item.name}</p></div>
+          <div><h2>Edit item</h2></div>
           <button type="button" className="ato-close" aria-label="Close" onClick={close}>×</button>
         </header>
+        <div className="eoi-product">
+          <span className="eoi-product-image">{item.image && <Image src={item.image} alt="" fill sizes="64px" unoptimized={isRemoteImage(item.image)} onError={fallbackImage} />}</span>
+          <span className="eoi-product-copy"><strong>{item.name}</strong><small>Ordered: {[item.packLabel, `Qty ${item.quantity}`, item.dressing ? shortName(item.dressing) : ""].filter(Boolean).join(" · ")}</small></span>
+        </div>
         <div className="eoi-body">
           {detail === undefined && <p className="ato-empty">Loading what is available now…</p>}
           {detail === null && <p className="ato-message is-bad">This product is not available in your city right now, so it cannot be changed. You can cancel the item instead.</p>}

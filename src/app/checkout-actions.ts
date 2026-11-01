@@ -84,7 +84,7 @@ export async function myOrdersAction(page = 1, group: OrderGroup = "all"): Promi
 }
 
 export interface MyOrderDetail {
-  id: string; orderNumber: string; status: MyOrder["status"]; placedAt: string; deliveryDate: string | null; deliverySlotName: string | null; deliverySlotLabel: string | null;
+  id: string; cityId: string | null; orderNumber: string; status: MyOrder["status"]; placedAt: string; deliveryDate: string | null; deliverySlotName: string | null; deliverySlotLabel: string | null;
   deliveryType: string; paymentMethod: string; paymentState: string; address: Record<string, string | number | null> | null; legacyAddressText: string | null;
   store: { name: string; areaName: string | null; pincode: string | null; phone: string } | null;
   editable: boolean; cancelMode: "direct" | "request" | null; cancelReason: string | null; paidPaisa: number;

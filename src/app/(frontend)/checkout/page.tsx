@@ -250,7 +250,7 @@ function CheckoutContent() {
                     <button type="button" aria-label="Decrease quantity" disabled={item.quantity <= 1} onClick={() => changeQuantity(item.variantId, item.cuttingTypeId, -1)}>−</button>
                     <b aria-live="polite">{item.quantity}</b>
                     <button type="button" aria-label="Increase quantity" disabled={item.quantity >= 99} onClick={() => changeQuantity(item.variantId, item.cuttingTypeId, 1)}>+</button>
-                    <button type="button" className="checkout-qty-remove" onClick={() => removeLine(item.variantId, item.cuttingTypeId)}>Remove</button>
+                    <button type="button" className="checkout-qty-remove" onClick={() => setDialog({ title: "Remove this item?", icon: "warning", body: <p>{item.name} will be taken out of your order.</p>, buttons: [{ label: "Yes, remove", tone: "danger", onClick: () => removeLine(item.variantId, item.cuttingTypeId) }, { label: "Keep it", tone: "plain", onClick: () => undefined }] })}>Remove</button>
                   </span>
                   {item.problem && <em className="checkout-product-problem">{item.problem} <Link href="/products">Change</Link></em>}</div>
                 <strong className="checkout-product-price">{item.problem ? "—" : money(item.linePaisa)}</strong>

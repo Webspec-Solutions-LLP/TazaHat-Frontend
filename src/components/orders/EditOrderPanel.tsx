@@ -12,7 +12,10 @@ type Item = MyOrderDetail["items"][number];
 const money = (paisa: number) => `₹${(paisa / 100).toFixed(2)}`;
 
 /** "Edit order": every item of the order with Edit and Cancel, and a way to add more items (all in one side panel). */
-export default function EditOrderPanel({ order, onEditItem, onCancelItem, onAddItems, onClose }: {
+export default function EditOrderPanel({ order, busy, onQuantity, onEditItem, onCancelItem, onAddItems, onClose }: {
+  busy: boolean;
+  /** change the quantity of an item by one */
+  onQuantity: (item: Item, delta: number) => void;
   order: MyOrderDetail;
   onEditItem: (item: Item) => void;
   onCancelItem: (item: Item) => void;
@@ -42,10 +45,17 @@ export default function EditOrderPanel({ order, onEditItem, onCancelItem, onAddI
           {items.map(item => (
             <article className="eop-item" key={item.id}>
               <span className="ato-image">{item.image && <Image src={item.image} alt="" fill sizes="56px" unoptimized={isRemoteImage(item.image)} onError={fallbackImage} />}</span>
-              <span className="ato-name">{item.name}<small>{[item.packLabel, `Qty ${item.quantity}`, item.dressing].filter(Boolean).join(" · ")} · {money(item.estimatedLinePaisa)}</small></span>
-              <span className="eop-actions">
-                <button type="button" disabled={!item.canEdit} onClick={() => onEditItem(item)}>Edit</button>
-                <button type="button" className="is-danger" disabled={!item.canCancel} onClick={() => onCancelItem(item)}>Cancel</button>
+              <span className="ato-name">{item.name}<small>{[item.packLabel, item.dressing].filter(Boolean).join(" · ")}{item.packLabel || item.dressing ? " · " : ""}{money(item.estimatedLinePaisa)}</small></span>
+              <span className="eop-side">
+                <span className="eop-stepper" role="group" aria-label={`Quantity of ${item.name}`}>
+                  <button type="button" aria-label="Decrease quantity" disabled={busy || !item.canEdit || item.quantity <= 1} onClick={() => onQuantity(item, -1)}>−</button>
+                  <b aria-live="polite">{item.quantity}</b>
+                  <button type="button" aria-label="Increase quantity" disabled={busy || !item.canEdit || item.quantity >= 99} onClick={() => onQuantity(item, 1)}>+</button>
+                </span>
+                <span className="eop-actions">
+                  <button type="button" disabled={busy || !item.canEdit} onClick={() => onEditItem(item)}>Edit</button>
+                  <button type="button" className="is-danger" disabled={busy || !item.canCancel} onClick={() => onCancelItem(item)}>Cancel</button>
+                </span>
               </span>
             </article>
           ))}

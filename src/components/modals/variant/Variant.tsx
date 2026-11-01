@@ -34,9 +34,11 @@ interface VariantProps {
   currency: string;
   onClose: () => void;
   onGoToCart: (item: CartItem) => void;
+  /** read this city's shop instead of the visitor's (changing an order is done in the order's own city) */
+  cityId?: string;
 }
 
-export default function Variant({ product, currency, onClose, onGoToCart }: VariantProps) {
+export default function Variant({ product, currency, onClose, onGoToCart, cityId }: VariantProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeTimer = useRef<number | null>(null);
   const titleId = useId();
@@ -57,13 +59,13 @@ export default function Variant({ product, currency, onClose, onGoToCart }: Vari
   const dressingSelect = useRef<HTMLSelectElement>(null);
   useEffect(() => {
     let cancelled = false;
-    void getProductDetailAction(product.id).then(found => {
+    void getProductDetailAction(product.id, cityId).then(found => {
       if (cancelled) return;
       setDetail(found);
       setDetailState(found ? "ready" : "failed");
     });
     return () => { cancelled = true; };
-  }, [product.id]);
+  }, [product.id, cityId]);
   const dressing = detail?.cutting.find(c => c.id === dressingId);
   const isCustomDressing = !!dressing && /custom/i.test(dressing.name);
   const selectedPack = detail?.packs.find(pk => pk.label === (variants[selectedIndex] ?? variants[0]).label);

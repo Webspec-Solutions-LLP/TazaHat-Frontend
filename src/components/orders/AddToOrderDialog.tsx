@@ -13,7 +13,9 @@ import "./AddToOrderDialog.css";
  * "Add items" on an order that is not processed yet: search the shop (or pick from what goes with the order), choose the size and
  * dressing in the same pop-up the shop uses, and the item goes into the ORDER (not the cart).
  */
-export default function AddToOrderDialog({ orderLabel, orderSlugs, onAdd, onClose }: {
+export default function AddToOrderDialog({ orderLabel, orderSlugs, cityId, onAdd, onClose }: {
+  /** the order's own city: its shop is what can be added */
+  cityId?: string;
   orderLabel: string;
   /** products already in the order: the suggestions are things that go with them */
   orderSlugs: string[];
@@ -41,7 +43,7 @@ export default function AddToOrderDialog({ orderLabel, orderSlugs, onAdd, onClos
 
   useEffect(() => {
     let cancelled = false;
-    cartRelatedAction(orderSlugs).then(items => { if (!cancelled) setSuggested(items); });
+    cartRelatedAction(orderSlugs, cityId).then(items => { if (!cancelled) setSuggested(items); });
     return () => { cancelled = true; };
   }, [orderSlugs.join(",")]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -49,7 +51,7 @@ export default function AddToOrderDialog({ orderLabel, orderSlugs, onAdd, onClos
     const text = query.trim();
     if (text.length < 2) { setResults(null); return; }
     let cancelled = false;
-    const t = window.setTimeout(() => { searchSuggestionsAction(text).then(items => { if (!cancelled) setResults(items); }); }, 250);
+    const t = window.setTimeout(() => { searchSuggestionsAction(text, cityId).then(items => { if (!cancelled) setResults(items); }); }, 250);
     return () => { cancelled = true; window.clearTimeout(t); };
   }, [query]);
 
@@ -77,6 +79,7 @@ export default function AddToOrderDialog({ orderLabel, orderSlugs, onAdd, onClos
       </section>
       {picked && (
         <Variant
+          cityId={cityId}
           product={picked}
           currency="INR"
           onClose={() => setPicked(null)}

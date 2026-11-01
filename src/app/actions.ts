@@ -109,8 +109,14 @@ export async function loadCatalogPageAction(query: CatalogQuery, page: number): 
 }
 
 /** One product as the product page shows it (packs, dressing types, pictures, description, related products): for the quick view. */
-export async function getProductDetailAction(slug: string): Promise<ApiProductDetail | null> {
-  const city = await readCityCookie();
+/** the city to read the shop for: the one asked for (an order being changed is for its own city), else the visitor's */
+async function shopCity(cityId?: string): Promise<{ id: string } | null> {
+  if (cityId && /^[\w-]{1,60}$/.test(cityId)) return { id: cityId };
+  return readCityCookie();
+}
+
+export async function getProductDetailAction(slug: string, cityId?: string): Promise<ApiProductDetail | null> {
+  const city = await shopCity(cityId);
   const clean = String(slug ?? "").trim().slice(0, 160);
   if (!city || !clean) return null;
   try {
@@ -132,8 +138,8 @@ export async function checkCartAction(lines: { variantId: string; cuttingTypeId?
 }
 
 /** Products that go with what is in the cart (same sub-categories, in stock in the city, not in the cart yet). */
-export async function cartRelatedAction(slugs: string[]): Promise<Product[]> {
-  const city = await readCityCookie();
+export async function cartRelatedAction(slugs: string[], cityId?: string): Promise<Product[]> {
+  const city = await shopCity(cityId);
   const clean = [...new Set((Array.isArray(slugs) ? slugs : []).filter((s) => typeof s === "string" && /^[\w-]{1,160}$/.test(s)))].slice(0, 100);
   if (!city || !clean.length) return [];
   try { return (await getCartRelated(city.id, clean)).map(cardToProduct); } catch { return []; }
@@ -170,8 +176,8 @@ export async function loadAvailabilityAction(kind: "upcoming" | "soldout", page:
 }
 
 /** Search-as-you-type suggestions for the navbar. */
-export async function searchSuggestionsAction(q: string): Promise<Product[]> {
-  const city = await readCityCookie();
+export async function searchSuggestionsAction(q: string, cityId?: string): Promise<Product[]> {
+  const city = await shopCity(cityId);
   const text = String(q ?? "").trim().slice(0, 60);
   if (!city || text.length < 2) return [];
   try {

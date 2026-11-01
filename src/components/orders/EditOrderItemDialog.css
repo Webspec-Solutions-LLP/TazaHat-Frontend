@@ -27,3 +27,17 @@
 .eop-actions button { padding: 6px 14px; border: 1px solid #cfe3f6; border-radius: 8px; background: #fff; color: #087cff; font-size: 12px; font-weight: 700; cursor: pointer; }
 .eop-actions button.is-danger { color: #c0261f; border-color: #efc9c5; }
 .eop-actions button:disabled { opacity: .45; cursor: not-allowed; }
+
+.eoi-product { display: grid; grid-template-columns: 64px minmax(0, 1fr); align-items: center; gap: 12px; margin-top: 12px; padding: 10px; border: 1px solid #e3edf6; border-radius: 12px; background: #f8fbfe; }
+.eoi-product-image { position: relative; width: 64px; aspect-ratio: 1; overflow: hidden; border-radius: 10px; background: #fff; }
+.eoi-product-image img { object-fit: cover; }
+.eoi-product-copy { display: grid; gap: 3px; min-width: 0; }
+.eoi-product-copy strong { color: #123b6d; font-size: 15px; line-height: 1.25; }
+.eoi-product-copy small { color: #5a6f85; font-size: 12px; }
+
+.eop-side { display: grid; justify-items: end; gap: 6px; }
+.eop-actions { display: flex; gap: 6px; }
+.eop-stepper { display: inline-flex; align-items: center; gap: 6px; }
+.eop-stepper button { display: grid; width: 26px; height: 26px; place-items: center; padding: 0; border: 1px solid #cfe3f6; border-radius: 7px; background: #fff; color: #087cff; font-size: 16px; font-weight: 700; line-height: 1; cursor: pointer; }
+.eop-stepper button:disabled { color: #b4c3d1; cursor: not-allowed; }
+.eop-stepper b { min-width: 22px; color: #123b6d; font-size: 13px; text-align: center; }
