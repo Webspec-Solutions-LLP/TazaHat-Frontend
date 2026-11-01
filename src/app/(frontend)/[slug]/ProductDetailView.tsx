@@ -57,6 +57,8 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
   const firstAvailable = Math.max(0, detail.packs.findIndex(p => p.inStock));
   const [packIndex, setPackIndex] = useState(firstAvailable);
   const [dressingId, setDressingId] = useState("");
+  const [dressingError, setDressingError] = useState(false);
+  const dressingSelect = useRef<HTMLSelectElement>(null);
   const [specialInstruction, setSpecialInstruction] = useState("");
   // what is in the cart now (the navbar keeps the cart and announces it): the quantity stepper shows once this pack has been added
   const [cartLines, setCartLines] = useState<CartItem[]>([]);
@@ -160,6 +162,8 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
   const compareProduct: CompareProduct = { id: detail.slug, name, image: mainImage, price: unitPrice, originalPrice: unitMrp, unit: pack?.label ?? detail.unit ?? "pack", rating: 0, reviews: 0 };
   const addToCart = () => {
     if (!pack || !pack.inStock) return;
+    // real dressing types: one of them has to be chosen
+    if (detail.dressingRequired && !dressing) { setDressingError(true); dressingSelect.current?.focus(); return; }
     const item: CartItem = {
       id: lineId,
       name,
@@ -211,7 +215,7 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
               </label>)}</div>
             </fieldset>
           </> : <p className="pd-description">This product is not on sale in your city right now.</p>}
-          {detail.cutting.length > 0 && <label className="pd-field"><span>Dressing Type</span><select value={dressingId} onChange={event => { setDressingId(event.target.value); setSpecialInstruction(""); }}><option value="">Select Dressing Type</option>{detail.cutting.map(c => <option key={c.id} value={c.id}>{c.name}{c.chargePaisa > 0 ? ` (+${money.format(c.chargePaisa / 100)})` : ""}</option>)}</select></label>}
+          {detail.cutting.length > 0 && <label className={`pd-field${dressingError ? " has-error" : ""}`}><span>Dressing Type{detail.dressingRequired ? <b className="pd-required" aria-hidden="true"> *</b> : null}</span><select ref={dressingSelect} required={detail.dressingRequired} aria-invalid={dressingError || undefined} value={dressingId} onChange={event => { setDressingId(event.target.value); setSpecialInstruction(""); setDressingError(false); }}><option value="">Select Dressing Type</option>{detail.cutting.map(c => <option key={c.id} value={c.id}>{c.name}{c.chargePaisa > 0 ? ` (+${money.format(c.chargePaisa / 100)})` : ""}</option>)}</select>{dressingError && <small className="pd-field-error" role="alert">Please choose a dressing type before adding to the cart.</small>}</label>}
           {isCustomDressing && <label className="pd-field"><span>Special instruction</span><textarea rows={4} value={specialInstruction} onChange={event => setSpecialInstruction(event.target.value)} placeholder="Tell us how you want it cut (e.g. 6 pieces, head removed, small pieces for curry...)" maxLength={250} autoFocus /><small className="pd-field-count">{specialInstruction.length}/250</small></label>}
           <AvailabilityNote pack={pack} />
           <div className="pd-actions">

@@ -116,6 +116,8 @@ export interface ApiProductDetail {
   id: string; slug: string; name: string; description: string | null; shortDescription: string | null; unit: string | null; images: string[];
   category: { name: string; slug: string }; subCategory: { name: string; slug: string };
   cutting: { id: string; name: string; chargePaisa: number }[];
+  /** the product has real dressing types: one of them must be chosen before it goes to the cart (only "N/A" in the old system = nothing to choose) */
+  dressingRequired: boolean;
   packs: { id: string; label: string; weight: boolean; ratePaisa: number; pricePaisa: number; mrpPaisa: number; discountPercent: number; inStock: boolean; availableFrom: string | null; availableFromLabel: string | null; preOrderDays: number | null; availableTo: string | null }[];
   /** weight items are priced per kg; each pack costs rate x weight */
   ratePerKgPaisa: number | null;

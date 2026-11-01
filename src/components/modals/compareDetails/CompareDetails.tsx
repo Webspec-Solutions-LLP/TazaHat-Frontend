@@ -44,7 +44,7 @@ function describe(p: CompareProduct, detail: Detail) {
   const startingPrice = packs.length ? Math.min(...packs.map(x => Math.round(x.pricePaisa / 100))) : null;
   const perKg = detail?.ratePerKgPaisa ? Math.round(detail.ratePerKgPaisa / 100) : null;
   return {
-    price, original, packs, pack, availability, availabilityText, startingPrice, perKg,
+    price, original, packs, pack, availability, dressingRequired: !!detail?.dressingRequired, availabilityText, startingPrice, perKg,
     unit: p.unit || "",
     saving: original > price ? original - price : 0,
     savingPct: original > price ? Math.round((1 - price / original) * 100) : 0,
@@ -172,6 +172,8 @@ export default function CompareDetails({ products, onClose, onBackToList }: Comp
   const card = (p: CompareProduct, side: Side, other: Side, which: "A" | "B", added: boolean) => {
     const cheaper = side.startingPrice !== null && other.startingPrice !== null ? side.startingPrice < other.startingPrice : !other.unit || side.unit === other.unit ? side.price < other.price : false;
     const blocked = side.availability === "out" || side.availability === "soon";
+    // real dressing types have to be chosen on the product page, so it cannot be added from here
+    const chooseFirst = side.dressingRequired && !blocked;
     return (
       <div className="compare-product-card">
         <div className="compare-product-img-wrap">
@@ -192,9 +194,13 @@ export default function CompareDetails({ products, onClose, onBackToList }: Comp
         </div>
         {side.availability !== "unknown" && <span className={`compare-avail compare-avail--${side.availability}`}>{side.availabilityText}</span>}
         <div className="compare-card-actions">
-          <button type="button" className={`compare-cart-btn${added ? " is-added" : ""}`} disabled={blocked} onClick={() => addToCart(p, side, which)}>
-            {added ? <>✓ Added!</> : side.availability === "out" ? <>Out of stock</> : side.availability === "soon" ? <>Available from {side.packs.find(x => x.availableFromLabel)?.availableFromLabel}</> : <>Add to Cart</>}
-          </button>
+          {chooseFirst ? (
+            <Link href={`/${encodeURIComponent(p.id)}`} className="compare-cart-btn compare-cart-btn--choose" onClick={() => closeWithAnimation()} title="This product needs a dressing type: choose it on its page">Choose dressing</Link>
+          ) : (
+            <button type="button" className={`compare-cart-btn${added ? " is-added" : ""}`} disabled={blocked} onClick={() => addToCart(p, side, which)}>
+              {added ? <>✓ Added!</> : side.availability === "out" ? <>Out of stock</> : side.availability === "soon" ? <>Available from {side.packs.find(x => x.availableFromLabel)?.availableFromLabel}</> : <>Add to Cart</>}
+            </button>
+          )}
           <Link href={`/${encodeURIComponent(p.id)}`} className="compare-view-link" onClick={() => closeWithAnimation()}>View Details</Link>
         </div>
       </div>

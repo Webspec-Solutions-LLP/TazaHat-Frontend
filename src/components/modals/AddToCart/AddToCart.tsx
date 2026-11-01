@@ -55,6 +55,8 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
   const [detailState, setDetailState] = useState<"loading" | "ready" | "failed">("loading");
   const [dressingId, setDressingId] = useState("");
   const [specialInstruction, setSpecialInstruction] = useState("");
+  const [dressingError, setDressingError] = useState(false);
+  const dressingSelect = useRef<HTMLSelectElement>(null);
   useEffect(() => {
     let cancelled = false;
     void getProductDetailAction(product.id).then(found => {
@@ -92,6 +94,9 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
   const addLine = (item: CartItem) => { if (onAddToCart) onAddToCart(item); else window.dispatchEvent(new CustomEvent("tazahat:add-cart-item", { detail: item })); };
   const changeLine = (delta: number) => { if (onUpdateCartQuantity) onUpdateCartQuantity(cartItemId, delta); else window.dispatchEvent(new CustomEvent("tazahat:update-cart-quantity", { detail: { id: cartItemId, delta } })); };
   const handleAddToCart = () => {
+    // the product's data has not arrived yet, or it has real dressing types and none is chosen: not into the cart
+    if (detailState === "loading") return;
+    if (detail?.dressingRequired && !dressing) { setDressingError(true); dressingSelect.current?.focus(); return; }
     addLine({
       id: cartItemId,
       name: product.name,
@@ -173,7 +178,7 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
               </div>
             </fieldset>
             {detailState === "loading" && <div className="sk add-cart-field-skeleton" role="status" aria-label="Loading dressing options" />}
-            {detail && detail.cutting.length > 0 && <label className="add-cart-field">Dressing Type<select value={dressingId} onChange={event => { setDressingId(event.target.value); setSpecialInstruction(""); setQuantity(1); }}><option value="">Select Dressing Type</option>{detail.cutting.map(c => <option key={c.id} value={c.id}>{c.name}{c.chargePaisa > 0 ? ` (+${money.format(c.chargePaisa / 100)})` : ""}</option>)}</select></label>}
+            {detail && detail.cutting.length > 0 && <label className={`add-cart-field${dressingError ? " has-error" : ""}`}>Dressing Type{detail.dressingRequired ? <b className="add-cart-required" aria-hidden="true"> *</b> : null}<select ref={dressingSelect} required={detail.dressingRequired} aria-invalid={dressingError || undefined} value={dressingId} onChange={event => { setDressingId(event.target.value); setSpecialInstruction(""); setQuantity(1); setDressingError(false); }}><option value="">Select Dressing Type</option>{detail.cutting.map(c => <option key={c.id} value={c.id}>{c.name}{c.chargePaisa > 0 ? ` (+${money.format(c.chargePaisa / 100)})` : ""}</option>)}</select>{dressingError && <small className="add-cart-field-error" role="alert">Please choose a dressing type first.</small>}</label>}
             {isCustomDressing && <label className="add-cart-field">Special instruction<textarea rows={3} value={specialInstruction} onChange={event => setSpecialInstruction(event.target.value)} placeholder="Tell us how you want it cut (e.g. 6 pieces, head removed, small pieces for curry...)" maxLength={250} autoFocus /><small className="add-cart-field-count">{specialInstruction.length}/250</small></label>}
             <AvailabilityNote pack={variant} />
             <div className="add-cart-actions">

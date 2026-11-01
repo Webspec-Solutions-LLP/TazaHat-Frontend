@@ -6,7 +6,8 @@ import { useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import type { CartItem } from "../cart/Cart";
 import "./Variant.css";
-import { fallbackImage, isRemoteImage, type PackAvailability } from "@/lib/api";
+import { fallbackImage, isRemoteImage, shortName, type ApiProductDetail, type PackAvailability } from "@/lib/api";
+import { getProductDetailAction } from "@/app/actions";
 import PackAction, { firstOrderable, packStatus } from "@/components/availability/PackAction";
 
 export type VariantOption = {
@@ -46,7 +47,25 @@ export default function Variant({ product, currency, onClose, onGoToCart }: Vari
     return firstOrderable(variants, matchingIndex >= 0 ? matchingIndex : 0);
   });
   const [quantity, setQuantity] = useState(1);
-  const [dressingType, setDressingType] = useState("");
+  // the product's own dressing types come from the backend (the same data as the product page); real ones must be chosen, "N/A" means none
+  const [detail, setDetail] = useState<ApiProductDetail | null>(null);
+  const [detailState, setDetailState] = useState<"loading" | "ready" | "failed">("loading");
+  const [dressingId, setDressingId] = useState("");
+  const [instruction, setInstruction] = useState("");
+  const [dressingError, setDressingError] = useState(false);
+  const dressingSelect = useRef<HTMLSelectElement>(null);
+  useEffect(() => {
+    let cancelled = false;
+    void getProductDetailAction(product.id).then(found => {
+      if (cancelled) return;
+      setDetail(found);
+      setDetailState(found ? "ready" : "failed");
+    });
+    return () => { cancelled = true; };
+  }, [product.id]);
+  const dressing = detail?.cutting.find(c => c.id === dressingId);
+  const isCustomDressing = !!dressing && /custom/i.test(dressing.name);
+  const dressingCharge = Math.round((dressing?.chargePaisa ?? 0) / 100);
   const [isClosing, setIsClosing] = useState(false);
   const selected = variants[selectedIndex] ?? variants[0];
   const money = new Intl.NumberFormat("en-IN", { style: "currency", currency, maximumFractionDigits: 2 });
@@ -74,13 +93,17 @@ export default function Variant({ product, currency, onClose, onGoToCart }: Vari
   }, []);
 
   const handleGoToCart = () => {
+    // wait for the product's options; with real dressing types one has to be chosen first
+    if (detailState === "loading") return;
+    if (detail?.dressingRequired && !dressing) { setDressingError(true); dressingSelect.current?.focus(); return; }
     onGoToCart({
-      id: `${product.id}-${selected.label.replace(/\s+/g, "-")}`,
+      // the same line id as the product page and the quick view use for this pack (+ dressing), so they never become two lines
+      id: `${product.id}-${selected.label}${dressing ? `-${dressing.id}` : ""}`,
       name: product.name,
       image: product.image,
-      price: selected.price,
-      originalPrice: selected.originalPrice,
-      weight: selected.label,
+      price: selected.price + dressingCharge,
+      originalPrice: selected.originalPrice + dressingCharge,
+      weight: `${selected.label}${dressing ? ` · ${shortName(dressing.name)}` : ""}${isCustomDressing && instruction.trim() ? ` · “${instruction.trim().slice(0, 60)}”` : ""}`,
       quantity,
     });
   };
@@ -109,7 +132,7 @@ export default function Variant({ product, currency, onClose, onGoToCart }: Vari
         <div className="variant-product-summary">
           <div className="variant-product-image"><Image src={product.image} alt="" fill sizes="72px" unoptimized={isRemoteImage(product.image)} onError={fallbackImage} /></div>
           <div className="variant-selected-size"><span>Selected size</span><strong>{selected.label}</strong><small>{money.format(unitPrice)} / {unitLabel}</small></div>
-          <strong className="variant-selected-price">{money.format(selected.price * quantity)}</strong>
+          <strong className="variant-selected-price">{money.format((selected.price + dressingCharge) * quantity)}</strong>
         </div>
         <fieldset className="variant-options">
           <legend>Available sizes</legend>
@@ -133,15 +156,23 @@ export default function Variant({ product, currency, onClose, onGoToCart }: Vari
             ))}
           </div>
         </fieldset>
-        <label className="variant-dressing-field">
-          <span>Dressing Type</span>
-          <select value={dressingType} onChange={event => setDressingType(event.target.value)}>
-            <option value="">Select Dressing Type</option>
-            <option value="whole">Whole / Uncut</option>
-            <option value="cleaned">Cleaned</option>
-            <option value="curry-cut">Curry Cut</option>
-          </select>
-        </label>
+        {detailState === "loading" && <div className="sk variant-dressing-skeleton" role="status" aria-label="Loading dressing options" />}
+        {detail && detail.cutting.length > 0 && (
+          <label className={`variant-dressing-field${dressingError ? " has-error" : ""}`}>
+            <span>Dressing Type{detail.dressingRequired ? <b className="variant-required" aria-hidden="true"> *</b> : null}</span>
+            <select ref={dressingSelect} required={detail.dressingRequired} aria-invalid={dressingError || undefined} value={dressingId} onChange={event => { setDressingId(event.target.value); setInstruction(""); setDressingError(false); }}>
+              <option value="">Select Dressing Type</option>
+              {detail.cutting.map(c => <option key={c.id} value={c.id}>{c.name}{c.chargePaisa > 0 ? ` (+${money.format(c.chargePaisa / 100)})` : ""}</option>)}
+            </select>
+            {dressingError && <small className="variant-field-error" role="alert">Please choose a dressing type first.</small>}
+          </label>
+        )}
+        {isCustomDressing && (
+          <label className="variant-dressing-field">
+            <span>Special instruction</span>
+            <textarea rows={3} value={instruction} onChange={event => setInstruction(event.target.value)} placeholder="Tell us how you want it cut (e.g. 6 pieces, head removed...)" maxLength={250} />
+          </label>
+        )}
         <footer className="variant-footer">
           <PackAction pack={selected} className="variant-go-cart" onAdd={handleGoToCart}>
             <span className="variant-go-cart-label">Go to Cart</span>

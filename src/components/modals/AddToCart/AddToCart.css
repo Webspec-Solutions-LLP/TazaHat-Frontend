@@ -263,3 +263,7 @@
 .add-cart-description--full { margin: 0; padding: 14px 18px 18px 30px; border-top: 1px solid #e3edf6; }
 .add-cart-description--full p { font-size: 13px; }
 .add-cart-description--full .add-cart-description-html { max-height: none; overflow: visible; font-size: 13px; }
+
+.add-cart-required { color: #d53c3c; }
+.add-cart-field.has-error select { border-color: #d53c3c; box-shadow: 0 0 0 3px #d53c3c1f; }
+.add-cart-field-error { color: #d53c3c; font-size: 12px; font-weight: 600; }
