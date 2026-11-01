@@ -318,3 +318,8 @@
   .price-period-dates { font-size: 7px; line-height: 1.25; white-space: nowrap; }
   .price-product-image { border: 1px solid #d7e7f2; border-radius: 8px; background: linear-gradient(145deg, #f8fcff, #edf6fc); box-shadow: 0 2px 7px #0633611a, inset 0 1px #ffffff; }
 }
+
+.price-more { margin: 10px 4px 0; font-size: 14px; font-weight: 700; }
+.price-more a { color: #0b5cad; text-decoration: none; }
+.price-more a:hover { text-decoration: underline; }
+a.price-product-order { display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; }

@@ -17,7 +17,7 @@ const categoryByGroup: Record<string, string> = {
 
 export interface BestSellerGroup { id: string; name: string; slug?: string; more: number; images: { src: string; alt: string }[] }
 
-export default function BestSeller({ groups = text.groups }: { groups?: BestSellerGroup[] }) {
+export default function BestSeller({ groups }: { groups: BestSellerGroup[] }) {
   const router = useRouter();
   const browse = (group: BestSellerGroup) => {
     if (group.slug) return router.push(`/products?category=${encodeURIComponent(group.slug)}`);

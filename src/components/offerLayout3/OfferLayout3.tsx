@@ -23,16 +23,6 @@ const money = new Intl.NumberFormat(text.locale, {
   maximumFractionDigits: 0,
 });
 
-const dealProducts: Record<string, Product> = Object.fromEntries(
-  text.deals.map(deal => {
-    const product = catalog.products.find(item => item.id === deal.productId);
-    if (!product) {
-      throw new Error(`Winter deal "${deal.id}" references missing product "${deal.productId}"`);
-    }
-    return [deal.id, { ...product, name: deal.name, price: deal.price, originalPrice: deal.originalPrice, variants: [] }];
-  }),
-);
-
 function CartIcon() {
   return <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M2 3h2l2.4 12.2a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6L22 8H5" /><circle cx="9" cy="21" r="1" /><circle cx="19" cy="21" r="1" /></svg>;
 }
@@ -43,11 +33,9 @@ function Snowflake({ className }: { className: string }) {
 
 type DealView = { id: string; name: string; image: string; description: string; weight: string; rating: number; reviews: number; price: number; originalPrice: number };
 
-/** Deals from the API (`products`); without them the sample deals from english.json are shown. */
-export default function OfferLayout3({ products }: { products?: Product[] }) {
-  const items: { deal: DealView; product: Product }[] = products
-    ? products.map(p => ({ deal: { id: p.id, name: p.name, image: p.image, description: `${p.subcategory} · ${p.weight}`, weight: p.weight, rating: p.rating, reviews: p.reviews, price: p.price, originalPrice: p.originalPrice }, product: p }))
-    : text.deals.map(deal => ({ deal, product: dealProducts[deal.id] }));
+/** The deals of the shop (`products`). */
+export default function OfferLayout3({ products }: { products: Product[] }) {
+  const items: { deal: DealView; product: Product }[] = products.map(p => ({ deal: { id: p.id, name: p.name, image: p.image, description: `${p.subcategory} · ${p.weight}`, weight: p.weight, rating: p.rating, reviews: p.reviews, price: p.price, originalPrice: p.originalPrice }, product: p }));
   const topDiscount = Math.max(0, ...items.map(({ deal }) => (deal.originalPrice > 0 ? Math.round((1 - deal.price / deal.originalPrice) * 100) : 0)));
   const [saved, setSaved] = useState<string[]>([]);
   const [selected, setSelected] = useState<Product | null>(null);
@@ -69,7 +57,7 @@ export default function OfferLayout3({ products }: { products?: Product[] }) {
           <p className="winter-editorial-description">{text.description}</p>
           <div className="winter-editorial-offer">
             <span>{text.offerLabel}</span>
-            <strong>{products && topDiscount > 0 ? `Up to ${topDiscount}% off` : text.heroBadge}</strong>
+            <strong>{topDiscount > 0 ? `Up to ${topDiscount}% off` : text.heroBadge}</strong>
           </div>
           <p className="winter-editorial-note">{text.heroBadgeFoot}</p>
           <div className="winter-editorial-decoration" aria-hidden="true"><span /><span /><span /></div>

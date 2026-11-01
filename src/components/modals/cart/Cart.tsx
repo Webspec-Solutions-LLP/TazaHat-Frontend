@@ -26,36 +26,6 @@ export interface CartProps {
   onCheckout?: (items: CartItem[], total: number) => void;
 }
 
-const DEFAULT_ITEMS: CartItem[] = [
-  {
-    id: "katla-fish",
-    name: "Katla Fish",
-    image: "/images/products/product--2.png",
-    price: 499,
-    originalPrice: 599,
-    weight: "1 kg",
-    quantity: 1,
-  },
-  {
-    id: "rohu-fish",
-    name: "Rohu Fish - Fresh",
-    image: "/images/products/product--2.png",
-    price: 360,
-    originalPrice: 420,
-    weight: "500 g",
-    quantity: 1,
-  },
-  {
-    id: "chicken-curry-cut",
-    name: "Chicken Curry Cut",
-    image: "/images/products/product--1.png",
-    price: 440,
-    originalPrice: 500,
-    weight: "1 kg",
-    quantity: 1,
-  },
-];
-
 export default function Cart({
   onClose,
   items: externalItems,
@@ -68,9 +38,7 @@ export default function Cart({
   const [closing, setClosing] = useState(false);
   const [checkoutRequested, setCheckoutRequested] = useState(false);
   const [priceDetailsOpen, setPriceDetailsOpen] = useState(true);
-  const [cartItems, setCartItems] = useState<CartItem[]>(
-    externalItems !== undefined ? externalItems : DEFAULT_ITEMS
-  );
+  const [cartItems, setCartItems] = useState<CartItem[]>(externalItems ?? []);
   const isInitialCartItemsEffect = useRef(true);
   const titleId = useId();
 
@@ -223,12 +191,8 @@ export default function Cart({
               </div>
               <h3>Your cart is empty</h3>
               <p>Looks like you haven&apos;t added any fresh items to your cart yet.</p>
-              <button
-                type="button"
-                className="cart-reset-btn"
-                onClick={() => setCartItems(DEFAULT_ITEMS)}
-              >
-                Reset Demo Items
+              <button type="button" className="cart-reset-btn" onClick={handleClose}>
+                Start shopping
               </button>
             </div>
           ) : (

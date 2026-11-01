@@ -99,9 +99,9 @@ function FlameBadge() {
   );
 }
 
-/** Products from the API (`products`, first tab = trending) with price tabs; without them the sample deals from english.json are shown. */
-export default function OfferLayout4({ products, tabs }: { products?: CatalogProduct[]; tabs?: StealTab[] }) {
-  const allDeals = (products ?? text.deals) as Deal[];
+/** Products of the shop (`products`, first tab = trending) with price tabs. */
+export default function OfferLayout4({ products, tabs }: { products: CatalogProduct[]; tabs?: StealTab[] }) {
+  const allDeals = products as Deal[];
   const allTabs: StealTab[] = tabs ?? text.tabs;
   const [activeTabId, setActiveTabId] = useState<string>(allTabs[0]?.id ?? "trending");
   const [saved, setSaved] = useState<string[]>([]);

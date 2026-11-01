@@ -122,6 +122,20 @@ export async function getProductDetailAction(slug: string): Promise<ApiProductDe
   }
 }
 
+/** The wishlist's products (by their slugs) as they are sold in the visitor's city, in the order of the list; the ones not sold there are left out. */
+export async function loadWishlistProductsAction(slugs: string[]): Promise<Product[]> {
+  const city = await readCityCookie();
+  const clean = [...new Set(slugs.filter((s) => typeof s === "string" && /^[\w-]{1,160}$/.test(s)))].slice(0, 60);
+  if (!city || !clean.length) return [];
+  try {
+    const res = await getShopCatalog(city.id, { slugs: clean.join(",") }, 1, 60);
+    const bySlug = new Map(res.items.map((c) => [c.slug, c]));
+    return clean.map((s) => bySlug.get(s)).filter((c): c is NonNullable<typeof c> => !!c).map(cardToProduct);
+  } catch {
+    return [];
+  }
+}
+
 const SHELF_PAGE_SIZE = 10;
 
 /** The next 10 products of a home page shelf: the ones that start selling on a later day, or the sold out ones. */

@@ -22,7 +22,7 @@ import { ProductCardSkeleton } from "@/components/skeleton/Skeletons";
 const money = new Intl.NumberFormat(text.locale, { style: "currency", currency: text.currency, maximumFractionDigits: 0 });
 interface ProductsProps {
   heading?: string;
-  products?: Product[];
+  products: Product[];
   showViewAll?: boolean;
   layout?: "catalog" | "related" | "grid";
   /** the shelf reached its last card: load more (the home page shelves of upcoming / sold out products add 10 at a time) */
@@ -37,7 +37,7 @@ function CartIcon() {
   return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M2 3h2l2.4 12.2a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6L22 8H5" /><circle cx="9" cy="21" r="1" /><circle cx="19" cy="21" r="1" /></svg>;
 }
 
-export default function Products({ heading, products = text.products, showViewAll = true, layout = "catalog", onReachEnd, loadingMore = false, rows }: ProductsProps) {
+export default function Products({ heading, products, showViewAll = true, layout = "catalog", onReachEnd, loadingMore = false, rows }: ProductsProps) {
   const [saved, setSaved] = useState<string[]>([]);
   const [selected, setSelected] = useState<Product | null>(null);
   const [variantProduct, setVariantProduct] = useState<Product | null>(null);

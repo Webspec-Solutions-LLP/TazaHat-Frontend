@@ -19,7 +19,7 @@ export interface ShopProductPage { items: ApiCard[]; total: number; page: number
 export const getShopProducts = (cityId: string, page: number, limit: number) =>
   get<ShopProductPage>("/shop/products", { cityId, page: String(page), limit: String(limit) });
 /** `availability`: "upcoming" (nothing can be ordered yet, starts on a later day) or "soldout" (visible but sold out), for the home page shelves */
-export interface CatalogQuery { category?: string; sub?: string; q?: string; sort?: string; maxPrice?: string; availability?: "upcoming" | "soldout" }
+export interface CatalogQuery { category?: string; sub?: string; q?: string; sort?: string; maxPrice?: string; availability?: "upcoming" | "soldout"; /** comma separated product slugs: the favourites page */ slugs?: string }
 export const getShopCatalog = (cityId: string, query: CatalogQuery, page: number, limit: number) =>
   get<ShopProductPage>("/shop/products", { cityId, ...query, page: String(page), limit: String(limit) });
 export const getShopCategories = (cityId: string) => get<{ categories: ApiFacetCategory[] }>("/shop/categories", { cityId }).then((d) => d.categories);

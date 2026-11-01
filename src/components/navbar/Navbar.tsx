@@ -764,7 +764,7 @@ export default function Navbar({
       {isCartOpen && (
         <Cart
           onClose={() => setIsCartOpen(false)}
-          items={hasCustomCart ? cartItems : undefined}
+          items={cartItems}
           onItemsChange={handleCartItemsChange}
         />
       )}

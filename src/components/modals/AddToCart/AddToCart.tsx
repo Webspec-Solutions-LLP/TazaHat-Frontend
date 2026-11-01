@@ -10,7 +10,6 @@ import { A11y, Keyboard, Mousewheel } from "swiper/modules";
 import type { CartItem } from "../cart/Cart";
 import Chat from "../chat/Chat";
 import "swiper/css";
-import catalog from "../../products/english.json";
 import "./AddToCart.css";
 import { cardToProduct, fallbackImage, isRemoteImage, mediaSrc, shortName, type ApiProductDetail, type Product as ShopProduct } from "@/lib/api";
 import { getProductDetailAction } from "@/app/actions";
@@ -86,7 +85,7 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
   const discount = variant.originalPrice > 0 ? Math.round((1 - variant.price / variant.originalPrice) * 100) : 0;
   const selectedPrice = (variant.price + dressingCharge) * quantity;
   const selectedOriginalPrice = (variant.originalPrice + dressingCharge) * quantity;
-  const relatedProducts: Product[] = detail ? detail.related.map(cardToProduct) : detailState === "failed" ? catalog.products.filter(item => item.id !== product.id && item.category === product.category) : [];
+  const relatedProducts: Product[] = detail ? detail.related.map(cardToProduct) : [];
   const relatedMoney = new Intl.NumberFormat(locale, { style: "currency", currency, maximumFractionDigits: 0 });
   const cartItemId = `${product.id}-${variant.label}${dressing ? `-${dressing.id}` : ""}`;
   const isAddedToCart = addedVariantId === cartItemId;

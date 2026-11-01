@@ -14,7 +14,7 @@ function FreshIcon({ kind }: { kind: string }) {
 
 export interface FreshPick { id: string; name: string; image: string; discount: number; theme: string; slug?: string }
 
-export default function OfferLayout2({ items = text.categories }: { items?: FreshPick[] }) {
+export default function OfferLayout2({ items }: { items: FreshPick[] }) {
   const router = useRouter();
   const shop = (category?: string) => {
     router.push(category ? `/products?category=${encodeURIComponent(category)}` : "/products");

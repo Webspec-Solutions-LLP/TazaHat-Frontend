@@ -1,22 +1,19 @@
 "use client";
 
+import { useWishlistProducts } from "@/lib/useWishlistProducts";
+import { ProductGridSkeleton } from "@/components/skeleton/Skeletons";
+
 import PackAction, { StockRibbon, firstOrderable } from "@/components/availability/PackAction";
 import type { Product } from "@/lib/api";
 
-import { useState, useSyncExternalStore } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import AddToCart from "@/components/modals/AddToCart/AddToCart";
 import Variant from "@/components/modals/variant/Variant";
 import type { CartItem } from "@/components/modals/cart/Cart";
 import catalog from "@/components/products/english.json";
-import {
-  getServerWishlistSnapshot,
-  getWishlistSnapshot,
-  parseWishlistSnapshot,
-  subscribeToWishlist,
-  toggleWishlistId,
-} from "@/lib/wishlist";
+import { toggleWishlistId } from "@/lib/wishlist";
 import "./Wishlist.css";
 import VariantChips from "@/components/products/VariantChips";
 
@@ -48,13 +45,8 @@ export default function WishlistPage() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [variantProduct, setVariantProduct] = useState<Product | null>(null);
   const [variantIndexes, setVariantIndexes] = useState<Record<string, number>>({});
-  const savedIdsSnapshot = useSyncExternalStore(
-    subscribeToWishlist,
-    getWishlistSnapshot,
-    getServerWishlistSnapshot,
-  );
-  const savedIds = parseWishlistSnapshot(savedIdsSnapshot);
-  const products = (catalog.products as Product[]).filter((product) => savedIds.includes(product.id));
+  // the wishlist is kept in the browser; its products come from the shop for the chosen city
+  const { products, loading, count } = useWishlistProducts();
   const toggleProduct = (productId: string) => toggleWishlistId(productId);
 
   return (
@@ -73,7 +65,9 @@ export default function WishlistPage() {
           </span>
         </header>
 
-        {products.length ? (
+        {loading ? (
+          <ProductGridSkeleton count={Math.min(count, 10)} heading={false} label="Loading your wishlist" />
+        ) : products.length ? (
           <div className="wishlist-grid">
             {products.map((product) => {
               const variants = product.variants?.length ? product.variants : [{ label: product.weight, amount: 1, unit: "pack", price: product.price, originalPrice: product.originalPrice, inStock: true }];
@@ -147,7 +141,7 @@ export default function WishlistPage() {
           product={selectedProduct}
           locale={catalog.locale}
           currency={catalog.currency}
-          saved={savedIds.includes(selectedProduct.id)}
+          saved={products.some((p) => p.id === selectedProduct.id)}
           onToggleWishlist={() => toggleProduct(selectedProduct.id)}
           onClose={() => setSelectedProduct(null)}
           onOpenProduct={setSelectedProduct}

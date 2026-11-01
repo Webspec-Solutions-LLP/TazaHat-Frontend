@@ -1,5 +1,7 @@
 "use client";
 
+import { useWishlistProducts } from "@/lib/useWishlistProducts";
+
 import RequireLogin from "@/components/auth/RequireLogin";
 
 import Link from "next/link";
@@ -158,6 +160,7 @@ function GroceryIllustration() {
 }
 
 function MyProfileContent() {
+  const { products: likedProducts } = useWishlistProducts();
   const [avatarUrl, setAvatarUrl] = useState("");
   const [profile, setProfile] = useState({ name: "Joydeep Barik", email: "customer@tazahat.in", phone: "+91 90000 00000" });
   const [profileDraft, setProfileDraft] = useState<typeof profile | null>(null);
@@ -360,7 +363,7 @@ function MyProfileContent() {
           onSave={saveAddress}
         />
       )}
-      <Products heading="Your liked products" />
+      {likedProducts.length > 0 && <Products heading="Your liked products" products={likedProducts} />}
       <section className="profile-tickets" aria-labelledby="profile-tickets-title">
         <div className="profile-tickets-heading">
           <div className="profile-tickets-title-wrap">

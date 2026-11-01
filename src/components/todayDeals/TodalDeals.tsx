@@ -25,7 +25,7 @@ function CartIcon() {
   return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M2 3h2l2.4 12.2a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6L22 8H5" /><circle cx="9" cy="21" r="1" /><circle cx="19" cy="21" r="1" /></svg>;
 }
 
-export default function TodalDeals({ products = catalog.products }: { products?: Product[] }) {
+export default function TodalDeals({ products }: { products: Product[] }) {
   const [remaining, setRemaining] = useState<number | null>(null);
   const [showFloatingTimer, setShowFloatingTimer] = useState(false);
   const [navbarOffset, setNavbarOffset] = useState(72);
