@@ -3,6 +3,7 @@
 import { useBackClose } from "@/lib/backLayers";
 
 import { useEffect, useId, useRef, useState } from "react";
+import { lookupPincodeAction } from "@/app/address-actions";
 import "./Address.css";
 
 export interface AddressFormValues {
@@ -20,7 +21,8 @@ export interface AddressFormValues {
 
 interface AddressProps {
   onClose: () => void;
-  onSave: (values: AddressFormValues) => void;
+  /** save the address; return an error text to keep the form open and show it */
+  onSave: (values: AddressFormValues) => void | string | null | Promise<void | string | null>;
   initialValues?: Partial<AddressFormValues>;
 }
 
@@ -75,9 +77,27 @@ export default function Address({ onClose, onSave, initialValues }: AddressProps
   const updateValue = (field: keyof AddressFormValues, value: string) => {
     setValues((current) => ({ ...current, [field]: value }));
   };
-  const submitAddress = (event: React.FormEvent<HTMLFormElement>) => {
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [pinInfo, setPinInfo] = useState<{ serviceable: boolean; text: string } | null>(null);
+  // a full PIN code is checked as soon as it is typed: do we deliver there, and to which city
+  useEffect(() => {
+    if (!/^\d{6}$/.test(values.pincode)) { setPinInfo(null); return; }
+    let cancelled = false;
+    lookupPincodeAction(values.pincode).then(info => {
+      if (cancelled || !info) return;
+      setPinInfo(info.serviceable ? { serviceable: true, text: `We deliver here: ${[info.city, info.state].filter(Boolean).join(", ")}` } : { serviceable: false, text: "We do not deliver to this PIN code yet." });
+    });
+    return () => { cancelled = true; };
+  }, [values.pincode]);
+  const submitAddress = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    onSave(values);
+    if (saving) return;
+    setSaving(true);
+    setError("");
+    const problem = await onSave(values);
+    setSaving(false);
+    if (problem) { setError(problem); return; }
     closeSidebar();
   };
 
@@ -172,11 +192,13 @@ export default function Address({ onClose, onSave, initialValues }: AddressProps
               <span>Pin code <b>*</b></span>
               <input required inputMode="numeric" autoComplete="postal-code" pattern="[0-9]{6}" maxLength={6} placeholder="Enter PIN" value={values.pincode} onChange={(event) => updateValue("pincode", event.target.value.replace(/\D/g, "").slice(0, 6))} />
             </label>
+            {pinInfo && <p className={`address-pin-info${pinInfo.serviceable ? " is-ok" : " is-bad"}`} role="status">{pinInfo.text}</p>}
+            {error && <p className="address-pin-info is-bad" role="alert">{error}</p>}
           </div>
 
           <footer className="address-sidebar-footer">
             <button type="button" className="address-cancel-button" onClick={closeSidebar}>Cancel</button>
-            <button type="submit" className="address-submit-button">{isEditing ? "SAVE ADDRESS" : "ADD ADDRESS"}</button>
+            <button type="submit" className="address-submit-button" disabled={saving}>{saving ? "SAVING…" : isEditing ? "SAVE ADDRESS" : "ADD ADDRESS"}</button>
           </footer>
         </form>
       </section>

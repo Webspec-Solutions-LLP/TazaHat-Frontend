@@ -257,3 +257,7 @@
   .address-sidebar-close,
   .address-sidebar-footer button { transition: none; }
 }
+.address-pin-info { margin: -4px 0 0; font-size: 13px; font-weight: 600; }
+.address-pin-info.is-ok { color: #1b7a3a; }
+.address-pin-info.is-bad { color: #b3261e; }
+.address-submit-button:disabled { opacity: .6; cursor: wait; }
