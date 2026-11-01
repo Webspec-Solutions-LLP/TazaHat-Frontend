@@ -1,6 +1,6 @@
 "use client";
 
-import PackAction, { firstOrderable } from "@/components/availability/PackAction";
+import PackAction, { StockRibbon, firstOrderable } from "@/components/availability/PackAction";
 import type { Product } from "@/lib/api";
 
 import { useCallback, useEffect, useState } from "react";
@@ -68,6 +68,7 @@ export default function Products({ heading, products = text.products, showViewAl
       <article className="product-card" key={product.id}>
         <div className="product-image">
           <Image src={product.image} alt={product.name} fill sizes="(max-width: 600px) 45vw, (max-width: 1023px) 25vw, 180px" draggable={false} unoptimized={isRemoteImage(product.image)} onError={fallbackImage} />
+          <StockRibbon pack={variant} />
           <span className="product-discount-badge">{text.discount.replace("{percent}", String(discount))}</span>
           {product.rating > 0 && <span className="product-image-rating" aria-label={text.rating.replace("{rating}", String(product.rating)).replace("{reviews}", String(product.reviews))}>★ {product.rating}</span>}
           <button type="button" className="product-save" aria-pressed={isSaved} aria-label={(isSaved ? text.unsave : text.save).replace("{name}", product.name)} onClick={() => setSaved(toggleWishlistId(product.id))}>

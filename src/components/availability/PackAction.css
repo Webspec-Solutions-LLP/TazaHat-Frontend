@@ -6,3 +6,11 @@
 .pack-action--soon, .pack-action--out { background: #f1f4f8 !important; color: #5b6b7c !important; border: 1.5px solid #dde5ee !important; cursor: not-allowed; }
 .pack-action:disabled { opacity: 1; }
 .pack-action svg { flex: none; }
+
+/* the label on the picture of a card whose selected pack cannot be ordered */
+.stock-ribbon { position: absolute; left: 50%; bottom: 10px; z-index: 2; transform: translateX(-50%); padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 800; letter-spacing: 0.02em; white-space: nowrap; box-shadow: 0 4px 12px rgba(15, 45, 80, 0.2); pointer-events: none; }
+.stock-ribbon--out { background: #c62828; color: #fff; }
+.stock-ribbon--soon { background: #0b5cad; color: #fff; }
+.product-image:has(.stock-ribbon--out) img { filter: grayscale(0.85); opacity: 0.65; }
+.pd-main-image .stock-ribbon { top: 14px; bottom: auto; font-size: 13px; padding: 6px 14px; }
+.pd-main-image:has(.stock-ribbon--out) img { filter: grayscale(0.85); opacity: 0.65; }

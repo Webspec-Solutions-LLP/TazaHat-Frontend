@@ -1,6 +1,6 @@
 "use client";
 
-import PackAction, { firstOrderable } from "@/components/availability/PackAction";
+import PackAction, { StockRibbon, firstOrderable } from "@/components/availability/PackAction";
 import type { Product } from "@/lib/api";
 
 import { useState, useSyncExternalStore } from "react";
@@ -94,7 +94,8 @@ export default function WishlistPage() {
                       sizes="(max-width: 560px) 45vw, (max-width: 1050px) 25vw, 220px"
                       draggable={false}
                     />
-                    <span className="product-discount-badge">
+                    <StockRibbon pack={variant} />
+          <span className="product-discount-badge">
                       {catalog.discount.replace("{percent}", String(discount))}
                     </span>
                     <span

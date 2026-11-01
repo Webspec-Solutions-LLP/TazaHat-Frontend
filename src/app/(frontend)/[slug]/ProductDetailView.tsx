@@ -1,6 +1,6 @@
 "use client";
 
-import PackAction from "@/components/availability/PackAction";
+import PackAction, { StockRibbon } from "@/components/availability/PackAction";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Products from "@/components/products/Products";
@@ -227,6 +227,7 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
               onLoad={e => { setNatural({ w: e.currentTarget.naturalWidth || 1, h: e.currentTarget.naturalHeight || 1 }); setShownSrc(e.currentTarget.currentSrc || null); }}
               style={tapZoom ? { transform: "scale(2.2)", transformOrigin: `${tapZoom.x}% ${tapZoom.y}%` } : undefined} />
             {lens && <span className="pd-zoom-lens" aria-hidden="true" style={lens.lens} />}
+            <StockRibbon pack={pack} />
             {isFish ? <span className="pd-fresh">🐟 &nbsp;Fresh Catch</span> : <span className="pd-fresh">🌿 &nbsp;Fresh &amp; Quality Checked</span>}<span className="pd-natural">◉ &nbsp;100% Fresh &amp; Natural</span>
           </div>
           {hasThumbs && <div className="pd-thumbnails" role="tablist" aria-label="Product pictures">{gallery.map((src, index) => <button key={`${src}-${index}`} className={mainImage === src ? "is-active" : ""} onClick={() => { setActiveImage(index); setLens(null); setTapZoom(null); }} aria-label={`Show product image ${index + 1}`} role="tab" aria-selected={mainImage === src}><Image src={src} alt={`${name} - picture ${index + 1}`} fill sizes="76px" unoptimized={isRemoteImage(src)} onError={fallbackImage} /></button>)}</div>}

@@ -29,6 +29,13 @@ const BellIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="non
 const CalendarIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>;
 const CheckIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10" /></svg>;
 
+/** On the picture of a card: "Out of stock" (the picture fades) or "Coming soon" when the pack is not on sale yet; nothing when it can be ordered. */
+export function StockRibbon({ pack }: { pack?: PackAvailability | null }) {
+  const status = packStatus(pack);
+  if (status === "ok") return null;
+  return <span className={`stock-ribbon stock-ribbon--${status}`}>{status === "out" ? "Out of stock" : "Coming soon"}</span>;
+}
+
 export function AvailableFromButton({ label, className = "" }: { label: string; className?: string }) {
   return <button type="button" className={`${className} pack-action pack-action--soon`} disabled><CalendarIcon />Available from {label}</button>;
 }
