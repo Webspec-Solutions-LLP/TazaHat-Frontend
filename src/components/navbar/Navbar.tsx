@@ -796,7 +796,7 @@ export default function Navbar({
           onUpdateCartQuantity={updateCartQuantity}
         />
       )}
-      {isLocationOpen && <Location onClose={() => setIsLocationOpen(false)} onLogin={() => { setIsLocationOpen(false); openLogin(); }} />}
+      {isLocationOpen && <Location onClose={() => setIsLocationOpen(false)} />}
     </header>
   );
 }

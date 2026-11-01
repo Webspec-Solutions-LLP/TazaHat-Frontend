@@ -206,7 +206,7 @@
 .location-map {
   position: relative;
   overflow: hidden;
-  height: clamp(330px, 47vh, 430px);
+  height: clamp(250px, 36vh, 360px); /* leaves room for more city buttons now that the Deliver button stays at the bottom */
   border: 1px solid #dce6ef;
   border-radius: 10px;
   background: #f1f4e9;
@@ -900,3 +900,13 @@
 .location-confirm:hover:not(:disabled) { background: #156a30; }
 .location-confirm:disabled { background: #c9d3cc; color: #fff; cursor: not-allowed; }
 .pac-container { z-index: 100000 !important; }
+
+/* search and "use my location" sit on top of the map; the confirm button stays at the bottom of the popup; the city buttons fill each row */
+.location-map-toolbar { position: absolute; z-index: 5; top: 12px; right: 12px; left: 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; pointer-events: none; }
+.location-map-toolbar > * { pointer-events: auto; }
+.location-map-toolbar .location-map-search-field { flex: 1 1 220px; width: auto; min-width: 0; box-shadow: 0 4px 14px rgb(0 22 47 / 18%); }
+.location-map-toolbar .location-map-locate { position: static; flex: none; height: 42px; box-shadow: 0 4px 14px rgb(0 22 47 / 18%); }
+.location-actions { flex: none; padding: 12px 22px; border-top: 1px solid #edf1f5; background: #fff; }
+.location-actions .location-confirm { margin-top: 0; }
+.location-chip { flex: 1 1 auto; }
+@media (max-width: 576px) { .location-actions { padding: 10px 14px; } }

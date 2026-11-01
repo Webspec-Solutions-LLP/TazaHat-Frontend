@@ -12,7 +12,6 @@ import "./Location.css";
 
 interface LocationProps {
   onClose: () => void;
-  onLogin: () => void;
 }
 
 const INDIA_CENTER = { lat: 22.5726, lng: 88.3639 }; // Kolkata, used until a city or the visitor's position is known
@@ -20,7 +19,7 @@ const LOCATION_BLOCKED = "Location access is blocked for this site. To see produ
 
 type Verdict = { serviceable: true; city: ApiCity } | { serviceable: false; message: string };
 
-export default function Location({ onClose, onLogin }: LocationProps) {
+export default function Location({ onClose }: LocationProps) {
   const router = useRouter();
   const { city: savedCity } = useCity();
   const [cities, setCities] = useState<ApiCity[]>([]);
@@ -218,23 +217,23 @@ export default function Location({ onClose, onLogin }: LocationProps) {
           </div>
 
           <div className="location-header-actions">
-            <button type="button" className="location-login-link" onClick={() => closeWithAnimation(onLogin)}>Login</button>
             <button type="button" className="location-close" onClick={() => closeWithAnimation()} aria-label="Close location selector">×</button>
           </div>
         </header>
 
         <div className="location-content">
           <section className="location-map-section" aria-label="Delivery map">
-            <div className="location-map-search">
-              <label className="location-map-search-field">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
-                <input ref={searchInputRef} placeholder="Search area, street or landmark" aria-label="Search area, street or landmark" />
-              </label>
-            </div>
             <div className="location-map">
               <div ref={mapElementRef} className="location-map-canvas" role="application" aria-label="Interactive delivery map. Drag the pin to choose a location." />
               {mapError && <p className="location-map-error">{mapError} You can still pick a city below.</p>}
-              <button type="button" className="location-map-locate" onClick={() => void detectLocation()} disabled={busy}>Use my current location</button>
+              {/* search and "use my location" sit on top of the map */}
+              <div className="location-map-toolbar">
+                <label className="location-map-search-field">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+                  <input ref={searchInputRef} placeholder="Search area, street or landmark" aria-label="Search area, street or landmark" />
+                </label>
+                <button type="button" className="location-map-locate" onClick={() => void detectLocation()} disabled={busy}>Use my current location</button>
+              </div>
               <span className="location-map-caption">{busy ? "Checking this location…" : verdict?.serviceable ? `Delivery area · ${verdict.city.name}` : "Drag the pin to your address"}</span>
             </div>
           </section>
@@ -254,7 +253,8 @@ export default function Location({ onClose, onLogin }: LocationProps) {
               <button type="button" key={city.id} className={`location-chip${selectedCityId === city.id ? " is-selected" : ""}`} style={{ "--chip-index": index } as React.CSSProperties} onClick={() => void chooseCity(city)}>{city.name}</button>
             ))}
           </div>
-
+        </div>
+        <div className="location-actions">
           <button type="button" className="location-confirm" onClick={() => void confirm()} disabled={!verdict?.serviceable || busy || saving}>
             {verdict?.serviceable ? `Deliver to ${verdict.city.name}` : "Choose a delivery location"}
           </button>
