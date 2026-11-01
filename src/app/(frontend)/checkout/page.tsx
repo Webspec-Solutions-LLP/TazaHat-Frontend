@@ -2,43 +2,30 @@
 
 import RequireLogin from "@/components/auth/RequireLogin";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import Address, { type AddressFormValues } from "@/components/modals/address/Address";
+import { listAddressesAction, saveAddressAction, type SavedAddress } from "@/app/address-actions";
+import { checkoutOptionsAction, checkoutQuoteAction, type CheckoutOptions, type CheckoutQuote } from "@/app/checkout-actions";
+import type { CartItem } from "@/components/modals/cart/Cart";
+import { fallbackImage, isRemoteImage } from "@/lib/api";
 import "./Checkout.css";
 
-const days = [
-  { month: "October", date: 23, day: "Friday" },
-  { month: "October", date: 24, day: "Saturday" },
-  { month: "October", date: 25, day: "Sunday" },
-  { month: "October", date: 26, day: "Monday" },
-  { month: "October", date: 27, day: "Tuesday" },
-  { month: "October", date: 28, day: "Wednesday" },
-];
-
-const schedules = [
-  { title: "Morning Delivery", detail: "Between 10:00AM - 12:00PM", fee: 0 },
-  { title: "Lunch Delivery", detail: "Between 12:00PM - 2:00PM", fee: 0 },
-  { title: "Express Delivery", detail: "Before 9:00 AM", fee: 20 },
-  { title: "Rocket Service", detail: "Before 8:00 AM", fee: 28 },
-  { title: "Priority Delivery", detail: "Before 10:00AM", fee: 10 },
-  { title: "Evening Delivery", detail: "Between 6:00PM - 10:00PM", fee: 0 },
-];
-
-type CheckoutItem = {
-  id: string;
-  name: string;
-  image: string;
-  price: number;
-  quantity: number;
-  weight?: string;
+const CART_STORAGE_KEY = "tazahat-cart-v1";
+const money = (paisa: number) => `₹${(paisa / 100).toFixed(2)}`;
+const addressText = (a: SavedAddress) =>
+  [a.label ? `${a.label} :` : "", [a.contactName, a.apartmentNumber, a.line1, a.line2, a.landmark, a.locality, a.cityName, a.pincode].filter(Boolean).join(", ")].filter(Boolean).join(" ");
+const dayParts = (iso: string) => {
+  const d = new Date(`${iso}T00:00:00Z`);
+  return { month: d.toLocaleDateString("en-IN", { month: "long", timeZone: "UTC" }), date: d.getUTCDate(), day: d.toLocaleDateString("en-IN", { weekday: "long", timeZone: "UTC" }) };
 };
-
-const demoAddresses = [
-  "Office : C/O Tapash Nath, Dharmanagar, near school, Cooch Behar, West Bengal 73610",
-  "Home : House 14, Road 3, Banamalipur, Agartala, Tripura 799001",
-  "Flat 3B, Sunshine Residency, Ramnagar, Agartala, Tripura 799002",
-];
+const readCart = (): CartItem[] => {
+  try {
+    const raw = JSON.parse(window.localStorage.getItem(CART_STORAGE_KEY) ?? "[]");
+    return Array.isArray(raw) ? raw.filter((i: CartItem) => i && typeof i.id === "string" && i.variantId && i.quantity > 0) : [];
+  } catch { return []; }
+};
 
 function Icon({ name }: { name: string }) {
   const common = { width: 26, height: 26, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.9, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, "aria-hidden": true as const };
@@ -58,40 +45,79 @@ function Icon({ name }: { name: string }) {
 }
 
 function CheckoutContent() {
-  const [items, setItems] = useState<CheckoutItem[]>([]);
-  const [selectedDay, setSelectedDay] = useState(0);
-  const [deliveryType, setDeliveryType] = useState("Store Pick Up");
-  const [schedule, setSchedule] = useState(0);
-  const [payment, setPayment] = useState("Online Payment");
-  const [address, setAddress] = useState(demoAddresses[0]);
+  const [cart, setCart] = useState<CartItem[] | null>(null);
+  const [options, setOptions] = useState<CheckoutOptions | null>(null);
+  const [addresses, setAddresses] = useState<SavedAddress[] | null>(null);
+  const [quote, setQuote] = useState<CheckoutQuote | null>(null);
+  const [quoteError, setQuoteError] = useState("");
+  const [quoting, setQuoting] = useState(false);
+  const [deliveryType, setDeliveryType] = useState<"HOME_DELIVERY" | "STORE_PICKUP">("HOME_DELIVERY");
+  const [date, setDate] = useState("");
+  const [slotId, setSlotId] = useState("");
+  const [payment, setPayment] = useState<"COD" | "ONLINE">("COD");
+  const [addressId, setAddressId] = useState("");
+  const [useWallet, setUseWallet] = useState(false);
   const [isAddressListOpen, setIsAddressListOpen] = useState(false);
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [coupon, setCoupon] = useState("");
   const [couponMessage, setCouponMessage] = useState("");
-  const [placed, setPlaced] = useState(false);
-  const deliveryFee = deliveryType === "Home Delivery" ? 0 : 0;
-  const subtotal = useMemo(() => items.reduce((sum, item) => sum + item.price * item.quantity, 0), [items]);
-  const itemCount = useMemo(() => items.reduce((sum, item) => sum + item.quantity, 0), [items]);
-  const total = subtotal + deliveryFee + schedules[schedule].fee;
+  const [placeMessage, setPlaceMessage] = useState("");
 
-  const saveAddress = (values: AddressFormValues) => {
-    setAddress([values.recipient, values.houseNumber, values.addressLine1, values.addressLine2, values.locality, values.landmark, values.pincode].filter(Boolean).join(", "));
-    setIsAddressModalOpen(false);
-  };
-
+  // the cart is the browser's own (the same one the cart sidebar shows); the address book and the city's choices come from the server
   useEffect(() => {
-    const savedItems = window.sessionStorage.getItem("tazahat-checkout-items");
-    if (!savedItems) return;
-    try {
-      const parsedItems: unknown = JSON.parse(savedItems);
-      if (Array.isArray(parsedItems)) setItems(parsedItems as CheckoutItem[]);
-    } catch {
-      window.sessionStorage.removeItem("tazahat-checkout-items");
-    }
-    window.sessionStorage.removeItem("tazahat-checkout-items");
+    setCart(readCart());
+    checkoutOptionsAction().then(o => {
+      setOptions(o);
+      if (o) {
+        setDate(current => current || o.dates[0]?.date || "");
+        setSlotId(current => current || o.slots.find(s => s.chargePaisa === 0)?.id || o.slots[0]?.id || "");
+      }
+    });
+    listAddressesAction().then(list => {
+      setAddresses(list);
+      setAddressId(current => current || (list.find(a => a.isDefault) ?? list[0])?.id || "");
+    });
   }, []);
 
-  const applyCoupon = () => setCouponMessage(coupon.trim() ? "This coupon code is not valid." : "Enter a coupon code to apply.");
+  const lines = useMemo(() => (cart ?? []).map(i => ({ variantId: i.variantId!, cuttingTypeId: i.cuttingTypeId ?? null, quantity: i.quantity, instruction: i.instruction ?? null })), [cart]);
+  const linesKey = JSON.stringify(lines);
+
+  // every change that can move the price is priced again by the server
+  useEffect(() => {
+    if (!lines.length) { setQuote(null); return; }
+    let cancelled = false;
+    setQuoting(true);
+    checkoutQuoteAction({ lines, deliveryType, addressId: deliveryType === "HOME_DELIVERY" ? addressId || null : null, slotId: slotId || null, useWallet }).then(res => {
+      if (cancelled) return;
+      setQuoting(false);
+      if (res.ok) { setQuote(res.quote); setQuoteError(""); } else setQuoteError(res.error);
+    });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [linesKey, deliveryType, addressId, slotId, useWallet]);
+
+  const saveAddress = useCallback(async (values: AddressFormValues) => {
+    const res = await saveAddressAction({
+      label: values.addressType, contactName: values.recipient, phone: values.phone, altPhone: values.alternatePhone || undefined, line1: values.addressLine1,
+      line2: values.addressLine2 || undefined, apartmentNumber: values.houseNumber || undefined, landmark: values.landmark || undefined, locality: values.locality || undefined,
+      pincode: values.pincode, makeDefault: true,
+    });
+    if (!res.ok) return res.error;
+    setAddresses(await listAddressesAction());
+    setAddressId(res.data.id);
+    return null;
+  }, []);
+
+  const selectedAddress = addresses?.find(a => a.id === addressId);
+  const itemCount = quote ? quote.lines.filter(l => !l.problem).reduce((n, l) => n + l.quantity, 0) : (cart ?? []).reduce((n, i) => n + i.quantity, 0);
+  const missing: string[] = [];
+  if (!date) missing.push("Choose a delivery date.");
+  if (!slotId) missing.push("Choose a delivery time.");
+  const blockers = [...(quote?.blockers ?? []), ...missing];
+  const canPlace = !!quote && !quoting && blockers.length === 0;
+  const applyCoupon = () => setCouponMessage(coupon.trim() ? "Coupons are not available yet." : "Enter a coupon code to apply.");
+  const onlinePay = options?.payments.find(p => p.id === "ONLINE");
+  const fee = (paisa: number) => (paisa > 0 ? money(paisa) : "Free");
 
   return (
     <main className="checkout-page">
@@ -99,38 +125,56 @@ function CheckoutContent() {
         <div className="checkout-left-scroll">
           <section className="checkout-section checkout-products">
             <div className="checkout-section-heading"><span className="checkout-icon"><Icon name="box" /></span><div><h2>Your Items <b>*</b></h2><p>{itemCount} {itemCount === 1 ? "item" : "items"} in your order</p></div></div>
-            {items.length > 0 ? <div className="checkout-product-list">{items.map(item => <article className="checkout-product" key={item.id}>
-              <div className="checkout-product-image"><Image src={item.image} alt={item.name} fill sizes="76px"/></div>
-              <div className="checkout-product-info"><h3>{item.name}</h3>{item.weight && <p>{item.weight}</p>}<span>Qty: {item.quantity}</span></div>
-              <strong className="checkout-product-price">₹{(item.price * item.quantity).toFixed(2)}</strong>
-            </article>)}</div> : <p className="checkout-empty-items">No cart items were found. Add items to your cart to continue.</p>}
-          </section>
-          <section className="checkout-section checkout-address">
-            <div className="checkout-section-heading"><span className="checkout-icon"><Icon name="pin" /></span><div><h1>Delivery Address <b>*</b></h1><p>Select your delivery address or add a new one</p></div></div>
-            <button className="checkout-add-address" type="button" onClick={() => setIsAddressModalOpen(true)}><span>＋</span> Add Address</button>
-            <button className={`checkout-address-choice${isAddressListOpen ? " is-open" : ""}`} type="button" aria-expanded={isAddressListOpen} onClick={() => setIsAddressListOpen(open => !open)}><span className="checkout-radio checked"/><span className="checkout-home-icon">⌂</span><strong>{address}</strong><span className="checkout-chevron" aria-hidden="true"/></button>
-            {isAddressListOpen && <div className="checkout-address-list" role="listbox" aria-label="Saved delivery addresses">{demoAddresses.map((savedAddress) => <button key={savedAddress} type="button" role="option" aria-selected={address === savedAddress} className={`checkout-address-option${address === savedAddress ? " selected" : ""}`} onClick={() => { setAddress(savedAddress); setIsAddressListOpen(false); }}><span className={`checkout-radio${address === savedAddress ? " checked" : ""}`}/><span>{savedAddress}</span></button>)}</div>}
-          </section>
-
-          <section className="checkout-section">
-            <div className="checkout-section-heading"><span className="checkout-icon"><Icon name="calendar" /></span><div><h2>Delivery Date <b>*</b></h2><p>Choose your preferred delivery date</p></div></div>
-            <div className="checkout-date-grid">{days.map((day, index) => <button key={day.date} type="button" className={`checkout-date${selectedDay === index ? " selected" : ""}`} onClick={() => setSelectedDay(index)}><span>{day.month}</span><strong>{day.date}</strong><b>{day.day}</b>{selectedDay === index && <i>✓</i>}</button>)}</div>
+            {cart === null ? <p className="checkout-empty-items">Loading your items…</p> : cart.length === 0 ? <p className="checkout-empty-items">No cart items were found. <Link href="/products">Add items to your cart</Link> to continue.</p> : <div className="checkout-product-list">{(quote?.lines ?? cart.map(i => ({ variantId: i.variantId!, cuttingTypeId: i.cuttingTypeId ?? null, quantity: i.quantity, instruction: i.instruction ?? null, name: i.name, image: i.image, packLabel: i.packLabel ?? null, dressingName: i.dressingName ?? null, dressingUnitPaisa: (i.dressingCharge ?? 0) * 100, linePaisa: i.price * i.quantity * 100, problem: null as string | null }))).map(item => {
+              const original = cart.find(c => c.variantId === item.variantId && (c.cuttingTypeId ?? null) === item.cuttingTypeId);
+              const image = item.image || original?.image || "";
+              return <article className={`checkout-product${item.problem ? " has-problem" : ""}`} key={`${item.variantId}|${item.cuttingTypeId ?? ""}`}>
+                <div className="checkout-product-image">{image && <Image src={image} alt={item.name} fill sizes="76px" unoptimized={isRemoteImage(image)} onError={fallbackImage} />}</div>
+                <div className="checkout-product-info"><h3>{item.name}</h3>
+                  <p>{[item.packLabel, item.dressingName ? `${item.dressingName}${item.dressingUnitPaisa > 0 ? ` (+${money(item.dressingUnitPaisa)} dressing)` : ""}` : ""].filter(Boolean).join(" · ")}</p>
+                  {item.instruction && <p>“{item.instruction}”</p>}
+                  <span>Qty: {item.quantity}</span>
+                  {item.problem && <em className="checkout-product-problem">{item.problem} <Link href="/products">Change</Link></em>}</div>
+                <strong className="checkout-product-price">{item.problem ? "—" : money(item.linePaisa)}</strong>
+              </article>;
+            })}</div>}
           </section>
 
           <section className="checkout-section">
             <div className="checkout-section-heading"><span className="checkout-icon"><Icon name="truck" /></span><div><h2>Delivery Type <b>*</b></h2><p>Choose your delivery type</p></div></div>
-            <div className="checkout-options checkout-type-options">{["Store Pick Up", "Home Delivery"].map((option, index) => <button type="button" key={option} className={`checkout-choice${deliveryType === option ? " selected" : ""}`} onClick={() => setDeliveryType(option)}><span className={`checkout-radio${deliveryType === option ? " checked" : ""}`}/><span className="checkout-choice-icon">{index === 0 ? "▣" : "⌂"}</span><strong>{option}</strong></button>)}</div>
+            <div className="checkout-options checkout-type-options">{([["HOME_DELIVERY", "Home Delivery", "⌂"], ["STORE_PICKUP", "Store Pick Up", "▣"]] as const).map(([id, label, icon]) => <button type="button" key={id} aria-pressed={deliveryType === id} className={`checkout-choice${deliveryType === id ? " selected" : ""}`} onClick={() => setDeliveryType(id)}><span className={`checkout-radio${deliveryType === id ? " checked" : ""}`}/><span className="checkout-choice-icon">{icon}</span><strong>{label}</strong></button>)}</div>
             <span className="checkout-wave" aria-hidden="true">〜〜</span>
           </section>
 
+          {deliveryType === "HOME_DELIVERY" ? <section className="checkout-section checkout-address">
+            <div className="checkout-section-heading"><span className="checkout-icon"><Icon name="pin" /></span><div><h1>Delivery Address <b>*</b></h1><p>Select your delivery address or add a new one</p></div></div>
+            <button className="checkout-add-address" type="button" onClick={() => setIsAddressModalOpen(true)}><span>＋</span> Add Address</button>
+            {addresses === null ? <p className="checkout-empty-items">Loading your addresses…</p> : addresses.length === 0 ? <p className="checkout-empty-items">You have no saved address yet. Add one to get your order delivered.</p> : <>
+              <button className={`checkout-address-choice${isAddressListOpen ? " is-open" : ""}`} type="button" aria-expanded={isAddressListOpen} onClick={() => setIsAddressListOpen(open => !open)}><span className="checkout-radio checked"/><span className="checkout-home-icon">⌂</span><strong>{selectedAddress ? addressText(selectedAddress) : "Select an address"}</strong><span className="checkout-chevron" aria-hidden="true"/></button>
+              {isAddressListOpen && <div className="checkout-address-list" role="listbox" aria-label="Saved delivery addresses">{addresses.map(a => <button key={a.id} type="button" role="option" aria-selected={addressId === a.id} className={`checkout-address-option${addressId === a.id ? " selected" : ""}`} onClick={() => { setAddressId(a.id); setIsAddressListOpen(false); }}><span className={`checkout-radio${addressId === a.id ? " checked" : ""}`}/><span>{addressText(a)}</span></button>)}</div>}
+            </>}
+          </section> : <section className="checkout-section checkout-address">
+            <div className="checkout-section-heading"><span className="checkout-icon"><Icon name="pin" /></span><div><h1>Pick up from our store</h1><p>No delivery fee and no minimum order. Pay when you collect.</p></div></div>
+            {options === null ? null : options.pickupStores.length ? <div className="checkout-address-list" aria-label="Pickup stores">{options.pickupStores.map(st => <div key={st.id} className="checkout-address-option selected"><span className="checkout-radio checked"/><span><strong>{st.name}</strong>{[st.areaName, st.pincode].filter(Boolean).length ? ` — ${[st.areaName, st.pincode].filter(Boolean).join(", ")}` : ""}{st.phone ? ` · ${st.phone}` : ""}</span></div>)}</div> : <p className="checkout-empty-items">We will tell you the pickup address when your order is confirmed.</p>}
+          </section>}
+
           <section className="checkout-section">
-            <div className="checkout-section-heading"><span className="checkout-icon"><Icon name="clock" /></span><div><h2>Delivery Schedule <b>*</b></h2><p>Select your preferred delivery time</p></div></div>
-            <div className="checkout-schedule-grid">{schedules.map((item, index) => <label key={item.title} className={`checkout-schedule${schedule === index ? " selected" : ""}`}><input type="radio" name="schedule" checked={schedule === index} onChange={() => setSchedule(index)}/><span className="checkout-radio checked"/><span><strong>{item.title}</strong> <small>({item.detail})</small>{item.fee > 0 && <b className="schedule-fee"> +₹{item.fee}.00</b>}</span></label>)}</div>
+            <div className="checkout-section-heading"><span className="checkout-icon"><Icon name="calendar" /></span><div><h2>{deliveryType === "HOME_DELIVERY" ? "Delivery Date" : "Pickup Date"} <b>*</b></h2><p>Choose your preferred date</p></div></div>
+            <div className="checkout-date-grid" role="radiogroup" aria-label="Date">{(options?.dates ?? []).map(d => { const p = dayParts(d.date); const on = date === d.date; return <button key={d.date} type="button" role="radio" aria-checked={on} className={`checkout-date${on ? " selected" : ""}`} onClick={() => setDate(d.date)}><span>{p.month}</span><strong>{p.date}</strong><b>{d.label === "Today" || d.label === "Tomorrow" ? d.label : p.day}</b>{on && <i>✓</i>}</button>; })}</div>
+          </section>
+
+          <section className="checkout-section">
+            <div className="checkout-section-heading"><span className="checkout-icon"><Icon name="clock" /></span><div><h2>{deliveryType === "HOME_DELIVERY" ? "Delivery Schedule" : "Pickup Time"} <b>*</b></h2><p>Select your preferred time</p></div></div>
+            <div className="checkout-schedule-grid" role="radiogroup" aria-label="Time">{(options?.slots ?? []).map(s => { const on = slotId === s.id; return <label key={s.id} className={`checkout-schedule${on ? " selected" : ""}`}><input type="radio" name="schedule" checked={on} onChange={() => setSlotId(s.id)}/><span className={`checkout-radio${on ? " checked" : ""}`}/><span><strong>{s.name}</strong> {s.time && <small>({s.time.replace(/\s+/g, " ")})</small>}{s.chargePaisa > 0 && <b className="schedule-fee"> +{money(s.chargePaisa)}</b>}</span></label>; })}</div>
           </section>
 
           <section className="checkout-section checkout-payment-section">
             <div className="checkout-section-heading"><span className="checkout-icon"><Icon name="card" /></span><div><h2>Payment Option <b>*</b></h2><p>Select your preferred payment method</p></div></div>
-            <div className="checkout-options checkout-payment-options">{["Online Payment", "Cash On Delivery"].map((option, index) => <button type="button" key={option} className={`checkout-choice${payment === option ? " selected" : ""}`} onClick={() => setPayment(option)}><span className={`checkout-radio${payment === option ? " checked" : ""}`}/><span className="checkout-choice-icon">{index === 0 ? "▰" : "♧"}</span><strong>{option}</strong></button>)}</div>
+            <div className="checkout-options checkout-payment-options">
+              <button type="button" aria-disabled={!onlinePay?.enabled} disabled={!onlinePay?.enabled} className={`checkout-choice is-disabled${payment === "ONLINE" ? " selected" : ""}`} onClick={() => onlinePay?.enabled && setPayment("ONLINE")}><span className={`checkout-radio${payment === "ONLINE" ? " checked" : ""}`}/><span className="checkout-choice-icon">▰</span><strong>Online Payment</strong><small className="checkout-soon">{onlinePay?.note ?? "Coming soon"}</small></button>
+              <button type="button" aria-pressed={payment === "COD"} className={`checkout-choice${payment === "COD" ? " selected" : ""}`} onClick={() => setPayment("COD")}><span className={`checkout-radio${payment === "COD" ? " checked" : ""}`}/><span className="checkout-choice-icon">♧</span><strong>{deliveryType === "HOME_DELIVERY" ? "Cash On Delivery" : "Pay at Store"}</strong></button>
+            </div>
+            {(options?.walletBalancePaisa ?? 0) > 0 && <label className="checkout-wallet"><input type="checkbox" checked={useWallet} onChange={e => setUseWallet(e.target.checked)}/> Use my wallet balance ({money(options!.walletBalancePaisa)})</label>}
           </section>
         </div>
 
@@ -139,17 +183,21 @@ function CheckoutContent() {
           <form className="checkout-coupon" onSubmit={event => { event.preventDefault(); applyCoupon(); }}><span>♧</span><input aria-label="Coupon code" value={coupon} onChange={event => setCoupon(event.target.value)} placeholder="Enter coupon code"/><button type="submit">Apply</button></form>
           {couponMessage && <p className="checkout-coupon-message" role="status">{couponMessage}</p>}
           <p className="checkout-note"><span>i</span><span>Please note we bill based on the actual wt. of the products. Final amount may vary depending on the actual item wt. during packaging. Thank you.</span></p>
-          <div className="checkout-price-rows">
-            <div className="checkout-price-row"><Icon name="box"/><span>Total {itemCount} {itemCount === 1 ? "Item" : "Items"}</span><strong>₹{subtotal.toFixed(2)}</strong></div>
-            <div className="checkout-price-row"><Icon name="drop"/><span>Dressing Fee</span><b>₹0.00</b></div>
-            <div className="checkout-price-row"><Icon name="truck"/><span>Delivery Fee</span><b>₹{deliveryFee.toFixed(2)}</b></div>
-            <div className="checkout-price-row"><Icon name="shield"/><span>Convenience Fee</span><b>₹0.00</b></div>
-            <div className="checkout-price-row"><span className="checkout-lightning">ϟ</span><span>Fast Processing Charge</span><b>₹{schedules[schedule].fee.toFixed(2)}</b></div>
-            <div className="checkout-price-row"><Icon name="tag"/><span>Promo</span><b>₹0.00</b></div>
+          <div className={`checkout-price-rows${quoting ? " is-updating" : ""}`}>
+            <div className="checkout-price-row"><Icon name="box"/><span>Total {itemCount} {itemCount === 1 ? "Item" : "Items"}</span><strong>{money(quote?.itemsPaisa ?? 0)}</strong></div>
+            <div className="checkout-price-row"><Icon name="drop"/><span>Dressing Fee</span><b>{fee(quote?.dressingPaisa ?? 0)}</b></div>
+            <div className="checkout-price-row"><Icon name="truck"/><span>Delivery Fee</span><b>{deliveryType === "STORE_PICKUP" ? "Free" : fee(quote?.deliveryPaisa ?? 0)}</b></div>
+            <div className="checkout-price-row"><Icon name="shield"/><span>Convenience Fee</span><b>{deliveryType === "STORE_PICKUP" ? "Free" : fee(quote?.convenienceFeePaisa ?? 0)}</b></div>
+            <div className="checkout-price-row"><span className="checkout-lightning">ϟ</span><span>Fast Processing Charge</span><b>{fee(quote?.slotFeePaisa ?? 0)}</b></div>
+            <div className="checkout-price-row"><Icon name="tag"/><span>Promo</span><b>{money(0)}</b></div>
+            {(quote?.walletUsedPaisa ?? 0) > 0 && <div className="checkout-price-row"><Icon name="card"/><span>Wallet</span><b>−{money(quote!.walletUsedPaisa)}</b></div>}
           </div>
-          <div className="checkout-total"><span>₹</span><strong>Total Amount</strong><b>₹{total.toFixed(2)}</b></div>
-          <button type="button" className="checkout-proceed" onClick={() => setPlaced(true)}><span>🛒</span>{placed ? "ORDER READY" : "PROCEED TO CHECKOUT"}<span>›</span></button>
-          {placed && <p className="checkout-order-message" role="status">Your order details are ready. Payment: {payment}.</p>}
+          {quote?.notes.map(n => <p className="checkout-hint" key={n}>{n}</p>)}
+          <div className="checkout-total"><span>₹</span><strong>{(quote?.walletUsedPaisa ?? 0) > 0 ? "To Pay" : "Total Amount"}</strong><b>{money(quote?.payablePaisa ?? 0)}</b></div>
+          {quoteError && <p className="checkout-blocker" role="alert">{quoteError}</p>}
+          {blockers.map(b => <p className="checkout-blocker" role="alert" key={b}>{b}</p>)}
+          <button type="button" className="checkout-proceed" disabled={!canPlace} onClick={() => setPlaceMessage("Your order details are ready. Placing orders is being switched on.")}><span>🛒</span>{quoting ? "UPDATING…" : "PLACE ORDER"}<span>›</span></button>
+          {placeMessage && <p className="checkout-order-message" role="status">{placeMessage}</p>}
           <div className="checkout-promo-art"><div className="checkout-promo-copy">Fresh<br/>From River<br/>To Your Table</div><Image src="/images/products/product--2.png" alt="Fresh fish" fill sizes="(max-width: 800px) 40vw, 300px"/></div>
         </aside>
       </div>

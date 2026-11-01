@@ -223,3 +223,16 @@
   .checkout-summary { height: 410px; padding-right: 9px; padding-left: 9px; }
   .checkout-promo-art { margin-inline: -9px; }
 }
+
+/* real checkout: disabled online payment, price hints, blockers */
+.checkout-choice.is-disabled { opacity: .55; cursor: not-allowed; }
+.checkout-choice.is-disabled:hover { border-color: #d6e4f0; box-shadow: none; }
+.checkout-soon { margin-left: auto; padding: 1px 6px; border-radius: 999px; background: #eef2f6; color: #5a6f85; font-size: 9px; font-weight: 700; white-space: nowrap; }
+.checkout-wallet { display: flex; align-items: center; gap: 8px; margin-top: 12px; color: #123b6d; font-size: 11px; font-weight: 600; }
+.checkout-hint { margin: 6px 5px 0; color: #0b7a3b; font-size: 10px; font-weight: 600; }
+.checkout-blocker { margin: 6px 0 0; color: #c0261f; font-size: 10px; font-weight: 600; line-height: 1.35; }
+.checkout-product.has-problem { opacity: .75; }
+.checkout-product-problem { display: block; margin-top: 3px; color: #c0261f; font-size: 10px; font-style: normal; font-weight: 600; }
+.checkout-price-rows.is-updating { opacity: .6; transition: opacity .15s; }
+.checkout-proceed:disabled { opacity: .55; cursor: not-allowed; }
+.checkout-address-option strong { font-weight: 700; }
