@@ -115,7 +115,9 @@ export default function Navbar({
     window.addEventListener(OPEN_LOCATION_EVENT, open);
     return () => window.removeEventListener(OPEN_LOCATION_EVENT, open);
   }, []);
-  const { user, openLogin, logout } = useAuth();
+  const { user, ready, openLogin, logout } = useAuth();
+  // a signed-in customer is greeted by first name on the button; "Customer" is the placeholder name of a new account
+  const greetName = user && user.name && user.name !== "Customer" ? user.name.split(" ")[0] : "";
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -657,10 +659,15 @@ export default function Navbar({
             <button
               type="button"
               className="navbar-action-item"
-              aria-label={t.account}
-              aria-haspopup="menu"
-              aria-expanded={isAccountOpen}
-              onClick={() => setIsAccountOpen(open => !open)}
+              aria-label={user ? t.account : t.login}
+              aria-haspopup={user ? "menu" : "dialog"}
+              aria-expanded={user ? isAccountOpen : undefined}
+              // not signed in: no menu, the login popup opens right away
+              onClick={() => {
+                if (!ready) return;
+                if (!user) { setIsAccountOpen(false); openLogin(); return; }
+                setIsAccountOpen(open => !open);
+              }}
             >
               <div className="navbar-action-icon-wrap">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -668,7 +675,7 @@ export default function Navbar({
                   <circle cx="12" cy="7" r="4" />
                 </svg>
               </div>
-              <span className="navbar-action-label">{t.account}</span>
+              <span className="navbar-action-label">{greetName || t.account}</span>
             </button>
             <div className={`navbar-account-dropdown${isAccountOpen ? " is-open" : ""}`} role="menu" aria-label={t.account} aria-hidden={!isAccountOpen}>
               {user ? (

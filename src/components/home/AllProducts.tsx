@@ -45,14 +45,15 @@ export default function AllProducts({ initial, total, cityName }: { initial: Pro
   }, [loadMore, hasMore, error]);
 
   return (
-    <>
+    // five cards a row on a wide screen: every 10 that load fill exactly two rows
+    <div className="home-all-products">
       <Products products={items} heading={`All products in ${cityName}`} showViewAll={false} layout="grid" />
       <div className="products-container">
         {hasMore && !error && <div ref={sentinel} className="products-more-sentinel" aria-hidden="true" />}
-        {loading && <div className="products-grid" role="status" aria-label="Loading more products" style={{ marginTop: 12 }}><ProductCardsSkeleton count={5} /></div>}
+        {loading && <div className="products-grid" role="status" aria-label="Loading more products" style={{ marginTop: 12 }}><ProductCardsSkeleton count={10} /></div>}
         {error && <p className="products-more-status" role="alert">{error}<button type="button" onClick={() => { setError(""); void loadMore(); }}>Try again</button></p>}
         {!hasMore && items.length > 0 && <p className="products-more-status">You have seen all {total.toLocaleString()} products in {cityName}.</p>}
       </div>
-    </>
+    </div>
   );
 }

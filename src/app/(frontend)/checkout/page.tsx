@@ -1,5 +1,7 @@
 "use client";
 
+import RequireLogin from "@/components/auth/RequireLogin";
+
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Address, { type AddressFormValues } from "@/components/modals/address/Address";
@@ -55,7 +57,7 @@ function Icon({ name }: { name: string }) {
   return <svg {...common}>{paths[name] ?? paths.box}</svg>;
 }
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const [items, setItems] = useState<CheckoutItem[]>([]);
   const [selectedDay, setSelectedDay] = useState(0);
   const [deliveryType, setDeliveryType] = useState("Store Pick Up");
@@ -154,4 +156,9 @@ export default function CheckoutPage() {
       {isAddressModalOpen && <Address onClose={() => setIsAddressModalOpen(false)} onSave={saveAddress} />}
     </main>
   );
+}
+
+/** Needs a login: without one the page asks the visitor to log in. */
+export default function CheckoutPage() {
+  return <RequireLogin what="checkout and place your order"><CheckoutContent /></RequireLogin>;
 }

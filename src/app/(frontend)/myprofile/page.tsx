@@ -1,5 +1,7 @@
 "use client";
 
+import RequireLogin from "@/components/auth/RequireLogin";
+
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import Products from "@/components/products/Products";
@@ -155,7 +157,7 @@ function GroceryIllustration() {
   );
 }
 
-export default function MyProfilePage() {
+function MyProfileContent() {
   const [avatarUrl, setAvatarUrl] = useState("");
   const [profile, setProfile] = useState({ name: "Joydeep Barik", email: "customer@tazahat.in", phone: "+91 90000 00000" });
   const [profileDraft, setProfileDraft] = useState<typeof profile | null>(null);
@@ -384,4 +386,9 @@ export default function MyProfilePage() {
       </section>
     </main>
   );
+}
+
+/** Needs a login: without one the page asks the visitor to log in. */
+export default function MyProfilePage() {
+  return <RequireLogin what="your profile"><MyProfileContent /></RequireLogin>;
 }

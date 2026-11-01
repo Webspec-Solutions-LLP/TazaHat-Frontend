@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/lib/auth";
 import "./BottomNavigation.css";
 
 const items = [
@@ -14,6 +15,7 @@ const items = [
 
 export default function BottomNavigation() {
   const pathname = usePathname();
+  const { user, ready, openLogin } = useAuth();
   const [isHidden, setIsHidden] = useState(false);
   const lastScrollY = useRef(0);
 
@@ -46,6 +48,15 @@ export default function BottomNavigation() {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{icon}</svg>
           <span>{label}</span>
         </>;
+
+        // not signed in: Account opens the login popup instead of a page that needs a login
+        if (label === "Account" && ready && !user) {
+          return (
+            <button className="mobile-bottom-navigation-item" type="button" key={label} aria-label="Log in" tabIndex={isHidden ? -1 : undefined} onClick={() => openLogin()}>
+              {content}
+            </button>
+          );
+        }
 
         if (label === "Cart") {
           return (

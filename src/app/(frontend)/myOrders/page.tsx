@@ -1,5 +1,7 @@
 "use client";
 
+import RequireLogin from "@/components/auth/RequireLogin";
+
 import Link from "next/link";
 import { useState } from "react";
 import orderData from "./orderData.json";
@@ -31,7 +33,7 @@ const tabs: { id: OrderTab; label: string }[] = [
   { id: "refund", label: "Refund" },
 ];
 
-export default function MyOrdersPage() {
+function MyOrdersContent() {
   const [activeTab, setActiveTab] = useState<OrderTab>("all");
   const filteredOrders = orders.filter(order => activeTab === "all" || order.status === activeTab);
 
@@ -121,4 +123,9 @@ export default function MyOrdersPage() {
       </div>
     </main>
   );
+}
+
+/** Needs a login: without one the page asks the visitor to log in. */
+export default function MyOrdersPage() {
+  return <RequireLogin what="your orders"><MyOrdersContent /></RequireLogin>;
 }

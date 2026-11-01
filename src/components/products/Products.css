@@ -632,3 +632,9 @@
 .products-more-status { margin: 18px 0 8px; text-align: center; color: #4b6a86; font-size: 14px; }
 .products-more-status button { margin-left: 6px; border: 0; background: none; color: #0b5cad; font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; }
 .products-more-sentinel { height: 1px; }
+
+/* home "All products": five a row (the wide screen default is six), so the 10 that load at a time are two full rows */
+.home-all-products .products-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+@media (max-width: 1023px) { .home-all-products .products-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 876px) { .home-all-products .products-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 576px) { .home-all-products .products-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
