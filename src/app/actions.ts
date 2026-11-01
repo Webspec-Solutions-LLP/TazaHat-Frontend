@@ -2,9 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { readPlace, type GeocodeResult } from "@/lib/places";
-import { checkServiceability, getCities, getShopCatalog, getShopCategoryPage, getShopProducts, type CatalogQuery } from "@/lib/server/api";
+import { checkServiceability, getCities, getShopCatalog, getShopCategoryPage, getShopProduct, getShopProducts, type CatalogQuery } from "@/lib/server/api";
 import { readCityCookie, writeCityCookie } from "@/lib/server/city";
-import { cardToProduct, categoryToItem, type ApiCity, type Product } from "@/lib/api";
+import { cardToProduct, categoryToItem, type ApiCity, type ApiProductDetail, type Product } from "@/lib/api";
 import type { CategoryTile } from "@/components/category/Category";
 
 /**
@@ -105,6 +105,20 @@ export async function loadCatalogPageAction(query: CatalogQuery, page: number): 
     return { products: res.items.map(cardToProduct), hasMore: res.page * res.limit < res.total, total: res.total };
   } catch {
     return { error: "We could not load products. Please try again." };
+  }
+}
+
+/** One product as the product page shows it (packs, dressing types, pictures, description, related products): for the quick view. */
+export async function getProductDetailAction(slug: string): Promise<ApiProductDetail | null> {
+  const city = await readCityCookie();
+  const clean = String(slug ?? "").trim().slice(0, 160);
+  if (!city || !clean) return null;
+  try {
+    let detail = await getShopProduct(city.id, clean);
+    if (detail.redirectSlug) detail = await getShopProduct(city.id, detail.redirectSlug); // the product was renamed
+    return detail.packs ? detail : null;
+  } catch {
+    return null;
   }
 }
 

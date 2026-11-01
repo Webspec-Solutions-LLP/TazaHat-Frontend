@@ -12,7 +12,9 @@
 .stock-ribbon--out { background: #c62828; color: #fff; }
 .stock-ribbon--soon { background: #0b5cad; color: #fff; }
 .product-image:has(.stock-ribbon--out) img { filter: grayscale(0.85); opacity: 0.65; }
-.pd-main-image .stock-ribbon { top: 14px; bottom: auto; font-size: 13px; padding: 6px 14px; }
+/* on the big pictures (product page, quick view) the label sits in the middle of the picture */
+.pd-main-image .stock-ribbon, .add-cart-photo .stock-ribbon { top: 50%; left: 50%; bottom: auto; transform: translate(-50%, -50%); font-size: 15px; padding: 8px 20px; }
+.add-cart-photo:has(.stock-ribbon--out) img { filter: grayscale(0.85); opacity: 0.65; }
 .pd-main-image:has(.stock-ribbon--out) img { filter: grayscale(0.85); opacity: 0.65; }
 
 /* "Available from <day>" in two small lines so it always fits a card button */

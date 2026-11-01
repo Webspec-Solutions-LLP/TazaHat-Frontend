@@ -10,10 +10,13 @@ import Chat from "../chat/Chat";
 import "swiper/css";
 import catalog from "../../products/english.json";
 import "./AddToCart.css";
-import { fallbackImage, isRemoteImage, type Product as ShopProduct } from "@/lib/api";
-import PackAction, { AvailabilityNote, firstOrderable, packStatus } from "@/components/availability/PackAction";
+import { cardToProduct, fallbackImage, isRemoteImage, mediaSrc, shortName, type ApiProductDetail, type Product as ShopProduct } from "@/lib/api";
+import { getProductDetailAction } from "@/app/actions";
+import PackAction, { AvailabilityNote, StockRibbon, firstOrderable, packStatus } from "@/components/availability/PackAction";
 
 type Product = ShopProduct;
+
+const plainText = (html: string | null | undefined) => (html ?? "").replace(/<[^>]*>/g, " ").replace(/&nbsp;/gi, " ").replace(/&amp;/gi, "&").replace(/&lt;/gi, "<").replace(/&gt;/gi, ">").replace(/&quot;/gi, "\"").replace(/\s+/g, " ").trim();
 
 function DetailIcon({ kind }: { kind: string }) {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -42,10 +45,32 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
   const [relatedVariantIndexes, setRelatedVariantIndexes] = useState<Record<string, number>>({});
   const [relatedSaved, setRelatedSaved] = useState<string[]>([]);
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const variants = product.variants?.length ? product.variants : [{ label: product.weight, amount: 1, unit: "pack", price: product.price, originalPrice: product.originalPrice, inStock: true, availableFromLabel: null }];
-  const [variantIndex, setVariantIndex] = useState(() => firstOrderable(variants, Math.max(0, variants.findIndex(variant => variant.price === product.price))));
+  // The whole product (packs, dressing types, pictures, description, related products) comes from the backend, the same data the product
+  // page uses. The card's own data is shown until it arrives, and kept when the product is not in the shop (demo products).
+  const [detail, setDetail] = useState<ApiProductDetail | null>(null);
+  const [detailState, setDetailState] = useState<"loading" | "ready" | "failed">("loading");
+  const [dressingId, setDressingId] = useState("");
+  const [specialInstruction, setSpecialInstruction] = useState("");
+  useEffect(() => {
+    let cancelled = false;
+    void getProductDetailAction(product.id).then(found => {
+      if (cancelled) return;
+      setDetail(found);
+      setDetailState(found ? "ready" : "failed");
+    });
+    return () => { cancelled = true; };
+  }, [product.id]);
+  const cardVariants = product.variants?.length ? product.variants : [{ label: product.weight, amount: 1, unit: "pack", price: product.price, originalPrice: product.originalPrice, inStock: true, availableFromLabel: null }];
+  const variants = detail && detail.packs.length
+    ? detail.packs.map(p => ({ id: p.id, label: p.label, amount: 1, unit: "pack", price: Math.round(p.pricePaisa / 100), originalPrice: Math.round(p.mrpPaisa / 100), inStock: p.inStock, availableFrom: p.availableFrom, availableFromLabel: p.availableFromLabel, ratePaisa: p.weight ? p.ratePaisa : null as number | null }))
+    : cardVariants.map(v => ({ ...v, ratePaisa: null as number | null }));
+  const [variantIndex, setVariantIndex] = useState(() => firstOrderable(cardVariants, Math.max(0, cardVariants.findIndex(variant => variant.price === product.price))));
   const variant = variants[variantIndex] ?? variants[0];
-  const imageSources = [product.image];
+  const dressing = detail?.cutting.find(c => c.id === dressingId);
+  // the instruction box only appears when a custom cut is chosen
+  const isCustomDressing = !!dressing && /custom/i.test(dressing.name);
+  const dressingCharge = Math.round((dressing?.chargePaisa ?? 0) / 100);
+  const imageSources = detail && detail.images.length ? detail.images.map(mediaSrc) : [product.image];
   const galleryImages = imageSources.length > 1
     ? imageSources.map((src, index) => ({ src, scale: 1, label: `Image ${index + 1}` }))
     : [
@@ -56,21 +81,20 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
   const currentImage = galleryImages[activeImage] ?? galleryImages[0];
   const money = new Intl.NumberFormat(locale, { style: "currency", currency, minimumFractionDigits: 0, maximumFractionDigits: 2 });
   const discount = variant.originalPrice > 0 ? Math.round((1 - variant.price / variant.originalPrice) * 100) : 0;
-  const unitPrice = variant.price / variant.amount;
-  const selectedPrice = variant.price * quantity;
-  const selectedOriginalPrice = variant.originalPrice * quantity;
-  const relatedProducts = catalog.products.filter(item => item.id !== product.id && item.category === product.category);
+  const selectedPrice = (variant.price + dressingCharge) * quantity;
+  const selectedOriginalPrice = (variant.originalPrice + dressingCharge) * quantity;
+  const relatedProducts: Product[] = detail ? detail.related.map(cardToProduct) : detailState === "failed" ? catalog.products.filter(item => item.id !== product.id && item.category === product.category) : [];
   const relatedMoney = new Intl.NumberFormat(locale, { style: "currency", currency, maximumFractionDigits: 0 });
-  const cartItemId = `${product.id}-${variant.label}`;
+  const cartItemId = `${product.id}-${variant.label}${dressing ? `-${dressing.id}` : ""}`;
   const isAddedToCart = addedVariantId === cartItemId;
   const handleAddToCart = () => {
     onAddToCart?.({
       id: cartItemId,
       name: product.name,
-      image: product.image,
-      price: variant.price,
-      originalPrice: variant.originalPrice,
-      weight: variant.label,
+      image: imageSources[0],
+      price: variant.price + dressingCharge,
+      originalPrice: variant.originalPrice + dressingCharge,
+      weight: `${variant.label}${dressing ? ` · ${shortName(dressing.name)}` : ""}${isCustomDressing && specialInstruction.trim() ? ` · “${specialInstruction.trim().slice(0, 60)}”` : ""}`,
       quantity: 1,
     });
     setQuantity(1);
@@ -107,6 +131,7 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
           <div className="add-cart-gallery">
             <div className="add-cart-photo" id="add-cart-main-image">
               <span className="add-cart-photo-badge"><DetailIcon kind="leaf" />Fresh picks</span>
+              <StockRibbon pack={variant} />
               <Image src={currentImage.src} alt={`${product.name} — ${currentImage.label}`} fill sizes="(max-width: 575px) 100vw, (max-width: 760px) 100vw, 380px" unoptimized={isRemoteImage(currentImage.src)} onError={fallbackImage} style={{ transform: `scale(${currentImage.scale})` }} />
               <span className="add-cart-photo-count">{activeImage + 1} / {galleryImages.length}</span>
             </div>
@@ -127,7 +152,7 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
             <h2 id="add-cart-title">{product.name}</h2>
             {product.rating > 0 && <p className="add-cart-rating"><span aria-hidden="true">★</span> {product.rating} <span>({product.reviews} Reviews)</span></p>}
             {discount > 0 && <span className="add-cart-discount">{discount}% OFF</span>}
-            <div className="add-cart-price" aria-live="polite" aria-atomic="true"><del>{money.format(selectedOriginalPrice)}</del><strong>{money.format(selectedPrice)}</strong><span>/ {variant.label} × {quantity}</span><small>{money.format(unitPrice)} / {variant.unit}</small></div>
+            <div className="add-cart-price" aria-live="polite" aria-atomic="true"><del>{money.format(selectedOriginalPrice)}</del><strong>{money.format(selectedPrice)}</strong><span>/ {variant.label} × {quantity}</span>{variant.ratePaisa ? <small>{money.format(variant.ratePaisa / 100)} / kg</small> : null}</div>
             <div className="add-cart-benefits">
               {[{ icon: "leaf", label: "Fresh picks" }, { icon: "flask", label: "Quality first" }, { icon: "snow", label: "Handled with care" }, { icon: "shield", label: "Carefully packed" }].map(item => <div key={item.icon}><DetailIcon kind={item.icon} /><span>{item.label}</span></div>)}
             </div>
@@ -140,8 +165,9 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
                 </label>)}
               </div>
             </fieldset>
-            <label className="add-cart-field">Dressing Type<select defaultValue=""><option value="">Select Dressing Type</option><option>Whole / Uncut</option><option>Cleaned</option><option>Curry Cut</option></select></label>
-            <label className="add-cart-field">Special instruction<input type="text" placeholder="Any preferences? (optional)" maxLength={250} /></label>
+            {detailState === "loading" && <div className="sk add-cart-field-skeleton" role="status" aria-label="Loading dressing options" />}
+            {detail && detail.cutting.length > 0 && <label className="add-cart-field">Dressing Type<select value={dressingId} onChange={event => { setDressingId(event.target.value); setSpecialInstruction(""); setQuantity(1); }}><option value="">Select Dressing Type</option>{detail.cutting.map(c => <option key={c.id} value={c.id}>{c.name}{c.chargePaisa > 0 ? ` (+${money.format(c.chargePaisa / 100)})` : ""}</option>)}</select></label>}
+            {isCustomDressing && <label className="add-cart-field">Special instruction<textarea rows={3} value={specialInstruction} onChange={event => setSpecialInstruction(event.target.value)} placeholder="Tell us how you want it cut (e.g. 6 pieces, head removed, small pieces for curry...)" maxLength={250} autoFocus /><small className="add-cart-field-count">{specialInstruction.length}/250</small></label>}
             <AvailabilityNote pack={variant} />
             <div className="add-cart-actions">
               {isAddedToCart ? (
@@ -188,7 +214,10 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
             </div>
             <section ref={descriptionRef} id="add-cart-description" className="add-cart-description" aria-labelledby="add-cart-description-title">
               <h3 id="add-cart-description-title">Description</h3>
-              <p>{product.name} is a quality pick from our {product.category.toLowerCase()} range, selected for your everyday meals.</p>
+              {detail ? <>
+                <p>{plainText(detail.shortDescription) || (plainText(detail.description).length > 260 ? `${plainText(detail.description).slice(0, 260).trimEnd()}…` : plainText(detail.description)) || `${product.name} is selected for freshness and quality, then carefully packed to arrive ready for your kitchen.`}</p>
+                {detail.description && <div className="add-cart-description-html" dangerouslySetInnerHTML={{ __html: detail.description }} />}
+              </> : <p>{product.name} is a quality pick from our {product.category.toLowerCase()} range, selected for your everyday meals.</p>}
             </section>
           </div>
         </div>
