@@ -2,7 +2,8 @@
 
 import { createContext, useContext } from "react";
 
-export interface SelectedCity { id: string; name: string }
+/** `pincode` is the PIN code of the spot the visitor picked on the map (absent when the city was chosen from the list) */
+export interface SelectedCity { id: string; name: string; pincode?: string }
 
 export const OPEN_LOCATION_EVENT = "tazahat:open-location";
 

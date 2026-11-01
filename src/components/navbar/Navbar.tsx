@@ -102,7 +102,7 @@ export default function Navbar({
   const [compareCount, setCompareCount] = useState(0);
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const { city, ready: cityReady } = useCity();
-  const deliveryLocation = city ? city.name : "Select your city";
+  const deliveryLocation = city ? (city.pincode ? `${city.name}, ${city.pincode}` : city.name) : "Select your city";
   const askedForCity = useRef(false);
   // first visit: ask for the delivery city; other parts of the page can ask again with the "open location" event
   useEffect(() => {

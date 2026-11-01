@@ -32,7 +32,7 @@ export async function listCitiesAction(): Promise<{ cities?: ApiCity[]; error?: 
 }
 
 export type LocationCheck =
-  | { ok: true; address: string; serviceable: true; city: ApiCity }
+  | { ok: true; address: string; serviceable: true; city: ApiCity; pincode?: string }
   | { ok: true; address: string; serviceable: false; message: string }
   | { ok: false; error: string };
 
@@ -44,7 +44,7 @@ export async function checkLocationAction(lat: number, lng: number): Promise<Loc
     const found = await checkServiceability({ pincode: /^\d{6}$/.test(place.pincode) ? place.pincode : undefined, city: place.cityName || undefined });
     const address = place.address || "Selected location";
     return found.serviceable && found.city
-      ? { ok: true, address, serviceable: true, city: found.city }
+      ? { ok: true, address, serviceable: true, city: found.city, ...(/^\d{6}$/.test(place.pincode) ? { pincode: place.pincode } : {}) }
       : { ok: true, address, serviceable: false, message: found.message ?? "TazaHat does not deliver to this location yet. Please wait, we are coming to this area soon." };
   } catch {
     return { ok: false, error: "We could not check this location. Please try again or pick a city below." };
@@ -62,11 +62,11 @@ export async function locateCityAction(name: string): Promise<{ lat: number; lng
 }
 
 /** Remember the visitor's delivery city (cookie) and refresh the page data for it. */
-export async function selectCityAction(city: ApiCity): Promise<{ ok: boolean }> {
+export async function selectCityAction(city: ApiCity, pincode?: string): Promise<{ ok: boolean }> {
   const cities = await getCities().catch(() => [] as ApiCity[]);
   const real = cities.find((c) => c.id === city.id);
   if (!real) return { ok: false };
-  await writeCityCookie({ id: real.id, name: real.name });
+  await writeCityCookie({ id: real.id, name: real.name, ...(pincode && /^\d{6}$/.test(pincode) ? { pincode } : {}) });
   revalidatePath("/", "layout");
   return { ok: true };
 }

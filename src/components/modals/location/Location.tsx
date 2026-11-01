@@ -17,7 +17,7 @@ interface LocationProps {
 const INDIA_CENTER = { lat: 22.5726, lng: 88.3639 }; // Kolkata, used until a city or the visitor's position is known
 const LOCATION_BLOCKED = "Location access is blocked for this site. To see products near you, allow Location in your browser's site settings (the lock icon next to the address), or drag the pin / pick a city below.";
 
-type Verdict = { serviceable: true; city: ApiCity } | { serviceable: false; message: string };
+type Verdict = { serviceable: true; city: ApiCity; pincode?: string } | { serviceable: false; message: string };
 
 export default function Location({ onClose }: LocationProps) {
   const router = useRouter();
@@ -30,7 +30,7 @@ export default function Location({ onClose }: LocationProps) {
   const [busy, setBusy] = useState(false);
   const [saving, setSaving] = useState(false);
   const [address, setAddress] = useState(savedCity ? `${savedCity.name}` : "");
-  const [verdict, setVerdict] = useState<Verdict | null>(savedCity ? { serviceable: true, city: savedCity } : null);
+  const [verdict, setVerdict] = useState<Verdict | null>(savedCity ? { serviceable: true, city: savedCity, pincode: savedCity.pincode } : null);
   const mapElementRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -66,7 +66,7 @@ export default function Location({ onClose }: LocationProps) {
     if (!res || !res.ok) setVerdict({ serviceable: false, message: res?.error ?? "We could not check this location. Please try again or pick a city below." });
     else {
       setAddress(res.address);
-      setVerdict(res.serviceable ? { serviceable: true, city: res.city } : { serviceable: false, message: res.message });
+      setVerdict(res.serviceable ? { serviceable: true, city: res.city, pincode: res.pincode } : { serviceable: false, message: res.message });
     }
     setBusy(false);
   }, []);
@@ -186,7 +186,7 @@ export default function Location({ onClose }: LocationProps) {
   const confirm = async () => {
     if (!verdict?.serviceable || saving) return;
     setSaving(true);
-    const res = await selectCityAction(verdict.city).catch(() => ({ ok: false }));
+    const res = await selectCityAction(verdict.city, verdict.pincode).catch(() => ({ ok: false }));
     if (!res.ok) {
       setSaving(false);
       return setVerdict({ serviceable: false, message: "We could not save this city. Please try again." });
@@ -234,7 +234,7 @@ export default function Location({ onClose }: LocationProps) {
                 </label>
                 <button type="button" className="location-map-locate" onClick={() => void detectLocation()} disabled={busy}>Use my current location</button>
               </div>
-              <span className="location-map-caption">{busy ? "Checking this location…" : verdict?.serviceable ? `Delivery area · ${verdict.city.name}` : "Drag the pin to your address"}</span>
+              <span className="location-map-caption">{busy ? "Checking this location…" : verdict?.serviceable ? `Delivery area · ${verdict.city.name}${verdict.pincode ? `, ${verdict.pincode}` : ""}` : "Drag the pin to your address"}</span>
             </div>
           </section>
 
