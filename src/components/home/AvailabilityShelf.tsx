@@ -7,10 +7,13 @@ import type { Product } from "@/lib/api";
 
 /**
  * A home page shelf of products that cannot be ordered yet: "upcoming" (they start selling on a later day, the card says from when)
- * or "soldout" (the card offers Notify me). Same cards as the other shelves, two rows, scrolling sideways; the next 10 load when the
- * visitor reaches the end.
+ * or "soldout" (the card offers Notify me). Same cards as the other shelves, scrolling sideways; the next 10 load when the visitor
+ * reaches the end. Up to 12 products fit one row; with more there are two rows.
  */
-export default function AvailabilityShelf({ kind, heading, initial, hasMore: initialHasMore }: { kind: "upcoming" | "soldout"; heading: string; initial: Product[]; hasMore: boolean }) {
+/** a shelf with this many products or fewer is one row, with more it is two */
+const ONE_ROW_MAX = 12;
+
+export default function AvailabilityShelf({ kind, heading, initial, hasMore: initialHasMore, total }: { kind: "upcoming" | "soldout"; heading: string; initial: Product[]; hasMore: boolean; total: number }) {
   const [products, setProducts] = useState(initial);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(false);
@@ -36,5 +39,5 @@ export default function AvailabilityShelf({ kind, heading, initial, hasMore: ini
     busy.current = false;
   }, [kind, hasMore]);
 
-  return <Products products={products} heading={heading} showViewAll={false} onReachEnd={() => void loadMore()} loadingMore={loading} />;
+  return <Products products={products} heading={heading} showViewAll={false} rows={total > ONE_ROW_MAX ? 2 : 1} onReachEnd={() => void loadMore()} loadingMore={loading} />;
 }

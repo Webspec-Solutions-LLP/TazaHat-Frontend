@@ -85,8 +85,8 @@ export async function AvailabilitySections({ cityId }: Pick<City, "cityId">) {
   const hasMore = (r: typeof upcoming) => !!r && r.page * r.limit < r.total;
   return (
     <>
-      {upcoming && upcoming.items.length > 0 && <AvailabilityShelf kind="upcoming" heading="Upcoming Products" initial={upcoming.items.map(cardToProduct)} hasMore={hasMore(upcoming)} />}
-      {soldout && soldout.items.length > 0 && <AvailabilityShelf kind="soldout" heading="Out of Stock Products" initial={soldout.items.map(cardToProduct)} hasMore={hasMore(soldout)} />}
+      {upcoming && upcoming.items.length > 0 && <AvailabilityShelf kind="upcoming" heading="Upcoming Products" initial={upcoming.items.map(cardToProduct)} hasMore={hasMore(upcoming)} total={upcoming.total} />}
+      {soldout && soldout.items.length > 0 && <AvailabilityShelf kind="soldout" heading="Out of Stock Products" initial={soldout.items.map(cardToProduct)} hasMore={hasMore(soldout)} total={soldout.total} />}
     </>
   );
 }

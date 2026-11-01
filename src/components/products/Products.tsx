@@ -29,13 +29,15 @@ interface ProductsProps {
   onReachEnd?: () => void;
   /** more cards are on their way: a skeleton column waits at the end */
   loadingMore?: boolean;
+  /** cards stacked in each column: 1 = a single row, 2 = two rows (default: two, the "related" shelf with few products uses one) */
+  rows?: 1 | 2;
 }
 
 function CartIcon() {
   return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M2 3h2l2.4 12.2a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6L22 8H5" /><circle cx="9" cy="21" r="1" /><circle cx="19" cy="21" r="1" /></svg>;
 }
 
-export default function Products({ heading, products = text.products, showViewAll = true, layout = "catalog", onReachEnd, loadingMore = false }: ProductsProps) {
+export default function Products({ heading, products = text.products, showViewAll = true, layout = "catalog", onReachEnd, loadingMore = false, rows }: ProductsProps) {
   const [saved, setSaved] = useState<string[]>([]);
   const [selected, setSelected] = useState<Product | null>(null);
   const [variantProduct, setVariantProduct] = useState<Product | null>(null);
@@ -47,7 +49,7 @@ export default function Products({ heading, products = text.products, showViewAl
     return subscribeToWishlist(refreshWishlist);
   }, []);
   const sectionHeading = heading ?? text.heading;
-  const productsPerSlide = layout === "related" && products.length <= 10 ? 1 : 2;
+  const productsPerSlide = rows ?? (layout === "related" && products.length <= 10 ? 1 : 2);
   const columns = Array.from(
     { length: Math.ceil(products.length / productsPerSlide) },
     (_, index) => products.slice(index * productsPerSlide, index * productsPerSlide + productsPerSlide),
@@ -94,7 +96,7 @@ export default function Products({ heading, products = text.products, showViewAl
         {layout === "grid" ? <div id="products-list" className="products-grid">{products.map(renderProduct)}</div> : <div id="products-list">
             <Swiper className="products-slider" modules={[A11y, Keyboard, Mousewheel]} slidesPerView={1.7} spaceBetween={8} breakpoints={{ 451: { slidesPerView: 2.1, spaceBetween: 9 }, 576: { slidesPerView: 2.7, spaceBetween: 10 }, 679: { slidesPerView: 3.5, spaceBetween: 10 }, 877: { slidesPerView: 4.5, spaceBetween: 12 }, 1300: { slidesPerView: 5.5, spaceBetween: 12 } }} keyboard={{ enabled: true, onlyInViewport: true }} mousewheel={{ forceToAxis: true }} a11y={{ containerMessage: sliderLabel, slideLabelMessage: text.columnLabel }} tabIndex={0} onReachEnd={() => onReachEnd?.()} onAfterInit={swiper => { if (swiper.isEnd) onReachEnd?.(); }}>
               {columns.map((column) => <SwiperSlide key={column[0].id}><div className="products-column">{column.map(renderProduct)}</div></SwiperSlide>)}
-              {loadingMore && <SwiperSlide key="loading-more"><div className="products-column" role="status" aria-label="Loading more products"><ProductCardSkeleton /><ProductCardSkeleton /></div></SwiperSlide>}
+              {loadingMore && <SwiperSlide key="loading-more"><div className="products-column" role="status" aria-label="Loading more products"><ProductCardSkeleton />{productsPerSlide === 2 && <ProductCardSkeleton />}</div></SwiperSlide>}
             </Swiper>
         </div>}
       </div>
