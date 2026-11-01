@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Login from "@/components/modals/login/Login";
+import NotificationsPanel from "@/components/modals/notifications/NotificationsPanel";
 import {
   cancelNotifyMeAction, getSessionAction, logoutAction, markNotificationsReadAction, myStockAlertsAction, notificationsAction, notifyMeAction,
   type AppNotification,
@@ -27,6 +28,8 @@ interface AuthValue {
   unread: number;
   reloadNotifications: () => Promise<void>;
   markRead: (ids?: string[]) => Promise<void>;
+  /** opens the side panel with all notifications */
+  openNotifications: () => void;
 }
 
 const AuthContext = createContext<AuthValue | null>(null);
@@ -42,6 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<SessionUser | null>(null);
   const [ready, setReady] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [waiting, setWaiting] = useState<ReadonlySet<string>>(new Set());
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [unread, setUnread] = useState(0);
@@ -104,6 +108,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await reloadNotifications();
   }, [reloadNotifications]);
 
+  const openNotifications = useCallback(() => setNotificationsOpen(true), []);
+
   const onLoggedIn = useCallback((u: SessionUser) => {
     setUser(u);
     setLoginOpen(false);
@@ -114,13 +120,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [loadAccount]);
 
   const value = useMemo<AuthValue>(
-    () => ({ user, ready, openLogin, logout, waiting, requestNotify, cancelNotify, notifications, unread, reloadNotifications, markRead }),
-    [user, ready, openLogin, logout, waiting, requestNotify, cancelNotify, notifications, unread, reloadNotifications, markRead],
+    () => ({ user, ready, openLogin, logout, waiting, requestNotify, cancelNotify, notifications, unread, reloadNotifications, markRead, openNotifications }),
+    [user, ready, openLogin, logout, waiting, requestNotify, cancelNotify, notifications, unread, reloadNotifications, markRead, openNotifications],
   );
 
   return (
     <AuthContext.Provider value={value}>
       {children}
+      {notificationsOpen && user && <NotificationsPanel unread={unread} onClose={() => setNotificationsOpen(false)} onChanged={() => void reloadNotifications()} />}
       {loginOpen && <Login onClose={() => { afterLogin.current = null; setLoginOpen(false); }} onLoggedIn={onLoggedIn} />}
     </AuthContext.Provider>
   );

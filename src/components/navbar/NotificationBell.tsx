@@ -3,19 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
-
-/** "5 min ago" / "3 h ago" / "12 Nov" */
-function ago(iso: string): string {
-  const seconds = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 1000));
-  if (seconds < 60) return "Just now";
-  if (seconds < 3600) return `${Math.floor(seconds / 60)} min ago`;
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)} h ago`;
-  return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
-}
+import { timeAgo } from "@/lib/timeAgo";
 
 /** The bell in the header: unread count and the latest notifications of the signed-in customer (shown only when signed in). */
 export default function NotificationBell() {
-  const { user, notifications, unread, markRead, reloadNotifications } = useAuth();
+  const { user, notifications, unread, markRead, reloadNotifications, openNotifications } = useAuth();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const box = useRef<HTMLDivElement>(null);
@@ -56,18 +48,19 @@ export default function NotificationBell() {
           {notifications.length === 0 ? (
             <p className="navbar-notify-empty">Nothing yet. Tap “Notify me” on a sold-out item and we will tell you here when it is back.</p>
           ) : (
-            <ul>
-              {notifications.map((n) => (
+            <ul className="navbar-notify-list">
+              {notifications.slice(0, 6).map((n) => (
                 <li key={n.id}>
                   <button type="button" className={n.isRead ? "" : "is-unread"} onClick={() => openItem(n.id, n.data?.slug)}>
                     <span className="navbar-notify-title">{n.title}</span>
                     <span className="navbar-notify-body">{n.body}</span>
-                    <time dateTime={n.createdAt}>{ago(n.createdAt)}</time>
+                    <time dateTime={n.createdAt}>{timeAgo(n.createdAt)}</time>
                   </button>
                 </li>
               ))}
             </ul>
           )}
+          <button type="button" className="navbar-notify-viewall" onClick={() => { setOpen(false); openNotifications(); }}>View all notifications</button>
         </div>
       )}
     </div>
