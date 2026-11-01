@@ -1,6 +1,6 @@
 "use client";
 
-import PackAction, { StockRibbon } from "@/components/availability/PackAction";
+import PackAction, { AvailabilityNote, StockRibbon } from "@/components/availability/PackAction";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Products from "@/components/products/Products";
@@ -258,6 +258,7 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
           </> : <p className="pd-description">This product is not on sale in your city right now.</p>}
           {detail.cutting.length > 0 && <label className="pd-field"><span>Dressing Type</span><select value={dressingId} onChange={event => { setDressingId(event.target.value); setSpecialInstruction(""); }}><option value="">Select Dressing Type</option>{detail.cutting.map(c => <option key={c.id} value={c.id}>{c.name}{c.chargePaisa > 0 ? ` (+${money.format(c.chargePaisa / 100)})` : ""}</option>)}</select></label>}
           {isCustomDressing && <label className="pd-field"><span>Special instruction</span><textarea rows={4} value={specialInstruction} onChange={event => setSpecialInstruction(event.target.value)} placeholder="Tell us how you want it cut (e.g. 6 pieces, head removed, small pieces for curry...)" maxLength={250} autoFocus /><small className="pd-field-count">{specialInstruction.length}/250</small></label>}
+          <AvailabilityNote pack={pack} />
           <div className="pd-actions">
             {inCart ? (
               <div className="pd-quantity" role="group" aria-label={`Quantity of ${name} in your cart`}>

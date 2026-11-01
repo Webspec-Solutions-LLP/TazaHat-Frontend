@@ -36,8 +36,27 @@ export function StockRibbon({ pack }: { pack?: PackAvailability | null }) {
   return <span className={`stock-ribbon stock-ribbon--${status}`}>{status === "out" ? "Out of stock" : "Coming soon"}</span>;
 }
 
+/** two small lines in a card ("Available from" / "Tomorrow"), one line in a wide button */
 export function AvailableFromButton({ label, className = "" }: { label: string; className?: string }) {
-  return <button type="button" className={`${className} pack-action pack-action--soon`} disabled><CalendarIcon />Available from {label}</button>;
+  return (
+    <button type="button" className={`${className} pack-action pack-action--soon`} disabled aria-label={`Available from ${label}`}>
+      <CalendarIcon />
+      <span className="pack-from"><small>Available from</small><strong>{label}</strong></span>
+    </button>
+  );
+}
+
+const fullDay = (iso: string) => new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short", timeZone: "UTC" });
+
+/** the sentence under the size picker on the product page and in the quick view: when it starts, or that it is sold out and Notify me is there */
+export function AvailabilityNote({ pack }: { pack?: PackAvailability | null }) {
+  const status = packStatus(pack);
+  if (status === "ok") return null;
+  return status === "soon" ? (
+    <p className="pack-note pack-note--soon" role="status"><CalendarIcon />This item will be available from <strong>{pack?.availableFrom ? fullDay(pack.availableFrom) : pack?.availableFromLabel}</strong>.</p>
+  ) : (
+    <p className="pack-note pack-note--out" role="status"><BellIcon />Currently out of stock. Tap <strong>Notify me</strong> and we will tell you here as soon as it is back.</p>
+  );
 }
 
 export function NotifyMeButton({ variantId, className = "" }: { variantId?: string; className?: string }) {

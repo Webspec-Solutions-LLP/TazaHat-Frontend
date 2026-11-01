@@ -6,7 +6,7 @@ type CatalogProduct = (typeof catalog.products)[number];
 type CatalogVariant = NonNullable<CatalogProduct["variants"]>[number];
 
 /** What a pack can do right now: ordered (inStock), or, when it is not on sale yet, from when (a label like "Tuesday" / "12 Nov"). */
-export interface PackAvailability { id?: string; inStock?: boolean; availableFromLabel?: string | null }
+export interface PackAvailability { id?: string; inStock?: boolean; availableFromLabel?: string | null; /** the day it starts, "2026-11-04" */ availableFrom?: string | null }
 export type Product = Omit<CatalogProduct, "variants"> & {
   /** can any pack be ordered now (absent = yes) */
   inStock?: boolean;
@@ -84,7 +84,7 @@ export function cardToProduct(c: ApiCard): Product {
   const mrp = Math.round((c.mrpPaisa ?? c.pricePaisa ?? 0) / 100);
   const label = c.fromLabel ?? (c.unit ? `1 ${c.unit}` : "1 pack");
   const variants = c.packs?.length
-    ? c.packs.map((p) => ({ id: p.id, label: p.label, ...packUnit(p.amount, p.unit), price: Math.round(p.pricePaisa / 100), originalPrice: Math.round(p.mrpPaisa / 100), inStock: p.inStock, availableFromLabel: p.availableFromLabel }))
+    ? c.packs.map((p) => ({ id: p.id, label: p.label, ...packUnit(p.amount, p.unit), price: Math.round(p.pricePaisa / 100), originalPrice: Math.round(p.mrpPaisa / 100), inStock: p.inStock, availableFromLabel: p.availableFromLabel, availableFrom: p.availableFrom }))
     : [{ label, amount: 1, unit: c.unit ?? "pack", price, originalPrice: mrp }];
   return {
     id: c.slug,

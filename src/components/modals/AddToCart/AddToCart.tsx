@@ -11,7 +11,7 @@ import "swiper/css";
 import catalog from "../../products/english.json";
 import "./AddToCart.css";
 import { fallbackImage, isRemoteImage, type Product as ShopProduct } from "@/lib/api";
-import PackAction, { firstOrderable, packStatus } from "@/components/availability/PackAction";
+import PackAction, { AvailabilityNote, firstOrderable, packStatus } from "@/components/availability/PackAction";
 
 type Product = ShopProduct;
 
@@ -142,6 +142,7 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
             </fieldset>
             <label className="add-cart-field">Dressing Type<select defaultValue=""><option value="">Select Dressing Type</option><option>Whole / Uncut</option><option>Cleaned</option><option>Curry Cut</option></select></label>
             <label className="add-cart-field">Special instruction<input type="text" placeholder="Any preferences? (optional)" maxLength={250} /></label>
+            <AvailabilityNote pack={variant} />
             <div className="add-cart-actions">
               {isAddedToCart ? (
                 <div className="add-cart-quantity">
