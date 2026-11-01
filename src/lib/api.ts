@@ -118,9 +118,20 @@ export interface ApiProductDetail {
   cutting: { id: string; name: string; chargePaisa: number }[];
   /** the product has real dressing types: one of them must be chosen before it goes to the cart (only "N/A" in the old system = nothing to choose) */
   dressingRequired: boolean;
-  packs: { id: string; label: string; weight: boolean; ratePaisa: number; pricePaisa: number; mrpPaisa: number; discountPercent: number; inStock: boolean; availableFrom: string | null; availableFromLabel: string | null; preOrderDays: number | null; availableTo: string | null }[];
+  packs: { id: string; label: string; weight: boolean; grams: number | null; ratePaisa: number; pricePaisa: number; mrpPaisa: number; discountPercent: number; inStock: boolean; availableFrom: string | null; availableFromLabel: string | null; preOrderDays: number | null; availableTo: string | null }[];
   /** weight items are priced per kg; each pack costs rate x weight */
   ratePerKgPaisa: number | null;
   available: boolean; city: ApiCity | null; related: ApiCard[];
   redirectSlug?: string;
+}
+
+/** One cart line as the server sees it now (POST /shop/cart/check): can it still be ordered, and at what price. */
+export interface CartLineCheck {
+  variantId: string; cuttingTypeId: string | null;
+  state: "ok" | "upcoming" | "out_of_stock" | "unavailable";
+  availableFromLabel?: string | null;
+  name?: string; slug?: string; image?: string | null; packLabel?: string; grams?: number | null;
+  pricePaisa?: number; mrpPaisa?: number;
+  dressing?: { id: string; name: string; offered: boolean; chargePaisa: number } | null;
+  dressingRequired?: boolean;
 }

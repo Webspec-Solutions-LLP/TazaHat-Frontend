@@ -2,9 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { readPlace, type GeocodeResult } from "@/lib/places";
-import { checkServiceability, getCities, getShopCatalog, getShopCategoryPage, getShopProduct, getShopProducts, type CatalogQuery } from "@/lib/server/api";
+import { checkServiceability, checkShopCart, getCities, getShopCatalog, getShopCategoryPage, getShopProduct, getShopProducts, type CatalogQuery } from "@/lib/server/api";
 import { readCityCookie, writeCityCookie } from "@/lib/server/city";
-import { cardToProduct, categoryToItem, type ApiCity, type ApiProductDetail, type Product } from "@/lib/api";
+import { cardToProduct, type CartLineCheck, categoryToItem, type ApiCity, type ApiProductDetail, type Product } from "@/lib/api";
 import type { CategoryTile } from "@/components/category/Category";
 
 /**
@@ -120,6 +120,15 @@ export async function getProductDetailAction(slug: string): Promise<ApiProductDe
   } catch {
     return null;
   }
+}
+
+/** Re-checks the cart's lines against the shop for the visitor's city: still sold, in stock, today's price, dressing still offered. null = could not check. */
+export async function checkCartAction(lines: { variantId: string; cuttingTypeId?: string | null }[]): Promise<CartLineCheck[] | null> {
+  const city = await readCityCookie();
+  const clean = (Array.isArray(lines) ? lines : []).filter((l) => l && typeof l.variantId === "string" && l.variantId).slice(0, 100)
+    .map((l) => ({ variantId: l.variantId.slice(0, 60), cuttingTypeId: typeof l.cuttingTypeId === "string" ? l.cuttingTypeId.slice(0, 60) : null }));
+  if (!city || !clean.length) return null;
+  try { return await checkShopCart(city.id, clean); } catch { return null; }
 }
 
 /** The wishlist's products (by their slugs) as they are sold in the visitor's city, in the order of the list; the ones not sold there are left out. */

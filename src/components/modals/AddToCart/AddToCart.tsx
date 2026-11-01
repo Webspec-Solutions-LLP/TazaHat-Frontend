@@ -11,6 +11,7 @@ import type { CartItem } from "../cart/Cart";
 import Chat from "../chat/Chat";
 import "swiper/css";
 import "./AddToCart.css";
+import { dressingChargeRupees } from "@/lib/cartLine";
 import { cardToProduct, fallbackImage, isRemoteImage, mediaSrc, shortName, type ApiProductDetail, type Product as ShopProduct } from "@/lib/api";
 import { getProductDetailAction } from "@/app/actions";
 import { useImageZoom } from "@/lib/useImageZoom";
@@ -74,7 +75,8 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
   const dressing = detail?.cutting.find(c => c.id === dressingId);
   // the instruction box only appears when a custom cut is chosen
   const isCustomDressing = !!dressing && /custom/i.test(dressing.name);
-  const dressingCharge = Math.round((dressing?.chargePaisa ?? 0) / 100);
+  const packGrams = detail?.packs.find(p => p.label === variant.label)?.grams ?? null;
+  const dressingCharge = dressing ? dressingChargeRupees(dressing.chargePaisa, packGrams) : 0;
   const imageSources = detail && detail.images.length ? detail.images.map(mediaSrc) : [product.image];
   const galleryImages = imageSources.map((src, index) => ({ src, label: `Image ${index + 1}` }));
   const hasThumbs = galleryImages.length > 1;
@@ -102,6 +104,8 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
       image: imageSources[0],
       price: variant.price + dressingCharge,
       originalPrice: variant.originalPrice + dressingCharge,
+      slug: product.id, variantId: detail?.packs.find(p => p.label === variant.label)?.id, packLabel: variant.label, cuttingTypeId: dressing?.id ?? null, dressingName: dressing ? shortName(dressing.name) : undefined, dressingCharge: dressing ? dressingCharge : undefined,
+      instruction: isCustomDressing ? specialInstruction.trim().slice(0, 200) || undefined : undefined,
       weight: `${variant.label}${dressing ? ` · ${shortName(dressing.name)}` : ""}${isCustomDressing && specialInstruction.trim() ? ` · “${specialInstruction.trim().slice(0, 60)}”` : ""}`,
       quantity: 1,
     });

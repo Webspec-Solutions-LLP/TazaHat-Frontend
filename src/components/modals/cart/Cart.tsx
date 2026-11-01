@@ -6,7 +6,9 @@ import { useEffect, useRef, useState, useId } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import "./Cart.css";
-import { fallbackImage, isRemoteImage } from "@/lib/api";
+import Link from "next/link";
+import { fallbackImage, isRemoteImage, type CartLineCheck } from "@/lib/api";
+import { checkCartAction } from "@/app/actions";
 
 export type CartItem = {
   id: string;
@@ -16,6 +18,15 @@ export type CartItem = {
   originalPrice?: number;
   weight?: string;
   quantity: number;
+  /** product page address, pack and dressing as chosen: the server re-checks the line with these */
+  slug?: string;
+  variantId?: string;
+  packLabel?: string;
+  cuttingTypeId?: string | null;
+  dressingName?: string;
+  /** dressing charge in rupees already inside `price` */
+  dressingCharge?: number;
+  instruction?: string;
 };
 
 export interface CartProps {
@@ -100,23 +111,60 @@ export default function Cart({
     setCartItems((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const totalAmount = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
+  // The shop is asked about every line (still sold here? in stock? today's price? dressing still offered?) whenever the cart opens or its lines change.
+  const [checks, setChecks] = useState<Record<string, CartLineCheck>>({});
+  const [checking, setChecking] = useState(false);
+  const lineKey = (item: CartItem) => `${item.variantId}|${item.cuttingTypeId ?? ""}`;
+  const checkSignature = [...new Set(cartItems.filter(i => i.variantId).map(lineKey))].sort().join(",");
+  useEffect(() => {
+    if (!checkSignature) { setChecks({}); return; }
+    let cancelled = false;
+    setChecking(true);
+    checkCartAction(checkSignature.split(",").map(k => { const [variantId, cut] = k.split("|"); return { variantId, cuttingTypeId: cut || null }; })).then(result => {
+      if (cancelled) return;
+      setChecking(false);
+      if (result) setChecks(Object.fromEntries(result.map(r => [`${r.variantId}|${r.cuttingTypeId ?? ""}`, r])));
+    });
+    return () => { cancelled = true; };
+  }, [checkSignature]);
 
-  const totalItemsCount = cartItems.reduce(
-    (sum, item) => sum + item.quantity,
-    0
-  );
-  const discountAmount = cartItems.reduce(
+  type LineStatus = { kind: "ok" | "price" | "blocked"; message?: string; newPrice?: number; newOriginal?: number; link?: boolean; notify?: boolean };
+  const statusOf = (item: CartItem): LineStatus => {
+    const c = item.variantId ? checks[lineKey(item)] : undefined;
+    if (!c) return { kind: "ok" };
+    if (c.state === "unavailable") return { kind: "blocked", message: "No longer available in your city." };
+    if (c.state === "out_of_stock") return { kind: "blocked", message: "Out of stock right now.", link: true, notify: true };
+    if (c.state === "upcoming") return { kind: "blocked", message: `Not available yet, expected ${c.availableFromLabel ?? "soon"}.`, link: true, notify: true };
+    if (c.dressingRequired && !c.dressing) return { kind: "blocked", message: "This product now needs a dressing type. Choose one on its page.", link: true };
+    if (c.dressing && !c.dressing.offered) return { kind: "blocked", message: "This dressing type is no longer offered.", link: true };
+    const unit = Math.round((c.pricePaisa ?? 0) / 100) + (c.dressing ? Math.round(c.dressing.chargePaisa / 100) : 0);
+    if (c.pricePaisa !== undefined && unit !== item.price) {
+      return { kind: "price", newPrice: unit, newOriginal: Math.round((c.mrpPaisa ?? 0) / 100) + (c.dressing ? Math.round(c.dressing.chargePaisa / 100) : 0),
+        message: unit > item.price ? `Price went up from ${currencySymbol} ${item.price} to ${currencySymbol} ${unit}.` : `Good news, the price dropped from ${currencySymbol} ${item.price} to ${currencySymbol} ${unit}.` };
+    }
+    return { kind: "ok" };
+  };
+  const applyPrice = (id: string) => setCartItems(prev => prev.map(item => {
+    if (item.id !== id) return item;
+    const s = statusOf(item);
+    return s.kind === "price" ? { ...item, price: s.newPrice!, originalPrice: s.newOriginal || s.newPrice! } : item;
+  }));
+  const statuses = new Map(cartItems.map(i => [i.id, statusOf(i)] as const));
+  const orderable = cartItems.filter(i => statuses.get(i.id)?.kind === "ok");
+  const unresolved = cartItems.length - orderable.length;
+
+  const totalAmount = orderable.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const totalItemsCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const discountAmount = orderable.reduce(
     (sum, item) => sum + Math.max(0, (item.originalPrice ?? item.price) - item.price) * item.quantity,
     0
   );
+  const dressingTotal = orderable.reduce((sum, item) => sum + (item.dressingCharge ?? 0) * item.quantity, 0);
 
   const handleCheckoutClick = () => {
-    onCheckout?.(cartItems, totalAmount);
-    window.sessionStorage.setItem("tazahat-checkout-items", JSON.stringify(cartItems));
+    if (unresolved > 0 || checking || !orderable.length) return;
+    onCheckout?.(orderable, totalAmount);
+    window.sessionStorage.setItem("tazahat-checkout-items", JSON.stringify(orderable));
     setCheckoutRequested(true);
     setClosing(true);
   };
@@ -200,7 +248,7 @@ export default function Cart({
               {cartItems.map((item) => (
                 <article
                   key={item.id}
-                  className="cart-item-card"
+                  className={`cart-item-card${statuses.get(item.id)?.kind === "blocked" ? " is-blocked" : ""}`}
                   role="listitem"
                 >
                   {/* Left: Product Image */}
@@ -250,6 +298,20 @@ export default function Cart({
                         </svg>
                       </button>
                     </div>
+
+                    {statuses.get(item.id)?.message && (() => {
+                      const s = statuses.get(item.id)!;
+                      return (
+                        <div className={`cart-item-notice is-${s.kind}`} role="status">
+                          <span>{s.message}</span>
+                          <span className="cart-item-notice-actions">
+                            {s.kind === "price" && <button type="button" onClick={() => applyPrice(item.id)}>Update price</button>}
+                            {s.link && item.slug && <Link href={`/${encodeURIComponent(item.slug)}`} onClick={handleClose}>{s.notify ? "Notify me" : "Open product"}</Link>}
+                            {s.kind !== "ok" && s.kind !== "price" && <button type="button" onClick={() => removeItem(item.id)}>Remove</button>}
+                          </span>
+                        </div>
+                      );
+                    })()}
 
                     {/* Bottom Row: Qty label, -/+ buttons, Price */}
                     <div className="cart-item-bottom-row">
@@ -322,16 +384,17 @@ export default function Cart({
                 <h3>Estimated Price Details</h3>
                 <div className="cart-price-row"><span>Total ({totalItemsCount} {totalItemsCount === 1 ? "item" : "items"})</span><span>{currencySymbol} {totalAmount.toFixed(2)}</span></div>
                 <div className="cart-price-row cart-price-discount"><span>Discount</span><span>−{currencySymbol} {discountAmount.toFixed(2)}</span></div>
-                <div className="cart-price-row cart-price-discount"><span>Dressing Price</span><span>{currencySymbol} 0.00</span></div>
+                <div className="cart-price-row cart-price-discount"><span>Dressing Price</span><span>{currencySymbol} {dressingTotal.toFixed(2)}</span></div>
                 <div className="cart-price-row cart-price-total"><strong>Total Amount</strong><strong>{currencySymbol} {totalAmount.toFixed(2)}</strong></div>
               </div>
             </div>
             <button
               type="button"
               className="cart-checkout-btn"
+              disabled={checking || unresolved > 0 || !orderable.length}
               onClick={handleCheckoutClick}
             >
-              <span className="cart-checkout-text">Proceed to checkout</span>
+              <span className="cart-checkout-text">{checking ? "Checking your items…" : unresolved > 0 ? `Resolve ${unresolved} ${unresolved === 1 ? "item" : "items"} to continue` : "Proceed to checkout"}</span>
               <span className="cart-checkout-price">
                 {currencySymbol}{" "}
                 {totalAmount}

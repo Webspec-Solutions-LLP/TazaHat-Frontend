@@ -583,3 +583,12 @@
   }
   .cart-details-toggle, .cart-details-toggle svg, .cart-price-details { transition: none; }
 }
+
+/* per-line status from the shop check */
+.cart-item-card.is-blocked .cart-item-image-wrap { opacity: .5; }
+.cart-item-notice { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 10px; margin: 6px 0 2px; padding: 7px 10px; border-radius: 8px; font-size: 12px; line-height: 1.35; }
+.cart-item-notice.is-blocked { background: #fdecea; color: #a12622; }
+.cart-item-notice.is-price { background: #fff6e0; color: #8a5a00; }
+.cart-item-notice-actions { display: inline-flex; gap: 12px; }
+.cart-item-notice-actions button, .cart-item-notice-actions a { background: none; border: 0; padding: 0; font: inherit; font-weight: 700; color: inherit; text-decoration: underline; cursor: pointer; }
+.cart-checkout-btn:disabled { opacity: .6; cursor: not-allowed; }

@@ -6,6 +6,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import type { CartItem } from "../cart/Cart";
 import "./Variant.css";
+import { dressingChargeRupees } from "@/lib/cartLine";
 import { fallbackImage, isRemoteImage, shortName, type ApiProductDetail, type PackAvailability } from "@/lib/api";
 import { getProductDetailAction } from "@/app/actions";
 import PackAction, { firstOrderable, packStatus } from "@/components/availability/PackAction";
@@ -65,7 +66,8 @@ export default function Variant({ product, currency, onClose, onGoToCart }: Vari
   }, [product.id]);
   const dressing = detail?.cutting.find(c => c.id === dressingId);
   const isCustomDressing = !!dressing && /custom/i.test(dressing.name);
-  const dressingCharge = Math.round((dressing?.chargePaisa ?? 0) / 100);
+  const selectedPack = detail?.packs.find(pk => pk.label === (variants[selectedIndex] ?? variants[0]).label);
+  const dressingCharge = dressing ? dressingChargeRupees(dressing.chargePaisa, selectedPack?.grams) : 0;
   const [isClosing, setIsClosing] = useState(false);
   const selected = variants[selectedIndex] ?? variants[0];
   const money = new Intl.NumberFormat("en-IN", { style: "currency", currency, maximumFractionDigits: 2 });
@@ -103,6 +105,8 @@ export default function Variant({ product, currency, onClose, onGoToCart }: Vari
       image: product.image,
       price: selected.price + dressingCharge,
       originalPrice: selected.originalPrice + dressingCharge,
+      slug: product.id, variantId: selectedPack?.id, packLabel: selected.label, cuttingTypeId: dressing?.id ?? null, dressingName: dressing ? shortName(dressing.name) : undefined, dressingCharge: dressing ? dressingCharge : undefined,
+      instruction: isCustomDressing ? instruction.trim().slice(0, 200) || undefined : undefined,
       weight: `${selected.label}${dressing ? ` · ${shortName(dressing.name)}` : ""}${isCustomDressing && instruction.trim() ? ` · “${instruction.trim().slice(0, 60)}”` : ""}`,
       quantity,
     });

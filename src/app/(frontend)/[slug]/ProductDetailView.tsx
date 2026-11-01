@@ -8,6 +8,7 @@ import CompareList, { COMPARE_CHANGE_EVENT, COMPARE_STORAGE_KEY, type ComparePro
 import CompareDetails from "@/components/modals/compareDetails/CompareDetails";
 import Confermation from "@/components/modals/confermation/Confermation";
 import type { CartItem } from "@/components/modals/cart/Cart";
+import { dressingChargeRupees } from "@/lib/cartLine";
 import { cardToProduct, fallbackImage, isRemoteImage, mediaSrc, PLACEHOLDER_IMAGE, shortName, type ApiProductDetail } from "@/lib/api";
 import { readWishlistIds, subscribeToWishlist, toggleWishlistId } from "@/lib/wishlist";
 import { useImageZoom } from "@/lib/useImageZoom";
@@ -125,7 +126,7 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
   const dressing = detail.cutting.find(c => c.id === dressingId);
   // the instruction box only appears when a custom cut is chosen
   const isCustomDressing = !!dressing && /custom/i.test(dressing.name);
-  const dressingCharge = Math.round((dressing?.chargePaisa ?? 0) / 100);
+  const dressingCharge = dressing ? dressingChargeRupees(dressing.chargePaisa, pack?.grams) : 0;
   const unitPrice = pack ? Math.round(pack.pricePaisa / 100) + dressingCharge : 0;
   const unitMrp = pack ? Math.round(pack.mrpPaisa / 100) + dressingCharge : 0;
   const mainImage = gallery[Math.min(activeImage, gallery.length - 1)];
@@ -170,6 +171,8 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
       image: gallery[0],
       price: unitPrice,
       originalPrice: unitMrp,
+      slug: detail.slug, variantId: pack.id, packLabel: pack.label, cuttingTypeId: dressing?.id ?? null, dressingName: dressing ? shortName(dressing.name) : undefined, dressingCharge: dressing ? dressingCharge : undefined,
+      instruction: isCustomDressing ? specialInstruction.trim().slice(0, 200) || undefined : undefined,
       weight: `${pack.label}${dressing ? ` · ${shortName(dressing.name)}` : ""}${isCustomDressing && specialInstruction.trim() ? ` · “${specialInstruction.trim().slice(0, 60)}”` : ""}`,
       quantity: 1,
     };

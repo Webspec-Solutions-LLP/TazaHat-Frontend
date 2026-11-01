@@ -31,6 +31,7 @@ const MAX_SEARCH_HISTORY = 30;
 const MIN_HISTORY_LENGTH = 4; // shorter searches are not remembered
 const HISTORY_PAGE_SIZE = 5;
 export const LANGUAGE_STORAGE_KEY = "tazahat-language";
+const CART_STORAGE_KEY = "tazahat-cart-v1";
 export const LANGUAGE_CHANGE_EVENT = "tazahat:change-language";
 
 export type SupportedLang = "en" | "bn" | "hi";
@@ -179,6 +180,31 @@ export default function Navbar({
       window.removeEventListener("storage", refreshCompareCount);
     };
   }, []);
+  // The cart lives in this browser (guests and logged-in customers alike) so a refresh or another tab keeps it.
+  const cartLoaded = useRef(false);
+  useEffect(() => {
+    const read = (): CartItem[] | null => {
+      try {
+        const raw = JSON.parse(window.localStorage.getItem(CART_STORAGE_KEY) ?? "null");
+        if (!Array.isArray(raw)) return null;
+        return raw.filter((i): i is CartItem => !!i && typeof i.id === "string" && typeof i.name === "string" && typeof i.price === "number" && Number.isFinite(i.quantity) && i.quantity > 0).slice(0, 100);
+      } catch { return null; }
+    };
+    const saved = read();
+    if (saved?.length) { setCartItems(saved); setHasCustomCart(true); }
+    cartLoaded.current = true;
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== CART_STORAGE_KEY) return;
+      setCartItems(read() ?? []);
+      setHasCustomCart(true);
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+  useEffect(() => {
+    if (!cartLoaded.current) return;
+    try { window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems)); } catch { /* private mode: the cart then lives for this visit only */ }
+  }, [cartItems]);
   const handleCartItemsChange = useCallback((items: CartItem[]) => {
     setHasCustomCart(true);
     setCartItems(items);

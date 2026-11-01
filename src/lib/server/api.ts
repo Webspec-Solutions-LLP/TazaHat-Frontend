@@ -1,5 +1,5 @@
 import "server-only";
-import type { ApiCard, ApiCity, ApiFacetCategory, ApiProductDetail, Serviceability, ShopHome } from "../api";
+import type { CartLineCheck, ApiCard, ApiCity, ApiFacetCategory, ApiProductDetail, Serviceability, ShopHome } from "../api";
 
 /**
  * Every call to the TazaHat backend goes through here, on the server. The browser only ever talks to this site, so the API
@@ -26,6 +26,12 @@ export const getShopCategories = (cityId: string) => get<{ categories: ApiFacetC
 export const getShopCategoryPage = (cityId: string, page: number, limit: number) =>
   get<{ categories: ApiFacetCategory[]; total: number; page: number; limit: number }>("/shop/categories", { cityId, page: String(page), limit: String(limit) });
 export const getShopProduct = (cityId: string, slug: string) => get<ApiProductDetail>(`/shop/products/${encodeURIComponent(slug)}`, { cityId });
+export async function checkShopCart(cityId: string, lines: { variantId: string; cuttingTypeId?: string | null }[]): Promise<CartLineCheck[]> {
+  const res = await fetch(`${API_BASE}/api/public/shop/cart/check`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ cityId, lines }), cache: "no-store" });
+  const json = (await res.json().catch(() => null)) as { status?: string; message?: string; data?: { lines: CartLineCheck[] } } | null;
+  if (!res.ok || json?.status !== "success" || !json.data) throw new Error(json?.message ?? "Could not reach the server.");
+  return json.data.lines;
+}
 export const getCities = () => get<{ cities: ApiCity[] }>("/cities").then((d) => d.cities);
 export const getShopHome = (cityId: string) => get<ShopHome>("/shop/home", { cityId });
 export const checkServiceability = (q: { pincode?: string; city?: string }) => get<Serviceability>("/serviceability", q);
