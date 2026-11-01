@@ -79,7 +79,7 @@
 .add-cart-quantity > div > button { display: grid; width: 40px; height: 38px; place-items: center; border: 0; background: transparent; font-size: 24px; font-weight: 500; line-height: 1; color: #123f77; transition: background-color 160ms ease, color 160ms ease; }
 .add-cart-quantity > div > button:hover:not(:disabled) { background: #eff7ff; }
 .add-cart-quantity output { min-width: 48px; padding: 0 8px; text-align: center; border-inline: 1px solid #e1eaf2; font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
-.add-cart-actions { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; margin: 12px 0 8px; }
+.add-cart-actions { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 10px; margin: 12px 0 8px; }
 .add-cart-actions button { display: flex; align-items: center; justify-content: center; gap: 7px; min-width: 0; min-height: 40px; border: 1px solid #0063cc; border-radius: 8px; padding: 7px 12px; font-size: 12px; font-weight: 600; white-space: nowrap; transition: background-color 180ms ease, box-shadow 180ms ease; }
 .add-cart-actions .add-cart-wishlist { justify-self: center; min-height: 40px; padding: 7px 14px; border-radius: 8px; }
 .add-cart-actions .add-cart-info { min-width: 104px; color: #0756a2; background: #fff; }
@@ -191,7 +191,7 @@
   .add-cart-field { gap: 3px; margin-bottom: 7px; font-size: 11px; }
   .add-cart-field :is(select, input) { min-height: 35px; padding: 7px 9px; border-radius: 5px; font-size: 11px; }
   .add-cart-field select { min-height: 37px; padding: 6px 9px; border-radius: 6px; }
-  .add-cart-actions { grid-template-columns: auto minmax(0, 1fr) auto; gap: 6px; margin: 8px 0 5px; }
+  .add-cart-actions { grid-template-columns: minmax(0, 1fr) auto auto; gap: 6px; margin: 8px 0 5px; }
   .add-cart-actions button { min-height: 35px; gap: 5px; padding: 5px 8px; border-radius: 6px; font-size: 10px; }
   .add-cart-actions .add-cart-wishlist { min-height: 35px; padding: 5px 8px; border-radius: 6px; }
   .add-cart-actions .add-cart-info { min-width: 0; }
@@ -231,3 +231,12 @@
 .add-cart-description-html { margin-top: 8px; max-height: 220px; overflow-y: auto; font-size: 12px; line-height: 1.6; }
 .add-cart-description-html :is(p, ul, ol) { margin: 0 0 6px; }
 .add-cart-description-html img { max-width: 100%; height: auto; }
+
+/* the main button (Add to Cart / Notify me / Available from) takes the room, wishlist is a round-cornered icon, Info stays small */
+.add-cart-actions > :first-child { min-height: 44px; font-size: 14px; }
+.add-cart-actions .add-cart-wishlist--icon { width: 44px; min-width: 44px; min-height: 44px; padding: 0; }
+.add-cart-actions .add-cart-info { min-width: 0; min-height: 44px; padding-inline: 14px; }
+@media (max-width: 575px) {
+  .add-cart-actions > :first-child, .add-cart-actions .add-cart-wishlist--icon, .add-cart-actions .add-cart-info { min-height: 40px; }
+  .add-cart-actions .add-cart-wishlist--icon { width: 40px; min-width: 40px; }
+}

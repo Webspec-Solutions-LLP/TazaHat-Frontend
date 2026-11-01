@@ -87,8 +87,11 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
   const relatedMoney = new Intl.NumberFormat(locale, { style: "currency", currency, maximumFractionDigits: 0 });
   const cartItemId = `${product.id}-${variant.label}${dressing ? `-${dressing.id}` : ""}`;
   const isAddedToCart = addedVariantId === cartItemId;
+  // opened from a product card there is no cart callback: the navbar, which owns the cart, listens for these events (same as the product page)
+  const addLine = (item: CartItem) => { if (onAddToCart) onAddToCart(item); else window.dispatchEvent(new CustomEvent("tazahat:add-cart-item", { detail: item })); };
+  const changeLine = (delta: number) => { if (onUpdateCartQuantity) onUpdateCartQuantity(cartItemId, delta); else window.dispatchEvent(new CustomEvent("tazahat:update-cart-quantity", { detail: { id: cartItemId, delta } })); };
   const handleAddToCart = () => {
-    onAddToCart?.({
+    addLine({
       id: cartItemId,
       name: product.name,
       image: imageSources[0],
@@ -177,7 +180,7 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
                       type="button"
                       aria-label="Decrease quantity"
                       onClick={() => {
-                        onUpdateCartQuantity?.(cartItemId, -1);
+                        changeLine(-1);
                         if (quantity <= 1) {
                           setAddedVariantId(null);
                           setQuantity(1);
@@ -194,7 +197,7 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
                       aria-label="Increase quantity"
                       disabled={quantity >= 99}
                       onClick={() => {
-                        onUpdateCartQuantity?.(cartItemId, 1);
+                        changeLine(1);
                         setQuantity(value => value + 1);
                       }}
                     >
@@ -203,13 +206,11 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
                   </div>
                 </div>
               ) : (
-                onAddToCart && (
-                  <PackAction pack={variant} className="add-cart-submit" onAdd={handleAddToCart}>
-                    <DetailIcon kind="cart" />Add to Cart
-                  </PackAction>
-                )
+                <PackAction pack={variant} className="add-cart-submit" onAdd={handleAddToCart}>
+                  <DetailIcon kind="cart" />Add to Cart
+                </PackAction>
               )}
-              <button type="button" className="add-cart-wishlist" aria-pressed={saved} onClick={onToggleWishlist}><DetailIcon kind="heart" />{saved ? "Wishlisted" : "Add to Wishlist"}</button>
+              <button type="button" className="add-cart-wishlist add-cart-wishlist--icon" aria-pressed={saved} aria-label={saved ? "Remove from wishlist" : "Add to wishlist"} title={saved ? "Remove from wishlist" : "Add to wishlist"} onClick={onToggleWishlist}><DetailIcon kind="heart" /></button>
               <button type="button" className="add-cart-info" onClick={() => { dialog.current?.close(); document.body.style.overflow = previousOverflow.current; setIsChatOpen(true); }}><DetailIcon kind="info" />Info</button>
             </div>
             <section ref={descriptionRef} id="add-cart-description" className="add-cart-description" aria-labelledby="add-cart-description-title">

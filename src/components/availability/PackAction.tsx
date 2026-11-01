@@ -53,9 +53,9 @@ export function AvailabilityNote({ pack }: { pack?: PackAvailability | null }) {
   const status = packStatus(pack);
   if (status === "ok") return null;
   return status === "soon" ? (
-    <p className="pack-note pack-note--soon" role="status"><CalendarIcon />This item will be available from <strong>{pack?.availableFrom ? fullDay(pack.availableFrom) : pack?.availableFromLabel}</strong>.</p>
+    <p className="pack-note pack-note--soon" role="status"><CalendarIcon /><span>Coming soon. Available from <strong>{pack?.availableFrom ? fullDay(pack.availableFrom) : pack?.availableFromLabel}</strong>.</span></p>
   ) : (
-    <p className="pack-note pack-note--out" role="status"><BellIcon />Currently out of stock. Tap <strong>Notify me</strong> and we will tell you here as soon as it is back.</p>
+    <p className="pack-note pack-note--out" role="status"><BellIcon /><span>Out of stock right now. Tap <strong>Notify me</strong> and we will alert you when it is back.</span></p>
   );
 }
 

@@ -32,7 +32,8 @@
 .pd-add-cart.pack-action--soon .pack-from strong, .add-cart-submit.pack-action--soon .pack-from strong, .variant-go-cart.pack-action--soon .pack-from strong { font-size: 14px; opacity: 1; }
 .product-details-button.pack-action--waiting, .product-details-button.pack-action--notify { font-size: 13px; padding-inline: 8px; }
 
-.pack-note { display: flex; align-items: center; gap: 8px; margin: 10px 0 0; padding: 10px 12px; border-radius: 10px; font-size: 13px; line-height: 1.4; }
+.pack-note { display: flex; align-items: center; gap: 8px; margin: 10px 0 0; padding: 9px 12px; border-radius: 10px; font-size: 13px; line-height: 1.35; }
+.pack-note > span { flex: 1; min-width: 0; }
 .pack-note svg { flex: none; }
 .pack-note--soon { background: #eef6ff; color: #0b4a8c; border: 1px solid #cfe3fb; }
 .pack-note--out { background: #fdeeee; color: #8f1d1d; border: 1px solid #f5cccc; }
