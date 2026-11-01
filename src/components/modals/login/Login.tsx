@@ -13,6 +13,7 @@ interface LoginModalProps { onClose: () => void; onLoggedIn?: (user: SessionUser
 
 const OTP_LENGTH = 4;
 const emptyOtp = () => Array<string>(OTP_LENGTH).fill("");
+const NO_SMS_NOTICE = "No SMS service yet: your code is";
 
 export default function Login({ onClose, onLoggedIn }: LoginModalProps) {
   const [mobile, setMobile] = useState("");
@@ -33,8 +34,11 @@ export default function Login({ onClose, onLoggedIn }: LoginModalProps) {
 
   const updateOtp = (index: number, value: string) => {
     const digit = value.replace(/\D/g, "").slice(-1);
-    setOtp(current => current.map((item, itemIndex) => itemIndex === index ? digit : item));
+    const next = otp.map((item, itemIndex) => itemIndex === index ? digit : item);
+    setOtp(next);
     if (digit && index < otpRefs.current.length - 1) otpRefs.current[index + 1]?.focus();
+    // the 4th digit is the last step: no need to press Verify
+    if (next.every(item => /^\d$/.test(item))) void verifyOtp(next.join(""));
   };
 
   const handleOtpKeyDown = (index: number, event: ReactKeyboardEvent<HTMLInputElement>) => {
@@ -50,32 +54,37 @@ export default function Login({ onClose, onLoggedIn }: LoginModalProps) {
     return () => window.clearTimeout(timer);
   }, [wait]);
 
-  const sendOtp = async () => {
-    if (!validMobile) {
+  const sendOtp = async (number = mobile) => {
+    if (!/^\d{10}$/.test(number)) {
       setNotice("Enter a valid 10-digit mobile number.");
       return;
     }
     if (busy) return;
     setBusy(true);
     setNotice("");
-    const res = await requestOtpAction(mobile);
+    const res = await requestOtpAction(number);
     setBusy(false);
     if (!res.ok) { setNotice(res.error); return; }
     setOtpRequested(true);
     setOtp(emptyOtp());
     setWait(res.resendAfter);
-    // a development server without an SMS service hands the code back so the flow can be tried
-    setNotice(res.devCode ? `Development mode: your code is ${res.devCode}` : "");
+    // without an SMS service the server hands the code back (the fixed test code) so the flow can be used
+    setNotice(res.devCode ? `${NO_SMS_NOTICE} ${res.devCode}` : "");
     window.setTimeout(() => otpRefs.current[0]?.focus(), 50);
   };
 
-  const verifyOtp = async () => {
-    if (!validMobile || !validOtp || busy) return;
+  const verifyOtp = async (code = otp.join("")) => {
+    if (!validMobile || !new RegExp(`^\\d{${OTP_LENGTH}}$`).test(code) || busy) return;
     setBusy(true);
     setNotice("");
-    const res = await verifyOtpAction(mobile, otp.join(""));
+    const res = await verifyOtpAction(mobile, code);
     setBusy(false);
-    if (!res.ok) { setNotice(res.error); return; }
+    if (!res.ok) {
+      setNotice(res.error);
+      setOtp(emptyOtp());
+      window.setTimeout(() => otpRefs.current[0]?.focus(), 50);
+      return;
+    }
     onLoggedIn?.(res.user);
     if (!onLoggedIn) onClose();
   };
@@ -123,16 +132,21 @@ export default function Login({ onClose, onLoggedIn }: LoginModalProps) {
           <label className="login-phone-field">
             <span className="login-country-code"><span className="login-flag" aria-hidden="true">🇮🇳</span><b>+91</b><svg className="login-country-chevron" viewBox="0 0 12 8" aria-hidden="true"><path d="m1 1 5 5 5-5" /></svg></span>
             <span className="login-field-divider" />
-            <input aria-label="10-digit mobile number" type="tel" inputMode="numeric" autoComplete="tel-national" maxLength={12} placeholder="xxx xxx xxxx" value={formattedMobile} onChange={event => { setMobile(event.target.value.replace(/\D/g, "").slice(0, 10)); setOtpRequested(false); setOtp(emptyOtp()); setNotice(""); }} />
+            <input aria-label="10-digit mobile number" type="tel" inputMode="numeric" autoComplete="tel-national" maxLength={12} placeholder="xxx xxx xxxx" value={formattedMobile} onChange={event => {
+              const digits = event.target.value.replace(/\D/g, "").slice(0, 10);
+              setMobile(digits); setOtpRequested(false); setOtp(emptyOtp()); setNotice("");
+              // the 10th digit sends the OTP by itself
+              if (digits.length === 10) void sendOtp(digits);
+            }} />
           </label>
-          <button className="login-send-otp" type="submit" disabled={busy}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4 20-7Z"/><path d="M22 2 11 13"/></svg>Send OTP</button>
+          {!otpRequested && <button className="login-send-otp" type="submit" disabled={busy}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4 20-7Z"/><path d="M22 2 11 13"/></svg>Send OTP</button>}
         </form>
-        {notice && <p className={`login-notice${notice.startsWith("Development mode") ? "" : " is-error"}`} role="status">{notice}</p>}
+        {notice && <p className={`login-notice${notice.startsWith(NO_SMS_NOTICE) ? "" : " is-error"}`} role="status">{notice}</p>}
 
         {otpRequested && <div className="login-otp-step">
           <div className="login-otp-heading"><h2>Enter {OTP_LENGTH}-Digit OTP</h2><p>Enter the code sent to +91 {mobile}</p></div>
           <div className="login-otp-inputs" role="group" aria-label={`Enter ${OTP_LENGTH}-digit OTP`}>
-            {otp.map((digit, index) => <input key={index} ref={element => { otpRefs.current[index] = element; }} aria-label={`OTP digit ${index + 1}`} type="text" inputMode="numeric" autoComplete={index === 0 ? "one-time-code" : "off"} maxLength={1} value={digit} placeholder="—" onChange={event => updateOtp(index, event.target.value)} onKeyDown={event => handleOtpKeyDown(index, event)} onPaste={event => { const digits = event.clipboardData.getData("text").replace(/\D/g, "").slice(0, OTP_LENGTH).split(""); if (digits.length) { event.preventDefault(); setOtp(current => current.map((_, digitIndex) => digits[digitIndex] ?? "")); otpRefs.current[Math.min(digits.length, OTP_LENGTH - 1)]?.focus(); } }} />)}
+            {otp.map((digit, index) => <input key={index} ref={element => { otpRefs.current[index] = element; }} aria-label={`OTP digit ${index + 1}`} type="text" inputMode="numeric" autoComplete={index === 0 ? "one-time-code" : "off"} maxLength={1} value={digit} placeholder="—" onChange={event => updateOtp(index, event.target.value)} onKeyDown={event => handleOtpKeyDown(index, event)} onPaste={event => { const digits = event.clipboardData.getData("text").replace(/\D/g, "").slice(0, OTP_LENGTH).split(""); if (digits.length) { event.preventDefault(); setOtp(current => current.map((_, digitIndex) => digits[digitIndex] ?? "")); otpRefs.current[Math.min(digits.length, OTP_LENGTH - 1)]?.focus(); if (digits.length === OTP_LENGTH) void verifyOtp(digits.join("")); } }} />)}
           </div>
           <button className="login-verify-button" type="button" disabled={!validMobile || !validOtp || busy} onClick={() => void verifyOtp()}><span>✓</span>Verify &amp; Continue</button>
           <div className="login-otp-actions"><button type="button" disabled={wait > 0 || busy} onClick={() => void sendOtp()}>⟳ <span>Resend OTP</span>{wait > 0 && <> in <b>00:{String(wait).padStart(2, "0")}</b></>}</button><button type="button" onClick={() => { setMobile(""); setOtp(emptyOtp()); setOtpRequested(false); setNotice(""); setWait(0); }}>Change Mobile Number</button></div>

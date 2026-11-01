@@ -46,7 +46,7 @@ body { margin: 0; }
 .login-or span { flex: 1; height: 1px; background: #dbe6f0; }
 .login-otp-heading h2 { margin: 0; color: #0a345f; font-size: 19px; font-weight: 800; }
 .login-otp-heading p { margin: 8px 0 17px; color: #6d89a7; font-size: 14px; line-height: 1.4; }
-.login-otp-inputs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
+.login-otp-inputs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
 .login-otp-inputs input { width: 100%; height: 70px; border: 1.5px solid #d4e1ed; border-radius: 14px; outline: none; background: #fff; color: #0a4b85; font: inherit; font-size: 25px; font-weight: 700; text-align: center; transition: border-color .18s ease, box-shadow .18s ease; }
 .login-otp-inputs input::placeholder { color: #9bb0c6; font-size: 22px; }
 .login-otp-inputs input:focus { border-color: #087cff; box-shadow: 0 0 0 3px #087cff1c; }
