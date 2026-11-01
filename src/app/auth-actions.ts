@@ -75,3 +75,22 @@ export async function notificationsPageAction(cursor?: NotificationCursor | null
 export async function markNotificationsReadAction(ids?: string[]): Promise<void> {
   await userApi("/notifications/read", { method: "POST", body: ids?.length ? { ids: ids.slice(0, 100) } : {} });
 }
+
+/** the Firebase web config the browser needs for notifications (null while notifications are not set up in the CRM) */
+export async function pushConfigAction() {
+  const { getPushConfig } = await import("@/lib/server/api");
+  const c = await getPushConfig();
+  return c.enabled && c.config ? { config: c.config, vapidKey: c.vapidKey ?? null } : null;
+}
+
+/** remember this browser as a place to send the customer's notifications */
+export async function registerPushTokenAction(token: string): Promise<boolean> {
+  if (typeof token !== "string" || token.length < 20 || token.length > 4096) return false;
+  const res = await userApi<unknown>("/fcm-token", { method: "POST", body: { token, platform: "WEB" } });
+  return res.ok;
+}
+
+export async function removePushTokenAction(token: string): Promise<void> {
+  if (typeof token !== "string" || !token) return;
+  await userApi<unknown>("/fcm-token", { method: "DELETE", body: { token } });
+}

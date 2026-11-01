@@ -873,3 +873,8 @@
 
 /* phones: the bell is only its icon (the "Alerts" word stays on desktop and tablet) */
 @media (max-width: 575px) { .navbar-action-item .navbar-action-label.navbar-bell-label { display: none; } }
+
+.navbar-notify-push { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 10px; padding: 8px 12px; border-top: 1px solid #edf1f5; background: #f6faff; color: #45627a; font-size: 11.5px; }
+.navbar-notify-push button { padding: 4px 11px; border: 0; border-radius: 6px; background: #087cff; color: #fff; font-size: 11.5px; font-weight: 700; cursor: pointer; }
+.navbar-notify-push button:disabled { opacity: .6; cursor: wait; }
+.navbar-notify-push small { flex-basis: 100%; color: #a12622; }

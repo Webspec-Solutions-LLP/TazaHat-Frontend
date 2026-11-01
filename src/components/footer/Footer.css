@@ -260,7 +260,7 @@
   line-height: 1.6;
 }
 
-.footer-store-buttons { display: flex; flex-wrap: wrap; gap: 10px; }
+.footer-store-buttons { display: flex; flex-wrap: wrap; gap: 12px 10px; }
 
 .footer-play-badge {
   position: relative;
@@ -270,17 +270,17 @@
 
 /* no store link yet: the badge is dimmed and says so */
 .footer-play-badge.is-soon { cursor: default; }
-.footer-play-badge.is-soon .footer-play-image { opacity: .55; filter: grayscale(.35); }
-.footer-play-badge.is-soon { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 4px; }
-.footer-soon-tag { padding: 1px 8px; border-radius: 999px; background: #ffb400; color: #3b2a00; font-size: 10px; font-weight: 800; letter-spacing: .02em; }
+.footer-play-badge.is-soon .footer-play-image { opacity: .6; filter: grayscale(.3); }
+.footer-soon-tag { position: absolute; top: -7px; right: -5px; padding: 1px 7px; border-radius: 999px; background: #ffb400; color: #3b2a00; font-size: 9px; font-weight: 800; letter-spacing: .02em; line-height: 1.5; }
 
-.footer-ios-badge { height: 53px; }
+
 .footer-play-image {
   display: block;
-  width: 180px;
+  width: 150px;
+  height: 45px;
   max-width: 100%;
-  height: auto;
   object-fit: contain;
+  border-radius: 8px;
 }
 
 /* Bottom Copyright & Legal */
@@ -375,7 +375,7 @@
   .footer-seller-links { gap: 7px; margin-top: 9px; padding-top: 8px; font-size: 9px; }
   .footer-app-col { padding-left: 12px; }
   .footer-app-col > p { margin: 8px 0 12px; font-size: 11px; }
-  .footer-play-image { width: 155px; }
+  .footer-play-image { width: 150px; }
   .footer-bottom { gap: 9px 14px; padding: 13px 0; font-size: 10px; }
   .footer-legal { gap: 12px; }
   .footer-legal a + a { padding-left: 12px; }
@@ -415,7 +415,7 @@
   .footer-sell-button { margin-top: 7px; padding: 6px 11px; font-size: 10px; }
   .footer-seller-links { gap: 5px; font-size: 8px; }
   .footer-seller-links a + a { padding-left: 6px; }
-  .footer-play-image { width: 140px; }
+  .footer-play-image { width: 136px; height: 41px; }
   .footer-bottom { gap: 7px; font-size: 9px; }
   .footer-bottom-values { flex-wrap: wrap; justify-content: center; }
 }

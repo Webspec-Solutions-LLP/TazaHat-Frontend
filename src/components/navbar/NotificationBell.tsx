@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { timeAgo } from "@/lib/timeAgo";
+import { disablePush, enablePush, pushIsOn, pushPermission, syncPush } from "@/lib/webPush";
 
 /** The bell in the header: unread count and the latest notifications of the signed-in customer (shown only when signed in). */
 export default function NotificationBell() {
@@ -11,6 +12,29 @@ export default function NotificationBell() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const box = useRef<HTMLDivElement>(null);
+  // browser notifications of this device: on / off / blocked, and the answer to the last tap
+  const [push, setPush] = useState<"unsupported" | "off" | "on" | "blocked">("unsupported");
+  const [pushBusy, setPushBusy] = useState(false);
+  const [pushNote, setPushNote] = useState("");
+  const readPush = () => { const p = pushPermission(); setPush(p === "unsupported" ? "unsupported" : p === "denied" ? "blocked" : pushIsOn() ? "on" : "off"); };
+  const signedIn = !!user;
+  useEffect(() => {
+    if (!signedIn) return;
+    readPush();
+    // a browser that already allowed notifications keeps working for whoever signs in on it
+    void syncPush().then(readPush);
+  }, [signedIn]);
+  const togglePush = async () => {
+    setPushBusy(true);
+    setPushNote("");
+    if (push === "on") { await disablePush(); readPush(); }
+    else {
+      const res = await enablePush();
+      if (!res.ok) setPushNote(res.reason === "denied" ? "Notifications are blocked for this site. Allow them in your browser's site settings." : res.reason === "not-set-up" ? "Browser notifications are not switched on yet." : "We could not turn notifications on. Please try again.");
+      readPush();
+    }
+    setPushBusy(false);
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -59,6 +83,13 @@ export default function NotificationBell() {
                 </li>
               ))}
             </ul>
+          )}
+          {push !== "unsupported" && (
+            <div className="navbar-notify-push">
+              <span>{push === "on" ? "Notifications are on for this device." : push === "blocked" ? "Notifications are blocked in this browser." : "Get notified on this device, even when the site is closed."}</span>
+              {push !== "blocked" && <button type="button" disabled={pushBusy} onClick={() => void togglePush()}>{pushBusy ? "…" : push === "on" ? "Turn off" : "Turn on"}</button>}
+              {pushNote && <small role="status">{pushNote}</small>}
+            </div>
           )}
           <button type="button" className="navbar-notify-viewall" onClick={() => { setOpen(false); openNotifications(); }}>View all notifications</button>
         </div>
