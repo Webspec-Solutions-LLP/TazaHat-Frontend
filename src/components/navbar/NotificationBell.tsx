@@ -47,10 +47,11 @@ export default function NotificationBell() {
 
   if (!user) return null;
 
-  const openItem = (id: string, slug?: string) => {
+  const openItem = (id: string, slug?: string, order?: string) => {
     setOpen(false);
     void markRead([id]);
-    if (slug) router.push(`/${encodeURIComponent(slug)}`);
+    if (order) router.push(`/orders/${encodeURIComponent(order)}`);
+    else if (slug) router.push(`/${encodeURIComponent(slug)}`);
   };
 
   return (
@@ -75,7 +76,7 @@ export default function NotificationBell() {
             <ul className="navbar-notify-list">
               {notifications.slice(0, 6).map((n) => (
                 <li key={n.id}>
-                  <button type="button" className={n.isRead ? "" : "is-unread"} onClick={() => openItem(n.id, n.data?.slug)}>
+                  <button type="button" className={n.isRead ? "" : "is-unread"} onClick={() => openItem(n.id, n.data?.slug, n.data?.orderNumber)}>
                     <span className="navbar-notify-title">{n.title}</span>
                     <span className="navbar-notify-body">{n.body}</span>
                     <time dateTime={n.createdAt}>{timeAgo(n.createdAt)}</time>

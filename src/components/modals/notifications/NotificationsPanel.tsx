@@ -91,7 +91,8 @@ export default function NotificationsPanel({ unread, onClose, onChanged }: { unr
       setItems((current) => current.map((x) => (x.id === n.id ? { ...x, isRead: true } : x)));
       void markNotificationsReadAction([n.id]).then(onChanged);
     }
-    if (n.data?.slug) { close(); router.push(`/${encodeURIComponent(n.data.slug)}`); }
+    if (n.data?.orderNumber) { close(); router.push(`/orders/${encodeURIComponent(n.data.orderNumber)}`); }
+    else if (n.data?.slug) { close(); router.push(`/${encodeURIComponent(n.data.slug)}`); }
   };
 
   return (
