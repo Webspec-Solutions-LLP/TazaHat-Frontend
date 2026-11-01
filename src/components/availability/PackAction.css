@@ -1,0 +1,8 @@
+/* the three states that replace "Add to Cart": Notify me / We'll notify you / Available from <day> */
+.pack-action { display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; }
+.pack-action--notify { background: #fff !important; color: #0b5cad !important; border: 1.5px solid #0b5cad !important; }
+.pack-action--notify:hover { background: #eef6ff !important; }
+.pack-action--waiting { background: #e9f7ee !important; color: #1f7a3d !important; border: 1.5px solid #bfe5cb !important; }
+.pack-action--soon, .pack-action--out { background: #f1f4f8 !important; color: #5b6b7c !important; border: 1.5px solid #dde5ee !important; cursor: not-allowed; }
+.pack-action:disabled { opacity: 1; }
+.pack-action svg { flex: none; }

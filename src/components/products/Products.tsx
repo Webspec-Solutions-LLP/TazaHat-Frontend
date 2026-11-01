@@ -1,5 +1,8 @@
 "use client";
 
+import PackAction, { firstOrderable } from "@/components/availability/PackAction";
+import type { Product } from "@/lib/api";
+
 import { useCallback, useEffect, useState } from "react";
 import AddToCart from "../modals/AddToCart/AddToCart";
 import Variant from "../modals/variant/Variant";
@@ -15,7 +18,6 @@ import { fallbackImage, isRemoteImage } from "../../lib/api";
 import "./Products.css";
 import VariantChips from "@/components/products/VariantChips";
 
-type Product = (typeof text.products)[number];
 const money = new Intl.NumberFormat(text.locale, { style: "currency", currency: text.currency, maximumFractionDigits: 0 });
 interface ProductsProps {
   heading?: string;
@@ -52,7 +54,7 @@ export default function Products({ heading, products = text.products, showViewAl
   const renderProduct = (product: Product) => {
     const isSaved = saved.includes(product.id);
     const variants = product.variants?.length ? product.variants : [{ label: product.weight, amount: 1, unit: "pack", price: product.price, originalPrice: product.originalPrice }];
-    const initialVariant = Math.max(0, variants.findIndex(variant => variant.price === product.price));
+    const initialVariant = firstOrderable(variants, Math.max(0, variants.findIndex(variant => variant.price === product.price)));
     const selectedIndex = variantIndexes[product.id] ?? initialVariant;
     const variant = variants[selectedIndex] ?? variants[0];
     const discount = variant.originalPrice > 0 ? Math.max(0, Math.round((1 - variant.price / variant.originalPrice) * 100)) : 0;
@@ -72,7 +74,7 @@ export default function Products({ heading, products = text.products, showViewAl
         <div className="product-pricing"><strong>{money.format(variant.price)}</strong><del>{money.format(variant.originalPrice)}</del></div>
         <VariantChips name={product.name} variants={variants} selected={selectedIndex} onSelect={index => setVariantIndexes(current => ({ ...current, [product.id]: index }))} onMore={() => setVariantProduct(product)} />
         <div className="product-card-actions">
-          <button className="product-details-button" type="button" onClick={() => setVariantProduct(product)}><CartIcon />Add to Cart</button>
+          <PackAction pack={variant} className="product-details-button" onAdd={() => setVariantProduct(product)}><CartIcon />Add to Cart</PackAction>
           <button className="product-quick-view" type="button" aria-label={`View ${product.name} details`} onClick={() => setSelected(product)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
         </div>
       </article>

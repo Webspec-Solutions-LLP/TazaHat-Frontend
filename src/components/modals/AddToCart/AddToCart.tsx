@@ -10,9 +10,10 @@ import Chat from "../chat/Chat";
 import "swiper/css";
 import catalog from "../../products/english.json";
 import "./AddToCart.css";
-import { fallbackImage, isRemoteImage } from "@/lib/api";
+import { fallbackImage, isRemoteImage, type Product as ShopProduct } from "@/lib/api";
+import PackAction, { firstOrderable, packStatus } from "@/components/availability/PackAction";
 
-type Product = (typeof catalog.products)[number];
+type Product = ShopProduct;
 
 function DetailIcon({ kind }: { kind: string }) {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -41,8 +42,8 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
   const [relatedVariantIndexes, setRelatedVariantIndexes] = useState<Record<string, number>>({});
   const [relatedSaved, setRelatedSaved] = useState<string[]>([]);
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const variants = product.variants?.length ? product.variants : [{ label: product.weight, amount: 1, unit: "pack", price: product.price, originalPrice: product.originalPrice }];
-  const [variantIndex, setVariantIndex] = useState(() => Math.max(0, variants.findIndex(variant => variant.price === product.price)));
+  const variants = product.variants?.length ? product.variants : [{ label: product.weight, amount: 1, unit: "pack", price: product.price, originalPrice: product.originalPrice, inStock: true, availableFromLabel: null }];
+  const [variantIndex, setVariantIndex] = useState(() => firstOrderable(variants, Math.max(0, variants.findIndex(variant => variant.price === product.price))));
   const variant = variants[variantIndex] ?? variants[0];
   const imageSources = [product.image];
   const galleryImages = imageSources.length > 1
@@ -135,7 +136,7 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
               <div className="add-cart-variant-grid">
                 {variants.map((option, index) => <label key={option.label} className="add-cart-variant">
                   <input type="radio" name={`weight-${product.id}`} value={option.label} checked={variantIndex === index} onChange={() => { setVariantIndex(index); setQuantity(1); }} />
-                  <span className="add-cart-variant-card"><span className="add-cart-variant-heading"><strong>{option.label}</strong><span className="add-cart-variant-check" aria-hidden="true">✓</span></span></span>
+                  <span className="add-cart-variant-card"><span className="add-cart-variant-heading"><strong>{option.label}</strong><span className="add-cart-variant-check" aria-hidden="true">✓</span></span>{packStatus(option) === "soon" ? <small>From {option.availableFromLabel}</small> : packStatus(option) === "out" && <small>Out of stock</small>}</span>
                 </label>)}
               </div>
             </fieldset>
@@ -176,9 +177,9 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
                 </div>
               ) : (
                 onAddToCart && (
-                  <button type="button" className="add-cart-submit" onClick={handleAddToCart}>
+                  <PackAction pack={variant} className="add-cart-submit" onAdd={handleAddToCart}>
                     <DetailIcon kind="cart" />Add to Cart
-                  </button>
+                  </PackAction>
                 )
               )}
               <button type="button" className="add-cart-wishlist" aria-pressed={saved} onClick={onToggleWishlist}><DetailIcon kind="heart" />{saved ? "Wishlisted" : "Add to Wishlist"}</button>

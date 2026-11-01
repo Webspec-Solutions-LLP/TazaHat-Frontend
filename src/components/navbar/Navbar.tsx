@@ -13,7 +13,8 @@ import CompareList, {
 import CompareDetails from "../modals/compareDetails/CompareDetails";
 import AddToCart from "../modals/AddToCart/AddToCart";
 import Location from "../modals/location/Location";
-import Login from "../modals/login/Login";
+import NotificationBell from "./NotificationBell";
+import { useAuth } from "@/lib/auth";
 import { searchSuggestionsAction } from "@/app/actions";
 import { SearchHistorySkeleton, SearchSuggestionSkeleton } from "../skeleton/Skeletons";
 import { fallbackImage, isRemoteImage, type Product as CatalogProduct } from "@/lib/api";
@@ -112,7 +113,7 @@ export default function Navbar({
     window.addEventListener(OPEN_LOCATION_EVENT, open);
     return () => window.removeEventListener(OPEN_LOCATION_EVENT, open);
   }, []);
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const { user, openLogin, logout } = useAuth();
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -528,6 +529,8 @@ export default function Navbar({
                             +
                           </button>
                         </div>
+                      ) : product.availableFromLabel ? (
+                        <span className="navbar-search-status" title={`Available from ${product.availableFromLabel}`}>From {product.availableFromLabel}</span>
                       ) : (
                         <button
                           className="navbar-search-add-btn"
@@ -540,9 +543,9 @@ export default function Navbar({
                               handleAddToCart(product);
                             }
                           }}
-                          aria-label={`Add ${product.name} to cart`}
+                          aria-label={product.inStock === false ? `Notify me when ${product.name} is back` : `Add ${product.name} to cart`}
                         >
-                          {t.searchAddBtn}
+                          {product.inStock === false ? "Notify me" : t.searchAddBtn}
                         </button>
                       )}
                     </div>
@@ -644,6 +647,8 @@ export default function Navbar({
             <span className="navbar-delivery-badge">{t.deliveryBadge}</span>
           </Link>
 
+          <NotificationBell />
+
           {/* Account */}
           <div className="navbar-account-menu" ref={accountMenuRef}>
             <button
@@ -663,9 +668,15 @@ export default function Navbar({
               <span className="navbar-action-label">{t.account}</span>
             </button>
             <div className={`navbar-account-dropdown${isAccountOpen ? " is-open" : ""}`} role="menu" aria-label={t.account} aria-hidden={!isAccountOpen}>
-              <button type="button" role="menuitem" tabIndex={isAccountOpen ? 0 : -1} onClick={() => { setIsAccountOpen(false); setIsLoginOpen(true); }}>
-                <span className="navbar-account-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M14 4h5a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-5"/><path d="M10 16l4-4-4-4M14 12H3"/></svg></span>{t.login}
-              </button>
+              {user ? (
+                <button type="button" role="menuitem" tabIndex={isAccountOpen ? 0 : -1} onClick={() => { setIsAccountOpen(false); void logout(); }}>
+                  <span className="navbar-account-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5"/><path d="M14 16l4-4-4-4M18 12H8"/></svg></span>Logout{user.phone ? ` (+91 ${user.phone})` : ""}
+                </button>
+              ) : (
+                <button type="button" role="menuitem" tabIndex={isAccountOpen ? 0 : -1} onClick={() => { setIsAccountOpen(false); openLogin(); }}>
+                  <span className="navbar-account-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M14 4h5a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-5"/><path d="M10 16l4-4-4-4M14 12H3"/></svg></span>{t.login}
+                </button>
+              )}
               <Link href="/wishlist" role="menuitem" tabIndex={isAccountOpen ? 0 : -1} onClick={() => setIsAccountOpen(false)}>
                 <span className="navbar-account-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20.8 8.7c0 5.1-8.8 10.2-8.8 10.2S3.2 13.8 3.2 8.7A4.7 4.7 0 0 1 12 6.1a4.7 4.7 0 0 1 8.8 2.6Z"/></svg></span>{t.wishlist}
               </Link>
@@ -775,8 +786,7 @@ export default function Navbar({
           onUpdateCartQuantity={updateCartQuantity}
         />
       )}
-      {isLocationOpen && <Location onClose={() => setIsLocationOpen(false)} onLogin={() => { setIsLocationOpen(false); setIsLoginOpen(true); }} />}
-      {isLoginOpen && <Login onClose={() => setIsLoginOpen(false)} />}
+      {isLocationOpen && <Location onClose={() => setIsLocationOpen(false)} onLogin={() => { setIsLocationOpen(false); openLogin(); }} />}
     </header>
   );
 }

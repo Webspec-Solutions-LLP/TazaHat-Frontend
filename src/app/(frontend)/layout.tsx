@@ -6,6 +6,7 @@ import BottomNavigation from "@/components/bottomNavigation/BottomNavigation";
 import FeedbackButton from "@/components/feedbackButton/FeedbackButton";
 import HomeBackConfirmation from "@/components/modals/confermation/HomeBackConfirmation";
 import { CityProvider } from "@/lib/city";
+import { AuthProvider } from "@/lib/auth";
 import { readCityCookie } from "@/lib/server/city";
 import "./Home.css";
 
@@ -24,6 +25,7 @@ export default async function RootLayout({
     <html lang="en">
       <body className="min-h-screen flex flex-col">
         <CityProvider value={city}>
+        <AuthProvider>
         <Navbar />
         <main className="flex-1 frontend-layout-main">{children}</main>
         <Footer />
@@ -31,6 +33,7 @@ export default async function RootLayout({
         <BottomNavigation />
         <FeedbackButton />
         <HomeBackConfirmation />
+        </AuthProvider>
         </CityProvider>
       </body>
     </html>

@@ -1,5 +1,6 @@
 "use client";
 
+import PackAction from "@/components/availability/PackAction";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Products from "@/components/products/Products";
@@ -249,8 +250,8 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
             <fieldset className="pd-variant-picker">
               <legend><strong>Weight / Pack size</strong><span>{pack.label}</span></legend>
               <div className="pd-weights">{detail.packs.map((option, index) => <label key={option.id} className={`pd-weight-option${packIndex === index ? " is-selected" : ""}${option.inStock ? "" : " is-sold-out"}`}>
-                <input type="radio" name={`weight-${detail.id}`} value={option.label} checked={packIndex === index} disabled={!option.inStock} onChange={() => setPackIndex(index)} />
-                <span className="pd-weight-option-card"><strong>{option.label}</strong>{!option.inStock && <small>Out of stock</small>}</span>
+                <input type="radio" name={`weight-${detail.id}`} value={option.label} checked={packIndex === index} onChange={() => setPackIndex(index)} />
+                <span className="pd-weight-option-card"><strong>{option.label}</strong>{option.availableFromLabel ? <small>From {option.availableFromLabel}</small> : !option.inStock && <small>Out of stock</small>}</span>
               </label>)}</div>
             </fieldset>
           </> : <p className="pd-description">This product is not on sale in your city right now.</p>}
@@ -264,7 +265,7 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
                 <button type="button" aria-label="Increase quantity" disabled={inCart.quantity >= 99} onClick={() => changeQuantity(1)}><Icon name="plus" /></button>
               </div>
             ) : (
-              <button type="button" className="pd-add-cart" onClick={addToCart} disabled={!pack || !pack.inStock}><Icon name="cart" /> {pack && !pack.inStock ? "Out of stock" : "Add to Cart"}</button>
+              pack ? <PackAction pack={pack} className="pd-add-cart" onAdd={addToCart}><Icon name="cart" /> Add to Cart</PackAction> : <button type="button" className="pd-add-cart" disabled><Icon name="cart" /> Add to Cart</button>
             )}
             <button type="button" className="pd-wishlist pd-wishlist--icon" aria-pressed={saved} aria-label={saved ? "Remove from wishlist" : "Add to wishlist"} title={saved ? "Remove from wishlist" : "Add to wishlist"} onClick={() => setSaved(toggleWishlistId(detail.slug).includes(detail.slug))}><Icon name="heart" /></button>
             <button type="button" className={`pd-compare${isCompared ? " is-compared" : ""}`} disabled={isCompared} onClick={handleAddToCompare} title={isCompared ? "Already added to compare" : "Add to compare"}><Icon name="compare" /><span>{isCompared ? "Added to Compare" : "Add to Compare"}</span></button>

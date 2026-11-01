@@ -2,7 +2,18 @@ import type { SyntheticEvent } from "react";
 import catalog from "@/components/products/english.json";
 
 /** The shape every product card / modal in the UI already uses. */
-export type Product = (typeof catalog.products)[number];
+type CatalogProduct = (typeof catalog.products)[number];
+type CatalogVariant = NonNullable<CatalogProduct["variants"]>[number];
+
+/** What a pack can do right now: ordered (inStock), or, when it is not on sale yet, from when (a label like "Tuesday" / "12 Nov"). */
+export interface PackAvailability { id?: string; inStock?: boolean; availableFromLabel?: string | null }
+export type Product = Omit<CatalogProduct, "variants"> & {
+  /** can any pack be ordered now (absent = yes) */
+  inStock?: boolean;
+  /** none can yet, the first starts on this day */
+  availableFromLabel?: string | null;
+  variants: (CatalogVariant & PackAvailability)[];
+};
 
 export const PLACEHOLDER_IMAGE = "/images/logo.webp";
 
@@ -29,10 +40,10 @@ export interface ApiCard {
   id: string; slug: string; name: string; image: string | null; unit: string | null;
   categoryName: string; categorySlug: string; subCategoryName: string; subCategorySlug: string;
   pricePaisa: number | null; mrpPaisa: number | null; discountPercent: number; fromLabel: string | null;
-  packCount: number; inStock: boolean; perUnitPaisa: number | null; endsOn: string | null;
+  packCount: number; inStock: boolean; availableFrom: string | null; availableFromLabel: string | null; perUnitPaisa: number | null; endsOn: string | null;
   packs: ApiPack[];
 }
-export interface ApiPack { id: string; label: string; amount: number; unit: string; pricePaisa: number; mrpPaisa: number; inStock: boolean }
+export interface ApiPack { id: string; label: string; amount: number; unit: string; pricePaisa: number; mrpPaisa: number; inStock: boolean; availableFrom: string | null; availableFromLabel: string | null }
 export interface ApiHomeCategory { id: string; name: string; slug: string; imageUrl: string | null; subCategories: { id: string; name: string; slug: string }[] }
 export interface ShopHome {
   cities: ApiCity[];
@@ -73,7 +84,7 @@ export function cardToProduct(c: ApiCard): Product {
   const mrp = Math.round((c.mrpPaisa ?? c.pricePaisa ?? 0) / 100);
   const label = c.fromLabel ?? (c.unit ? `1 ${c.unit}` : "1 pack");
   const variants = c.packs?.length
-    ? c.packs.map((p) => ({ label: p.label, ...packUnit(p.amount, p.unit), price: Math.round(p.pricePaisa / 100), originalPrice: Math.round(p.mrpPaisa / 100) }))
+    ? c.packs.map((p) => ({ id: p.id, label: p.label, ...packUnit(p.amount, p.unit), price: Math.round(p.pricePaisa / 100), originalPrice: Math.round(p.mrpPaisa / 100), inStock: p.inStock, availableFromLabel: p.availableFromLabel }))
     : [{ label, amount: 1, unit: c.unit ?? "pack", price, originalPrice: mrp }];
   return {
     id: c.slug,
@@ -87,6 +98,8 @@ export function cardToProduct(c: ApiCard): Product {
     category: shortName(c.categoryName),
     subcategory: shortName(c.subCategoryName),
     variants,
+    inStock: c.inStock,
+    availableFromLabel: c.availableFromLabel,
   };
 }
 
@@ -103,7 +116,7 @@ export interface ApiProductDetail {
   id: string; slug: string; name: string; description: string | null; shortDescription: string | null; unit: string | null; images: string[];
   category: { name: string; slug: string }; subCategory: { name: string; slug: string };
   cutting: { id: string; name: string; chargePaisa: number }[];
-  packs: { id: string; label: string; weight: boolean; ratePaisa: number; pricePaisa: number; mrpPaisa: number; discountPercent: number; inStock: boolean; preOrderDays: number | null; availableTo: string | null }[];
+  packs: { id: string; label: string; weight: boolean; ratePaisa: number; pricePaisa: number; mrpPaisa: number; discountPercent: number; inStock: boolean; availableFrom: string | null; availableFromLabel: string | null; preOrderDays: number | null; availableTo: string | null }[];
   /** weight items are priced per kg; each pack costs rate x weight */
   ratePerKgPaisa: number | null;
   available: boolean; city: ApiCity | null; related: ApiCard[];

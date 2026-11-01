@@ -4,7 +4,8 @@ import { useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import type { CartItem } from "../cart/Cart";
 import "./Variant.css";
-import { fallbackImage, isRemoteImage } from "@/lib/api";
+import { fallbackImage, isRemoteImage, type PackAvailability } from "@/lib/api";
+import PackAction, { firstOrderable, packStatus } from "@/components/availability/PackAction";
 
 export type VariantOption = {
   label: string;
@@ -12,7 +13,7 @@ export type VariantOption = {
   unit: string;
   price: number;
   originalPrice: number;
-};
+} & PackAvailability;
 
 export type VariantProduct = {
   id: string;
@@ -40,7 +41,7 @@ export default function Variant({ product, currency, onClose, onGoToCart }: Vari
     : [{ label: product.weight, amount: 1, unit: "pack", price: product.price, originalPrice: product.originalPrice }];
   const [selectedIndex, setSelectedIndex] = useState(() => {
     const matchingIndex = variants.findIndex((variant) => variant.price === product.price);
-    return matchingIndex >= 0 ? matchingIndex : 0;
+    return firstOrderable(variants, matchingIndex >= 0 ? matchingIndex : 0);
   });
   const [quantity, setQuantity] = useState(1);
   const [dressingType, setDressingType] = useState("");
@@ -114,9 +115,9 @@ export default function Variant({ product, currency, onClose, onGoToCart }: Vari
               <div className={`variant-choice${selectedIndex === index ? " is-selected" : ""}`} key={`${product.id}-${variant.label}`} onClick={() => setSelectedIndex(index)}>
                 <label className="variant-option">
                   <input type="radio" name={`variant-${product.id}`} checked={selectedIndex === index} onChange={() => setSelectedIndex(index)} />
-                  <span className="variant-option-copy"><strong>{variant.label}</strong></span>
+                  <span className="variant-option-copy"><strong>{variant.label}</strong>{packStatus(variant) === "soon" ? <small>From {variant.availableFromLabel}</small> : packStatus(variant) === "out" && <small>Out of stock</small>}</span>
                 </label>
-                {selectedIndex === index && <div className="variant-choice-quantity">
+                {selectedIndex === index && packStatus(variant) === "ok" && <div className="variant-choice-quantity">
                   <div className="variant-quantity" role="group" aria-label={`Quantity for ${variant.label}`}>
                     <button type="button" aria-label="Decrease quantity" onClick={() => setQuantity(count => Math.max(1, count - 1))} disabled={quantity <= 1}>-</button>
                     <output aria-live="polite">{quantity}</output>
@@ -139,11 +140,11 @@ export default function Variant({ product, currency, onClose, onGoToCart }: Vari
           </select>
         </label>
         <footer className="variant-footer">
-          <button type="button" className="variant-go-cart" onClick={handleGoToCart}>
+          <PackAction pack={selected} className="variant-go-cart" onAdd={handleGoToCart}>
             <span className="variant-go-cart-label">Go to Cart</span>
             <small className="variant-go-cart-meta">{selected.label} x {quantity}</small>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M2 3h2l2.4 12.2a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6L22 8H5"/><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/></svg>
-          </button>
+          </PackAction>
         </footer>
       </section>
     </dialog>
