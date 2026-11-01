@@ -2,14 +2,15 @@
 
 import RequireLogin from "@/components/auth/RequireLogin";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { STATUS_TEXT, statusGroup } from "@/lib/orderStatus";
 import { myOrdersAction, type MyOrder } from "@/app/checkout-actions";
 import "./MyOrders.css";
 
 type OrderStatus = "upcoming" | "complete" | "cancel" | "refund";
 const money = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 2 });
-const tabOf = (o: MyOrder): OrderStatus => (o.status === "DELIVERED" ? "complete" : o.status === "CANCELLED" ? "cancel" : "upcoming");
-const STATUS_TEXT: Record<MyOrder["status"], string> = { PENDING: "Order placed", IN_PROGRESS: "In progress", PROCESSING: "Processing", PACKAGING: "Packing", OUT_FOR_DELIVERY: "Out for delivery", DELIVERED: "Delivered", CANCELLED: "Cancelled" };
+const tabOf = (o: MyOrder): OrderStatus => statusGroup(o.status);
 const dateText = (iso: string) => new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric", timeZone: "Asia/Kolkata" });
 
 type OrderTab = "all" | OrderStatus;
@@ -36,6 +37,24 @@ function MyOrdersContent() {
     setOrders(current => (next === 1 ? res.orders : [...(current ?? []), ...res.orders]));
   }, []);
   useEffect(() => { void load(1); }, [load]);
+  // the next 30 orders load by themselves when the end of the list comes into view
+  const sentinel = useRef<HTMLDivElement>(null);
+  const busy = useRef(false);
+  const hasMore = orders !== null && orders.length < total;
+  useEffect(() => {
+    const el = sentinel.current;
+    if (!el || !hasMore) return;
+    const watcher = new IntersectionObserver(async entries => {
+      if (!entries[0].isIntersecting || busy.current) return;
+      busy.current = true;
+      setLoadingMore(true);
+      await load(page + 1);
+      setLoadingMore(false);
+      busy.current = false;
+    }, { rootMargin: "300px" });
+    watcher.observe(el);
+    return () => watcher.disconnect();
+  }, [hasMore, page, load]);
   // a message left by the page we came from (the order was placed)
   const [flash, setFlash] = useState("");
   useEffect(() => {
@@ -95,6 +114,7 @@ function MyOrdersContent() {
         >
           {orders === null ? <div className="my-orders-empty"><p>Loading your orders…</p></div> : filteredOrders.length ? filteredOrders.map(order => (
             <article className="my-order-card" key={order.id}>
+              <Link className="my-order-card-link" href={`/myOrders/orderDetails?orderId=${encodeURIComponent(order.orderNumber)}`} aria-label={`View order ${order.orderNumber}`} />
               <div className="my-order-summary">
                 <div className="my-order-number">
                   <span>Order ID</span>
@@ -116,6 +136,7 @@ function MyOrdersContent() {
                   <span aria-hidden="true" />
                   {STATUS_TEXT[order.status]}
                 </span>
+                <span className="my-order-details-button">View order</span>
               </div>
               <p className="my-order-items-line">{order.totalItem} {order.totalItem === 1 ? "item" : "items"}: {order.preview.map(p => p.name).join(", ")}{order.totalItem > order.preview.length ? "…" : ""}</p>
             </article>
@@ -125,9 +146,7 @@ function MyOrdersContent() {
               <p>Your orders in this category will show up here.</p>
             </div>
           )}
-          {orders !== null && list.length < total && (
-            <button type="button" className="my-orders-more" disabled={loadingMore} onClick={async () => { setLoadingMore(true); await load(page + 1); setLoadingMore(false); }}>{loadingMore ? "Loading…" : "Load more orders"}</button>
-          )}
+          {hasMore && <div ref={sentinel} className="my-orders-more" role="status">{loadingMore ? "Loading more orders…" : ""}</div>}
         </section>
       </div>
     </main>

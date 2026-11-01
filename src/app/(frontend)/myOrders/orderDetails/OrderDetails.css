@@ -153,3 +153,11 @@
   .order-product-price { font-size: 11px; }
   .order-product-status { padding: 4px 6px; font-size: 8px; }
 }
+
+.order-details-note { margin: 8px 0 0; color: #6b7f92; font-size: 13px; }
+.order-bill-note { padding: 0 20px 16px; }
+.order-details-back { display: inline-block; margin-top: 12px; color: #087cff; font-weight: 600; }
+.order-product-copy h3 a { color: inherit; text-decoration: none; }
+.order-product-copy h3 a:hover { color: #087cff; }
+.order-price-breakdown { display: grid; gap: 8px; padding: 14px 20px; border-top: 1px solid #edf1f5; color: #45627a; font-size: 14px; }
+.order-price-breakdown > div { display: flex; justify-content: space-between; gap: 12px; }

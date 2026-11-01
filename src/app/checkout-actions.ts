@@ -79,3 +79,17 @@ export async function myOrdersAction(page = 1): Promise<{ orders: MyOrder[]; tot
   const res = await userApi<{ orders: MyOrder[]; total: number; page: number; limit: number }>(`/orders?page=${Math.max(1, Math.floor(page) || 1)}&limit=30`);
   return res.ok ? res.data : null;
 }
+
+export interface MyOrderDetail {
+  id: string; orderNumber: string; status: MyOrder["status"]; placedAt: string; deliveryDate: string | null; deliverySlotName: string | null; deliverySlotLabel: string | null;
+  deliveryType: string; paymentMethod: string; paymentState: string; address: Record<string, string | number | null> | null; legacyAddressText: string | null;
+  store: { name: string; areaName: string | null; pincode: string | null; phone: string } | null;
+  totals: { itemCount: number; deliveryFeePaisa: number; deliveryTimeFeePaisa: number; cuttingFeePaisa: number; convenienceFeePaisa: number; estimatedTotalPaisa: number; billTotalPaisa: number; adjustmentPaisa: number; discountPaisa: number; couponDiscountPaisa: number };
+  items: { id: string; name: string; slug: string | null; image: string | null; weight: boolean; linePaisa: number; estimatedLinePaisa: number; packLabel: string | null; dressing: string | null; instruction: string | null; quantity: number; unitPricePaisa: number; dressingUnitPaisa: number; status: MyOrder["status"]; cancelled: boolean; orderedMeasurement: number; billedMeasurement: number }[];
+}
+
+export async function myOrderAction(ref: string): Promise<MyOrderDetail | null> {
+  if (!/^[\w-]{1,60}$/.test(ref)) return null;
+  const res = await userApi<MyOrderDetail>(`/orders/${encodeURIComponent(ref)}`);
+  return res.ok ? res.data : null;
+}
