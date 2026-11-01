@@ -4,6 +4,7 @@ import { useBackClose } from "@/lib/backLayers";
 
 import { useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
+import { fallbackImage, isRemoteImage, PLACEHOLDER_IMAGE } from "@/lib/api";
 import "./CompareList.css";
 
 export interface CompareProduct {
@@ -243,29 +244,38 @@ export default function CompareList({
               {items.map(item => {
                 const isSelected = selectedIds.includes(item.id);
                 return (
-                  <li key={item.id} className={`compare-item-card${isSelected ? " is-selected" : ""}`}>
-                    <label
-                      className="compare-item-select-wrap"
-                      title={isSelected ? "Deselect" : "Select for comparison"}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => toggleSelect(item.id)}
-                        className="compare-item-radio-input"
-                        aria-label={`Select ${item.name} for comparison`}
-                      />
+                  // the whole card is the control: a tap anywhere on it selects / deselects (the round mark only shows the state)
+                  <li
+                    key={item.id}
+                    className={`compare-item-card${isSelected ? " is-selected" : ""}`}
+                    role="checkbox"
+                    aria-checked={isSelected}
+                    aria-label={`${isSelected ? "Deselect" : "Select"} ${item.name} for comparison`}
+                    tabIndex={0}
+                    title={isSelected ? "Click to deselect" : "Click to select for comparison"}
+                    onClick={() => toggleSelect(item.id)}
+                    onKeyDown={event => {
+                      if (event.key === " " || event.key === "Enter") {
+                        event.preventDefault();
+                        toggleSelect(item.id);
+                      }
+                    }}
+                  >
+                    <span className="compare-item-select-wrap">
+                      <input type="checkbox" checked={isSelected} readOnly tabIndex={-1} aria-hidden="true" className="compare-item-radio-input" />
                       <span className="compare-item-radio-custom" aria-hidden="true">
                         <span className="compare-item-radio-dot" />
                       </span>
-                    </label>
+                    </span>
 
                     <div className="compare-item-image">
                       <Image
-                        src={item.image || "/images/products/product--2.png"}
+                        src={item.image || PLACEHOLDER_IMAGE}
                         alt={item.name}
                         fill
-                        sizes="64px"
+                        sizes="96px"
+                        unoptimized={isRemoteImage(item.image || PLACEHOLDER_IMAGE)}
+                        onError={fallbackImage}
                         className="compare-item-img"
                       />
                     </div>
@@ -279,7 +289,11 @@ export default function CompareList({
                           className="compare-item-remove"
                           aria-label={`Delete ${item.name}`}
                           title={`Delete ${item.name}`}
-                          onClick={() => handleRemove(item.id)}
+                          onClick={event => {
+                            event.stopPropagation();
+                            handleRemove(item.id);
+                          }}
+                          onKeyDown={event => event.stopPropagation()}
                         >
                           <svg
                             viewBox="0 0 24 24"

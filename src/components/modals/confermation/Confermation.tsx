@@ -1,5 +1,7 @@
 "use client";
 
+import { fallbackImage, isRemoteImage } from "@/lib/api";
+
 import { useBackClose } from "@/lib/backLayers";
 
 import { useCallback, useEffect, useId, useState } from "react";
@@ -130,6 +132,8 @@ export default function Confermation({
                   alt=""
                   fill
                   sizes="28px"
+                  unoptimized={isRemoteImage(productImage)}
+                  onError={fallbackImage}
                   style={{ objectFit: "contain" }}
                 />
               </span>

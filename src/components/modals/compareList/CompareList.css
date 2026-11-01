@@ -1,7 +1,7 @@
 .compare-sidebar-dialog {
   position: fixed;
   inset: 0 0 0 auto;
-  width: min(390px, 100vw);
+  width: min(540px, 100vw);
   max-width: 100vw;
   height: 100dvh;
   max-height: none;
@@ -242,9 +242,9 @@
 
 .compare-item-image {
   position: relative;
-  width: 62px;
-  height: 62px;
-  flex: 0 0 62px;
+  width: 92px;
+  height: 92px;
+  flex: 0 0 92px;
   border-radius: 8px;
   overflow: hidden;
   background: #f4f8fc;
@@ -597,3 +597,11 @@
     transition: none;
   }
 }
+
+/* the whole card selects: it shows it is a control */
+.compare-item-card { cursor: pointer; user-select: none; }
+.compare-item-card:focus-visible { outline: 2px solid #1683d8; outline-offset: 2px; }
+.compare-item-card.is-selected { box-shadow: 0 0 0 2px #cfe6fa, 0 4px 12px rgb(8 117 209 / 10%); }
+.compare-item-remove { cursor: pointer; }
+.compare-item-name { font-size: 14.5px; }
+@media (max-width: 575px) { .compare-item-image { width: 72px; height: 72px; flex-basis: 72px; } }
