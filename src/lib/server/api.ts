@@ -38,6 +38,9 @@ export async function checkShopCart(cityId: string, lines: { variantId: string; 
   if (!res.ok || json?.status !== "success" || !json.data) throw new Error(json?.message ?? "Could not reach the server.");
   return json.data.lines;
 }
+export type AppLink = { state: "link"; url: string } | { state: "soon" | "hidden"; url: null };
+/** the footer's store buttons, set in the CRM (Settings > App links); when the shop cannot be reached both say "Coming soon" */
+export const getAppLinks = () => get<{ android: AppLink; ios: AppLink }>("/app-links").catch(() => ({ android: { state: "soon", url: null }, ios: { state: "soon", url: null } }) as { android: AppLink; ios: AppLink });
 export const getCities = () => get<{ cities: ApiCity[] }>("/cities").then((d) => d.cities);
 export const getShopHome = (cityId: string) => get<ShopHome>("/shop/home", { cityId });
 export const checkServiceability = (q: { pincode?: string; city?: string }) => get<Serviceability>("/serviceability", q);

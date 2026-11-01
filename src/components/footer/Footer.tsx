@@ -1,9 +1,29 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { getAppLinks, type AppLink } from "@/lib/server/api";
 import "./Footer.css";
 
-export default function Footer() {
+function AppStoreBadge() {
+  return (
+    <svg className="footer-play-image footer-ios-badge" viewBox="0 0 180 53" role="img" aria-label="Download on the App Store">
+      <rect x="0.5" y="0.5" width="179" height="52" rx="9" fill="#000" stroke="#a6a6a6" />
+      <path transform="translate(16 12) scale(1.15)" fill="#fff" d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701" />
+      <text x="52" y="21" fill="#fff" fontSize="9.5" fontFamily="-apple-system, Helvetica, Arial, sans-serif">Download on the</text>
+      <text x="51" y="40" fill="#fff" fontSize="20" fontWeight="600" fontFamily="-apple-system, Helvetica, Arial, sans-serif">App Store</text>
+    </svg>
+  );
+}
+
+/** one store button: a link when the CRM has the address, "Coming soon" when it has not, nothing when it is switched off */
+function StoreButton({ link, label, children }: { link: AppLink; label: string; children: React.ReactNode }) {
+  if (link.state === "hidden") return null;
+  if (link.state === "link") return <a className="footer-play-badge" href={link.url} target="_blank" rel="noopener noreferrer" aria-label={label}>{children}</a>;
+  return <span className="footer-play-badge is-soon" aria-label={`${label} - coming soon`}>{children}<span className="footer-soon-tag">Coming soon</span></span>;
+}
+
+export default async function Footer() {
+  const apps = await getAppLinks();
   return (
     <footer className="tazahat-footer" aria-label="Site footer">
       <div className="tazahat-footer-inner">
@@ -154,9 +174,12 @@ export default function Footer() {
           <div className="footer-app-col">
             <h3 className="footer-col-title">Get Our App</h3>
             <p>Shop fresh groceries<br />anytime, anywhere.</p>
-            <div className="footer-play-badge">
-              <Image src="/images/playstore_img.webp" alt="Get it on Google Play" width={715} height={212} className="footer-play-image" />
-            </div>
+            {(apps.android.state !== "hidden" || apps.ios.state !== "hidden") && (
+              <div className="footer-store-buttons">
+                <StoreButton link={apps.android} label="Get it on Google Play"><Image src="/images/playstore_img.webp" alt="Get it on Google Play" width={715} height={212} className="footer-play-image" /></StoreButton>
+                <StoreButton link={apps.ios} label="Download on the App Store"><AppStoreBadge /></StoreButton>
+              </div>
+            )}
           </div>
         </div>
 
