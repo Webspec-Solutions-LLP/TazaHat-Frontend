@@ -1,0 +1,29 @@
+.eoi-body { display: grid; flex: 1; align-content: start; gap: 14px; margin-top: 14px; overflow-y: auto; }
+.eoi-group { display: grid; gap: 7px; margin: 0; padding: 0; border: 0; }
+.eoi-group legend { margin-bottom: 6px; padding: 0; color: #45627a; font-size: 13px; font-weight: 800; }
+.eoi-option { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid #dce8f2; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.eoi-option.is-on { border-color: #087cff; background: #eef7ff; }
+.eoi-option.is-off { opacity: .55; cursor: not-allowed; }
+.eoi-option b { color: #123b6d; font-size: 13px; }
+.eoi-group select, .eoi-group textarea { box-sizing: border-box; width: 100%; padding: 10px 12px; border: 1px solid #cfe3f6; border-radius: 10px; background: #fff; font: inherit; font-size: 13px; }
+.eoi-note { margin: 0; color: #a96808; font-size: 12px; font-weight: 600; }
+.eoi-qty { display: flex; align-items: center; justify-content: space-between; color: #45627a; font-size: 13px; font-weight: 800; }
+.eoi-stepper { display: inline-flex; align-items: center; gap: 10px; }
+.eoi-stepper button { display: grid; width: 32px; height: 32px; place-items: center; border: 1px solid #cfe3f6; border-radius: 8px; background: #fff; color: #087cff; font-size: 18px; font-weight: 700; cursor: pointer; }
+.eoi-stepper button:disabled { color: #b4c3d1; cursor: not-allowed; }
+.eoi-stepper b { min-width: 26px; color: #123b6d; font-size: 15px; text-align: center; }
+.eoi-price { margin: 0; padding: 10px 12px; border-radius: 10px; background: #f3f8fc; color: #45627a; font-size: 13px; }
+.eoi-price b { color: #123b6d; font-size: 15px; }
+.eoi-price small { color: #6b7f92; }
+.eoi-footer { gap: 10px; }
+.eoi-footer button:disabled { opacity: .5; cursor: not-allowed; }
+.eoi-footer .eoi-cancel { background: #eef2f6; color: #3d556b; }
+
+/* edit-order panel */
+.eop-list { margin-top: 14px; }
+.eop-item { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 10px; border: 1px solid #e3edf6; border-radius: 10px; }
+.eop-item .ato-name { white-space: normal; }
+.eop-actions { display: grid; gap: 6px; }
+.eop-actions button { padding: 6px 14px; border: 1px solid #cfe3f6; border-radius: 8px; background: #fff; color: #087cff; font-size: 12px; font-weight: 700; cursor: pointer; }
+.eop-actions button.is-danger { color: #c0261f; border-color: #efc9c5; }
+.eop-actions button:disabled { opacity: .45; cursor: not-allowed; }

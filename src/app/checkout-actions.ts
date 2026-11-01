@@ -87,9 +87,9 @@ export interface MyOrderDetail {
   id: string; orderNumber: string; status: MyOrder["status"]; placedAt: string; deliveryDate: string | null; deliverySlotName: string | null; deliverySlotLabel: string | null;
   deliveryType: string; paymentMethod: string; paymentState: string; address: Record<string, string | number | null> | null; legacyAddressText: string | null;
   store: { name: string; areaName: string | null; pincode: string | null; phone: string } | null;
-  editable: boolean;
+  editable: boolean; cancelMode: "direct" | "request" | null; cancelReason: string | null; paidPaisa: number;
   totals: { itemCount: number; deliveryFeePaisa: number; deliveryTimeFeePaisa: number; cuttingFeePaisa: number; convenienceFeePaisa: number; estimatedTotalPaisa: number; billTotalPaisa: number; adjustmentPaisa: number; discountPaisa: number; couponDiscountPaisa: number };
-  items: { id: string; name: string; slug: string | null; image: string | null; weight: boolean; linePaisa: number; estimatedLinePaisa: number; packLabel: string | null; dressing: string | null; instruction: string | null; quantity: number; unitPricePaisa: number; dressingUnitPaisa: number; status: MyOrder["status"]; cancelled: boolean; orderedMeasurement: number; billedMeasurement: number }[];
+  items: { id: string; name: string; slug: string | null; image: string | null; weight: boolean; linePaisa: number; estimatedLinePaisa: number; packLabel: string | null; dressing: string | null; instruction: string | null; quantity: number; unitPricePaisa: number; dressingUnitPaisa: number; status: MyOrder["status"]; cancelled: boolean; orderedMeasurement: number; billedMeasurement: number; variantId: string | null; cuttingTypeId: string | null; cancelStatus: "NONE" | "PENDING" | "REJECTED" | "CONFIRMED"; cancelNote: string | null; canEdit: boolean; canCancel: boolean; finalLinePaisa: number | null }[];
 }
 
 export async function myOrderAction(ref: string): Promise<MyOrderDetail | null> {
@@ -105,6 +105,8 @@ export async function myOrderCountsAction(): Promise<{ all: number; upcoming: nu
 }
 
 export interface OrderEditInput {
+  /** change an item: other size / dressing (null = none) / quantity / instruction */
+  update?: { itemId: string; variantId?: string; cuttingTypeId?: string | null; quantity?: number; instruction?: string | null }[];
   setQuantity?: { itemId: string; quantity: number }[];
   remove?: string[];
   add?: { variantId: string; cuttingTypeId?: string | null; quantity: number; instruction?: string | null }[];
@@ -114,6 +116,11 @@ export interface OrderEditInput {
 export async function editOrderAction(ref: string, edit: OrderEditInput): Promise<{ ok: true } | { ok: false; error: string }> {
   if (!/^[\w-]{1,60}$/.test(ref)) return { ok: false, error: "Order not found" };
   const body = {
+    update: (edit.update ?? []).slice(0, 100).map((u) => ({
+      itemId: String(u.itemId).slice(0, 60), ...(u.variantId ? { variantId: String(u.variantId).slice(0, 60) } : {}),
+      ...(u.cuttingTypeId !== undefined ? { cuttingTypeId: u.cuttingTypeId ? String(u.cuttingTypeId).slice(0, 60) : null } : {}),
+      ...(u.quantity ? { quantity: Math.max(1, Math.min(99, Math.floor(Number(u.quantity)) || 1)) } : {}), ...(u.instruction !== undefined ? { instruction: u.instruction ? String(u.instruction).slice(0, 200) : null } : {}),
+    })),
     setQuantity: (edit.setQuantity ?? []).slice(0, 100).map((q) => ({ itemId: String(q.itemId).slice(0, 60), quantity: Math.max(1, Math.min(99, Math.floor(Number(q.quantity)) || 1)) })),
     remove: (edit.remove ?? []).slice(0, 100).map((id) => String(id).slice(0, 60)),
     add: (edit.add ?? []).slice(0, 50).map((a) => ({
@@ -125,8 +132,15 @@ export async function editOrderAction(ref: string, edit: OrderEditInput): Promis
   return res.ok ? { ok: true } : { ok: false, error: res.message };
 }
 
-export async function cancelOrderAction(ref: string): Promise<{ ok: true } | { ok: false; error: string }> {
+/** cancel the whole order; `requested` = the shop has started on it, so it is now a request for the shop to review */
+export async function cancelOrderAction(ref: string, reason: string, details?: string): Promise<{ ok: true; requested: boolean } | { ok: false; error: string }> {
   if (!/^[\w-]{1,60}$/.test(ref)) return { ok: false, error: "Order not found" };
-  const res = await userApi<unknown>(`/orders/${encodeURIComponent(ref)}/cancel`, { method: "POST", body: {} });
-  return res.ok ? { ok: true } : { ok: false, error: res.message };
+  const res = await userApi<{ requested: boolean }>(`/orders/${encodeURIComponent(ref)}/cancel`, { method: "POST", body: { reason: String(reason ?? "").slice(0, 200), details: details ? String(details).slice(0, 300) : null } });
+  return res.ok ? { ok: true, requested: !!res.data.requested } : { ok: false, error: res.message };
+}
+
+export async function cancelOrderItemAction(ref: string, itemId: string, reason: string, details?: string): Promise<{ ok: true; requested: boolean } | { ok: false; error: string }> {
+  if (!/^[\w-]{1,60}$/.test(ref) || !/^[\w-]{1,60}$/.test(itemId)) return { ok: false, error: "Order not found" };
+  const res = await userApi<{ requested: boolean }>(`/orders/${encodeURIComponent(ref)}/items/${encodeURIComponent(itemId)}/cancel`, { method: "POST", body: { reason: String(reason ?? "").slice(0, 200), details: details ? String(details).slice(0, 300) : null } });
+  return res.ok ? { ok: true, requested: !!res.data.requested } : { ok: false, error: res.message };
 }

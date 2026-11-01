@@ -179,3 +179,28 @@
 .order-cancel-row button { padding: 9px 18px; border: 1px solid #e7b5b0; border-radius: 8px; background: #fff; color: #c0261f; font-weight: 700; cursor: pointer; }
 .order-cancel-row button:disabled { opacity: .5; cursor: wait; }
 @media (max-width: 600px) { .order-edit-bar { flex-direction: column; align-items: stretch; } }
+
+/* estimated / final amounts */
+.order-amounts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+.order-amount-card h2 small { margin-left: 6px; color: #8493a1; font-size: 12px; font-weight: 500; }
+.order-amount-rows { display: grid; gap: 9px; margin-top: 10px; color: #45627a; font-size: 14px; }
+.order-amount-rows > div { display: flex; justify-content: space-between; gap: 12px; }
+.order-amount-total { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px solid #edf1f5; color: #45627a; font-size: 14px; }
+.order-amount-total strong { color: #123b6d; font-size: 18px; }
+.order-amount-card.is-waiting { background: #fafcfe; border-style: dashed; }
+.order-amount-wait { margin: 12px 0 0; color: #6b7f92; font-size: 13px; line-height: 1.5; }
+@media (max-width: 760px) { .order-amounts { grid-template-columns: 1fr; } }
+
+/* per item: estimated and final amount, reason, actions */
+.order-product-amounts { display: grid; justify-items: end; gap: 1px; text-align: right; }
+.order-product-amounts small { color: #8493a1; font-size: 11px; }
+.order-product-final { color: #21804d; font-size: 15px; }
+.order-product-final-wait { margin-top: 4px; font-style: italic; }
+.order-item-reason { color: #a12622; }
+.order-edit-buttons { display: inline-flex; flex: 0 0 auto; flex-wrap: wrap; gap: 8px; }
+.order-edit-bar .order-edit-buttons button.is-light { background: #fff; color: #087cff; border: 1px solid #cfe3f6; }
+.order-edit-bar .order-edit-buttons button.is-danger { background: #fff; color: #c0261f; border: 1px solid #efc9c5; }
+.order-item-edit button:not(.order-item-remove) { width: auto; padding: 0 12px; font-size: 12px; }
+.order-item-edit .order-item-remove { border: 1px solid #efc9c5; padding: 0 12px; }
+@media (max-width: 600px) { .order-product-row { grid-template-columns: 64px minmax(0, 1fr) !important; } .order-product-amounts { grid-column: 2; justify-items: start; text-align: left; } }
+.order-edit-bar { margin-bottom: 12px; }

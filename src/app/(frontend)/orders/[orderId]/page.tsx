@@ -6,19 +6,24 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { cancelOrderAction, editOrderAction, myOrderAction, type MyOrderDetail, type OrderEditInput } from "@/app/checkout-actions";
+import { cancelOrderAction, cancelOrderItemAction, editOrderAction, myOrderAction, type MyOrderDetail, type OrderEditInput } from "@/app/checkout-actions";
 import AddToOrderDialog from "@/components/orders/AddToOrderDialog";
+import CancelReasonDialog from "@/components/orders/CancelReasonDialog";
+import EditOrderItemDialog from "@/components/orders/EditOrderItemDialog";
+import EditOrderPanel from "@/components/orders/EditOrderPanel";
 import CheckoutDialog, { type DialogSpec } from "@/components/checkout/CheckoutDialog";
 import type { CartItem } from "@/components/modals/cart/Cart";
-import { fallbackImage, isRemoteImage } from "@/lib/api";
 import { OrderDetailsSkeleton } from "@/components/skeleton/Skeletons";
+import { fallbackImage, isRemoteImage } from "@/lib/api";
 import { STATUS_TEXT, statusGroup } from "@/lib/orderStatus";
 import "./OrderDetails.css";
 
+type Item = MyOrderDetail["items"][number];
 const money = (paisa: number) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 2 }).format(paisa / 100);
 const when = (iso: string, withTime = false) =>
   new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric", ...(withTime ? { hour: "2-digit", minute: "2-digit" } : {}), timeZone: "Asia/Kolkata" });
 const PAYMENT_TEXT: Record<string, string> = { COD: "Cash on delivery", ONLINE: "Online payment", UNKNOWN: "—" };
+const LATE_CANCEL = "Oh No!!! It's too late to cancel this order now. We have already started working on this order. Cancelling this now may impact Your Account Credit. However we can still submit a cancellation request for further review or you can call our Support team for further assistance. Thank you.";
 
 /** the address as it was when the order was placed (a frozen copy), or the old free text of an old order */
 function addressLines(o: MyOrderDetail): string[] {
@@ -30,48 +35,59 @@ function addressLines(o: MyOrderDetail): string[] {
   return o.legacyAddressText ? [o.legacyAddressText] : [];
 }
 
+/** what to say about an item: its own status, or that it was cancelled / a cancellation is waiting for the shop */
+function itemState(item: Item): { text: string; group: "delivered" | "on-the-way" | "cancelled" | "refunded" } {
+  if (item.status === "CANCELLED") return { text: "Cancelled", group: "cancelled" };
+  if (item.cancelStatus === "PENDING") return { text: "Cancellation requested", group: "refunded" };
+  return { text: STATUS_TEXT[item.status], group: item.status === "DELIVERED" ? "delivered" : "on-the-way" };
+}
+
 function Details({ reference }: { reference: string }) {
   const [order, setOrder] = useState<MyOrderDetail | null | undefined>(undefined);
+  const [busy, setBusy] = useState(false);
+  const [notice, setNotice] = useState<{ text: string; tone: "ok" | "bad" } | null>(null);
+  const [dialog, setDialog] = useState<DialogSpec | null>(null);
+  const [panel, setPanel] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const [editing, setEditing] = useState<Item | null>(null);
+  const [cancelling, setCancelling] = useState<{ item: Item | null } | null>(null);
+
   useEffect(() => {
     let cancelled = false;
     myOrderAction(reference).then(o => { if (!cancelled) setOrder(o); });
     return () => { cancelled = true; };
   }, [reference]);
-
-  const [busy, setBusy] = useState(false);
-  const [notice, setNotice] = useState<{ text: string; tone: "ok" | "bad" } | null>(null);
-  const [dialog, setDialog] = useState<DialogSpec | null>(null);
-  const [adding, setAdding] = useState(false);
   useEffect(() => {
     if (!notice) return;
-    const t = window.setTimeout(() => setNotice(null), 5000);
+    const t = window.setTimeout(() => setNotice(null), 6000);
     return () => window.clearTimeout(t);
   }, [notice]);
 
+  const refresh = async () => setOrder(await myOrderAction(reference));
   /** one change to the order; the server prices the whole order again, then the page shows the new state */
   const change = async (edit: OrderEditInput, done?: string): Promise<string | null> => {
     setBusy(true);
     const res = await editOrderAction(reference, edit);
-    if (res.ok) {
-      setOrder(await myOrderAction(reference));
-      if (done) setNotice({ text: done, tone: "ok" });
-    } else setNotice({ text: res.error, tone: "bad" });
+    if (res.ok) { await refresh(); if (done) setNotice({ text: done, tone: "ok" }); } else setNotice({ text: res.error, tone: "bad" });
     setBusy(false);
     return res.ok ? null : res.error;
   };
-  const askRemove = (id: string, name: string) => setDialog({
-    title: "Remove this item?", icon: "warning", body: <p>{name} will be taken out of your order.</p>,
-    buttons: [{ label: "Yes, remove", tone: "danger", onClick: () => void change({ remove: [id] }, `${name} was removed from your order.`) }, { label: "Keep it", tone: "plain", onClick: () => undefined }],
-  });
-  const askCancel = () => setDialog({
-    title: "Cancel this order?", icon: "warning", body: <p>The whole order will be cancelled. This cannot be undone.</p>,
-    buttons: [{ label: "Yes, cancel order", tone: "danger", onClick: async () => {
-      setBusy(true);
-      const res = await cancelOrderAction(reference);
-      if (res.ok) { setOrder(await myOrderAction(reference)); setNotice({ text: "Your order was cancelled.", tone: "ok" }); } else setNotice({ text: res.error, tone: "bad" });
-      setBusy(false);
-    } }, { label: "Keep my order", tone: "plain", onClick: () => undefined }],
-  });
+
+  /** cancel an item (or the whole order when `item` is null): once the shop has started, say it is only a request first */
+  const startCancel = (item: Item | null) => {
+    if (order?.cancelMode === "request") {
+      setDialog({ title: "Confirmation Alert.", icon: "warning", body: <p>{LATE_CANCEL}</p>, buttons: [{ label: "Ok", tone: "primary", onClick: () => setCancelling({ item }) }] });
+    } else setCancelling({ item });
+  };
+  const submitCancel = async (reason: string, details: string): Promise<string | null> => {
+    const target = cancelling?.item ?? null;
+    const res = target ? await cancelOrderItemAction(reference, target.id, reason, details) : await cancelOrderAction(reference, reason, details);
+    if (!res.ok) return res.error;
+    setCancelling(null);
+    await refresh();
+    setNotice({ text: res.requested ? "Your cancellation request was sent. We will confirm it shortly." : target ? `${target.name} was cancelled.` : "Your order was cancelled.", tone: "ok" });
+    return null;
+  };
 
   if (order === undefined) return <main className="order-details-page"><div className="order-details-container"><OrderDetailsSkeleton /></div></main>;
   if (order === null) {
@@ -87,11 +103,12 @@ function Details({ reference }: { reference: string }) {
   const pickup = order.deliveryType === "STORE_PICKUP" || order.deliveryType === "WALK_IN";
   const billed = t.billTotalPaisa > 0;
   const lines = addressLines(order);
+  const active = order.items.filter(i => i.status !== "CANCELLED");
   const delivered = order.items.filter(i => i.status === "DELIVERED").length;
-  const fees: [string, number][] = [
-    ["Items", order.items.reduce((n, i) => n + (billed ? i.linePaisa - i.dressingUnitPaisa * i.quantity : i.estimatedLinePaisa - i.dressingUnitPaisa * i.quantity), 0)],
-    ["Dressing fee", t.cuttingFeePaisa], ["Delivery fee", t.deliveryFeePaisa], ["Convenience fee", t.convenienceFeePaisa], ["Fast processing charge", t.deliveryTimeFeePaisa],
-  ];
+  const estimatedItems = active.reduce((n, i) => n + i.estimatedLinePaisa - i.dressingUnitPaisa * i.quantity, 0);
+  const finalItems = active.reduce((n, i) => n + (i.finalLinePaisa ?? i.estimatedLinePaisa) - i.dressingUnitPaisa * i.quantity, 0);
+  const due = Math.max(0, t.billTotalPaisa - order.paidPaisa);
+  const row = (label: string, paisa: number, show = true) => (show ? <div key={label}><span>{label}</span><span>{money(paisa)}</span></div> : null);
 
   return (
     <main className="order-details-page">
@@ -107,25 +124,68 @@ function Details({ reference }: { reference: string }) {
           </span>
         </header>
 
+        {notice && <p className={`order-edit-notice is-${notice.tone}`} role="status">{notice.text}</p>}
+        {order.cancelReason && order.status === "CANCELLED" && <p className="order-edit-notice is-bad">Cancelled: {order.cancelReason}</p>}
+        {order.cancelMode && (
+          <section className="order-edit-bar" aria-label="Change this order">
+            <p>{order.editable
+              ? <><strong>You can still change this order.</strong> Edit an item, cancel an item or add more until we start processing it.</>
+              : <><strong>We have started on this order.</strong> You can still send a cancellation request for an item or for the order.</>}</p>
+            <span className="order-edit-buttons">
+              {order.editable && <button type="button" disabled={busy} onClick={() => setPanel(true)}>Edit order</button>}
+              {order.editable && <button type="button" className="is-light" disabled={busy} onClick={() => setAdding(true)}>+ Add items</button>}
+              <button type="button" className="is-danger" disabled={busy} onClick={() => startCancel(null)}>Cancel order</button>
+            </span>
+          </section>
+        )}
+
         <section className="order-details-card" aria-label="Order summary">
           <h2>Order summary</h2>
           <dl>
             <div><dt>Order date</dt><dd>{when(order.placedAt, true)}</dd></div>
             <div><dt>{pickup ? "Pickup" : "Delivery"} date</dt><dd>{order.deliveryDate ? when(order.deliveryDate) : "—"}{order.deliverySlotLabel ? ` · ${order.deliverySlotLabel.replace(/\s+/g, " ")}` : order.deliverySlotName ? ` · ${order.deliverySlotName}` : ""}</dd></div>
-            <div><dt>Items</dt><dd>{t.itemCount} {t.itemCount === 1 ? "item" : "items"}</dd></div>
-            <div><dt>Order total</dt><dd>{money(billed ? t.billTotalPaisa : t.estimatedTotalPaisa)}</dd></div>
+            <div><dt>Items</dt><dd>{active.length} {active.length === 1 ? "item" : "items"}</dd></div>
             <div><dt>Payment</dt><dd>{PAYMENT_TEXT[order.paymentMethod] ?? order.paymentMethod}{order.paymentState === "PAID" ? " · Paid" : order.paymentState === "PARTIAL" ? " · Part paid" : ""}</dd></div>
             <div><dt>{pickup ? "Pickup store" : "Delivery address"}</dt><dd>{pickup ? (order.store ? `${order.store.name}${order.store.areaName ? `, ${order.store.areaName}` : ""}${order.store.pincode ? `, ${order.store.pincode}` : ""}` : "Our store") : lines.length ? lines.map(l => <span key={l} style={{ display: "block" }}>{l}</span>) : "—"}</dd></div>
           </dl>
         </section>
 
-        {notice && <p className={`order-edit-notice is-${notice.tone}`} role="status">{notice.text}</p>}
-        {order.editable && (
-          <section className="order-edit-bar" aria-label="Change this order">
-            <p><strong>You can still change this order.</strong> Change the quantity, remove items or add more until we start processing it.</p>
-            <button type="button" disabled={busy} onClick={() => setAdding(true)}>+ Add items</button>
+        <div className="order-amounts">
+          <section className="order-details-card order-amount-card" aria-label="Estimated amount">
+            <h2>Estimated <small>at the time of order</small></h2>
+            <div className="order-amount-rows">
+              {row("Item price", estimatedItems)}
+              {row("Dressing fee", t.cuttingFeePaisa, t.cuttingFeePaisa > 0)}
+              {row("Delivery fee", t.deliveryFeePaisa, t.deliveryFeePaisa > 0)}
+              {row("Convenience fee", t.convenienceFeePaisa, t.convenienceFeePaisa > 0)}
+              {row("Fast processing charge", t.deliveryTimeFeePaisa, t.deliveryTimeFeePaisa > 0)}
+              {row("You saved", t.discountPaisa, t.discountPaisa > 0)}
+              {row("Coupon", -t.couponDiscountPaisa, t.couponDiscountPaisa > 0)}
+            </div>
+            <div className="order-amount-total"><span>Estimated total</span><strong>{money(t.estimatedTotalPaisa)}</strong></div>
           </section>
-        )}
+          <section className={`order-details-card order-amount-card${billed ? "" : " is-waiting"}`} aria-label="Final amount">
+            <h2>Final <small>after packing and weighing</small></h2>
+            {billed ? (
+              <>
+                <div className="order-amount-rows">
+                  {row("Final item price", finalItems)}
+                  {row("Dressing fee", t.cuttingFeePaisa, t.cuttingFeePaisa > 0)}
+                  {row("Delivery fee", t.deliveryFeePaisa, t.deliveryFeePaisa > 0)}
+                  {row("Convenience fee", t.convenienceFeePaisa, t.convenienceFeePaisa > 0)}
+                  {row("Fast processing charge", t.deliveryTimeFeePaisa, t.deliveryTimeFeePaisa > 0)}
+                  {row("Adjustment", t.adjustmentPaisa, t.adjustmentPaisa !== 0)}
+                  {row("You saved", t.discountPaisa, t.discountPaisa > 0)}
+                  {row("Paid", order.paidPaisa, order.paidPaisa > 0)}
+                  {row("Due", due)}
+                </div>
+                <div className="order-amount-total"><span>Final total</span><strong>{money(t.billTotalPaisa)}</strong></div>
+              </>
+            ) : (
+              <p className="order-amount-wait">{order.status === "CANCELLED" ? "This order was cancelled, so there is no final bill." : "Your final bill is made after your order is packed and weighed. We bill on the actual weight of the products, so it can differ a little from the estimate."}</p>
+            )}
+          </section>
+        </div>
 
         <section className="order-products-card" aria-labelledby="order-products-heading">
           <div className="order-products-heading">
@@ -138,9 +198,9 @@ function Details({ reference }: { reference: string }) {
 
           <div className="order-products-list">
             {order.items.map(item => {
-              const itemGroup = item.status === "DELIVERED" ? "delivered" : item.status === "CANCELLED" ? "cancelled" : "on-the-way";
+              const state = itemState(item);
               const name = item.slug ? <Link href={`/${encodeURIComponent(item.slug)}`}>{item.name}</Link> : item.name;
-              const weighed = item.weight && item.billedMeasurement > 0 && item.billedMeasurement !== item.orderedMeasurement;
+              const weighed = item.weight && item.billedMeasurement > 0;
               return (
                 <article className="order-product-row" key={item.id}>
                   <div className="order-product-image">
@@ -151,48 +211,73 @@ function Details({ reference }: { reference: string }) {
                     <p>
                       Qty: {item.quantity}
                       {item.packLabel ? <><span>·</span>{item.packLabel}</> : item.weight && item.orderedMeasurement ? <><span>·</span>{item.orderedMeasurement} gm</> : null}
-                      {weighed ? <><span>·</span>billed {item.billedMeasurement} gm</> : null}
                     </p>
                     {(item.dressing || item.instruction) && <p>{[item.dressing, item.instruction ? `“${item.instruction}”` : ""].filter(Boolean).join(" · ")}</p>}
-                    {order.editable && item.status !== "CANCELLED" && (
+                    {item.cancelNote && (item.status === "CANCELLED" || item.cancelStatus !== "NONE") && <p className="order-item-reason">{item.status === "CANCELLED" ? "Cancelled" : item.cancelStatus === "REJECTED" ? "Cancellation not accepted" : "Cancellation requested"}: {item.cancelNote}</p>}
+                    {(item.canEdit || item.canCancel) && (
                       <div className="order-item-edit" role="group" aria-label={`Change ${item.name}`}>
-                        <button type="button" aria-label="Decrease quantity" disabled={busy || item.quantity <= 1} onClick={() => void change({ setQuantity: [{ itemId: item.id, quantity: item.quantity - 1 }] })}>−</button>
-                        <b aria-live="polite">{item.quantity}</b>
-                        <button type="button" aria-label="Increase quantity" disabled={busy || item.quantity >= 99} onClick={() => void change({ setQuantity: [{ itemId: item.id, quantity: item.quantity + 1 }] })}>+</button>
-                        <button type="button" className="order-item-remove" disabled={busy || order.items.filter(i => i.status !== "CANCELLED").length <= 1} title={order.items.filter(i => i.status !== "CANCELLED").length <= 1 ? "An order needs at least one item. Cancel the order instead." : undefined} onClick={() => askRemove(item.id, item.name)}>Remove</button>
+                        {item.canEdit && <button type="button" disabled={busy} onClick={() => setEditing(item)}>Edit item</button>}
+                        {item.canCancel && <button type="button" className="order-item-remove" disabled={busy} onClick={() => startCancel(item)}>Cancel item</button>}
                       </div>
                     )}
                   </div>
-                  <strong className="order-product-price">{money(item.status === "CANCELLED" ? 0 : billed ? item.linePaisa : item.estimatedLinePaisa)}</strong>
-                  <span className={`order-product-status order-product-status--${itemGroup}`}>
+                  <div className="order-product-amounts">
+                    <strong className="order-product-price">{money(item.status === "CANCELLED" ? 0 : item.estimatedLinePaisa)}</strong>
+                    <small>Estimated</small>
+                    {item.status !== "CANCELLED" && (item.finalLinePaisa !== null
+                      ? <><strong className="order-product-final">{money(item.finalLinePaisa)}</strong><small>Final{weighed ? ` · ${item.billedMeasurement} gm` : ""}</small></>
+                      : <small className="order-product-final-wait">Final after packing</small>)}
+                  </div>
+                  <span className={`order-product-status order-product-status--${state.group}`}>
                     <span aria-hidden="true" />
-                    {STATUS_TEXT[item.status]}
+                    {state.text}
                   </span>
                 </article>
               );
             })}
           </div>
 
-          <div className="order-price-breakdown">
-            {fees.filter(([label, v]) => label === "Items" || v > 0).map(([label, v]) => <div key={label}><span>{label}</span><span>{money(v)}</span></div>)}
-            {t.discountPaisa > 0 && <div><span>Savings on this order</span><span>{money(t.discountPaisa)}</span></div>}
-            {t.couponDiscountPaisa > 0 && <div><span>Coupon</span><span>−{money(t.couponDiscountPaisa)}</span></div>}
-            {t.adjustmentPaisa !== 0 && <div><span>Adjustment</span><span>{money(t.adjustmentPaisa)}</span></div>}
-          </div>
           <footer className="order-products-total">
-            <span>{billed ? "Order total" : "Estimated total"}</span>
+            <span>{billed ? "Final total" : "Estimated total"}</span>
             <strong>{money(billed ? t.billTotalPaisa : t.estimatedTotalPaisa)}</strong>
           </footer>
-          {order.editable && <div className="order-cancel-row"><button type="button" disabled={busy} onClick={askCancel}>Cancel order</button></div>}
-          {!billed && order.status !== "CANCELLED" && <p className="order-details-note order-bill-note">We bill on the actual weight of the products, so the final amount can change a little when your order is packed.</p>}
         </section>
       </div>
+
+      {panel && (
+        <EditOrderPanel
+          order={order}
+          onClose={() => setPanel(false)}
+          onEditItem={item => setEditing(item)}
+          onCancelItem={item => startCancel(item)}
+          onAddItems={() => setAdding(true)}
+        />
+      )}
+      {editing && (
+        <EditOrderItemDialog
+          item={editing}
+          onClose={() => setEditing(null)}
+          onSave={async change_ => {
+            const problem = await change({ update: [{ itemId: editing.id, variantId: change_.variantId, cuttingTypeId: change_.cuttingTypeId, quantity: change_.quantity, instruction: change_.instruction }] }, `${editing.name} was updated.`);
+            return problem;
+          }}
+        />
+      )}
       {adding && (
         <AddToOrderDialog
           orderLabel={order.orderNumber}
           orderSlugs={order.items.map(i => i.slug).filter((x): x is string => !!x)}
           onClose={() => setAdding(false)}
           onAdd={(item: CartItem) => change({ add: [{ variantId: item.variantId ?? "", cuttingTypeId: item.cuttingTypeId ?? null, quantity: item.quantity, instruction: item.instruction ?? null }] })}
+        />
+      )}
+      {cancelling && (
+        <CancelReasonDialog
+          title={cancelling.item ? "Cancel Item" : "Cancel Order"}
+          subject={cancelling.item ? cancelling.item.name : `Order ${order.orderNumber}`}
+          request={order.cancelMode === "request"}
+          onSubmit={submitCancel}
+          onClose={() => setCancelling(null)}
         />
       )}
       {dialog && <CheckoutDialog spec={dialog} onDismiss={() => setDialog(null)} />}
