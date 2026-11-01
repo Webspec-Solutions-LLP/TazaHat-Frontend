@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { readPlace, type GeocodeResult } from "@/lib/places";
-import { checkServiceability, checkShopCart, getCities, getShopCatalog, getShopCategoryPage, getShopProduct, getShopProducts, type CatalogQuery } from "@/lib/server/api";
+import { checkServiceability, checkShopCart, getCartRelated, getCities, getShopCatalog, getShopCategoryPage, getShopProduct, getShopProducts, type CatalogQuery } from "@/lib/server/api";
 import { readCityCookie, writeCityCookie } from "@/lib/server/city";
 import { cardToProduct, type CartLineCheck, categoryToItem, type ApiCity, type ApiProductDetail, type Product } from "@/lib/api";
 import type { CategoryTile } from "@/components/category/Category";
@@ -129,6 +129,14 @@ export async function checkCartAction(lines: { variantId: string; cuttingTypeId?
     .map((l) => ({ variantId: l.variantId.slice(0, 60), cuttingTypeId: typeof l.cuttingTypeId === "string" ? l.cuttingTypeId.slice(0, 60) : null }));
   if (!city || !clean.length) return null;
   try { return await checkShopCart(city.id, clean); } catch { return null; }
+}
+
+/** Products that go with what is in the cart (same sub-categories, in stock in the city, not in the cart yet). */
+export async function cartRelatedAction(slugs: string[]): Promise<Product[]> {
+  const city = await readCityCookie();
+  const clean = [...new Set((Array.isArray(slugs) ? slugs : []).filter((s) => typeof s === "string" && /^[\w-]{1,160}$/.test(s)))].slice(0, 100);
+  if (!city || !clean.length) return [];
+  try { return (await getCartRelated(city.id, clean)).map(cardToProduct); } catch { return []; }
 }
 
 /** The wishlist's products (by their slugs) as they are sold in the visitor's city, in the order of the list; the ones not sold there are left out. */

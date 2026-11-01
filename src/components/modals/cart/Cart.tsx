@@ -8,7 +8,9 @@ import { useRouter } from "next/navigation";
 import "./Cart.css";
 import Link from "next/link";
 import { fallbackImage, isRemoteImage, type CartLineCheck } from "@/lib/api";
-import { checkCartAction } from "@/app/actions";
+import { checkCartAction, cartRelatedAction } from "@/app/actions";
+import Variant from "@/components/modals/variant/Variant";
+import type { Product } from "@/lib/api";
 
 export type CartItem = {
   id: string;
@@ -52,6 +54,23 @@ export default function Cart({
   const [cartItems, setCartItems] = useState<CartItem[]>(externalItems ?? []);
   const isInitialCartItemsEffect = useRef(true);
   const titleId = useId();
+
+  // items put in the cart from outside while it is open (the "You may also like" strip, another tab) show up here too
+  useEffect(() => {
+    if (!externalItems) return;
+    setCartItems(current => (JSON.stringify(current) === JSON.stringify(externalItems) ? current : externalItems));
+  }, [externalItems]);
+
+  // other products that go with what is in the cart
+  const [related, setRelated] = useState<Product[]>([]);
+  const [variantProduct, setVariantProduct] = useState<Product | null>(null);
+  const slugSignature = [...new Set(cartItems.map(i => i.slug).filter((s): s is string => !!s))].sort().join(",");
+  useEffect(() => {
+    if (!slugSignature) { setRelated([]); return; }
+    let cancelled = false;
+    cartRelatedAction(slugSignature.split(",")).then(items => { if (!cancelled) setRelated(items); });
+    return () => { cancelled = true; };
+  }, [slugSignature]);
 
   useEffect(() => {
     if (isInitialCartItemsEffect.current) {
@@ -361,9 +380,38 @@ export default function Cart({
                   </div>
                 </article>
               ))}
+              {related.length > 0 && (
+                <section className="cart-related" aria-label="You may also like">
+                  <h3>You may also like</h3>
+                  <div className="cart-related-row">
+                    {related.map(product => (
+                      <article className="cart-related-card" key={product.id}>
+                        <div className="cart-related-image">
+                          <Image src={product.image} alt={product.name} fill sizes="120px" unoptimized={isRemoteImage(product.image)} onError={fallbackImage} />
+                        </div>
+                        <h4 title={product.name}>{product.name}</h4>
+                        <span className="cart-related-price">{currencySymbol} {product.price}</span>
+                        <button type="button" onClick={() => setVariantProduct(product)}>Add</button>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              )}
             </div>
           )}
         </div>
+
+        {variantProduct && (
+          <Variant
+            product={variantProduct}
+            currency="INR"
+            onClose={() => setVariantProduct(null)}
+            onGoToCart={(item: CartItem) => {
+              window.dispatchEvent(new CustomEvent("tazahat:add-cart-item", { detail: item }));
+              setVariantProduct(null);
+            }}
+          />
+        )}
 
         {/* Checkout action */}
         {cartItems.length > 0 && (
