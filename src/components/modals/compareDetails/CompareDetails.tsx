@@ -1,5 +1,7 @@
 "use client";
 
+import { useBackClose } from "@/lib/backLayers";
+
 import { useCallback, useEffect, useId, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -44,6 +46,7 @@ export default function CompareDetails({
     },
     [isClosing, onClose]
   );
+  useBackClose(() => closeWithAnimation());
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {

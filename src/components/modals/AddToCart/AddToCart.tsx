@@ -1,5 +1,7 @@
 "use client";
 
+import { useBackClose } from "@/lib/backLayers";
+
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -40,6 +42,7 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
   const previousOverflow = useRef("");
   const descriptionRef = useRef<HTMLElement>(null);
   const [closing, setClosing] = useState(false);
+  useBackClose(() => setClosing(true));
   const [quantity, setQuantity] = useState(1);
   const [addedVariantId, setAddedVariantId] = useState<string | null>(null);
   const [activeImage, setActiveImage] = useState(0);

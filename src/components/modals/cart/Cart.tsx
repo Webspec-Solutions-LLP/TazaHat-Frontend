@@ -1,5 +1,7 @@
 "use client";
 
+import { navigateAfterClose, useBackClose } from "@/lib/backLayers";
+
 import { useEffect, useRef, useState, useId } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -102,7 +104,7 @@ export default function Cart({
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const timer = window.setTimeout(() => {
       onClose();
-      if (checkoutRequested) router.push("/checkout");
+      if (checkoutRequested) navigateAfterClose(() => router.push("/checkout"));
     }, prefersReducedMotion ? 0 : 400);
     return () => window.clearTimeout(timer);
   }, [closing, checkoutRequested, onClose, router]);
@@ -110,6 +112,7 @@ export default function Cart({
   const handleClose = () => {
     setClosing(true);
   };
+  useBackClose(handleClose);
 
   const updateQuantity = (id: string, delta: number) => {
     setCartItems((prev) =>

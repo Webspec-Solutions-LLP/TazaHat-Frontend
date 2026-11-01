@@ -1,5 +1,7 @@
 "use client";
 
+import { useBackClose } from "@/lib/backLayers";
+
 import { useCallback, useEffect, useId, useState } from "react";
 import Image from "next/image";
 import "./Confermation.css";
@@ -39,6 +41,7 @@ export default function Confermation({
     },
     [isClosing, onClose]
   );
+  useBackClose(() => closeWithAnimation());
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {

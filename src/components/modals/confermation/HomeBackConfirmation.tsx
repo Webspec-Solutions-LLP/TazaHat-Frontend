@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useId, useState } from "react";
 import { usePathname } from "next/navigation";
+import { onBackWithoutLayer } from "@/lib/backLayers";
 import "./HomeBackConfirmation.css";
 
 const LANGUAGE_STORAGE_KEY = "tazahat-language";
@@ -117,14 +118,14 @@ export default function HomeBackConfirmation() {
     setCanGoBack(window.history.length > 1);
     restoreHomeEntry();
 
-    const handlePopState = () => {
+    // Back with nothing open on top: ask before leaving. (A popup or side panel that is open takes the Back first, see lib/backLayers.ts.)
+    const handleBack = () => {
       setCanGoBack(true);
       setIsOpen(true);
       restoreHomeEntry();
     };
 
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
+    return onBackWithoutLayer(handleBack);
   }, [pathname, restoreHomeEntry]);
 
   const closeModal = useCallback(() => {

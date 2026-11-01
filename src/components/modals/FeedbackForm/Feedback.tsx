@@ -1,5 +1,7 @@
 "use client";
 
+import { useBackClose } from "@/lib/backLayers";
+
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import "./Feedback.css";
 
@@ -42,6 +44,7 @@ export default function Feedback({ onClose }: FeedbackProps) {
   }, [closing, onClose]);
 
   const close = () => setClosing(true);
+  useBackClose(close);
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSubmitted(true);

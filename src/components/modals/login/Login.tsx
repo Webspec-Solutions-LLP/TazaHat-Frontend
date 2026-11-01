@@ -1,5 +1,7 @@
 "use client";
 
+import { useBackClose } from "@/lib/backLayers";
+
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -85,6 +87,7 @@ export default function Login({ onClose, onLoggedIn }: LoginModalProps) {
     const closeDuration = reducedMotion ? 0 : window.matchMedia("(max-width: 575px)").matches ? 560 : 440;
     window.setTimeout(onClose, closeDuration);
   }, [isClosing, onClose]);
+  useBackClose(() => closeWithAnimation());
 
   useEffect(() => {
     const closeOnEscape = (event: globalThis.KeyboardEvent) => { if (event.key === "Escape") closeWithAnimation(); };

@@ -15,6 +15,7 @@ import AddToCart from "../modals/AddToCart/AddToCart";
 import Location from "../modals/location/Location";
 import NotificationBell from "./NotificationBell";
 import { useAuth } from "@/lib/auth";
+import { navigateAfterClose, useBackClose } from "@/lib/backLayers";
 import { searchSuggestionsAction } from "@/app/actions";
 import { SearchHistorySkeleton, SearchSuggestionSkeleton } from "../skeleton/Skeletons";
 import { fallbackImage, isRemoteImage, type Product as CatalogProduct } from "@/lib/api";
@@ -70,6 +71,7 @@ export default function Navbar({
   const searchFormRef = useRef<HTMLFormElement>(null);
   const [isSearchResultsOpen, setIsSearchResultsOpen] = useState(false);
   const [isCompactSearchOpen, setIsCompactSearchOpen] = useState(false);
+  useBackClose(() => setIsCompactSearchOpen(false), isCompactSearchOpen);
   const [searchHistory, setSearchHistory] = useState<string[]>(() => {
     try {
       const storedHistory = window.localStorage.getItem(SEARCH_HISTORY_KEY);
@@ -252,7 +254,8 @@ export default function Navbar({
     setIsCompactSearchOpen(false);
     searchInputRef.current?.blur();
     onSearch?.(query);
-    router.push(`/products?q=${encodeURIComponent(query)}`);
+    if (isCompactSearchOpen) navigateAfterClose(() => router.push(`/products?q=${encodeURIComponent(query)}`));
+    else router.push(`/products?q=${encodeURIComponent(query)}`);
   };
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();

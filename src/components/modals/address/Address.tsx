@@ -1,5 +1,7 @@
 "use client";
 
+import { useBackClose } from "@/lib/backLayers";
+
 import { useEffect, useId, useRef, useState } from "react";
 import "./Address.css";
 
@@ -69,6 +71,7 @@ export default function Address({ onClose, onSave, initialValues }: AddressProps
   }, [closing, onClose]);
 
   const closeSidebar = () => setClosing(true);
+  useBackClose(closeSidebar);
   const updateValue = (field: keyof AddressFormValues, value: string) => {
     setValues((current) => ({ ...current, [field]: value }));
   };

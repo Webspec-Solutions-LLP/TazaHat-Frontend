@@ -1,5 +1,7 @@
 "use client";
 
+import { useBackClose } from "@/lib/backLayers";
+
 import { useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import "./CompareList.css";
@@ -116,6 +118,7 @@ export default function CompareList({
   }, [closing, onClose]);
 
   const close = () => setClosing(true);
+  useBackClose(close);
 
   const toggleSelect = (id: string) => {
     setSelectedIds(prev => {

@@ -1,5 +1,7 @@
 ﻿"use client";
 
+import { useBackClose } from "@/lib/backLayers";
+
 import { useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import type { CartItem } from "../cart/Cart";
@@ -55,6 +57,7 @@ export default function Variant({ product, currency, onClose, onGoToCart }: Vari
     setIsClosing(true);
     closeTimer.current = window.setTimeout(onClose, 500);
   };
+  useBackClose(handleClose);
 
   useEffect(() => {
     const dialog = dialogRef.current;

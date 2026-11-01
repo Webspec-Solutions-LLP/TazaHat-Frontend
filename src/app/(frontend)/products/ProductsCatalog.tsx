@@ -1,5 +1,6 @@
 "use client";
 
+import { useBackClose } from "@/lib/backLayers";
 import PackAction, { StockRibbon, firstOrderable } from "@/components/availability/PackAction";
 
 import { useEffect, useRef, useState, useTransition } from "react";
@@ -49,6 +50,7 @@ export default function ProductsCatalog({ initial, total, categories, query, cit
 
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  useBackClose(() => setIsFilterOpen(false), isFilterOpen);
   useEffect(() => {
     if (!isFilterOpen) return;
     const closeOnEscape = (event: KeyboardEvent) => {

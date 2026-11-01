@@ -1,5 +1,7 @@
 "use client";
 
+import { useBackClose } from "@/lib/backLayers";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { checkLocationAction, listCitiesAction, locateCityAction, selectCityAction } from "@/app/actions";
@@ -127,6 +129,7 @@ export default function Location({ onClose, onLogin }: LocationProps) {
     const closeDuration = window.matchMedia("(max-width: 575px)").matches ? 560 : 380;
     window.setTimeout(afterClose, closeDuration);
   }, [isClosing, onClose]);
+  useBackClose(() => closeWithAnimation());
 
   useEffect(() => {
     const closeOnEscape = (event: KeyboardEvent) => {

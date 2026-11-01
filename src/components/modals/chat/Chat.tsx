@@ -1,5 +1,7 @@
 "use client";
 
+import { useBackClose } from "@/lib/backLayers";
+
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type FormEvent, type PointerEvent } from "react";
@@ -177,6 +179,7 @@ export default function Chat({ onClose, product, requestCloseRef }: ChatProps) {
     setIsClosing(true);
     closeTimerRef.current = setTimeout(onClose, 380);
   }, [isClosing, onClose]);
+  useBackClose(closeChat);
 
   useEffect(() => {
     if (requestCloseRef) {
