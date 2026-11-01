@@ -330,8 +330,10 @@ export default function Navbar({
     const handleSectionAddToCart = (event: Event) => {
       const item = (event as CustomEvent<CartItem>).detail;
       if (!item?.id) return;
+      // the sidebar opens only for the first item put in an empty cart; later adds just update the cart (the cart button opens it)
+      const wasEmpty = cartItemsRef.current.length === 0;
       addCartItem(item);
-      setIsCartOpen(true);
+      if (wasEmpty) setIsCartOpen(true);
     };
     const handleOpenCart = () => setIsCartOpen(true);
 
