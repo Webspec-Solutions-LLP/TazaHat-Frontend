@@ -1,0 +1,55 @@
+{
+  "language": "en",
+  "locale": "en-IN",
+  "currency": "INR",
+
+  "choosePhotoAria": "Choose a profile photo",
+  "uploadPhotoAria": "Upload a profile photo",
+  "photoAlt": "Your profile photo",
+  "welcomeBack": "Welcome back",
+  "goodFood": "Good Food",
+  "goodLife": "Good Life",
+  "editProfile": "Edit profile",
+
+  "orderSummaryAria": "Order summary",
+  "statTotalOrders": "Total orders",
+  "statTotalOrdersDetail": "View all your orders",
+  "statDelivered": "Delivered",
+  "statDeliveredDetail": "Orders completed",
+  "statPending": "Pending",
+  "statPendingDetail": "Orders in process",
+  "statCancelled": "Cancelled",
+  "statCancelledDetail": "Cancelled orders",
+
+  "bannerTitle": "Your orders, all in one place",
+  "bannerSubtitle": "Check delivery progress, order history, and more.",
+  "viewMyOrders": "View my orders",
+
+  "addressesHeading": "Delivery Addresses",
+  "addressesSubtitle": "Manage your delivery locations",
+  "addAddress": "Add Address",
+  "setDefaultAddressAria": "Set {type} as your default delivery address",
+  "editAddressAria": "Edit {type} address",
+  "deleteAddressAria": "Delete {type} address",
+
+  "editProfileTitle": "Edit profile",
+  "editProfileSubtitle": "Update your contact details.",
+  "closeFormAria": "Close profile form",
+  "fullName": "Full name",
+  "emailAddress": "Email address",
+  "phoneNumber": "Phone number",
+  "cancel": "Cancel",
+  "saveProfile": "Save profile",
+
+  "likedProductsHeading": "Your liked products",
+
+  "supportTicketsTitle": "Support tickets",
+  "supportTicketsSubtitle": "Track the issues you reported and our team’s updates.",
+  "ticketsCount": "{count} tickets",
+  "ticketPrefix": "Ticket #",
+  "yourIssue": "Your issue",
+  "resolution": "Resolution",
+  "latestUpdate": "Latest update",
+  "raised": "Raised",
+  "updated": "Updated"
+}

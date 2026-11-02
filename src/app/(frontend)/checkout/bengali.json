@@ -1,0 +1,70 @@
+{
+  "language": "bn",
+  "locale": "bn-IN",
+  "currency": "INR",
+
+  "yourItems": "আপনার পণ্যসমূহ",
+  "itemsInOrder": "আপনার অর্ডারে {count} {itemWord}",
+  "itemSingular": "টি পণ্য",
+  "itemPlural": "টি পণ্য",
+  "qty": "পরিমাণ:",
+  "emptyCart": "কার্টে কোনো পণ্য পাওয়া যায়নি। এগিয়ে যেতে কার্টে পণ্য যোগ করুন।",
+
+  "deliveryAddress": "ডেলিভারি ঠিকানা",
+  "deliveryAddressSubtitle": "আপনার ডেলিভারি ঠিকানা নির্বাচন করুন বা নতুন ঠিকানা যোগ করুন",
+  "addAddress": "ঠিকানা যোগ করুন",
+  "savedAddressesAria": "সংরক্ষিত ডেলিভারি ঠিকানা",
+
+  "deliveryDate": "ডেলিভারির তারিখ",
+  "deliveryDateSubtitle": "আপনার পছন্দের ডেলিভারির তারিখ বেছে নিন",
+
+  "deliveryType": "ডেলিভারির ধরন",
+  "deliveryTypeSubtitle": "আপনার পছন্দের ডেলিভারির ধরন বেছে নিন",
+  "typeStorePickup": "স্টোর পিকআপ",
+  "typeHomeDelivery": "হোম ডেলিভারি",
+
+  "deliverySchedule": "ডেলিভারি সময়সূচী",
+  "deliveryScheduleSubtitle": "আপনার সুবিধাজনক ডেলিভারি সময় নির্বাচন করুন",
+  "schedules": [
+    { "title": "সকালের ডেলিভারি", "detail": "সকাল ১০:০০ - দুপুর ১২:০০ এর মধ্যে" },
+    { "title": "দুপুরের ডেলিভারি", "detail": "দুপুর ১২:০০ - দুপুর ২:০০ এর মধ্যে" },
+    { "title": "এক্সপ্রেস ডেলিভারি", "detail": "সকাল ৯:০০ টার আগে" },
+    { "title": "রকেট সার্ভিস", "detail": "সকাল ৮:০০ টার আগে" },
+    { "title": "অগ্রাধিকার ডেলিভারি", "detail": "সকাল ১০:০০ টার আগে" },
+    { "title": "সন্ধ্যার ডেলিভারি", "detail": "সন্ধ্যা ৬:০০ - রাত ১০:০০ এর মধ্যে" }
+  ],
+
+  "paymentOption": "পেমেন্ট মাধ্যম",
+  "paymentOptionSubtitle": "আপনার সুবিধাজনক পেমেন্ট পদ্ধতি বেছে নিন",
+  "paymentOnline": "অনলাইন পেমেন্ট",
+  "paymentCOD": "ক্যাশ অন ডেলিভারি",
+
+  "summaryHeading": "আনুমানিক মূল্যের বিবরণ",
+  "summarySubtitle": "অর্ডারের বিবরণ পর্যালোচনা করুন এবং কুপন কোড ব্যবহার করুন",
+  "couponAria": "কুপন কোড",
+  "couponPlaceholder": "কুপন কোড লিখুন",
+  "couponApply": "প্রয়োগ করুন",
+  "couponInvalid": "এই কুপন কোডটি সঠিক নয়।",
+  "couponEmpty": "প্রয়োগ করতে একটি কুপন কোড লিখুন।",
+
+  "weightNotice": "দয়া করে মনে রাখবেন, পণ্যের প্রকৃত ওজনের ওপর ভিত্তি করে বিল করা হয়। প্যাকেজিংয়ের সময় ওজনের তারতম্যের কারণে চূড়ান্ত মূল্য কিছুটা পরিবর্তিত হতে পারে। ধন্যবাদ।",
+
+  "totalItemsRow": "মোট {count} {itemWord}",
+  "itemWordCapitalSingular": "টি পণ্য",
+  "itemWordCapitalPlural": "টি পণ্য",
+  "dressingFee": "ড্রেসিং ফি",
+  "deliveryFee": "ডেলিভারি ফি",
+  "convenienceFee": "কনভেনিয়েন্স ফি",
+  "fastProcessingCharge": "ফাস্ট প্রসেসিং চার্জ",
+  "promo": "প্রোমো",
+  "totalAmount": "সর্বমোট মূল্য",
+
+  "proceedToCheckout": "চেকআউট এগিয়ে যান",
+  "orderReady": "অর্ডার প্রস্তুত",
+  "orderReadyMessage": "আপনার অর্ডারের বিবরণ প্রস্তুত। পেমেন্ট: {payment}।",
+
+  "promoFresh": "টাটকা",
+  "promoRiver": "নদী থেকে সরাসরি",
+  "promoTable": "আপনার খাবার টেবিলে",
+  "promoAlt": "টাটকা মাছ"
+}

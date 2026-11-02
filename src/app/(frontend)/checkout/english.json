@@ -1,0 +1,70 @@
+{
+  "language": "en",
+  "locale": "en-IN",
+  "currency": "INR",
+
+  "yourItems": "Your Items",
+  "itemsInOrder": "{count} {itemWord} in your order",
+  "itemSingular": "item",
+  "itemPlural": "items",
+  "qty": "Qty:",
+  "emptyCart": "No cart items were found. Add items to your cart to continue.",
+
+  "deliveryAddress": "Delivery Address",
+  "deliveryAddressSubtitle": "Select your delivery address or add a new one",
+  "addAddress": "Add Address",
+  "savedAddressesAria": "Saved delivery addresses",
+
+  "deliveryDate": "Delivery Date",
+  "deliveryDateSubtitle": "Choose your preferred delivery date",
+
+  "deliveryType": "Delivery Type",
+  "deliveryTypeSubtitle": "Choose your delivery type",
+  "typeStorePickup": "Store Pick Up",
+  "typeHomeDelivery": "Home Delivery",
+
+  "deliverySchedule": "Delivery Schedule",
+  "deliveryScheduleSubtitle": "Select your preferred delivery time",
+  "schedules": [
+    { "title": "Morning Delivery", "detail": "Between 10:00AM - 12:00PM" },
+    { "title": "Lunch Delivery", "detail": "Between 12:00PM - 2:00PM" },
+    { "title": "Express Delivery", "detail": "Before 9:00 AM" },
+    { "title": "Rocket Service", "detail": "Before 8:00 AM" },
+    { "title": "Priority Delivery", "detail": "Before 10:00AM" },
+    { "title": "Evening Delivery", "detail": "Between 6:00PM - 10:00PM" }
+  ],
+
+  "paymentOption": "Payment Option",
+  "paymentOptionSubtitle": "Select your preferred payment method",
+  "paymentOnline": "Online Payment",
+  "paymentCOD": "Cash On Delivery",
+
+  "summaryHeading": "Estimated Price Details",
+  "summarySubtitle": "Review your order details and apply coupon code",
+  "couponAria": "Coupon code",
+  "couponPlaceholder": "Enter coupon code",
+  "couponApply": "Apply",
+  "couponInvalid": "This coupon code is not valid.",
+  "couponEmpty": "Enter a coupon code to apply.",
+
+  "weightNotice": "Please note we bill based on the actual wt. of the products. Final amount may vary depending on the actual item wt. during packaging. Thank you.",
+
+  "totalItemsRow": "Total {count} {itemWord}",
+  "itemWordCapitalSingular": "Item",
+  "itemWordCapitalPlural": "Items",
+  "dressingFee": "Dressing Fee",
+  "deliveryFee": "Delivery Fee",
+  "convenienceFee": "Convenience Fee",
+  "fastProcessingCharge": "Fast Processing Charge",
+  "promo": "Promo",
+  "totalAmount": "Total Amount",
+
+  "proceedToCheckout": "PROCEED TO CHECKOUT",
+  "orderReady": "ORDER READY",
+  "orderReadyMessage": "Your order details are ready. Payment: {payment}.",
+
+  "promoFresh": "Fresh",
+  "promoRiver": "From River",
+  "promoTable": "To Your Table",
+  "promoAlt": "Fresh fish"
+}

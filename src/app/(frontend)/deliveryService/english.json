@@ -1,0 +1,90 @@
+{
+  "language": "en",
+  "locale": "en-IN",
+  "currency": "INR",
+
+  "eyebrow": "FAST & RELIABLE",
+  "title": "Book a delivery",
+  "description": "Share your pickup and delivery details to arrange a convenient doorstep service.",
+
+  "pickupAddress": "Pickup address",
+  "deliveryAddress": "Delivery address",
+  "addNewAddress": "Add New Address",
+  "selectPickupAddress": "Select Pickup Address",
+  "selectDeliveryAddress": "Select Delivery Address",
+
+  "pickupDateTime": "Pickup date & time",
+  "choosePickupDatePlaceholder": "Choose Pickup Date..",
+  "choosePickupDateAria": "Choose Pickup Date",
+  "selectPickupTime": "Select Pick-up Time",
+
+  "noticeText": "Please note, we deliver all packages on same day as soon as those are picked up. In case, storage is needed after pick up and delivery needs to be halted, please contact",
+  "noticeHighlight": "customer care in Live Chat for special request",
+
+  "packageContains": "Package contains",
+  "selectPackageContain": "Select Package Contain",
+  "packageContainOptions": [
+    "Fresh Fish & Seafood",
+    "Fresh Meat & Poultry",
+    "Fresh Vegetables & Fruits",
+    "Dairy & Grocery Staples",
+    "Home Cooked Food / Bakery",
+    "Important Documents / Parcels",
+    "Medicines / Healthcare Items",
+    "Clothes / Personal Belongings",
+    "Others"
+  ],
+
+  "packageWeight": "Package weight",
+  "selectPackageWeight": "Select Package Weight",
+  "packageWeightOptions": [
+    "Up to 1 KG",
+    "1 KG - 3 KG",
+    "3 KG - 5 KG",
+    "5 KG - 10 KG",
+    "10 KG - 15 KG",
+    "Above 15 KG"
+  ],
+
+  "packageSize": "Package size",
+  "selectPackageSize": "Select Package Size",
+  "packageSizeOptions": [
+    "Small (Envelope / Pouch)",
+    "Medium (Standard Shoebox size)",
+    "Large (Big Carton / Sack)",
+    "Extra Large (Heavy / Bulk Parcel)"
+  ],
+
+  "totalPackets": "Total no of packet",
+  "selectTotalPackets": "Select Total No Of Packet",
+  "packetCountOptions": [
+    "1 Packet",
+    "2 Packets",
+    "3 Packets",
+    "4 Packets",
+    "5 Packets",
+    "6 - 10 Packets",
+    "More than 10 Packets"
+  ],
+
+  "paymentMode": "Payment mode",
+  "payOnPickup": "Pay on pickup",
+  "payOnDelivery": "Pay on delivery",
+
+  "specialInstructionsLabel": "Please write here if any special instructions for us.",
+  "specialInstructionsPlaceholder": "Please write here if any special instructions for us.",
+
+  "submit": "SUBMIT",
+  "dismissAlert": "Dismiss alert",
+
+  "alertPickupAddress": "Please select or add a Pickup address.",
+  "alertDeliveryAddress": "Please select or add a Delivery address.",
+  "alertPickupDate": "Please select a Pickup date.",
+  "alertPickupTime": "Please select a Pick-up time slot.",
+  "alertPackageContains": "Please choose what the package contains.",
+  "alertPackageWeight": "Please choose package weight.",
+  "alertPackageSize": "Please choose package size.",
+  "alertTotalPackets": "Please choose total number of packets.",
+
+  "bookingSuccess": "Delivery request booked successfully! Your tracking code is #{trackingId}. Our rider will contact you soon."
+}

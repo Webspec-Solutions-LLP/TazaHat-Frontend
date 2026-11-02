@@ -1,0 +1,70 @@
+{
+  "language": "hi",
+  "locale": "hi-IN",
+  "currency": "INR",
+
+  "yourItems": "आपकी वस्तुएं",
+  "itemsInOrder": "आपके ऑर्डर में {count} {itemWord}",
+  "itemSingular": "आइटम",
+  "itemPlural": "आइटम",
+  "qty": "मात्रा:",
+  "emptyCart": "कार्ट में कोई आइटम नहीं मिला। आगे बढ़ने के लिए कार्ट में उत्पाद जोड़ें।",
+
+  "deliveryAddress": "डिलीवरी पता",
+  "deliveryAddressSubtitle": "अपना डिलीवरी पता चुनें या नया पता जोड़ें",
+  "addAddress": "पता जोड़ें",
+  "savedAddressesAria": "सहेजे गए डिलीवरी पते",
+
+  "deliveryDate": "डिलीवरी तिथि",
+  "deliveryDateSubtitle": "अपनी पसंदीदा डिलीवरी तिथि चुनें",
+
+  "deliveryType": "डिलीवरी का प्रकार",
+  "deliveryTypeSubtitle": "अपनी डिलीवरी का प्रकार चुनें",
+  "typeStorePickup": "स्टोर पिकअप",
+  "typeHomeDelivery": "होम डिलीवरी",
+
+  "deliverySchedule": "डिलीवरी समय",
+  "deliveryScheduleSubtitle": "अपना पसंदीदा डिलीवरी समय चुनें",
+  "schedules": [
+    { "title": "सुबह की डिलीवरी", "detail": "सुबह 10:00 - दोपहर 12:00 के बीच" },
+    { "title": "दोपहर की डिलीवरी", "detail": "दोपहर 12:00 - दोपहर 2:00 के बीच" },
+    { "title": "एक्सप्रेस डिलीवरी", "detail": "सुबह 9:00 बजे से पहले" },
+    { "title": "रॉकेट सर्विस", "detail": "सुबह 8:00 बजे से पहले" },
+    { "title": "प्राथमिकता डिलीवरी", "detail": "सुबह 10:00 बजे से पहले" },
+    { "title": "शाम की डिलीवरी", "detail": "शाम 6:00 - रात 10:00 के बीच" }
+  ],
+
+  "paymentOption": "भुगतान विकल्प",
+  "paymentOptionSubtitle": "अपनी पसंदीदा भुगतान विधि चुनें",
+  "paymentOnline": "ऑनलाइन भुगतान",
+  "paymentCOD": "कैश ऑन डिलीवरी",
+
+  "summaryHeading": "अनुमानित मूल्य विवरण",
+  "summarySubtitle": "अपने ऑर्डर का विवरण देखें और कूपन कोड लागू करें",
+  "couponAria": "कूपन कोड",
+  "couponPlaceholder": "कूपन कोड दर्ज करें",
+  "couponApply": "लागू करें",
+  "couponInvalid": "यह कूपन कोड मान्य नहीं है।",
+  "couponEmpty": "लागू करने के लिए कूपन कोड दर्ज करें।",
+
+  "weightNotice": "कृपया ध्यान दें कि बिलिंग उत्पादों के वास्तविक वजन के आधार पर की जाती है। पैकेजिंग के समय वजन के अनुसार अंतिम राशि में थोड़ा अंतर हो सकता है। धन्यवाद।",
+
+  "totalItemsRow": "कुल {count} {itemWord}",
+  "itemWordCapitalSingular": "आइटम",
+  "itemWordCapitalPlural": "आइटम",
+  "dressingFee": "ड्रेसिंग शुल्क",
+  "deliveryFee": "डिलीवरी शुल्क",
+  "convenienceFee": "सुविधा शुल्क",
+  "fastProcessingCharge": "फास्ट प्रोसेसिंग शुल्क",
+  "promo": "प्रोमो",
+  "totalAmount": "कुल राशि",
+
+  "proceedToCheckout": "चेकआउट के लिए आगे बढ़ें",
+  "orderReady": "ऑर्डर तैयार है",
+  "orderReadyMessage": "आपके ऑर्डर का विवरण तैयार है। भुगतान: {payment}।",
+
+  "promoFresh": "ताज़ा",
+  "promoRiver": "नदी से सीधे",
+  "promoTable": "आपकी थाली तक",
+  "promoAlt": "ताज़ी मछली"
+}

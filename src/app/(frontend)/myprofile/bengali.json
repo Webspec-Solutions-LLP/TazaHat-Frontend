@@ -1,0 +1,55 @@
+{
+  "language": "bn",
+  "locale": "bn-IN",
+  "currency": "INR",
+
+  "choosePhotoAria": "প্রোফাইল ছবি নির্বাচন করুন",
+  "uploadPhotoAria": "প্রোফাইল ছবি আপলোড করুন",
+  "photoAlt": "আপনার প্রোফাইল ছবি",
+  "welcomeBack": "স্বাগতম",
+  "goodFood": "ভালো খাবার",
+  "goodLife": "সুন্দর জীবন",
+  "editProfile": "প্রোফাইল সম্পাদনা",
+
+  "orderSummaryAria": "অর্ডার সারসংক্ষেপ",
+  "statTotalOrders": "মোট অর্ডার",
+  "statTotalOrdersDetail": "সব অর্ডার দেখুন",
+  "statDelivered": "ডেলিভার্ড",
+  "statDeliveredDetail": "সম্পন্ন অর্ডার",
+  "statPending": "পেন্ডিং",
+  "statPendingDetail": "প্রক্রিয়াধীন অর্ডার",
+  "statCancelled": "বাতিল",
+  "statCancelledDetail": "বাতিলকৃত অর্ডার",
+
+  "bannerTitle": "আপনার সব অর্ডার, এক জায়গায়",
+  "bannerSubtitle": "ডেলিভারি ট্র্যাকিং, অর্ডারের ইতিহাস এবং আরও অনেক কিছু দেখুন।",
+  "viewMyOrders": "আমার অর্ডার দেখুন",
+
+  "addressesHeading": "ডেলিভারি ঠিকানা",
+  "addressesSubtitle": "আপনার ডেলিভারির ঠিকানাগুলো পরিচালনা করুন",
+  "addAddress": "ঠিকানা যোগ করুন",
+  "setDefaultAddressAria": "{type} ডিফল্ট ডেলিভারি ঠিকানা হিসেবে সেট করুন",
+  "editAddressAria": "{type} ঠিকানা সম্পাদনা করুন",
+  "deleteAddressAria": "{type} ঠিকানা মুছুন",
+
+  "editProfileTitle": "প্রোফাইল সম্পাদনা",
+  "editProfileSubtitle": "আপনার যোগাযোগের বিবরণ আপডেট করুন।",
+  "closeFormAria": "ফর্ম বন্ধ করুন",
+  "fullName": "পুরো নাম",
+  "emailAddress": "ইমেইল ঠিকানা",
+  "phoneNumber": "ফোন নম্বর",
+  "cancel": "বাতিল",
+  "saveProfile": "প্রোফাইল সংরক্ষণ করুন",
+
+  "likedProductsHeading": "আপনার পছন্দের পণ্যসমূহ",
+
+  "supportTicketsTitle": "সাপোর্ট টিকিট",
+  "supportTicketsSubtitle": "আপনার রিপোর্ট করা সমস্যা ও আমাদের টিমের আপডেট ট্র্যাক করুন।",
+  "ticketsCount": "{count}টি টিকিট",
+  "ticketPrefix": "টিকিট #",
+  "yourIssue": "আপনার সমস্যা",
+  "resolution": "সমাধান",
+  "latestUpdate": "সর্বশেষ আপডেট",
+  "raised": "তৈরি",
+  "updated": "আপডেট"
+}

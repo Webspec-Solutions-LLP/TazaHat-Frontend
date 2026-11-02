@@ -1,0 +1,18 @@
+{
+  "language": "en",
+  "locale": "en-IN",
+  "currency": "INR",
+  "heading": "My Wishlist",
+  "subheading": "Your favourite fresh picks, all in one place.",
+  "item": "item",
+  "items": "items",
+  "discount": "{percent}% off",
+  "rating": "Rated {rating} out of 5 based on {reviews} reviews",
+  "description": "{name} selected for freshness and quality, ready for your everyday meals.",
+  "removeAria": "Remove {name} from wishlist",
+  "addToCart": "Add to Cart",
+  "quickViewAria": "View {name} details",
+  "emptyTitle": "Your wishlist is waiting for favourites",
+  "emptyDescription": "Tap the heart on any product to save it here and find it whenever you need it.",
+  "browseProducts": "Browse products"
+}

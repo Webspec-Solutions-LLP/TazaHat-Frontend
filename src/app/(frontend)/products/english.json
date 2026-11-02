@@ -1,0 +1,54 @@
+{
+  "language": "en",
+  "locale": "en-IN",
+  "currency": "INR",
+
+  "allProducts": "All Products",
+  "searchResultsTitle": "Results for “{query}”",
+  "productsCount": "{count} of {total} products in {city}",
+
+  "sortLabel": "Sort:",
+  "sortAria": "Sort products",
+  "sortName": "Name: A to Z",
+  "sortPriceAsc": "Price: Low to High",
+  "sortPriceDesc": "Price: High to Low",
+  "sortDiscount": "Biggest discount",
+  "sortBestMatch": "Best match",
+
+  "filterTitle": "Filter By",
+  "filterReset": "Reset",
+  "filterCloseAria": "Close filters",
+  "filterTrigger": "Filter",
+  "filterAria": "Product filters",
+
+  "filterCategory": "Filter by Category",
+  "filterAllCategories": "All categories",
+  "filterSubcategory": "Filter by Subcategory",
+  "filterAllInSubcategory": "All in {category}",
+  "filterChooseCategoryFirst": "Choose a category first.",
+
+  "filterPrice": "Filter by Price",
+  "filterAnyPrice": "Any price",
+  "filterUnderPrice": "Under {price}",
+
+  "viewGroupAria": "Product display",
+  "viewGridAria": "Grid view",
+  "viewListAria": "List view",
+
+  "loadingProducts": "Loading products",
+  "loadMoreError": "We could not load more products. Please try again.",
+  "tryAgain": "Try again",
+  "seenAllProducts": "You have seen all {total} products.",
+
+  "emptyTitle": "No products found",
+  "emptySubtitle": "Try changing your filters to see more fresh picks.",
+  "clearFilters": "Clear filters",
+
+  "discount": "{percent}% off",
+  "rating": "Rated {rating} out of 5 based on {reviews} reviews",
+  "productDescription": "{name} selected for freshness and quality, ready for your everyday meals.",
+  "save": "Add {name} to wishlist",
+  "unsave": "Remove {name} from wishlist",
+  "addToCart": "Add to Cart",
+  "quickViewAria": "View {name} details"
+}

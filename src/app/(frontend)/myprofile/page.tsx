@@ -5,7 +5,21 @@ import { useEffect, useRef, useState } from "react";
 import Products from "@/components/products/Products";
 import Address, { type AddressFormValues } from "@/components/modals/address/Address";
 import orderData from "../myOrders/orderData.json";
+import englishText from "./english.json";
+import bengaliText from "./bengali.json";
+import hindiText from "./hindi.json";
+import {
+  LANGUAGE_CHANGE_EVENT,
+  LANGUAGE_STORAGE_KEY,
+  type SupportedLang,
+} from "@/components/navbar/Navbar";
 import "./MyProfile.css";
+
+const textMap: Record<SupportedLang, typeof englishText> = {
+  en: englishText,
+  bn: bengaliText,
+  hi: hindiText,
+};
 
 const orders = orderData.orders;
 
@@ -91,41 +105,6 @@ const initialAddresses: SavedAddress[] = [
   },
 ];
 
-const stats = [
-  {
-    id: "total",
-    label: "Total orders",
-    detail: "View all your orders",
-    count: orders.length,
-    tone: "blue",
-    icon: <><circle cx="12" cy="8" r="3.5" /><path d="M5 20v-1.5a7 7 0 0 1 14 0V20" /></>,
-  },
-  {
-    id: "delivered",
-    label: "Delivered",
-    detail: "Orders completed",
-    count: orders.filter((order) => order.status === "complete").length,
-    tone: "green",
-    icon: <><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z" /><path d="m4.5 7.8 7.5 4.3 7.5-4.3M12 12v8.5" /><path d="m9 12 2 2 4-4" /></>,
-  },
-  {
-    id: "pending",
-    label: "Pending",
-    detail: "Orders in process",
-    count: orders.filter((order) => order.status === "upcoming").length,
-    tone: "amber",
-    icon: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
-  },
-  {
-    id: "cancelled",
-    label: "Cancelled",
-    detail: "Cancelled orders",
-    count: orders.filter((order) => order.status === "cancel").length,
-    tone: "red",
-    icon: <><circle cx="12" cy="12" r="9" /><path d="m9 9 6 6m0-6-6 6" /></>,
-  },
-];
-
 function ProfileIcon({ children }: { children: React.ReactNode }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -156,6 +135,7 @@ function GroceryIllustration() {
 }
 
 export default function MyProfilePage() {
+  const [currentLang, setCurrentLang] = useState<SupportedLang>("en");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [profile, setProfile] = useState({ name: "Joydeep Barik", email: "customer@tazahat.in", phone: "+91 90000 00000" });
   const [profileDraft, setProfileDraft] = useState<typeof profile | null>(null);
@@ -164,6 +144,29 @@ export default function MyProfilePage() {
   const [isAddressDrawerOpen, setIsAddressDrawerOpen] = useState(false);
   const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY) as SupportedLang | null;
+      if (stored === "en" || stored === "bn" || stored === "hi") {
+        setCurrentLang(stored);
+      }
+    } catch {
+      // Use fallback
+    }
+
+    const handleLanguageChange = (event: Event) => {
+      const newLang = (event as CustomEvent<SupportedLang>).detail;
+      if (newLang === "en" || newLang === "bn" || newLang === "hi") {
+        setCurrentLang(newLang);
+      }
+    };
+
+    window.addEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange);
+    return () => window.removeEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange);
+  }, []);
+
+  const t = textMap[currentLang] || englishText;
 
   useEffect(() => {
     if (!avatarUrl) return;
@@ -211,8 +214,43 @@ export default function MyProfilePage() {
     setProfileDraft(null);
   };
 
+  const stats = [
+    {
+      id: "total",
+      label: t.statTotalOrders,
+      detail: t.statTotalOrdersDetail,
+      count: orders.length,
+      tone: "blue",
+      icon: <><circle cx="12" cy="8" r="3.5" /><path d="M5 20v-1.5a7 7 0 0 1 14 0V20" /></>,
+    },
+    {
+      id: "delivered",
+      label: t.statDelivered,
+      detail: t.statDeliveredDetail,
+      count: orders.filter((order) => order.status === "complete").length,
+      tone: "green",
+      icon: <><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z" /><path d="m4.5 7.8 7.5 4.3 7.5-4.3M12 12v8.5" /><path d="m9 12 2 2 4-4" /></>,
+    },
+    {
+      id: "pending",
+      label: t.statPending,
+      detail: t.statPendingDetail,
+      count: orders.filter((order) => order.status === "upcoming").length,
+      tone: "amber",
+      icon: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
+    },
+    {
+      id: "cancelled",
+      label: t.statCancelled,
+      detail: t.statCancelledDetail,
+      count: orders.filter((order) => order.status === "cancel").length,
+      tone: "red",
+      icon: <><circle cx="12" cy="12" r="9" /><path d="m9 9 6 6m0-6-6 6" /></>,
+    },
+  ];
+
   return (
-    <main className="my-profile-page">
+    <main className="my-profile-page" lang={t.language}>
       <div className="my-profile-container">
         <section className="profile-hero" aria-labelledby="profile-heading">
           <div className="profile-identity">
@@ -221,7 +259,7 @@ export default function MyProfilePage() {
                 className={`profile-avatar${avatarUrl ? " has-photo" : ""}`}
                 style={avatarUrl ? { backgroundImage: `url("${avatarUrl}")` } : undefined}
                 role={avatarUrl ? "img" : undefined}
-                aria-label={avatarUrl ? "Your profile photo" : undefined}
+                aria-label={avatarUrl ? t.photoAlt : undefined}
               >
                 {!avatarUrl && (
                   <ProfileIcon>
@@ -233,7 +271,7 @@ export default function MyProfilePage() {
               <button
                 className="profile-photo-button"
                 type="button"
-                aria-label="Choose a profile photo"
+                aria-label={t.choosePhotoAria}
                 onClick={() => photoInputRef.current?.click()}
               >
                 <ProfileIcon><path d="M4 8h3l1.5-2h7L17 8h3v11H4V8Z" /><circle cx="12" cy="13" r="3" /></ProfileIcon>
@@ -243,7 +281,7 @@ export default function MyProfilePage() {
                 className="profile-photo-input"
                 type="file"
                 accept="image/*"
-                aria-label="Upload a profile photo"
+                aria-label={t.uploadPhotoAria}
                 onChange={(event) => {
                   selectPhoto(event.target.files?.[0]);
                   event.target.value = "";
@@ -252,22 +290,22 @@ export default function MyProfilePage() {
             </div>
 
             <div className="profile-details">
-              <span className="profile-greeting">Welcome back</span>
+              <span className="profile-greeting">{t.welcomeBack}</span>
               <h1 id="profile-heading">{profile.name}</h1>
               <p><ProfileIcon><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m4 7 8 6 8-6" /></ProfileIcon><span>{profile.email}</span></p>
               <p><ProfileIcon><path d="M21 16.5v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.4 19.4 0 0 1-6-6A19.8 19.8 0 0 1 1.1 3.8 2 2 0 0 1 3.1 1.6h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.9a2 2 0 0 1-.5 2.1L7 9.6a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.9.6 2.9.7a2 2 0 0 1 1.7 2Z" /></ProfileIcon><span>{profile.phone}</span></p>
             </div>
           </div>
           <div className="profile-hero-message" aria-hidden="true">
-            <span>Good Food</span>
-            <span>Good Life</span>
+            <span>{t.goodFood}</span>
+            <span>{t.goodLife}</span>
             <i>♡</i>
           </div>
           <GroceryIllustration />
-          <button className="profile-edit-button" type="button" onClick={() => setProfileDraft(profile)}>Edit profile</button>
+          <button className="profile-edit-button" type="button" onClick={() => setProfileDraft(profile)}>{t.editProfile}</button>
         </section>
 
-        <section className="profile-stat-grid" aria-label="Order summary">
+        <section className="profile-stat-grid" aria-label={t.orderSummaryAria}>
           {stats.map((stat) => (
             <Link
               className={`profile-stat-card profile-stat-card--${stat.tone}`}
@@ -287,19 +325,19 @@ export default function MyProfilePage() {
 
         <section className="profile-next-step">
           <span className="profile-next-step-icon"><ProfileIcon><path d="M3 7h18v13H3z" /><path d="M3 7 12 2l9 5M8 12h8m-8 4h5" /></ProfileIcon></span>
-          <span><strong>Your orders, all in one place</strong><small>Check delivery progress, order history, and more.</small></span>
-          <Link href="/myOrders">View my orders <span aria-hidden="true">→</span></Link>
+          <span><strong>{t.bannerTitle}</strong><small>{t.bannerSubtitle}</small></span>
+          <Link href="/myOrders">{t.viewMyOrders} <span aria-hidden="true">→</span></Link>
         </section>
 
         <section className="profile-addresses" aria-labelledby="profile-addresses-heading">
           <div className="profile-addresses-header">
             <div className="profile-addresses-title">
               <span className="profile-addresses-icon"><ProfileIcon><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z" /><circle cx="12" cy="10" r="2.5" /></ProfileIcon></span>
-              <span><h2 id="profile-addresses-heading">Delivery Addresses</h2><p>Manage your delivery locations</p></span>
+              <span><h2 id="profile-addresses-heading">{t.addressesHeading}</h2><p>{t.addressesSubtitle}</p></span>
             </div>
             <button className="profile-add-address" type="button" onClick={() => openAddressEditor()}>
               <ProfileIcon><path d="M12 5v14m-7-7h14" /></ProfileIcon>
-              Add Address
+              {t.addAddress}
             </button>
           </div>
           <div className="profile-address-grid">
@@ -312,14 +350,14 @@ export default function MyProfilePage() {
                       name="default-address"
                       checked={defaultAddressId === address.id}
                       onChange={() => setDefaultAddressId(address.id)}
-                      aria-label={`Set ${address.addressType} as your default delivery address`}
+                      aria-label={t.setDefaultAddressAria.replace("{type}", address.addressType)}
                     />
                     <span>{address.recipient} ({address.addressType})</span>
                   </label>
-                  <button className="profile-address-edit" type="button" aria-label={`Edit ${address.addressType} address`} onClick={() => openAddressEditor(address)}>
+                  <button className="profile-address-edit" type="button" aria-label={t.editAddressAria.replace("{type}", address.addressType)} onClick={() => openAddressEditor(address)}>
                     <ProfileIcon><path d="m14 5 5 5M4 20l4.5-1 10-10a2.1 2.1 0 0 0-3-3l-10 10L4 20Z" /></ProfileIcon>
                   </button>
-                  <button className="profile-address-delete" type="button" aria-label={`Delete ${address.addressType} address`} onClick={() => deleteAddress(address.id)}>
+                  <button className="profile-address-delete" type="button" aria-label={t.deleteAddressAria.replace("{type}", address.addressType)} onClick={() => deleteAddress(address.id)}>
                     <ProfileIcon><path d="M3 6h18m-2 0-.9 14H5.9L5 6m4 0V4h6v2m-5 4v6m4-6v6" /></ProfileIcon>
                   </button>
                 </div>
@@ -334,14 +372,14 @@ export default function MyProfilePage() {
           <div className="profile-address-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setProfileDraft(null); }}>
             <section className="profile-address-dialog" role="dialog" aria-modal="true" aria-labelledby="profile-edit-dialog-title">
               <div className="profile-address-dialog-heading">
-                <div><h2 id="profile-edit-dialog-title">Edit profile</h2><p>Update your contact details.</p></div>
-                <button type="button" aria-label="Close profile form" onClick={() => setProfileDraft(null)}>×</button>
+                <div><h2 id="profile-edit-dialog-title">{t.editProfileTitle}</h2><p>{t.editProfileSubtitle}</p></div>
+                <button type="button" aria-label={t.closeFormAria} onClick={() => setProfileDraft(null)}>×</button>
               </div>
               <form onSubmit={saveProfile}>
-                <label>Full name<input required value={profileDraft.name} onChange={(event) => setProfileDraft({ ...profileDraft, name: event.target.value })} /></label>
-                <label>Email address<input required type="email" value={profileDraft.email} onChange={(event) => setProfileDraft({ ...profileDraft, email: event.target.value })} /></label>
-                <label>Phone number<input required type="tel" value={profileDraft.phone} onChange={(event) => setProfileDraft({ ...profileDraft, phone: event.target.value })} /></label>
-                <div className="profile-address-form-actions"><button type="button" onClick={() => setProfileDraft(null)}>Cancel</button><button type="submit">Save profile</button></div>
+                <label>{t.fullName}<input required value={profileDraft.name} onChange={(event) => setProfileDraft({ ...profileDraft, name: event.target.value })} /></label>
+                <label>{t.emailAddress}<input required type="email" value={profileDraft.email} onChange={(event) => setProfileDraft({ ...profileDraft, email: event.target.value })} /></label>
+                <label>{t.phoneNumber}<input required type="tel" value={profileDraft.phone} onChange={(event) => setProfileDraft({ ...profileDraft, phone: event.target.value })} /></label>
+                <div className="profile-address-form-actions"><button type="button" onClick={() => setProfileDraft(null)}>{t.cancel}</button><button type="submit">{t.saveProfile}</button></div>
               </form>
             </section>
           </div>
@@ -358,26 +396,26 @@ export default function MyProfilePage() {
           onSave={saveAddress}
         />
       )}
-      <Products heading="Your liked products" />
+      <Products heading={t.likedProductsHeading} />
       <section className="profile-tickets" aria-labelledby="profile-tickets-title">
         <div className="profile-tickets-heading">
           <div className="profile-tickets-title-wrap">
             <span className="profile-tickets-icon"><ProfileIcon><path d="M4 5h16v12H9l-5 3V5Z"/><path d="M8 9h8M8 13h5"/></ProfileIcon></span>
-            <span><h2 id="profile-tickets-title">Support tickets</h2><p>Track the issues you reported and our team’s updates.</p></span>
+            <span><h2 id="profile-tickets-title">{t.supportTicketsTitle}</h2><p>{t.supportTicketsSubtitle}</p></span>
           </div>
-          <span className="profile-tickets-count">{supportTickets.length} tickets</span>
+          <span className="profile-tickets-count">{t.ticketsCount.replace("{count}", String(supportTickets.length))}</span>
         </div>
         <div className="profile-ticket-list">
           {supportTickets.map((ticket) => (
             <article className="profile-ticket-card" key={ticket.id}>
               <div className="profile-ticket-topline">
-                <span className="profile-ticket-number">Ticket #{ticket.id}</span>
+                <span className="profile-ticket-number">{t.ticketPrefix}{ticket.id}</span>
                 <span className={`profile-ticket-status profile-ticket-status--${ticket.tone}`}><i aria-hidden="true" />{ticket.status}</span>
               </div>
               <div className="profile-ticket-title-row"><h3>{ticket.subject}</h3><span>{ticket.category}</span></div>
-              <p className="profile-ticket-issue"><strong>Your issue</strong>{ticket.issue}</p>
-              <div className="profile-ticket-update"><span className="profile-ticket-update-icon"><ProfileIcon><path d="m5 12 4 4L19 6"/></ProfileIcon></span><div><strong>{ticket.tone === "resolved" ? "Resolution" : "Latest update"}</strong><p>{ticket.update}</p></div></div>
-              <div className="profile-ticket-dates"><span>Raised <time>{ticket.raised}</time></span><span>Updated <time>{ticket.updated}</time></span></div>
+              <p className="profile-ticket-issue"><strong>{t.yourIssue}</strong>{ticket.issue}</p>
+              <div className="profile-ticket-update"><span className="profile-ticket-update-icon"><ProfileIcon><path d="m5 12 4 4L19 6"/></ProfileIcon></span><div><strong>{ticket.tone === "resolved" ? t.resolution : t.latestUpdate}</strong><p>{ticket.update}</p></div></div>
+              <div className="profile-ticket-dates"><span>{t.raised} <time>{ticket.raised}</time></span><span>{t.updated} <time>{ticket.updated}</time></span></div>
             </article>
           ))}
         </div>

@@ -1,0 +1,208 @@
+{
+  "language": "en",
+  "heroBadge": "PIONEERING HYPERLOCAL AGRITECH IN TRIPURA",
+  "heroTitlePrefix": "Redefining Fresh Food with ",
+  "heroTitleHighlight": "Smart Logistics",
+  "heroTitleSuffix": " & Honest Commerce.",
+  "heroSub": "TazaHaat is building Northeast India's most advanced fresh supply network. We eliminate layers of middlemen to deliver morning harvest vegetables, freshwater river catch, and dairy directly to your kitchen in under 90 minutes.",
+  "heroBtnPrimary": "Explore Fresh Products",
+  "heroBtnSecondary": "Partner With Us",
+  "heroTrustFormalin": "100% Formalin Free",
+  "heroTrustDirect": "Dawn-To-Door Direct",
+  "heroTrustInspection": "Doorstep Open-Box Inspection",
+  "heroImgAlt": "TazaHaat Fresh Produce and Supply Chain",
+  "hudTelemetryLabel": "COLD CHAIN TELEMETRY",
+  "hudTelemetryVal": "3.6°C Core Temp Active",
+  "hudGrowerLabel": "DIRECT GROWER BENEFIT",
+  "hudGrowerVal": "+28% Higher Farmer Income",
+  "metrics": [
+    {
+      "num": "45K+",
+      "tag": "Families",
+      "label": "Households Served",
+      "sub": "Daily fresh orders fulfilled reliably across Agartala and growing districts."
+    },
+    {
+      "num": "350+",
+      "tag": "Growers",
+      "label": "Partner Farmers & Fishers",
+      "sub": "Direct contract partnerships with fair same-day digital payments."
+    },
+    {
+      "num": "< 90m",
+      "tag": "Express",
+      "label": "Neighborhood Delivery",
+      "sub": "Dispatched from localized cold nodes to preserve natural vitamins."
+    },
+    {
+      "num": "99.4%",
+      "tag": "Rating",
+      "label": "Freshness Satisfaction",
+      "sub": "Rigorous triple-point inspection backed by instant doorstep refund."
+    }
+  ],
+  "tabsBadge": "OUR ARCHITECTURE",
+  "tabsHeading": "Built to Solve Northeast India's Perishable Supply Chain",
+  "tabsDesc": "Conventional wholesale mandis rely on multiple middlemen, delayed transit, and hazardous chemical preservatives. Here is how TazaHaat changes the equation using modern engineering.",
+  "tabPerks": [
+    "Real-time digital traceability",
+    "Zero formaldehyde / formalin certification",
+    "Agartala Central Cold Hub audited daily"
+  ],
+  "statLinkText": "Order from this pipeline",
+  "tabContent": [
+    {
+      "id": "mission",
+      "label": "Origin & Mission",
+      "badge": "HYPERLOCAL IMPACT",
+      "title": "Bridging Tripura's Traditional Bazaars with Next-Gen Tech",
+      "lead": "TazaHaat was founded with an uncompromising mission: to rescue fresh food commerce in Northeast India from lengthy, opaque supply chains and chemical adulteration.",
+      "points": [
+        {
+          "title": "Direct Sourcing Infrastructure",
+          "desc": "We buy directly at dawn from verified cultivators and river dock fishermen across Tripura, bypassing 3 to 5 exploitative intermediaries."
+        },
+        {
+          "title": "Fair Value for Producers",
+          "desc": "Local farmers and fishermen earn 25-30% more compared to traditional mandi rates, backed by same-day digital settlements."
+        },
+        {
+          "title": "Radical Consumer Transparency",
+          "desc": "Every vegetable bunch and fish order is traceable back to its source pond or cluster, offering complete peace of mind for families."
+        }
+      ],
+      "metricValue": "45K+",
+      "metricLabel": "Tripura Households Served",
+      "highlightTag": "100% Direct Sourced"
+    },
+    {
+      "id": "coldchain",
+      "label": "Smart Cold Chain",
+      "badge": "IOT & PRECISION CHILL",
+      "title": "0°C to 4°C Unbroken Cold Chain from Dock to Door",
+      "lead": "Freshwater fish and delicate organic produce lose nutritional value rapidly under humid tropical heat. Our micro-hubs deploy active thermal monitoring.",
+      "points": [
+        {
+          "title": "IoT Sensor Monitoring",
+          "desc": "Real-time telemetry continuously logs storage temperatures inside our central Agartala hub and refrigerated fleet."
+        },
+        {
+          "title": "Formalin & Chemical Free Guarantee",
+          "desc": "Zero chemical preservatives, zero ammonia sprays, and zero artificial coloring. Only clean food-grade flake ice and ozone purification."
+        },
+        {
+          "title": "Thermal-Shielded Delivery Packs",
+          "desc": "Insulated, food-grade transit packaging guarantees produce arrives as crisp and fresh as when harvested at daybreak."
+        }
+      ],
+      "metricValue": "< 90m",
+      "metricLabel": "Hub-to-Doorstep Window",
+      "highlightTag": "Continuous Temp Logs"
+    },
+    {
+      "id": "farmers",
+      "label": "Farmer Network",
+      "badge": "COMMUNITY FIRST",
+      "title": "Empowering 350+ Local Agritech Partners Across Tripura",
+      "lead": "We do not simply purchase crops; we invest in local agricultural prosperity by offering crop planning, modern organic guidance, and guaranteed off-take contracts.",
+      "points": [
+        {
+          "title": "Zero Middleman Commission",
+          "desc": "Growers receive full market value without paying arbitrary mandi brokerages or enduring delayed credit cycles."
+        },
+        {
+          "title": "Demand Forecasting AI",
+          "desc": "We share predictive harvest demands with our grower co-ops, drastically cutting post-harvest surplus and seasonal food loss."
+        },
+        {
+          "title": "Women & Youth Employment",
+          "desc": "More than 65% of our sorting, quality inspection, and packaging team is drawn from rural and semi-urban communities in Tripura."
+        }
+      ],
+      "metricValue": "350+",
+      "metricLabel": "Partner Cultivators & Fishermen",
+      "highlightTag": "Zero Exploitation"
+    },
+    {
+      "id": "quality",
+      "label": "Quality Protocol",
+      "badge": "LAB-GRADE VERIFICATION",
+      "title": "Triple-Point Quality Inspection Before Any Pack Leaves",
+      "lead": "We hold ourselves to standards that match the world's most rigorous grocery supply networks, adapted specifically for Northeast Indian produce.",
+      "points": [
+        {
+          "title": "Dawn Sorting & Grading",
+          "desc": "Trained agrarian quality specialists grade produce based on firmness, natural color, aroma, and natural ripeness."
+        },
+        {
+          "title": "Ozonized Wash & Sanitization",
+          "desc": "Vegetables and leafy greens undergo multi-stage ozonized water rinsing to eliminate surface dust and organic microbes without chemicals."
+        },
+        {
+          "title": "At-the-Door Open Box Inspection",
+          "desc": "Customers are encouraged to inspect their fish and vegetables at their doorstep. If you are not delighted, return it instantly."
+        }
+      ],
+      "metricValue": "99.4%",
+      "metricLabel": "First-Time Freshness Score",
+      "highlightTag": "Doorstep Open-Box Return"
+    }
+  ],
+  "lifecycleBadge": "FIELD TO FORK",
+  "lifecycleHeading": "How TazaHaat Delivers In Hours, Not Days",
+  "lifecycleDesc": "Every morning, before most of Tripura wakes up, our network is in full motion to bring you food at peak freshness.",
+  "lifecycleSteps": [
+    {
+      "time": "04:30 AM",
+      "title": "Dawn Harvest & Dock Catch",
+      "desc": "Produce is harvested and river fish collected at dawn from local Tripura ponds and farms under chilled holding conditions.",
+      "badge": "Step 01"
+    },
+    {
+      "time": "06:15 AM",
+      "title": "Ozone Wash & Precision Sorting",
+      "desc": "Arrives at our central Agartala Cold Hub for inspection, chemical screening, ozonized cleaning, and grade-A sorting.",
+      "badge": "Step 02"
+    },
+    {
+      "time": "07:30 AM",
+      "title": "Thermal Eco-Shield Packaging",
+      "desc": "Packaged in food-grade, breathable and insulated containers that maintain core temperature without artificial additives.",
+      "badge": "Step 03"
+    },
+    {
+      "time": "08:45 AM",
+      "title": "Hyperlocal Doorstep Dispatch",
+      "desc": "Delivered to your kitchen via smart-routed delivery partners within guaranteed morning and evening fulfillment slots.",
+      "badge": "Step 04"
+    }
+  ],
+  "pillarsBadge": "UNCOMPROMISING PROMISES",
+  "pillarsHeading": "The Four Standards That Define TazaHaat",
+  "pillarsDesc": "Designed around safety, transparent economics, and customer-first values.",
+  "pillars": [
+    {
+      "title": "100% Chemical-Free Freshness",
+      "desc": "Zero formalin, zero wax coatings, and zero synthetic ripening agents. We test incoming catch so your family eats cleanly."
+    },
+    {
+      "title": "Direct-From-Source Pricing",
+      "desc": "Cutting out multiple layers of brokerages allows us to offer honest prices for buyers and superior compensation for local growers."
+    },
+    {
+      "title": "Active Cold Chain & IoT Hubs",
+      "desc": "Our localized Agartala fulfillment hubs preserve micro-nutrients and texture from receipt through last-mile delivery."
+    },
+    {
+      "title": "Open-Box Doorstep Verification",
+      "desc": "Check every item with our delivery executive. Complete peace of mind with instant wallet credit or cash refund if dissatisfied."
+    }
+  ],
+  "ctaPill": "START FRESH TODAY",
+  "ctaHeadlinePrefix": "Ready to Experience ",
+  "ctaHeadlineHighlight": "Pure Morning Harvest",
+  "ctaHeadlineSuffix": " at Your Doorstep?",
+  "ctaSub": "Explore today's live freshwater fish selection, crisp organic vegetables, and pantry essentials. Order in under 2 minutes.",
+  "ctaBtnMain": "Browse Fresh Products",
+  "ctaBtnAlt": "Help & Support Hub"
+}

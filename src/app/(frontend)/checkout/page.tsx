@@ -3,7 +3,21 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Address, { type AddressFormValues } from "@/components/modals/address/Address";
+import englishText from "./english.json";
+import bengaliText from "./bengali.json";
+import hindiText from "./hindi.json";
+import {
+  LANGUAGE_CHANGE_EVENT,
+  LANGUAGE_STORAGE_KEY,
+  type SupportedLang,
+} from "@/components/navbar/Navbar";
 import "./Checkout.css";
+
+const textMap: Record<SupportedLang, typeof englishText> = {
+  en: englishText,
+  bn: bengaliText,
+  hi: hindiText,
+};
 
 const days = [
   { month: "October", date: 23, day: "Friday" },
@@ -14,14 +28,7 @@ const days = [
   { month: "October", date: 28, day: "Wednesday" },
 ];
 
-const schedules = [
-  { title: "Morning Delivery", detail: "Between 10:00AM - 12:00PM", fee: 0 },
-  { title: "Lunch Delivery", detail: "Between 12:00PM - 2:00PM", fee: 0 },
-  { title: "Express Delivery", detail: "Before 9:00 AM", fee: 20 },
-  { title: "Rocket Service", detail: "Before 8:00 AM", fee: 28 },
-  { title: "Priority Delivery", detail: "Before 10:00AM", fee: 10 },
-  { title: "Evening Delivery", detail: "Between 6:00PM - 10:00PM", fee: 0 },
-];
+const scheduleFees = [0, 0, 20, 28, 10, 0];
 
 type CheckoutItem = {
   id: string;
@@ -56,6 +63,31 @@ function Icon({ name }: { name: string }) {
 }
 
 export default function CheckoutPage() {
+  const [currentLang, setCurrentLang] = useState<SupportedLang>("en");
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY) as SupportedLang | null;
+      if (stored === "en" || stored === "bn" || stored === "hi") {
+        setCurrentLang(stored);
+      }
+    } catch {
+      // Use fallback
+    }
+
+    const handleLanguageChange = (event: Event) => {
+      const newLang = (event as CustomEvent<SupportedLang>).detail;
+      if (newLang === "en" || newLang === "bn" || newLang === "hi") {
+        setCurrentLang(newLang);
+      }
+    };
+
+    window.addEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange);
+    return () => window.removeEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange);
+  }, []);
+
+  const t = textMap[currentLang] || englishText;
+
   const [items, setItems] = useState<CheckoutItem[]>([]);
   const [selectedDay, setSelectedDay] = useState(0);
   const [deliveryType, setDeliveryType] = useState("Store Pick Up");
@@ -67,10 +99,19 @@ export default function CheckoutPage() {
   const [coupon, setCoupon] = useState("");
   const [couponMessage, setCouponMessage] = useState("");
   const [placed, setPlaced] = useState(false);
-  const deliveryFee = deliveryType === "Home Delivery" ? 0 : 0;
+
+  const schedules = useMemo(() => {
+    return t.schedules.map((item, index) => ({
+      title: item.title,
+      detail: item.detail,
+      fee: scheduleFees[index] ?? 0,
+    }));
+  }, [t]);
+
+  const deliveryFee = deliveryType === "Home Delivery" || deliveryType === t.typeHomeDelivery ? 0 : 0;
   const subtotal = useMemo(() => items.reduce((sum, item) => sum + item.price * item.quantity, 0), [items]);
   const itemCount = useMemo(() => items.reduce((sum, item) => sum + item.quantity, 0), [items]);
-  const total = subtotal + deliveryFee + schedules[schedule].fee;
+  const total = subtotal + deliveryFee + (schedules[schedule]?.fee ?? 0);
 
   const saveAddress = (values: AddressFormValues) => {
     setAddress([values.recipient, values.houseNumber, values.addressLine1, values.addressLine2, values.locality, values.landmark, values.pincode].filter(Boolean).join(", "));
@@ -89,66 +130,235 @@ export default function CheckoutPage() {
     window.sessionStorage.removeItem("tazahat-checkout-items");
   }, []);
 
-  const applyCoupon = () => setCouponMessage(coupon.trim() ? "This coupon code is not valid." : "Enter a coupon code to apply.");
+  const applyCoupon = () => setCouponMessage(coupon.trim() ? t.couponInvalid : t.couponEmpty);
 
   return (
-    <main className="checkout-page">
+    <main className="checkout-page" lang={t.language}>
       <div className="checkout-layout">
         <div className="checkout-left-scroll">
           <section className="checkout-section checkout-products">
-            <div className="checkout-section-heading"><span className="checkout-icon"><Icon name="box" /></span><div><h2>Your Items <b>*</b></h2><p>{itemCount} {itemCount === 1 ? "item" : "items"} in your order</p></div></div>
-            {items.length > 0 ? <div className="checkout-product-list">{items.map(item => <article className="checkout-product" key={item.id}>
-              <div className="checkout-product-image"><Image src={item.image} alt={item.name} fill sizes="76px"/></div>
-              <div className="checkout-product-info"><h3>{item.name}</h3>{item.weight && <p>{item.weight}</p>}<span>Qty: {item.quantity}</span></div>
-              <strong className="checkout-product-price">₹{(item.price * item.quantity).toFixed(2)}</strong>
-            </article>)}</div> : <p className="checkout-empty-items">No cart items were found. Add items to your cart to continue.</p>}
+            <div className="checkout-section-heading">
+              <span className="checkout-icon"><Icon name="box" /></span>
+              <div>
+                <h2>{t.yourItems} <b>*</b></h2>
+                <p>{t.itemsInOrder.replace("{count}", String(itemCount)).replace("{itemWord}", itemCount === 1 ? t.itemSingular : t.itemPlural)}</p>
+              </div>
+            </div>
+            {items.length > 0 ? (
+              <div className="checkout-product-list">
+                {items.map(item => (
+                  <article className="checkout-product" key={item.id}>
+                    <div className="checkout-product-image"><Image src={item.image} alt={item.name} fill sizes="76px"/></div>
+                    <div className="checkout-product-info">
+                      <h3>{item.name}</h3>
+                      {item.weight && <p>{item.weight}</p>}
+                      <span>{t.qty} {item.quantity}</span>
+                    </div>
+                    <strong className="checkout-product-price">₹{(item.price * item.quantity).toFixed(2)}</strong>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <p className="checkout-empty-items">{t.emptyCart}</p>
+            )}
           </section>
+
           <section className="checkout-section checkout-address">
-            <div className="checkout-section-heading"><span className="checkout-icon"><Icon name="pin" /></span><div><h1>Delivery Address <b>*</b></h1><p>Select your delivery address or add a new one</p></div></div>
-            <button className="checkout-add-address" type="button" onClick={() => setIsAddressModalOpen(true)}><span>＋</span> Add Address</button>
-            <button className={`checkout-address-choice${isAddressListOpen ? " is-open" : ""}`} type="button" aria-expanded={isAddressListOpen} onClick={() => setIsAddressListOpen(open => !open)}><span className="checkout-radio checked"/><span className="checkout-home-icon">⌂</span><strong>{address}</strong><span className="checkout-chevron" aria-hidden="true"/></button>
-            {isAddressListOpen && <div className="checkout-address-list" role="listbox" aria-label="Saved delivery addresses">{demoAddresses.map((savedAddress) => <button key={savedAddress} type="button" role="option" aria-selected={address === savedAddress} className={`checkout-address-option${address === savedAddress ? " selected" : ""}`} onClick={() => { setAddress(savedAddress); setIsAddressListOpen(false); }}><span className={`checkout-radio${address === savedAddress ? " checked" : ""}`}/><span>{savedAddress}</span></button>)}</div>}
+            <div className="checkout-section-heading">
+              <span className="checkout-icon"><Icon name="pin" /></span>
+              <div>
+                <h1>{t.deliveryAddress} <b>*</b></h1>
+                <p>{t.deliveryAddressSubtitle}</p>
+              </div>
+            </div>
+            <button className="checkout-add-address" type="button" onClick={() => setIsAddressModalOpen(true)}>
+              <span>＋</span> {t.addAddress}
+            </button>
+            <button
+              className={`checkout-address-choice${isAddressListOpen ? " is-open" : ""}`}
+              type="button"
+              aria-expanded={isAddressListOpen}
+              onClick={() => setIsAddressListOpen(open => !open)}
+            >
+              <span className="checkout-radio checked"/>
+              <span className="checkout-home-icon">⌂</span>
+              <strong>{address}</strong>
+              <span className="checkout-chevron" aria-hidden="true"/>
+            </button>
+            {isAddressListOpen && (
+              <div className="checkout-address-list" role="listbox" aria-label={t.savedAddressesAria}>
+                {demoAddresses.map((savedAddress) => (
+                  <button
+                    key={savedAddress}
+                    type="button"
+                    role="option"
+                    aria-selected={address === savedAddress}
+                    className={`checkout-address-option${address === savedAddress ? " selected" : ""}`}
+                    onClick={() => { setAddress(savedAddress); setIsAddressListOpen(false); }}
+                  >
+                    <span className={`checkout-radio${address === savedAddress ? " checked" : ""}`}/>
+                    <span>{savedAddress}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </section>
 
           <section className="checkout-section">
-            <div className="checkout-section-heading"><span className="checkout-icon"><Icon name="calendar" /></span><div><h2>Delivery Date <b>*</b></h2><p>Choose your preferred delivery date</p></div></div>
-            <div className="checkout-date-grid">{days.map((day, index) => <button key={day.date} type="button" className={`checkout-date${selectedDay === index ? " selected" : ""}`} onClick={() => setSelectedDay(index)}><span>{day.month}</span><strong>{day.date}</strong><b>{day.day}</b>{selectedDay === index && <i>✓</i>}</button>)}</div>
+            <div className="checkout-section-heading">
+              <span className="checkout-icon"><Icon name="calendar" /></span>
+              <div>
+                <h2>{t.deliveryDate} <b>*</b></h2>
+                <p>{t.deliveryDateSubtitle}</p>
+              </div>
+            </div>
+            <div className="checkout-date-grid">
+              {days.map((day, index) => (
+                <button
+                  key={day.date}
+                  type="button"
+                  className={`checkout-date${selectedDay === index ? " selected" : ""}`}
+                  onClick={() => setSelectedDay(index)}
+                >
+                  <span>{day.month}</span>
+                  <strong>{day.date}</strong>
+                  <b>{day.day}</b>
+                  {selectedDay === index && <i>✓</i>}
+                </button>
+              ))}
+            </div>
           </section>
 
           <section className="checkout-section">
-            <div className="checkout-section-heading"><span className="checkout-icon"><Icon name="truck" /></span><div><h2>Delivery Type <b>*</b></h2><p>Choose your delivery type</p></div></div>
-            <div className="checkout-options checkout-type-options">{["Store Pick Up", "Home Delivery"].map((option, index) => <button type="button" key={option} className={`checkout-choice${deliveryType === option ? " selected" : ""}`} onClick={() => setDeliveryType(option)}><span className={`checkout-radio${deliveryType === option ? " checked" : ""}`}/><span className="checkout-choice-icon">{index === 0 ? "▣" : "⌂"}</span><strong>{option}</strong></button>)}</div>
+            <div className="checkout-section-heading">
+              <span className="checkout-icon"><Icon name="truck" /></span>
+              <div>
+                <h2>{t.deliveryType} <b>*</b></h2>
+                <p>{t.deliveryTypeSubtitle}</p>
+              </div>
+            </div>
+            <div className="checkout-options checkout-type-options">
+              {[
+                { label: t.typeStorePickup, value: "Store Pick Up" },
+                { label: t.typeHomeDelivery, value: "Home Delivery" },
+              ].map((option, index) => (
+                <button
+                  type="button"
+                  key={option.value}
+                  className={`checkout-choice${deliveryType === option.value ? " selected" : ""}`}
+                  onClick={() => setDeliveryType(option.value)}
+                >
+                  <span className={`checkout-radio${deliveryType === option.value ? " checked" : ""}`}/>
+                  <span className="checkout-choice-icon">{index === 0 ? "▣" : "⌂"}</span>
+                  <strong>{option.label}</strong>
+                </button>
+              ))}
+            </div>
             <span className="checkout-wave" aria-hidden="true">〜〜</span>
           </section>
 
           <section className="checkout-section">
-            <div className="checkout-section-heading"><span className="checkout-icon"><Icon name="clock" /></span><div><h2>Delivery Schedule <b>*</b></h2><p>Select your preferred delivery time</p></div></div>
-            <div className="checkout-schedule-grid">{schedules.map((item, index) => <label key={item.title} className={`checkout-schedule${schedule === index ? " selected" : ""}`}><input type="radio" name="schedule" checked={schedule === index} onChange={() => setSchedule(index)}/><span className="checkout-radio checked"/><span><strong>{item.title}</strong> <small>({item.detail})</small>{item.fee > 0 && <b className="schedule-fee"> +₹{item.fee}.00</b>}</span></label>)}</div>
+            <div className="checkout-section-heading">
+              <span className="checkout-icon"><Icon name="clock" /></span>
+              <div>
+                <h2>{t.deliverySchedule} <b>*</b></h2>
+                <p>{t.deliveryScheduleSubtitle}</p>
+              </div>
+            </div>
+            <div className="checkout-schedule-grid">
+              {schedules.map((item, index) => (
+                <label key={item.title} className={`checkout-schedule${schedule === index ? " selected" : ""}`}>
+                  <input
+                    type="radio"
+                    name="schedule"
+                    checked={schedule === index}
+                    onChange={() => setSchedule(index)}
+                  />
+                  <span className="checkout-radio checked"/>
+                  <span>
+                    <strong>{item.title}</strong> <small>({item.detail})</small>
+                    {item.fee > 0 && <b className="schedule-fee"> +₹{item.fee}.00</b>}
+                  </span>
+                </label>
+              ))}
+            </div>
           </section>
 
           <section className="checkout-section checkout-payment-section">
-            <div className="checkout-section-heading"><span className="checkout-icon"><Icon name="card" /></span><div><h2>Payment Option <b>*</b></h2><p>Select your preferred payment method</p></div></div>
-            <div className="checkout-options checkout-payment-options">{["Online Payment", "Cash On Delivery"].map((option, index) => <button type="button" key={option} className={`checkout-choice${payment === option ? " selected" : ""}`} onClick={() => setPayment(option)}><span className={`checkout-radio${payment === option ? " checked" : ""}`}/><span className="checkout-choice-icon">{index === 0 ? "▰" : "♧"}</span><strong>{option}</strong></button>)}</div>
+            <div className="checkout-section-heading">
+              <span className="checkout-icon"><Icon name="card" /></span>
+              <div>
+                <h2>{t.paymentOption} <b>*</b></h2>
+                <p>{t.paymentOptionSubtitle}</p>
+              </div>
+            </div>
+            <div className="checkout-options checkout-payment-options">
+              {[
+                { label: t.paymentOnline, value: "Online Payment" },
+                { label: t.paymentCOD, value: "Cash On Delivery" },
+              ].map((option, index) => (
+                <button
+                  type="button"
+                  key={option.value}
+                  className={`checkout-choice${payment === option.value ? " selected" : ""}`}
+                  onClick={() => setPayment(option.value)}
+                >
+                  <span className={`checkout-radio${payment === option.value ? " checked" : ""}`}/>
+                  <span className="checkout-choice-icon">{index === 0 ? "▰" : "♧"}</span>
+                  <strong>{option.label}</strong>
+                </button>
+              ))}
+            </div>
           </section>
         </div>
 
         <aside className="checkout-summary">
-          <div className="checkout-summary-heading"><span className="checkout-summary-icon"><Icon name="receipt" /></span><div><h2>Estimated Price Details</h2><p>Review your order details and apply coupon code</p></div></div>
-          <form className="checkout-coupon" onSubmit={event => { event.preventDefault(); applyCoupon(); }}><span>♧</span><input aria-label="Coupon code" value={coupon} onChange={event => setCoupon(event.target.value)} placeholder="Enter coupon code"/><button type="submit">Apply</button></form>
-          {couponMessage && <p className="checkout-coupon-message" role="status">{couponMessage}</p>}
-          <p className="checkout-note"><span>i</span><span>Please note we bill based on the actual wt. of the products. Final amount may vary depending on the actual item wt. during packaging. Thank you.</span></p>
-          <div className="checkout-price-rows">
-            <div className="checkout-price-row"><Icon name="box"/><span>Total {itemCount} {itemCount === 1 ? "Item" : "Items"}</span><strong>₹{subtotal.toFixed(2)}</strong></div>
-            <div className="checkout-price-row"><Icon name="drop"/><span>Dressing Fee</span><b>₹0.00</b></div>
-            <div className="checkout-price-row"><Icon name="truck"/><span>Delivery Fee</span><b>₹{deliveryFee.toFixed(2)}</b></div>
-            <div className="checkout-price-row"><Icon name="shield"/><span>Convenience Fee</span><b>₹0.00</b></div>
-            <div className="checkout-price-row"><span className="checkout-lightning">ϟ</span><span>Fast Processing Charge</span><b>₹{schedules[schedule].fee.toFixed(2)}</b></div>
-            <div className="checkout-price-row"><Icon name="tag"/><span>Promo</span><b>₹0.00</b></div>
+          <div className="checkout-summary-heading">
+            <span className="checkout-summary-icon"><Icon name="receipt" /></span>
+            <div>
+              <h2>{t.summaryHeading}</h2>
+              <p>{t.summarySubtitle}</p>
+            </div>
           </div>
-          <div className="checkout-total"><span>₹</span><strong>Total Amount</strong><b>₹{total.toFixed(2)}</b></div>
-          <button type="button" className="checkout-proceed" onClick={() => setPlaced(true)}><span>🛒</span>{placed ? "ORDER READY" : "PROCEED TO CHECKOUT"}<span>›</span></button>
-          {placed && <p className="checkout-order-message" role="status">Your order details are ready. Payment: {payment}.</p>}
-          <div className="checkout-promo-art"><div className="checkout-promo-copy">Fresh<br/>From River<br/>To Your Table</div><Image src="/images/products/product--2.png" alt="Fresh fish" fill sizes="(max-width: 800px) 40vw, 300px"/></div>
+          <form className="checkout-coupon" onSubmit={event => { event.preventDefault(); applyCoupon(); }}>
+            <span>♧</span>
+            <input aria-label={t.couponAria} value={coupon} onChange={event => setCoupon(event.target.value)} placeholder={t.couponPlaceholder}/>
+            <button type="submit">{t.couponApply}</button>
+          </form>
+          {couponMessage && <p className="checkout-coupon-message" role="status">{couponMessage}</p>}
+          <p className="checkout-note">
+            <span>i</span>
+            <span>{t.weightNotice}</span>
+          </p>
+          <div className="checkout-price-rows">
+            <div className="checkout-price-row">
+              <Icon name="box"/>
+              <span>{t.totalItemsRow.replace("{count}", String(itemCount)).replace("{itemWord}", itemCount === 1 ? t.itemWordCapitalSingular : t.itemWordCapitalPlural)}</span>
+              <strong>₹{subtotal.toFixed(2)}</strong>
+            </div>
+            <div className="checkout-price-row"><Icon name="drop"/><span>{t.dressingFee}</span><b>₹0.00</b></div>
+            <div className="checkout-price-row"><Icon name="truck"/><span>{t.deliveryFee}</span><b>₹{deliveryFee.toFixed(2)}</b></div>
+            <div className="checkout-price-row"><Icon name="shield"/><span>{t.convenienceFee}</span><b>₹0.00</b></div>
+            <div className="checkout-price-row"><span className="checkout-lightning">ϟ</span><span>{t.fastProcessingCharge}</span><b>₹{(schedules[schedule]?.fee ?? 0).toFixed(2)}</b></div>
+            <div className="checkout-price-row"><Icon name="tag"/><span>{t.promo}</span><b>₹0.00</b></div>
+          </div>
+          <div className="checkout-total"><span>₹</span><strong>{t.totalAmount}</strong><b>₹{total.toFixed(2)}</b></div>
+          <button type="button" className="checkout-proceed" onClick={() => setPlaced(true)}>
+            <span>🛒</span>
+            {placed ? t.orderReady : t.proceedToCheckout}
+            <span>›</span>
+          </button>
+          {placed && (
+            <p className="checkout-order-message" role="status">
+              {t.orderReadyMessage.replace("{payment}", payment === "Online Payment" ? t.paymentOnline : t.paymentCOD)}
+            </p>
+          )}
+          <div className="checkout-promo-art">
+            <div className="checkout-promo-copy">
+              {t.promoFresh}<br/>{t.promoRiver}<br/>{t.promoTable}
+            </div>
+            <Image src="/images/products/product--2.png" alt={t.promoAlt} fill sizes="(max-width: 800px) 40vw, 300px"/>
+          </div>
         </aside>
       </div>
       {isAddressModalOpen && <Address onClose={() => setIsAddressModalOpen(false)} onSave={saveAddress} />}
