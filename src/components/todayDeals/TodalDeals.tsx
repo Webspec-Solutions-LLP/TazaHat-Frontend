@@ -46,7 +46,7 @@ export default function TodalDeals({ products }: { products?: Product[] }) {
   const text = textMap[language];
   const catalog = catalogMap[language];
   const dealProducts = products ?? catalog.products;
-  const money = new Intl.NumberFormat(catalog.locale, { style: "currency", currency: catalog.currency, maximumFractionDigits: 0 });
+  const money = new Intl.NumberFormat("en-IN", { style: "currency", currency: catalog.currency, maximumFractionDigits: 0 });
   const [remaining, setRemaining] = useState<number | null>(null);
   const [showFloatingTimer, setShowFloatingTimer] = useState(false);
   const [navbarOffset, setNavbarOffset] = useState(72);

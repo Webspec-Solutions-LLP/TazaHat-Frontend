@@ -43,7 +43,7 @@ function CartIcon() {
 export default function WishlistPage() {
   const [currentLang] = useLanguage();
   const t = textMap[currentLang] || englishText;
-  const money = useMemo(() => new Intl.NumberFormat(t.locale, { style: "currency", currency: t.currency, maximumFractionDigits: 0 }), [t.locale, t.currency]);
+  const money = useMemo(() => new Intl.NumberFormat("en-IN", { style: "currency", currency: t.currency, maximumFractionDigits: 0 }), [t.currency]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [variantProduct, setVariantProduct] = useState<Product | null>(null);
   const [variantIndexes, setVariantIndexes] = useState<Record<string, number>>({});

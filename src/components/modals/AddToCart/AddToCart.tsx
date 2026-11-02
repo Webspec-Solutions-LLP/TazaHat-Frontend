@@ -37,7 +37,7 @@ function DetailIcon({ kind }: { kind: string }) {
   </svg>;
 }
 
-export default function AddToCart({ product, locale, currency, saved, onToggleWishlist, onClose, onOpenProduct, onAddToCart, onUpdateCartQuantity }: {
+export default function AddToCart({ product, currency, saved, onToggleWishlist, onClose, onOpenProduct, onAddToCart, onUpdateCartQuantity }: {
   product: Product;
   locale: string;
   currency: string;
@@ -96,12 +96,12 @@ export default function AddToCart({ product, locale, currency, saved, onToggleWi
   const currentImage = galleryImages[Math.min(activeImage, galleryImages.length - 1)] ?? galleryImages[0];
   // hover zoom (lens + preview beside the picture) and tap zoom: the same as the product page
   const { galleryRef, lens, shownSrc, containerProps, imageProps, reset } = useImageZoom<HTMLDivElement>(hasThumbs);
-  const money = new Intl.NumberFormat(locale, { style: "currency", currency, minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  const money = new Intl.NumberFormat("en-IN", { style: "currency", currency, minimumFractionDigits: 0, maximumFractionDigits: 2 });
   const discount = variant.originalPrice > 0 ? Math.round((1 - variant.price / variant.originalPrice) * 100) : 0;
   const selectedPrice = (variant.price + dressingCharge) * quantity;
   const selectedOriginalPrice = (variant.originalPrice + dressingCharge) * quantity;
   const relatedProducts: Product[] = detail ? detail.related.map(cardToProduct) : [];
-  const relatedMoney = new Intl.NumberFormat(locale, { style: "currency", currency, maximumFractionDigits: 0 });
+  const relatedMoney = new Intl.NumberFormat("en-IN", { style: "currency", currency, maximumFractionDigits: 0 });
   const cartItemId = `${product.id}-${variant.label}${dressing ? `-${dressing.id}` : ""}`;
   const isAddedToCart = addedVariantId === cartItemId;
   // opened from a product card there is no cart callback: the navbar, which owns the cart, listens for these events (same as the product page)

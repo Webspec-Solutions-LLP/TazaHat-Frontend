@@ -175,21 +175,25 @@ function Details({ reference }: { reference: string }) {
     <main className="order-details-page">
       <div className="order-details-container">
         <header className="order-details-heading">
-          <div>
-            <p>{text.headingSubtitle}</p>
-            <h1>{order.orderNumber}</h1>
+          <div className="order-details-heading-title">
+            <div className="order-details-heading-meta">
+              <p>{text.headingSubtitle}</p>
+              <span className={`order-details-status order-details-status--${group}`}>
+                <span aria-hidden="true" />
+                {STATUS_TEXT[order.status]}
+              </span>
+            </div>
+            <div className="order-details-heading-main">
+              <h1>{order.orderNumber}</h1>
+              {order.cancelMode && (
+                <span className="order-edit-buttons">
+                  {order.editable && <button type="button" disabled={busy} onClick={() => setPanel(true)}>{text.editOrderBtn}</button>}
+                  {order.editable && <button type="button" className="is-light" disabled={busy} onClick={() => setAdding(true)}>{text.addItemsBtn}</button>}
+                  <button type="button" className="is-danger" disabled={busy} onClick={() => startCancel(null)}>{text.cancelOrderBtn}</button>
+                </span>
+              )}
+            </div>
           </div>
-          <span className={`order-details-status order-details-status--${group}`}>
-            <span aria-hidden="true" />
-            {STATUS_TEXT[order.status]}
-          </span>
-          {order.cancelMode && (
-            <span className="order-edit-buttons">
-              {order.editable && <button type="button" disabled={busy} onClick={() => setPanel(true)}>{text.editOrderBtn}</button>}
-              {order.editable && <button type="button" className="is-light" disabled={busy} onClick={() => setAdding(true)}>{text.addItemsBtn}</button>}
-              <button type="button" className="is-danger" disabled={busy} onClick={() => startCancel(null)}>{text.cancelOrderBtn}</button>
-            </span>
-          )}
         </header>
 
         {notice && <p className={`order-edit-notice is-${notice.tone}`} role="status">{notice.text}</p>}

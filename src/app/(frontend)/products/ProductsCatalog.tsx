@@ -10,11 +10,7 @@ import { useRouter } from "next/navigation";
 import englishText from "./english.json";
 import bengaliText from "./bengali.json";
 import hindiText from "./hindi.json";
-import {
-  LANGUAGE_CHANGE_EVENT,
-  LANGUAGE_STORAGE_KEY,
-  type SupportedLang,
-} from "@/components/navbar/Navbar";
+import { type SupportedLang, useLanguage } from "@/lib/language";
 import AddToCart from "@/components/modals/AddToCart/AddToCart";
 import Variant from "@/components/modals/variant/Variant";
 import type { CartItem } from "@/components/modals/cart/Cart";
@@ -41,38 +37,17 @@ export interface CatalogQueryProps { category?: string; sub?: string; q?: string
 export default function ProductsCatalog({ initial, total, categories, query, cityName }: { initial: Product[]; total: number; categories: ApiFacetCategory[]; query: CatalogQueryProps; cityName: string }) {
   const router = useRouter();
   const [navigating, startNavigation] = useTransition();
-  const [currentLang, setCurrentLang] = useState<SupportedLang>("en");
-
-  useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY) as SupportedLang | null;
-      if (stored === "en" || stored === "bn" || stored === "hi") {
-        setCurrentLang(stored);
-      }
-    } catch {
-      // Use fallback
-    }
-
-    const handleLanguageChange = (event: Event) => {
-      const newLang = (event as CustomEvent<SupportedLang>).detail;
-      if (newLang === "en" || newLang === "bn" || newLang === "hi") {
-        setCurrentLang(newLang);
-      }
-    };
-
-    window.addEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange);
-    return () => window.removeEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange);
-  }, []);
+  const [currentLang] = useLanguage();
 
   const t = textMap[currentLang] || englishText;
 
   const money = useMemo(() => {
-    return new Intl.NumberFormat(t.locale, {
+    return new Intl.NumberFormat("en-IN", {
       style: "currency",
       currency: t.currency,
       maximumFractionDigits: 0,
     });
-  }, [t.locale, t.currency]);
+  }, [t.currency]);
 
   const [items, setItems] = useState(initial);
   const [page, setPage] = useState(1);

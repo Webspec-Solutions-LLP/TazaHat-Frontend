@@ -12,11 +12,7 @@ import { dressingChargeRupees } from "@/lib/cartLine";
 import { cardToProduct, fallbackImage, isRemoteImage, mediaSrc, PLACEHOLDER_IMAGE, shortName, type ApiProductDetail } from "@/lib/api";
 import { readWishlistIds, subscribeToWishlist, toggleWishlistId } from "@/lib/wishlist";
 import { useImageZoom } from "@/lib/useImageZoom";
-import {
-  LANGUAGE_CHANGE_EVENT,
-  LANGUAGE_STORAGE_KEY,
-  type SupportedLang,
-} from "@/components/navbar/Navbar";
+import { type SupportedLang, useLanguage } from "@/lib/language";
 import englishText from "./english.json";
 import bengaliText from "./bengali.json";
 import hindiText from "./hindi.json";
@@ -48,29 +44,10 @@ const plainText = (html: string | null | undefined) => (html ?? "").replace(/<[^
 
 /** One product for the visitor's city: packs, prices and cutting options come from the API. */
 export default function ProductDetailView({ detail }: { detail: ApiProductDetail }) {
-  const [currentLang, setCurrentLang] = useState<SupportedLang>("en");
-  useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY) as SupportedLang | null;
-      if (stored === "en" || stored === "bn" || stored === "hi") {
-        setCurrentLang(stored);
-      }
-    } catch {
-      // Use fallback
-    }
-
-    const handleLanguageChange = (event: Event) => {
-      const newLang = (event as CustomEvent<SupportedLang>).detail;
-      if (newLang && (newLang === "en" || newLang === "bn" || newLang === "hi")) {
-        setCurrentLang(newLang);
-      }
-    };
-    window.addEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange);
-    return () => window.removeEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange);
-  }, []);
+  const [currentLang] = useLanguage();
 
   const t = textMap[currentLang] || englishText;
-  const money = new Intl.NumberFormat(t.locale, { style: "currency", currency: t.currency, maximumFractionDigits: 0 });
+  const money = new Intl.NumberFormat("en-IN", { style: "currency", currency: t.currency, maximumFractionDigits: 0 });
 
   const isFish = /fish|seafood/i.test(detail.category.slug + detail.category.name);
   const trustItems = isFish ? t.fishTrust : t.generalTrust;

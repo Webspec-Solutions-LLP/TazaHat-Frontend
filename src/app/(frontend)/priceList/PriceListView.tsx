@@ -16,7 +16,7 @@ export interface PriceRow { id: string; name: string; image: string; price: numb
 /** A category (or "Offers") with its products; `total` is how many the category has in all, `slug` its address on the products page. */
 export interface PriceGroup { id: string; name: string; image: string | null; slug: string | null; total: number; rows: PriceRow[] }
 
-const money = new Intl.NumberFormat(text.locale, { style: "currency", currency: text.currency, maximumFractionDigits: 0 });
+const money = new Intl.NumberFormat("en-IN", { style: "currency", currency: text.currency, maximumFractionDigits: 0 });
 
 function Icon({ kind }: { kind: string }) {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

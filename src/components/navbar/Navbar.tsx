@@ -382,10 +382,10 @@ export default function Navbar({
         {/* Left: Brand and delivery location */}
         <div className="navbar-brand">
           <div className="navbar-brand-stack">
-            <Link href="/" className="navbar-logo-link" aria-label="TazaHaat Home">
+            <Link href="/" className="navbar-logo-link" aria-label={t.homeAria}>
               <Image
-                src="/images/logo.webp"
-                alt="TazaHaat Logo"
+                src={t.logoSrc}
+                alt={t.logoAlt}
                 width={38}
                 height={38}
                 sizes="38px"
@@ -394,7 +394,7 @@ export default function Navbar({
               />
             </Link>
             <div className="navbar-brand-details">
-              <Link href="/" className="navbar-brand-name-link" aria-label="TazaHaat Home">
+              <Link href="/" className="navbar-brand-name-link" aria-label={t.homeAria}>
                 <span className="navbar-brand-name">{t.brandName}<span>{t.brandNameHighlight}</span></span>
               </Link>
               <button type="button" className="navbar-location" aria-label={t.deliverTo} onClick={() => setIsLocationOpen(true)}>

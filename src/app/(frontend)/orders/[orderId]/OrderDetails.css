@@ -1,11 +1,13 @@
 /* order details: compact. Summary and the estimated / final table sit beside the products on wide screens. */
 .order-details-page { min-height: 65vh; padding: 14px 0 32px; color: #183a57; background: #f5f8fb; font-family: "Poppins", "Segoe UI", Arial, sans-serif; }
 .order-details-container { box-sizing: border-box; width: calc(100% - 32px); max-width: 1320px; margin: 0 auto; }
-.order-details-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin-bottom: 8px; padding: 10px 14px; border: 1px solid #e5ecf2; border-radius: 9px; background: #fff; }
-.order-details-heading > div { margin-right: auto; }
+.order-details-heading { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin-bottom: 8px; padding: 10px 14px; border: 1px solid #e5ecf2; border-radius: 9px; background: #fff; }
+.order-details-heading-title { flex: 1 1 auto; min-width: 0; margin-right: auto; }
+.order-details-heading-meta { display: flex; align-items: center; }
 .order-details-heading p { margin: 0; color: #8493a1; font-size: 11px; }
-.order-details-heading h1 { margin: 0; color: #123b6d; font-size: 20px; font-weight: 800; line-height: 1.2; }
+.order-details-heading-main h1 { margin: 0; color: #123b6d; font-size: 20px; font-weight: 800; line-height: 1.2; }
 .order-details-status { display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.order-details-heading > .order-details-heading-title .order-details-status { position: absolute; top: 50%; right: 14px; transform: translateY(-50%); }
 .order-details-status > span { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 .order-details-status--upcoming { color: #a96808; background: #fff5df; }
 .order-details-status--complete { color: #21804d; background: #e8f7ef; }
@@ -90,4 +92,28 @@
   .order-product-image { width: 48px; }
   .order-product-status { grid-column: 2 / -1; justify-self: start; }
   .order-product-amounts { grid-column: 3; grid-row: 1; }
+}
+@media (max-width: 600px) {
+  .order-details-heading { display: block; padding: 9px 10px; }
+  .order-details-heading-title { margin: 0; }
+  .order-details-heading-meta { justify-content: flex-start; gap: 8px; }
+  .order-details-heading > .order-details-heading-title .order-details-status { position: static; transform: none; padding: 4px 9px; font-size: 11px; }
+  .order-details-heading-main { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 5px; }
+  .order-details-heading-main h1 { flex: 0 0 auto; font-size: 19px; }
+  .order-edit-buttons { min-width: 0; flex-wrap: nowrap; }
+  .order-edit-buttons button { padding: 6px 8px; font-size: 11px; white-space: nowrap; }
+}
+@media (max-width: 450px) {
+  .order-details-heading { padding: 7px 8px; }
+  .order-details-heading-meta { gap: 5px; }
+  .order-details-heading > .order-details-heading-title .order-details-status { gap: 3px; padding: 3px 5px; font-size: 9px; }
+  .order-details-heading > .order-details-heading-title .order-details-status > span { width: 5px; height: 5px; }
+  .order-details-heading-main { gap: 5px; margin-top: 6px; }
+  .order-details-heading-main h1 { font-size: 14px; font-weight: 700; }
+  .order-edit-buttons { flex: 0 1 auto; justify-content: flex-end; gap: 4px; }
+  .order-edit-buttons button { flex: 0 1 auto; min-width: 0; padding: 4px 6px; font-size: 9px; line-height: 1.15; white-space: normal; }
+  .order-side { gap: 6px; }
+  .order-summary h2 { font-weight: 700; }
+  .order-amounts tfoot .is-total th,
+  .order-amounts tfoot .is-total td { font-weight: 700; }
 }

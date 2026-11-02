@@ -106,7 +106,7 @@ function FlameBadge({ label }: { label: string }) {
 export default function OfferLayout4({ products, tabs }: { products?: CatalogProduct[]; tabs?: StealTab[] }) {
   const [language] = useLanguage();
   const text = textMap[language];
-  const money = new Intl.NumberFormat(text.locale, {
+  const money = new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: text.currency,
     maximumFractionDigits: 0,

@@ -49,7 +49,7 @@ interface VariantProps {
 }
 
 export default function Variant({ product, currency, onClose, onGoToCart, cityId }: VariantProps) {
-  const { lang } = useLanguage();
+  const [lang] = useLanguage();
   const t = textMap[lang] || englishText;
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeTimer = useRef<number | null>(null);
@@ -159,7 +159,7 @@ export default function Variant({ product, currency, onClose, onGoToCart, cityId
               <div className={`variant-choice${selectedIndex === index ? " is-selected" : ""}`} key={`${product.id}-${variant.label}`} onClick={() => setSelectedIndex(index)}>
                 <label className="variant-option">
                   <input type="radio" name={`variant-${product.id}`} checked={selectedIndex === index} onChange={() => setSelectedIndex(index)} />
-                  <span className="variant-option-copy"><strong>{variant.label}</strong>{packStatus(variant) === "soon" ? <small>{t.fromLabel.replace("{date}", variant.availableFromLabel)}</small> : packStatus(variant) === "out" && <small>{t.outOfStock}</small>}</span>
+                  <span className="variant-option-copy"><strong>{variant.label}</strong>{packStatus(variant) === "soon" && variant.availableFromLabel ? <small>{t.fromLabel.replace("{date}", variant.availableFromLabel)}</small> : packStatus(variant) === "out" && <small>{t.outOfStock}</small>}</span>
                 </label>
                 {selectedIndex === index && packStatus(variant) === "ok" && <div className="variant-choice-quantity">
                   <div className="variant-quantity" role="group" aria-label={t.quantityForVariantAria.replace("{label}", variant.label)}>
