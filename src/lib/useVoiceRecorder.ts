@@ -13,6 +13,8 @@ export const MAX_VOICE_SECONDS = 60;
 
 export interface VoiceResult { blob: Blob; seconds: number; transcript: string; mime: string; /** loudness along the recording: 40 numbers, 0-100 (the bars of the voice message) */ waveform: number[] }
 export const WAVE_BARS = 40;
+const VOICE_BITRATE = 32_000;
+const PIECE_BYTES = 64 * 1024;
 
 /** any number of loudness samples -> WAVE_BARS bars: the loudest part is full height, quiet parts stay visible */
 export function toBars(samples: number[], bars = WAVE_BARS): number[] {
@@ -100,10 +102,10 @@ export function useVoiceRecorder(language = "en", onLimit?: (r: VoiceResult) => 
     setError("");
     if (!voiceSupported()) { setError("Voice messages are not supported in this browser."); return false; }
     try {
-      const s = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+      const s = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, channelCount: 1 } });
       stream.current = s;
       const mime = MIMES.find((m) => MediaRecorder.isTypeSupported(m));
-      const r = new MediaRecorder(s, mime ? { mimeType: mime } : undefined);
+      const r = new MediaRecorder(s, { ...(mime ? { mimeType: mime } : {}), audioBitsPerSecond: VOICE_BITRATE }) // mono speech at 32 kbit/s: clear, about 240 KB a minute;
       chunks.current = []; said.current = ""; keep.current = true; samples.current = []; setLive([]);
       // how loud it is, 12 times a second: the bars of the message (and the moving bars while recording)
       try {
@@ -174,10 +176,31 @@ export function useVoiceRecorder(language = "en", onLimit?: (r: VoiceResult) => 
 
 /** uploads a picture or a recording of the chat; returns the address to put on the message */
 export async function uploadChatMedia(kind: "image" | "voice", blob: Blob, endpoint = "/api/chat-upload"): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
+  const type = (blob.type || (kind === "image" ? "image/jpeg" : "audio/mp4")).split(";")[0];
+  const read = async (res: Response) => (await res.json().catch(() => null)) as { status?: string; message?: string; data?: { url?: string } } | null;
   try {
-    const res = await fetch(`${endpoint}?kind=${kind}`, { method: "POST", headers: { "content-type": (blob.type || (kind === "image" ? "image/jpeg" : "audio/mp4")).split(";")[0] }, body: blob });
-    const json = (await res.json().catch(() => null)) as { status?: string; message?: string; data?: { url: string } } | null;
-    if (!res.ok || json?.status !== "success" || !json.data) return { ok: false, error: json?.message ?? "The upload failed. Please try again." };
+    if (kind === "voice") {
+      // a recording goes up in small pieces; a piece that fails is sent again (up to 3 times), the ones already there are kept
+      const uid = crypto.randomUUID(), total = Math.max(1, Math.ceil(blob.size / PIECE_BYTES));
+      let last: { status?: string; message?: string; data?: { url?: string } } | null = null;
+      for (let i = 0; i < total; i++) {
+        let sent = false;
+        for (let attempt = 0; attempt < 3 && !sent; attempt++) {
+          try {
+            const res = await fetch(`${endpoint}?kind=voice&uid=${uid}&index=${i}&total=${total}`, { method: "POST", headers: { "content-type": type }, body: blob.slice(i * PIECE_BYTES, (i + 1) * PIECE_BYTES, type) });
+            last = await read(res);
+            if (res.ok && last?.status === "success") sent = true;
+            else if (res.status >= 400 && res.status < 500 && res.status !== 429) return { ok: false, error: last?.message ?? "The upload failed. Please try again." };
+          } catch { /* connection dropped: try this piece again */ }
+          if (!sent) await new Promise((r) => setTimeout(r, 500 * (attempt + 1)));
+        }
+        if (!sent) return { ok: false, error: "No connection. Please try again." };
+      }
+      return last?.data?.url ? { ok: true, url: last.data.url } : { ok: false, error: "The upload failed. Please try again." };
+    }
+    const res = await fetch(`${endpoint}?kind=${kind}`, { method: "POST", headers: { "content-type": type }, body: blob });
+    const json = await read(res);
+    if (!res.ok || json?.status !== "success" || !json.data?.url) return { ok: false, error: json?.message ?? "The upload failed. Please try again." };
     return { ok: true, url: json.data.url };
   } catch {
     return { ok: false, error: "No connection. Please try again." };
