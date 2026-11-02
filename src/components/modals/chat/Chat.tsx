@@ -126,6 +126,24 @@ export default function Chat({ onClose, product, requestCloseRef }: ChatProps) {
     if (stickToEnd.current) el.scrollTop = el.scrollHeight;
   }, [rows, supportTyping, state]);
 
+  const scrollEnd = useCallback(() => { const el = scroller.current; if (el && stickToEnd.current) el.scrollTop = el.scrollHeight; }, []);
+  // opened: land on the newest message (and stay there while pictures load and change the height)
+  useEffect(() => {
+    if (state !== "ready") return;
+    stickToEnd.current = true;
+    scrollEnd();
+    const timers = [60, 250, 700].map((ms) => setTimeout(scrollEnd, ms));
+    return () => timers.forEach(clearTimeout);
+  }, [state, scrollEnd]);
+  // the chat is being read now: the notification of its messages (one per conversation) is taken away
+  useEffect(() => {
+    const clear = async () => { try { const reg = await navigator.serviceWorker?.getRegistration(); (await reg?.getNotifications())?.forEach((n) => { if (/^chat-/.test(n.tag)) n.close(); }); } catch { /* no service worker */ } };
+    void clear();
+    const onChat = (e: Event) => { const d = (e as CustomEvent<{ kind: string }>).detail; if (d.kind === "message") void clear(); };
+    window.addEventListener("tazahat:chat", onChat);
+    return () => window.removeEventListener("tazahat:chat", onChat);
+  }, []);
+
   const loadOlder = useCallback(async () => {
     const first = rowsRef.current.find((r) => !r.state);
     if (older.current || !hasMore || !first) return;
@@ -245,7 +263,7 @@ export default function Chat({ onClose, product, requestCloseRef }: ChatProps) {
                   <article id={`chat-message-${m.id}`} className={`chat-message chat-message--${mine ? "customer" : "team"}${m.state === "failed" ? " is-failed" : ""}`}>
                     {!mine && <span className="chat-message-author">TazaHat Support</span>}
                     {m.legacyMedia && <div className="chat-media-missing"><span aria-hidden="true">{m.legacyMedia === "image" ? "📷" : m.legacyMedia === "voice" ? "🎤" : m.legacyMedia === "video" ? "🎥" : "📎"}</span><span>{m.legacyMedia === "image" ? "Photo" : m.legacyMedia === "voice" ? "Voice message" : m.legacyMedia === "video" ? "Video" : "Document"} is no longer available</span></div>}
-                    {m.imageUrl && <button type="button" className="chat-photo" onClick={() => setLightbox(m.imageUrl)} aria-label="Open photo">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={m.imageUrl} alt="Photo in chat" loading="lazy" /></button>}
+                    {m.imageUrl && <button type="button" className="chat-photo" onClick={() => setLightbox(m.imageUrl)} aria-label="Open photo">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={m.imageUrl} alt="Photo in chat" loading="lazy" onLoad={scrollEnd} /></button>}
                     {m.voiceUrl && <VoiceBubble src={m.voiceUrl} seconds={m.voiceSeconds ?? 1} transcript={m.transcript} waveform={m.waveform} />}
                     {m.text && <p>{m.text}</p>}
                     <time>
