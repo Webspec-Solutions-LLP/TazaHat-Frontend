@@ -77,7 +77,7 @@ export default function Location({ onClose }: LocationProps) {
       .then((g) => {
         if (cancelled || !mapElementRef.current) return;
         const map = new g.maps.Map(mapElementRef.current, {
-          center: INDIA_CENTER, zoom: 11, disableDefaultUI: true, zoomControl: true, gestureHandling: "greedy", clickableIcons: false,
+          center: INDIA_CENTER, zoom: 11, disableDefaultUI: true, zoomControl: true, zoomControlOptions: { position: g.maps.ControlPosition.RIGHT_CENTER }, gestureHandling: "greedy", clickableIcons: false,
         });
         const marker = new g.maps.Marker({ map, position: INDIA_CENTER, draggable: true, title: "Drag to choose your delivery location" });
         marker.addListener("dragend", () => { const p = marker.getPosition(); if (p) void pick(p.toJSON()); });
@@ -232,8 +232,11 @@ export default function Location({ onClose }: LocationProps) {
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
                   <input ref={searchInputRef} placeholder="Search area, street or landmark" aria-label="Search area, street or landmark" />
                 </label>
-                <button type="button" className="location-map-locate" onClick={() => void detectLocation()} disabled={busy}>Use my current location</button>
               </div>
+              {/* "use my current location": an icon above the zoom buttons (both sit mid-height on the right, clear of the address caption) */}
+              <button type="button" className="location-map-locate" onClick={() => void detectLocation()} disabled={busy} aria-label="Use my current location" title="Use my current location">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3.2M12 18.8V22M2 12h3.2M18.8 12H22"/><circle cx="12" cy="12" r="7.4"/></svg>
+              </button>
               <span className="location-map-caption">{busy ? "Checking this location…" : verdict?.serviceable ? `Delivery area · ${verdict.city.name}${verdict.pincode ? `, ${verdict.pincode}` : ""}` : "Drag the pin to your address"}</span>
             </div>
           </section>
