@@ -516,3 +516,20 @@
   .chat-composer { padding: 8px 9px max(8px, env(safe-area-inset-bottom)); }
 }
 .chat-product-tag > svg { width: 17px; height: 17px; flex: 0 0 17px; color: #0878d1; }
+
+/* real chat: login gate, history loading, ticks, retry */
+.chat-gate { display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 24px 22px; text-align: center; color: #3b4f46; }
+.chat-gate strong { font-size: 15px; color: #14385c; }
+.chat-gate p { margin: 0; font-size: 12px; line-height: 1.5; color: #5d6f66; }
+.chat-gate-icon { display: grid; width: 52px; height: 52px; place-items: center; border-radius: 50%; background: #e6f1fb; color: #0756a2; }
+.chat-gate-icon svg { width: 26px; height: 26px; }
+.chat-gate-button { margin-top: 6px; padding: 10px 28px; border: 0; border-radius: 10px; background: linear-gradient(135deg, #0878d1, #00549e); color: #fff; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.chat-gate-button:disabled { opacity: .6; cursor: default; }
+.chat-older { align-self: center; padding: 6px 10px; color: #778477; font-size: 10px; }
+.chat-empty { display: flex; flex-direction: column; align-items: center; gap: 4px; margin: auto; padding: 20px; text-align: center; color: #5d6f66; font-size: 12px; }
+.chat-empty strong { color: #14385c; font-size: 14px; }
+.chat-message time { display: inline-flex; align-items: center; gap: 4px; }
+.chat-tick { color: #87918a; font-size: 10px; letter-spacing: -2px; }
+.chat-tick.is-read { color: #1c8ef0; }
+.chat-message.is-failed { opacity: .75; border-color: #f0b3ae; }
+.chat-retry { border: 0; background: none; color: #c0392b; font: inherit; font-size: 9px; font-weight: 700; text-align: right; cursor: pointer; text-decoration: underline; }

@@ -2,489 +2,228 @@
 
 import { useBackClose } from "@/lib/backLayers";
 
-import Image from "next/image";
-import Link from "next/link";
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type FormEvent, type PointerEvent } from "react";
-import productCatalog from "@/components/products/english.json";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
 import "./Chat.css";
-import { fallbackImage, isRemoteImage } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
+import { chatOlderAction, chatOpenAction, chatReadAction, chatSendAction, chatTypingAction, type ChatMsg } from "@/app/chat-actions";
 
-type OrderLine = {
-  id: string;
-  name: string;
-  image: string;
-  quantity: number;
-  price: number;
-  weight: string;
-};
-
-type ChatMessage = {
-  id: string;
-  sender: "customer" | "team" | "ai";
-  author: string;
-  text: string;
-  time: string;
-  image?: string;
-  replyTo?: { author: string; text: string; image?: string };
-  order?: OrderLine[];
-  orderStatus?: "placed" | "cancelled";
-  product?: Pick<(typeof productCatalog.products)[number], "id" | "name" | "image">;
-};
-
-const initialMessages: ChatMessage[] = [
-  {
-    id: "welcome",
-    sender: "ai",
-    author: "TazaHat AI",
-    text: "Hi! I’m TazaHat’s virtual assistant. Ask me about delivery, payments, or products. You can also try “order Rohu Fish x2”.",
-    time: "Now",
-  },
-];
-
-const productCatalogItems = productCatalog.products;
-
-function currentTime() {
-  return new Intl.DateTimeFormat("en-IN", {
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(new Date());
-}
-
-function getOrderLines(text: string): OrderLine[] {
-  const normalizedText = text.toLowerCase();
-  const quantityMatch = normalizedText.match(
-    /(?:\bx\s*|\bqty\s*|\bquantity\s*)(\d+)|\b(\d+)\s*(?:kg|g|packs?|pieces?|pcs|items?)\b/i
-  );
-  const quantity = Math.min(20, Math.max(1, Number(quantityMatch?.[1] ?? quantityMatch?.[2] ?? 1)));
-
-  return productCatalogItems
-    .filter((product) =>
-      normalizedText.includes(product.name.toLowerCase()) ||
-      normalizedText.includes(product.id.toLowerCase())
-    )
-    .map((product) => ({
-      id: product.id,
-      name: product.name,
-      image: product.image,
-      quantity,
-      price: product.price,
-      weight: product.weight,
-    }));
-}
-
-function createReply(text: string, activeOrder: boolean): Omit<ChatMessage, "id" | "time"> & { cancelOrder?: boolean } {
-  const lowerText = text.toLowerCase();
-
-  if (/\b(cancel|cancellation|stop)\b/.test(lowerText)) {
-    return {
-      sender: "ai",
-      author: "TazaHat AI",
-      text: activeOrder
-        ? "Your demo order has been cancelled. No real order was placed."
-        : "There isn’t an active demo order to cancel. You can still ask me about a product order.",
-      cancelOrder: activeOrder,
-    };
-  }
-
-  if (/\b(refund|complaint|damaged|spoiled|human|agent|team member|talk to support|speak to someone)\b/.test(lowerText)) {
-    return {
-      sender: "team",
-      author: "Priya · Support team",
-      text: "Hi! I’m Priya from the support team. I’ve received your message and will help review it. Please don’t share passwords or payment details here.",
-    };
-  }
-
-  const orderLines = getOrderLines(text);
-  if (orderLines.length > 0 && /\b(order|buy|add|get|want|need)\b/.test(lowerText)) {
-    return {
-      sender: "ai",
-      author: "TazaHat AI",
-      text: "Here’s your demo order summary. Please note that nothing has been purchased.",
-      order: orderLines,
-      orderStatus: "placed",
-    };
-  }
-
-  if (/\b(order|buy|add|get|want|need)\b/.test(lowerText)) {
-    return {
-      sender: "ai",
-      author: "TazaHat AI",
-      text: "Which product would you like? Send a catalog item name, for example “order Rohu Fish - Fresh x2”.",
-    };
-  }
-
-  if (/\b(delivery|deliver|shipping|pickup|pick up)\b/.test(lowerText)) {
-    return {
-      sender: "ai",
-      author: "TazaHat AI",
-      text: "You can book a pickup and check delivery details on the Delivery Service page. For an existing order, open My Orders to check its latest status.",
-    };
-  }
-
-  if (/\b(payment|pay|cash|online)\b/.test(lowerText)) {
-    return {
-      sender: "ai",
-      author: "TazaHat AI",
-      text: "Payment options depend on the order. The available methods will be shown at checkout. For payment issues, type “talk to support” and a team member will reply.",
-    };
-  }
-
-  if (/\b(track|status|where is|arrive)\b/.test(lowerText)) {
-    return {
-      sender: "ai",
-      author: "TazaHat AI",
-      text: "For live order status, please open My Orders. This preview chat doesn’t have access to real order or delivery data.",
-    };
-  }
-
-  return {
-    sender: "ai",
-    author: "TazaHat AI",
-    text: "I can help with product orders, cancellations, delivery, and payment questions. For a person, type “talk to support”.",
-  };
-}
-
-type ChatProduct = Pick<(typeof productCatalog.products)[number], "id" | "name" | "image">;
+/** a message on screen: the saved one, or one still being sent / that failed (kept with its own id so a retry never duplicates it) */
+type Row = ChatMsg & { state?: "sending" | "failed" };
 
 export interface ChatProps {
   onClose: () => void;
-  product?: ChatProduct;
+  /** opened from a product page: the question starts with the product's name */
+  product?: { id: string; name: string; image?: string };
   requestCloseRef?: { current: (() => void) | null };
 }
 
+const timeOf = (iso: string) => new Intl.DateTimeFormat("en-IN", { hour: "numeric", minute: "2-digit", timeZone: "Asia/Kolkata" }).format(new Date(iso));
+const dayKey = (iso: string) => new Date(iso).toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+function dayLabel(iso: string) {
+  const key = dayKey(iso);
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+  const yesterday = new Date(Date.now() - 86_400_000).toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+  if (key === today) return "Today";
+  if (key === yesterday) return "Yesterday";
+  return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Kolkata" });
+}
+const newId = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `c${Date.now()}${Math.random().toString(36).slice(2, 8)}`);
+
+/** WhatsApp-style support chat: signed-in customers only, the last 20 messages first, 10 more each time you scroll up, live replies, ticks and "typing...". */
 export default function Chat({ onClose, product, requestCloseRef }: ChatProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>(() => product ? [
-    { id: "product-question", sender: "ai", author: "TazaHat Assistant", text: `Hi! What would you like to know about ${product.name}? Ask me about its freshness, size, or how to prepare it.`, time: "Now", product },
-  ] : initialMessages);
-  const [message, setMessage] = useState("");
-  const [attachment, setAttachment] = useState<{ name: string; dataUrl: string } | null>(null);
-  const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null);
-  const [openMessageMenuId, setOpenMessageMenuId] = useState<string | null>(null);
-  const [pinnedMessageId, setPinnedMessageId] = useState<string | null>(null);
-  const [swipingMessageId, setSwipingMessageId] = useState<string | null>(null);
-  const [swipeOffset, setSwipeOffset] = useState(0);
-  const [attachmentError, setAttachmentError] = useState("");
-  const [isReplying, setIsReplying] = useState(false);
-  const [isTicketPromptOpen, setIsTicketPromptOpen] = useState(false);
+  const { user, ready, openLogin } = useAuth();
+  const [rows, setRows] = useState<Row[]>([]);
+  const [hasMore, setHasMore] = useState(false);
+  const [state, setState] = useState<"loading" | "ready" | "error">("loading");
+  const [loadingOlder, setLoadingOlder] = useState(false);
+  const [message, setMessage] = useState(() => (product ? `Hi, I have a question about ${product.name}: ` : ""));
+  const [supportTyping, setSupportTyping] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const messageInputRef = useRef<HTMLInputElement>(null);
-  const imageInputRef = useRef<HTMLInputElement>(null);
-  const messagePointerStartRef = useRef<{ x: number; y: number; messageId: string } | null>(null);
-  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const replyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scroller = useRef<HTMLDivElement>(null);
+  const input = useRef<HTMLInputElement>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastTypingSent = useRef(0);
+  const stickToEnd = useRef(true);
+  const prependFrom = useRef<number | null>(null);
+  const older = useRef(false);
+  const rowsRef = useRef<Row[]>([]);
+  rowsRef.current = rows;
 
   const closeChat = useCallback(() => {
     if (isClosing) return;
     setIsClosing(true);
-    closeTimerRef.current = setTimeout(onClose, 380);
+    closeTimer.current = setTimeout(onClose, 380);
   }, [isClosing, onClose]);
   useBackClose(closeChat);
-
   useEffect(() => {
-    if (requestCloseRef) {
-      requestCloseRef.current = closeChat;
-      return () => {
-        requestCloseRef.current = null;
-      };
-    }
+    if (requestCloseRef) { requestCloseRef.current = closeChat; return () => { requestCloseRef.current = null; }; }
   }, [closeChat, requestCloseRef]);
-
   useEffect(() => {
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") closeChat();
-    };
-    document.addEventListener("keydown", closeOnEscape);
-    return () => document.removeEventListener("keydown", closeOnEscape);
+    const esc = (e: KeyboardEvent) => { if (e.key === "Escape") closeChat(); };
+    document.addEventListener("keydown", esc);
+    return () => document.removeEventListener("keydown", esc);
   }, [closeChat]);
+  useEffect(() => () => { if (closeTimer.current) clearTimeout(closeTimer.current); if (typingTimer.current) clearTimeout(typingTimer.current); }, []);
 
+  // open: the latest 20 messages, then tell support they were read
+  const open = useCallback(async () => {
+    setState("loading");
+    const res = await chatOpenAction();
+    if (!res.ok) { setState("error"); return; }
+    setRows(res.data.messages);
+    setHasMore(res.data.hasMore);
+    stickToEnd.current = true;
+    setState("ready");
+    if (res.data.unread > 0) void chatReadAction();
+  }, []);
+  useEffect(() => { if (user) void open(); }, [user, open]);
+
+  // live: a reply, a read receipt, "typing..." (the page's own realtime link passes them on as one window event)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages, isReplying]);
-
-  useEffect(
-    () => () => {
-      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
-      if (replyTimerRef.current) clearTimeout(replyTimerRef.current);
-    },
-    []
-  );
-
-  const sendMessage = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const trimmed = message.trim();
-    if ((!trimmed && !attachment) || isReplying || isClosing) return;
-
-    const hasActiveOrder = messages.some((item) => item.orderStatus === "placed");
-    const reply = createReply(trimmed || "shared an image", hasActiveOrder);
-    const timestamp = Date.now();
-    const sentAttachment = attachment;
-    const sentReply = replyingTo;
-
-    setMessages((current) => [
-      ...current,
-      {
-        id: `customer-${timestamp}`,
-        sender: "customer",
-        author: "You",
-        text: trimmed,
-        ...(sentAttachment ? { image: sentAttachment.dataUrl } : {}),
-        ...(sentReply ? { replyTo: { author: sentReply.author, text: sentReply.text, ...(sentReply.image ? { image: sentReply.image } : {}) } } : {}),
-        time: currentTime(),
-      },
-    ]);
-    setMessage("");
-    setAttachment(null);
-    setReplyingTo(null);
-    setAttachmentError("");
-    setIsReplying(true);
-
-    replyTimerRef.current = setTimeout(() => {
-      setMessages((current) => [
-        ...current.map((item) =>
-          reply.cancelOrder && item.orderStatus === "placed"
-            ? { ...item, orderStatus: "cancelled" as const }
-            : item
-        ),
-        {
-          id: `reply-${timestamp}`,
-          sender: reply.sender,
-          author: reply.author,
-          text: reply.text,
-          time: currentTime(),
-          ...(reply.order ? { order: reply.order, orderStatus: reply.orderStatus } : {}),
-        },
-      ]);
-      setIsReplying(false);
-    }, 750);
-  };
-
-  const pickImage = (file?: File) => {
-    if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      setAttachmentError("Choose an image file.");
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      setAttachmentError("Choose an image smaller than 5 MB.");
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === "string") {
-        setAttachment({ name: file.name, dataUrl: reader.result });
-        setAttachmentError("");
+    const onChat = (e: Event) => {
+      const d = (e as CustomEvent<{ kind: string; message?: ChatMsg; by?: string; on?: boolean; at?: string }>).detail;
+      if (d.kind === "message" && d.message) {
+        const m = d.message;
+        setRows((cur) => (cur.some((r) => r.id === m.id || (m.clientId && r.clientId === m.clientId)) ? cur.map((r) => (r.clientId && r.clientId === m.clientId ? m : r)) : [...cur, m]));
+        if (m.fromSupport) { setSupportTyping(false); if (document.visibilityState === "visible") void chatReadAction(); }
+      } else if (d.kind === "read" && d.by === "support" && d.at) {
+        const at = d.at;
+        setRows((cur) => cur.map((r) => (!r.fromSupport && !r.readAt ? { ...r, readAt: at } : r)));
+      } else if (d.kind === "typing" && d.by === "support") {
+        setSupportTyping(!!d.on);
+        if (typingTimer.current) clearTimeout(typingTimer.current);
+        if (d.on) typingTimer.current = setTimeout(() => setSupportTyping(false), 6000);
       }
     };
-    reader.onerror = () => setAttachmentError("Could not read this image. Try another one.");
-    reader.readAsDataURL(file);
+    window.addEventListener("tazahat:chat", onChat);
+    return () => window.removeEventListener("tazahat:chat", onChat);
+  }, []);
+
+  // scrolling: stay at the bottom for new messages; at the top, 10 older ones load and the view does not jump
+  useLayoutEffect(() => {
+    const el = scroller.current;
+    if (!el) return;
+    if (prependFrom.current !== null) { el.scrollTop = el.scrollHeight - prependFrom.current; prependFrom.current = null; return; }
+    if (stickToEnd.current) el.scrollTop = el.scrollHeight;
+  }, [rows, supportTyping, state]);
+
+  const loadOlder = useCallback(async () => {
+    const first = rowsRef.current.find((r) => !r.state);
+    if (older.current || !hasMore || !first) return;
+    older.current = true;
+    setLoadingOlder(true);
+    const res = await chatOlderAction({ createdAt: first.createdAt, id: first.id });
+    older.current = false;
+    setLoadingOlder(false);
+    if (!res.ok) return;
+    const el = scroller.current;
+    prependFrom.current = el ? el.scrollHeight - el.scrollTop : null;
+    stickToEnd.current = false;
+    setRows((cur) => [...res.data.messages.filter((m) => !cur.some((r) => r.id === m.id)), ...cur]);
+    setHasMore(res.data.hasMore);
+  }, [hasMore]);
+
+  const onScroll = () => {
+    const el = scroller.current;
+    if (!el) return;
+    stickToEnd.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+    if (el.scrollTop < 60) void loadOlder();
   };
 
-  const startReply = (chatMessage: ChatMessage) => {
-    setReplyingTo(chatMessage);
-    setOpenMessageMenuId(null);
-    messageInputRef.current?.focus();
+  const send = async (text: string, clientId = newId(), retry = false) => {
+    const now = new Date().toISOString();
+    if (!retry) setRows((cur) => [...cur, { id: `local-${clientId}`, threadId: "", text, fromSupport: false, createdAt: now, readAt: null, clientId, imageUrl: null, state: "sending" }]);
+    else setRows((cur) => cur.map((r) => (r.clientId === clientId ? { ...r, state: "sending" } : r)));
+    stickToEnd.current = true;
+    const res = await chatSendAction(text, clientId);
+    setRows((cur) => {
+      if (!res.ok) return cur.map((r) => (r.clientId === clientId ? { ...r, state: "failed" } : r));
+      const real = res.data;
+      // the live copy may already have arrived: keep one
+      const withoutLive = cur.filter((r) => !(r.id === real.id && r.clientId !== clientId));
+      return withoutLive.map((r) => (r.clientId === clientId ? real : r));
+    });
   };
 
-  const togglePin = (chatMessage: ChatMessage) => {
-    setPinnedMessageId((current) => current === chatMessage.id ? null : chatMessage.id);
-    setOpenMessageMenuId(null);
+  const submit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const text = message.trim();
+    if (!text || isClosing) return;
+    setMessage("");
+    void chatTypingAction(false);
+    void send(text);
+    input.current?.focus();
   };
 
-  const startMessageSwipe = (chatMessage: ChatMessage, event: PointerEvent<HTMLElement>) => {
-    if (event.button !== 0) return;
-    const target = event.target;
-    if (target instanceof Element && target.closest("button, a, input")) return;
-    messagePointerStartRef.current = { x: event.clientX, y: event.clientY, messageId: chatMessage.id };
-    setSwipingMessageId(chatMessage.id);
-    setSwipeOffset(0);
-    event.currentTarget.setPointerCapture(event.pointerId);
+  const onType = (value: string) => {
+    setMessage(value);
+    const now = Date.now();
+    if (value.trim() && now - lastTypingSent.current > 2500) { lastTypingSent.current = now; void chatTypingAction(true); }
   };
 
-  const moveMessageSwipe = (event: PointerEvent<HTMLElement>) => {
-    const start = messagePointerStartRef.current;
-    if (!start) return;
-    const deltaX = event.clientX - start.x;
-    const deltaY = event.clientY - start.y;
-    if (deltaX > 0 && Math.abs(deltaX) > Math.abs(deltaY) * 1.1) setSwipeOffset(Math.min(deltaX, 72));
-  };
-
-  const finishMessageSwipe = (chatMessage: ChatMessage, event: PointerEvent<HTMLElement>) => {
-    const start = messagePointerStartRef.current;
-    messagePointerStartRef.current = null;
-    setSwipingMessageId(null);
-    setSwipeOffset(0);
-    if (!start) return;
-
-    const deltaX = event.clientX - start.x;
-    const deltaY = event.clientY - start.y;
-    if (start.messageId === chatMessage.id && deltaX > 36 && deltaX > Math.abs(deltaY) * 1.1) startReply(chatMessage);
-  };
-
-  const pinnedMessage = messages.find((item) => item.id === pinnedMessageId) ?? null;
-
+  let lastDay = "";
   return (
-    <section
-      className={`chat-panel${isClosing ? " chat-panel--closing" : ""}`}
-      role="dialog"
-      aria-modal="false"
-      aria-labelledby="chat-title"
-    >
+    <section className={`chat-panel${isClosing ? " chat-panel--closing" : ""}`} role="dialog" aria-modal="false" aria-labelledby="chat-title">
       <header className="chat-header">
         <span className="chat-avatar" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none">
-            <path d="M4 5h16v12H9l-5 3V5Z" />
-            <path d="M8 9h8M8 13h5" />
-          </svg>
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 5h16v12H9l-5 3V5Z" /><path d="M8 9h8M8 13h5" /></svg>
         </span>
         <span className="chat-header-copy">
           <strong id="chat-title">TazaHat Support</strong>
-          <span><i /> AI assistant · Team support</span>
+          <span><i /> {supportTyping ? "typing…" : "We usually reply within a few minutes"}</span>
         </span>
-        <button className="chat-ticket-button" type="button" onClick={() => setIsTicketPromptOpen(true)} aria-label="Raise a support ticket">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 5h16v12H9l-5 3V5Z"/><path d="M8 9h8M8 13h5"/></svg>
-          <span>Raise a Ticket</span>
-        </button>
         <button className="chat-collapse-button" type="button" onClick={closeChat} aria-label="Minimize chat">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="m6 9 6 6 6-6" />
-          </svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
         </button>
       </header>
 
-      <div className="chat-demo-banner">
-        <span>DEMO</span> Sample chat only · Orders are not purchased or sent.
-      </div>
-
-      <div className="chat-messages" aria-live="polite" aria-relevant="additions text">
-        {pinnedMessage && (
-          <button className="chat-pinned-banner" type="button" onClick={() => document.getElementById(`chat-message-${pinnedMessage.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" })}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m16 3 5 5-4 1-4 4-1 5-2-2-4 4-2-2 4-4-2-2 5-1 4-4z" /></svg>
-            <span><strong>Pinned message · {pinnedMessage.author}</strong><small>{pinnedMessage.text || (pinnedMessage.image ? "Photo" : "Message")}</small></span>
-          </button>
-        )}
-        <div className="chat-day-divider"><span>Today</span></div>
-        {messages.map((chatMessage) => (
-          <article
-            id={`chat-message-${chatMessage.id}`}
-            className={`chat-message chat-message--${chatMessage.sender}${pinnedMessageId === chatMessage.id ? " is-pinned" : ""}${swipingMessageId === chatMessage.id ? " is-swiping" : ""}`}
-            key={chatMessage.id}
-            style={{ "--chat-swipe-offset": `${swipingMessageId === chatMessage.id ? swipeOffset : 0}px` } as CSSProperties}
-            onPointerDown={(event) => startMessageSwipe(chatMessage, event)}
-            onPointerMove={moveMessageSwipe}
-            onPointerUp={(event) => finishMessageSwipe(chatMessage, event)}
-            onPointerCancel={() => { messagePointerStartRef.current = null; setSwipingMessageId(null); setSwipeOffset(0); }}
-          >
-            <span className="chat-message-author">{chatMessage.author}</span>
-            {swipingMessageId === chatMessage.id && swipeOffset > 8 && <span className="chat-swipe-reply-indicator" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m9 14-5-5 5-5"/><path d="M4 9h9a7 7 0 0 1 7 7v3"/></svg></span>}
-            <div className="chat-message-actions">
-              <button type="button" className="chat-message-menu-toggle" aria-label={`More options for ${chatMessage.author}'s message`} aria-haspopup="menu" aria-expanded={openMessageMenuId === chatMessage.id} onClick={() => setOpenMessageMenuId((current) => current === chatMessage.id ? null : chatMessage.id)}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
-              </button>
-              {openMessageMenuId === chatMessage.id && (
-                <div className="chat-message-menu" role="menu">
-                  <button type="button" role="menuitem" onClick={() => startReply(chatMessage)}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m9 14-5-5 5-5"/><path d="M4 9h9a7 7 0 0 1 7 7v3"/></svg>Reply</button>
-                  <button type="button" role="menuitem" onClick={() => togglePin(chatMessage)}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m16 3 5 5-4 1-4 4-1 5-2-2-4 4-2-2 4-4-2-2 5-1 4-4z"/></svg>{pinnedMessageId === chatMessage.id ? "Unpin" : "Pin"}</button>
+      {!user ? (
+        <div className="chat-gate">
+          <span className="chat-gate-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 5h16v12H9l-5 3V5Z" /><path d="M8 9h8M8 13h5" /></svg></span>
+          <strong>Log in to chat with us</strong>
+          <p>Your messages stay private and saved to your account, so our team can see your orders and help faster.</p>
+          <button type="button" className="chat-gate-button" disabled={!ready} onClick={() => openLogin()}>Log in</button>
+        </div>
+      ) : (
+        <>
+          <div className="chat-messages" ref={scroller} onScroll={onScroll} aria-live="polite" aria-relevant="additions text">
+            {loadingOlder && <div className="chat-older" role="status">Loading earlier messages…</div>}
+            {state === "loading" && <div className="chat-older" role="status">Loading your chat…</div>}
+            {state === "error" && <div className="chat-older">Could not load the chat. <button type="button" className="chat-retry" onClick={() => void open()}>Try again</button></div>}
+            {state === "ready" && rows.length === 0 && <div className="chat-empty"><strong>Say hello 👋</strong><span>Ask about an order, a product or delivery. Our team will reply here.</span></div>}
+            {rows.map((m) => {
+              const day = dayKey(m.createdAt);
+              const divider = day !== lastDay ? <div className="chat-day-divider" key={`d-${day}-${m.id}`}><span>{dayLabel(m.createdAt)}</span></div> : null;
+              lastDay = day;
+              const mine = !m.fromSupport;
+              return (
+                <div className="chat-row" key={m.clientId ?? m.id} style={{ display: "contents" }}>
+                  {divider}
+                  <article id={`chat-message-${m.id}`} className={`chat-message chat-message--${mine ? "customer" : "team"}${m.state === "failed" ? " is-failed" : ""}`}>
+                    {!mine && <span className="chat-message-author">TazaHat Support</span>}
+                    <p>{m.text}</p>
+                    <time>
+                      {timeOf(m.createdAt)}
+                      {mine && (m.state === "sending" ? <span className="chat-tick" aria-label="Sending">🕓</span> : m.state === "failed" ? null : <span className={`chat-tick${m.readAt ? " is-read" : ""}`} aria-label={m.readAt ? "Read" : "Sent"}>{m.readAt ? "✓✓" : "✓"}</span>)}
+                    </time>
+                    {m.state === "failed" && <button type="button" className="chat-retry" onClick={() => void send(m.text, m.clientId ?? newId(), true)}>Not sent · Tap to retry</button>}
+                  </article>
                 </div>
-              )}
-            </div>
-            {chatMessage.replyTo && (
-              <div className="chat-quoted-message">
-                <strong>{chatMessage.replyTo.author}</strong>
-                {chatMessage.replyTo.image && <Image src={chatMessage.replyTo.image} alt="Replied image" width={80} height={80} unoptimized />}
-                <span>{chatMessage.replyTo.text || (chatMessage.replyTo.image ? "Photo" : "Message")}</span>
-              </div>
-            )}
-            {chatMessage.text && <p>{chatMessage.text}</p>}
-            {chatMessage.image && <Image className="chat-message-image" src={chatMessage.image} alt="Image shared in chat" width={640} height={480} unoptimized />}
-            {chatMessage.product && (
-              <Link className="chat-product-tag" href={`/${encodeURIComponent(chatMessage.product.id)}`} aria-label={`View ${chatMessage.product.name} details`} onClick={closeChat}>
-                <span className="chat-product-tag-image"><Image src={chatMessage.product.image} alt="" fill sizes="42px" unoptimized={isRemoteImage(chatMessage.product.image)} onError={fallbackImage} /></span>
-                <span className="chat-product-tag-copy"><small>PRODUCT</small><strong>{chatMessage.product.name}</strong></span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-              </Link>
-            )}
-            {chatMessage.order && (
-              <div className="chat-order-card">
-                {chatMessage.order.map((item) => (
-                  <Link className="chat-order-line" key={item.id} href={`/${encodeURIComponent(item.id)}`} onClick={closeChat} aria-label={`View ${item.name} product details`}>
-                    <span className="chat-order-image">
-                      <Image src={item.image} alt="" fill sizes="38px" unoptimized={isRemoteImage(item.image)} onError={fallbackImage} />
-                    </span>
-                    <span className="chat-order-product">
-                      <strong>{item.name}</strong>
-                      <small>{item.weight} · Qty {item.quantity}</small>
-                    </span>
-                    <strong className="chat-order-price">₹{item.price * item.quantity}</strong>
-                  </Link>
-                ))}
-                <div className="chat-order-total">
-                  <span>{chatMessage.orderStatus === "cancelled" ? "Cancelled demo order" : "Demo order total"}</span>
-                  <strong>₹{chatMessage.order.reduce((sum, item) => sum + item.price * item.quantity, 0)}</strong>
-                </div>
-                <span className="chat-order-disclaimer">Demo only · Not a real purchase</span>
-              </div>
-            )}
-            {chatMessage.orderStatus === "cancelled" && <span className="chat-order-cancelled">Demo order cancelled</span>}
-            <time>{chatMessage.time}</time>
-          </article>
-        ))}
-        {isReplying && (
-          <div className="chat-typing" role="status" aria-label="TazaHat AI is replying">
-            <span>TazaHat AI is typing</span><i /><i /><i />
+              );
+            })}
+            {supportTyping && <div className="chat-typing" role="status" aria-label="Support is typing"><span>Support is typing</span><i /><i /><i /></div>}
           </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
 
-      <form className="chat-composer" onSubmit={sendMessage}>
-        {isTicketPromptOpen && (
-          <div className="chat-ticket-prompt">
-            <span className="chat-ticket-prompt-mark" aria-hidden="true">!</span>
-            <button type="button" onClick={() => setMessage("Yes, please tell us about your problem. ")}>
-              <small>SUPPORT TICKET</small>
-              <span>Yes, please tell us about your problem.</span>
+          <form className="chat-composer" onSubmit={submit}>
+            <label className="chat-sr-only" htmlFor="chat-message-input">Message to TazaHat support</label>
+            <input ref={input} id="chat-message-input" value={message} onChange={(e) => onType(e.target.value)} placeholder="Type a message" maxLength={2000} disabled={isClosing || state !== "ready"} autoComplete="off" />
+            <button className="chat-send-button" type="submit" disabled={!message.trim() || isClosing || state !== "ready"} aria-label="Send message">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 18-8-7 18-3-7-8-3Z" /><path d="m11 14 4-4" /></svg>
             </button>
-            <button className="chat-ticket-prompt-dismiss" type="button" aria-label="Dismiss ticket prompt" onClick={() => setIsTicketPromptOpen(false)}>×</button>
-          </div>
-        )}
-        {replyingTo && (
-          <div className="chat-composer-context chat-composer-reply">
-            <span className="chat-reply-accent" />
-            {replyingTo.image && <Image src={replyingTo.image} alt="" width={76} height={76} unoptimized />}
-            <span className="chat-composer-context-copy"><strong>Replying to {replyingTo.author}</strong><small>{replyingTo.text || (replyingTo.image ? "Photo" : "Message")}</small></span>
-            <button type="button" aria-label="Cancel reply" onClick={() => setReplyingTo(null)}>×</button>
-          </div>
-        )}
-        {attachment && (
-          <div className="chat-composer-context chat-image-attachment">
-            <Image src={attachment.dataUrl} alt="Selected image preview" width={76} height={76} unoptimized />
-            <span className="chat-composer-context-copy"><strong>Image ready to send</strong><small>{attachment.name}</small></span>
-            <button type="button" aria-label="Remove selected image" onClick={() => setAttachment(null)}>×</button>
-          </div>
-        )}
-        {attachmentError && <p className="chat-attachment-error" role="alert">{attachmentError}</p>}
-        <input ref={imageInputRef} className="chat-sr-only" type="file" accept="image/*" aria-label="Choose an image to send" onChange={(event) => { pickImage(event.target.files?.[0]); event.target.value = ""; }} />
-        <label className="chat-sr-only" htmlFor="chat-message-input">Send a message to TazaHat support</label>
-        <input
-          ref={messageInputRef}
-          id="chat-message-input"
-          value={message}
-          onChange={(event) => setMessage(event.target.value)}
-          placeholder="Message… try “order Rohu Fish x2” or “cancel order”"
-          maxLength={1000}
-          disabled={isReplying || isClosing}
-        />
-        <button className="chat-attachment-button" type="button" disabled={isReplying || isClosing} aria-label="Pick an image" onClick={() => imageInputRef.current?.click()}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
-        </button>
-        <button className="chat-send-button" type="submit" disabled={(!message.trim() && !attachment) || isReplying || isClosing} aria-label="Send message">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="m3 11 18-8-7 18-3-7-8-3Z" />
-            <path d="m11 14 4-4" />
-          </svg>
-        </button>
-      </form>
+          </form>
+        </>
+      )}
     </section>
   );
 }

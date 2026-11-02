@@ -100,6 +100,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (message.event === "notification" && message.notification) onLive(message.notification);
         // an order of this customer changed (the shop updated it, or it was placed elsewhere): My Orders and the open order page read it again
         else if (message.event === "order") window.dispatchEvent(new CustomEvent("tazahat:order-changed", { detail: message }));
+        // support chat: a reply, a read receipt or "typing..." from the support team
+        else if (message.event === "chat") window.dispatchEvent(new CustomEvent("tazahat:chat", { detail: message }));
       } catch { /* not for us */ }
     };
     return () => { source.close(); setLive(false); };
