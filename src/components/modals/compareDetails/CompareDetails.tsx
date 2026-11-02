@@ -9,6 +9,16 @@ import { getProductDetailAction } from "@/app/actions";
 import { fallbackImage, isRemoteImage, mediaSrc, PLACEHOLDER_IMAGE, shortName, type ApiProductDetail } from "@/lib/api";
 import type { CompareProduct } from "../compareList/CompareList";
 import "./CompareDetails.css";
+import { type SupportedLang, useLanguage } from "@/lib/language";
+import englishText from "./english.json";
+import bengaliText from "./bengali.json";
+import hindiText from "./hindi.json";
+
+const textMap: Record<SupportedLang, typeof englishText> = {
+  en: englishText,
+  bn: bengaliText,
+  hi: hindiText,
+};
 
 export interface CompareDetailsProps {
   products: CompareProduct[];
@@ -28,7 +38,7 @@ const toNumber = (val?: number | string): number => {
 type Detail = ApiProductDetail | null | undefined;
 type Availability = "ok" | "soon" | "out" | "unknown";
 
-function describe(p: CompareProduct, detail: Detail) {
+function describe(p: CompareProduct, detail: Detail, t: typeof englishText) {
   const price = toNumber(p.price);
   const original = toNumber(p.originalPrice);
   const packs = detail?.packs ?? [];
@@ -37,10 +47,10 @@ function describe(p: CompareProduct, detail: Detail) {
   // the pack to add to the cart: the one that was compared if it can be ordered, else the first that can
   const pack = orderable.find(x => x.label === p.unit) ?? orderable[0];
   const availability: Availability = !detail ? "unknown" : orderable.length ? "ok" : upcoming ? "soon" : "out";
-  const availabilityText = detail === undefined ? "Loading…" : !detail ? "—"
-    : !packs.length ? "Not sold in your city"
-    : orderable.length ? `In stock · ${orderable.length} of ${packs.length} size${packs.length === 1 ? "" : "s"}`
-    : upcoming ? `Available from ${upcoming.availableFromLabel}` : "Out of stock";
+  const availabilityText = detail === undefined ? t.loading : !detail ? t.dash
+    : !packs.length ? t.notSold
+    : orderable.length ? t.inStockCount.replace("{available}", String(orderable.length)).replace("{total}", String(packs.length)).replace("{unit}", packs.length === 1 ? t.sizeSingle : t.sizePlural)
+    : upcoming ? t.availableFrom.replace("{date}", upcoming.availableFromLabel ?? "") : t.outOfStock;
   const startingPrice = packs.length ? Math.min(...packs.map(x => Math.round(x.pricePaisa / 100))) : null;
   const perKg = detail?.ratePerKgPaisa ? Math.round(detail.ratePerKgPaisa / 100) : null;
   return {
@@ -48,9 +58,9 @@ function describe(p: CompareProduct, detail: Detail) {
     unit: p.unit || "",
     saving: original > price ? original - price : 0,
     savingPct: original > price ? Math.round((1 - price / original) * 100) : 0,
-    category: detail ? `${shortName(detail.category.name)} › ${shortName(detail.subCategory.name)}` : detail === undefined ? "Loading…" : "—",
-    sizes: detail ? (packs.length ? packs.map(x => x.label).join(", ") : "—") : detail === undefined ? "Loading…" : "—",
-    dressing: detail ? (detail.cutting.length ? `${detail.cutting.length} option${detail.cutting.length === 1 ? "" : "s"}` : "None") : detail === undefined ? "Loading…" : "—",
+    category: detail ? `${shortName(detail.category.name)} › ${shortName(detail.subCategory.name)}` : detail === undefined ? t.loading : t.dash,
+    sizes: detail ? (packs.length ? packs.map(x => x.label).join(", ") : t.dash) : detail === undefined ? t.loading : t.dash,
+    dressing: detail ? (detail.cutting.length ? t.dressingOptions.replace("{count}", String(detail.cutting.length)).replace("{unit}", detail.cutting.length === 1 ? t.optionSingle : t.optionPlural) : t.dressingNone) : detail === undefined ? t.loading : t.dash,
     image: detail?.images?.[0] ? mediaSrc(detail.images[0]) : p.image || PLACEHOLDER_IMAGE,
     rating: Number(p.rating ?? 0),
     reviews: p.reviews ?? 0,
@@ -61,6 +71,9 @@ type Side = ReturnType<typeof describe>;
 interface Row { key: string; label: string; a: ReactNode; b: ReactNode; textA: string; textB: string; winner?: "A" | "B" | null; tag?: string }
 
 export default function CompareDetails({ products, onClose, onBackToList }: CompareDetailsProps) {
+  const [lang] = useLanguage();
+  const t = textMap[lang] || englishText;
+
   const [isClosing, setIsClosing] = useState(false);
   const [addedA, setAddedA] = useState(false);
   const [addedB, setAddedB] = useState(false);
@@ -109,8 +122,8 @@ export default function CompareDetails({ products, onClose, onBackToList }: Comp
 
   if (!productA || !productB) return null;
 
-  const a = describe(productA, detailA);
-  const b = describe(productB, detailB);
+  const a = describe(productA, detailA, t);
+  const b = describe(productB, detailB, t);
   const nameA = shortName(productA.name);
   const nameB = shortName(productB.name);
   const lower = (x: number | null, y: number | null): "A" | "B" | null => (x === null || y === null || x === y ? null : x < y ? "A" : "B");
@@ -124,29 +137,29 @@ export default function CompareDetails({ products, onClose, onBackToList }: Comp
   const availWinner = a.availability !== "unknown" && b.availability !== "unknown" ? higher(availRank[a.availability], availRank[b.availability]) : null;
 
   const rows: Row[] = [
-    { key: "category", label: "Category", a: a.category, b: b.category, textA: a.category, textB: b.category },
+    { key: "category", label: t.rowCategory, a: a.category, b: b.category, textA: a.category, textB: b.category },
     {
-      key: "pack", label: "Compared pack",
+      key: "pack", label: t.rowPack,
       a: `${money(a.price)}${a.unit ? ` · ${a.unit}` : ""}`, b: `${money(b.price)}${b.unit ? ` · ${b.unit}` : ""}`,
       textA: `${a.price}|${a.unit}`, textB: `${b.price}|${b.unit}`,
     },
     {
-      key: "start", label: "Starting price", a: a.startingPrice === null ? a.sizes === "Loading…" ? "Loading…" : "—" : money(a.startingPrice), b: b.startingPrice === null ? b.sizes === "Loading…" ? "Loading…" : "—" : money(b.startingPrice),
-      textA: String(a.startingPrice), textB: String(b.startingPrice), winner: startWinner, tag: "Cheaper",
+      key: "start", label: t.rowStart, a: a.startingPrice === null ? a.sizes === t.loading ? t.loading : t.dash : money(a.startingPrice), b: b.startingPrice === null ? b.sizes === t.loading ? t.loading : t.dash : money(b.startingPrice),
+      textA: String(a.startingPrice), textB: String(b.startingPrice), winner: startWinner, tag: t.tagCheaper,
     },
     ...(a.perKg !== null || b.perKg !== null ? [{
-      key: "kg", label: "Price per kg", a: a.perKg === null ? "—" : money(a.perKg), b: b.perKg === null ? "—" : money(b.perKg), textA: String(a.perKg), textB: String(b.perKg), winner: kgWinner, tag: "Cheaper per kg",
+      key: "kg", label: t.rowKg, a: a.perKg === null ? t.dash : money(a.perKg), b: b.perKg === null ? t.dash : money(b.perKg), textA: String(a.perKg), textB: String(b.perKg), winner: kgWinner, tag: t.tagCheaperPerKg,
     } as Row] : []),
     {
-      key: "save", label: "You save", a: a.saving ? `${money(a.saving)} (${a.savingPct}% off)` : "No discount", b: b.saving ? `${money(b.saving)} (${b.savingPct}% off)` : "No discount",
-      textA: String(a.savingPct), textB: String(b.savingPct), winner: saveWinner, tag: "Bigger saving",
+      key: "save", label: t.rowSave, a: a.saving ? t.savePercentOff.replace("{amount}", money(a.saving)).replace("{percent}", String(a.savingPct)) : t.noDiscount, b: b.saving ? t.savePercentOff.replace("{amount}", money(b.saving)).replace("{percent}", String(b.savingPct)) : t.noDiscount,
+      textA: String(a.savingPct), textB: String(b.savingPct), winner: saveWinner, tag: t.tagBiggerSaving,
     },
-    { key: "sizes", label: "Pack sizes", a: a.sizes, b: b.sizes, textA: a.sizes, textB: b.sizes, winner: sizeWinner, tag: "More sizes" },
-    { key: "avail", label: "Availability", a: a.availabilityText, b: b.availabilityText, textA: a.availabilityText, textB: b.availabilityText, winner: availWinner, tag: "Available" },
-    { key: "dress", label: "Dressing options", a: a.dressing, b: b.dressing, textA: a.dressing, textB: b.dressing },
+    { key: "sizes", label: t.rowSizes, a: a.sizes, b: b.sizes, textA: a.sizes, textB: b.sizes, winner: sizeWinner, tag: t.tagMoreSizes },
+    { key: "avail", label: t.rowAvail, a: a.availabilityText, b: b.availabilityText, textA: a.availabilityText, textB: b.availabilityText, winner: availWinner, tag: t.tagAvailable },
+    { key: "dress", label: t.rowDress, a: a.dressing, b: b.dressing, textA: a.dressing, textB: b.dressing },
     ...(a.rating > 0 || b.rating > 0 ? [{
-      key: "rating", label: "Customer rating", a: a.rating > 0 ? `★ ${a.rating.toFixed(1)} (${a.reviews} reviews)` : "No ratings yet", b: b.rating > 0 ? `★ ${b.rating.toFixed(1)} (${b.reviews} reviews)` : "No ratings yet",
-      textA: String(a.rating), textB: String(b.rating), winner: higher(a.rating, b.rating), tag: "Higher rated",
+      key: "rating", label: t.rowRating, a: a.rating > 0 ? t.customerRatingText.replace("{rating}", a.rating.toFixed(1)).replace("{reviews}", String(a.reviews)) : t.noRatingsYet, b: b.rating > 0 ? t.customerRatingText.replace("{rating}", b.rating.toFixed(1)).replace("{reviews}", String(b.reviews)) : t.noRatingsYet,
+      textA: String(a.rating), textB: String(b.rating), winner: higher(a.rating, b.rating), tag: t.tagHigherRated,
     } as Row] : []),
   ];
   const shownRows = onlyDifferent ? rows.filter(r => r.textA !== r.textB) : rows;
@@ -154,10 +167,10 @@ export default function CompareDetails({ products, onClose, onBackToList }: Comp
 
   // the main differences, in a sentence each
   const glance: string[] = [];
-  if (startWinner && a.startingPrice !== null && b.startingPrice !== null) glance.push(`${startWinner === "A" ? nameA : nameB} starts ${money(Math.abs(a.startingPrice - b.startingPrice))} cheaper`);
-  if (kgWinner && a.perKg !== null && b.perKg !== null) glance.push(`${kgWinner === "A" ? nameA : nameB} is ${money(Math.abs(a.perKg - b.perKg))} cheaper per kg`);
-  if (sizeWinner) glance.push(`${sizeWinner === "A" ? nameA : nameB} comes in more sizes (${Math.max(a.packs.length, b.packs.length)} vs ${Math.min(a.packs.length, b.packs.length)})`);
-  if (availWinner) glance.push(`${availWinner === "A" ? nameB : nameA} is ${(availWinner === "A" ? b : a).availability === "soon" ? "not on sale yet" : "out of stock"}`);
+  if (startWinner && a.startingPrice !== null && b.startingPrice !== null) glance.push(t.glanceStartsCheaper.replace("{name}", startWinner === "A" ? nameA : nameB).replace("{amount}", money(Math.abs(a.startingPrice - b.startingPrice))));
+  if (kgWinner && a.perKg !== null && b.perKg !== null) glance.push(t.glanceCheaperPerKg.replace("{name}", kgWinner === "A" ? nameA : nameB).replace("{amount}", money(Math.abs(a.perKg - b.perKg))));
+  if (sizeWinner) glance.push(t.glanceMoreSizes.replace("{name}", sizeWinner === "A" ? nameA : nameB).replace("{max}", String(Math.max(a.packs.length, b.packs.length))).replace("{min}", String(Math.min(a.packs.length, b.packs.length))));
+  if (availWinner) glance.push((availWinner === "A" ? b : a).availability === "soon" ? t.glanceNotOnSale.replace("{name}", availWinner === "A" ? nameB : nameA) : t.glanceOutOfStock.replace("{name}", availWinner === "A" ? nameB : nameA));
 
   const addToCart = (p: CompareProduct, side: Side, which: "A" | "B") => {
     // with the live data: the compared pack (or the first one that can be ordered), at its real price; without it: as it was compared
@@ -178,30 +191,30 @@ export default function CompareDetails({ products, onClose, onBackToList }: Comp
       <div className="compare-product-card">
         <div className="compare-product-img-wrap">
           <Image src={side.image} alt={p.name} fill sizes="160px" unoptimized={isRemoteImage(side.image)} onError={fallbackImage} className="compare-product-single-img" />
-          {side.saving > 0 && <span className="compare-badge-savings">Save {money(side.saving)}</span>}
+          {side.saving > 0 && <span className="compare-badge-savings">{t.saveAmount.replace("{amount}", money(side.saving))}</span>}
         </div>
         <h3 className="compare-product-title" title={p.name}>{p.name}</h3>
         {side.rating > 0 && (
           <div className="compare-rating-pill">
-            <span className="compare-star">★</span><strong>{side.rating.toFixed(1)}</strong><span>({side.reviews} reviews)</span>
+            <span className="compare-star">★</span><strong>{side.rating.toFixed(1)}</strong><span>{t.reviewsCount.replace("{count}", String(side.reviews))}</span>
           </div>
         )}
         <div className="compare-price-pill">
           <strong className="compare-main-price">{money(side.price)}</strong>
           {side.original > side.price && <del>{money(side.original)}</del>}
-          {side.unit && <span className="compare-pack-unit">/ {side.unit}</span>}
-          {cheaper && <span className="compare-value-pill">Better Price</span>}
+          {side.unit && <span className="compare-pack-unit">{t.perUnit.replace("{unit}", side.unit)}</span>}
+          {cheaper && <span className="compare-value-pill">{t.betterPrice}</span>}
         </div>
         {side.availability !== "unknown" && <span className={`compare-avail compare-avail--${side.availability}`}>{side.availabilityText}</span>}
         <div className="compare-card-actions">
           {chooseFirst ? (
-            <Link href={`/${encodeURIComponent(p.id)}`} className="compare-cart-btn compare-cart-btn--choose" onClick={() => closeWithAnimation()} title="This product needs a dressing type: choose it on its page">Choose dressing</Link>
+            <Link href={`/${encodeURIComponent(p.id)}`} className="compare-cart-btn compare-cart-btn--choose" onClick={() => closeWithAnimation()} title={t.chooseDressingTitle}>{t.chooseDressing}</Link>
           ) : (
             <button type="button" className={`compare-cart-btn${added ? " is-added" : ""}`} disabled={blocked} onClick={() => addToCart(p, side, which)}>
-              {added ? <>✓ Added!</> : side.availability === "out" ? <>Out of stock</> : side.availability === "soon" ? <>Available from {side.packs.find(x => x.availableFromLabel)?.availableFromLabel}</> : <>Add to Cart</>}
+              {added ? <>✓ {t.added}</> : side.availability === "out" ? <>{t.outOfStock}</> : side.availability === "soon" ? <>{t.availableFrom.replace("{date}", side.packs.find(x => x.availableFromLabel)?.availableFromLabel ?? "")}</> : <>{t.addToCart}</>}
             </button>
           )}
-          <Link href={`/${encodeURIComponent(p.id)}`} className="compare-view-link" onClick={() => closeWithAnimation()}>View Details</Link>
+          <Link href={`/${encodeURIComponent(p.id)}`} className="compare-view-link" onClick={() => closeWithAnimation()}>{t.viewDetails}</Link>
         </div>
       </div>
     );
@@ -213,7 +226,7 @@ export default function CompareDetails({ products, onClose, onBackToList }: Comp
       onClick={event => { if (event.target === event.currentTarget) closeWithAnimation(); }}
       role="presentation"
     >
-      <div className="compare-details-dialog" role="dialog" aria-modal="true" aria-labelledby={titleId}>
+      <div className="compare-details-dialog" role="dialog" aria-modal="true" aria-labelledby={titleId} lang={t.language}>
         <header className="compare-details-header">
           <div className="compare-details-header-title">
             <span className="compare-details-header-icon" aria-hidden="true">
@@ -221,13 +234,13 @@ export default function CompareDetails({ products, onClose, onBackToList }: Comp
             </span>
             <div>
               <div className="compare-details-title-row">
-                <h2 id={titleId}>Compare Products</h2>
-                <span className="compare-details-count-pill">2 items</span>
+                <h2 id={titleId}>{t.compareTitle}</h2>
+                <span className="compare-details-count-pill">{t.itemsCount}</span>
               </div>
-              <p>What is different between the two, from the live shop data</p>
+              <p>{t.subtitle}</p>
             </div>
           </div>
-          <button type="button" className="compare-details-close" onClick={() => closeWithAnimation()} aria-label="Close comparison details">
+          <button type="button" className="compare-details-close" onClick={() => closeWithAnimation()} aria-label={t.closeAria}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
           </button>
         </header>
@@ -240,22 +253,22 @@ export default function CompareDetails({ products, onClose, onBackToList }: Comp
           </div>
 
           {glance.length > 0 && (
-            <ul className="compare-glance" aria-label="Main differences">
+            <ul className="compare-glance" aria-label={t.mainDifferencesAria}>
               {glance.map(line => <li key={line}>{line}</li>)}
             </ul>
           )}
 
           <section className="compare-table-section">
             <div className="compare-table-header-bar">
-              <h4 className="compare-table-heading">Attribute Comparison</h4>
+              <h4 className="compare-table-heading">{t.tableHeading}</h4>
               <label className="compare-only-diff">
                 <input type="checkbox" checked={onlyDifferent} onChange={event => setOnlyDifferent(event.target.checked)} />
-                <span>Show only differences ({differing})</span>
+                <span>{t.showOnlyDifferences.replace("{count}", String(differing))}</span>
               </label>
             </div>
             <div className="compare-table">
               <div className="compare-table-row compare-table-col-header">
-                <span className="compare-col-label">Attribute</span>
+                <span className="compare-col-label">{t.colAttribute}</span>
                 <span className="compare-col-val compare-header-val" title={productA.name}>{nameA}</span>
                 <span className="compare-col-val compare-header-val" title={productB.name}>{nameB}</span>
               </div>
@@ -266,9 +279,9 @@ export default function CompareDetails({ products, onClose, onBackToList }: Comp
                   <span className={`compare-col-val${r.winner === "B" ? " is-winner" : ""}`}>{r.b}{r.winner === "B" && <span className="compare-cell-tag">{r.tag}</span>}</span>
                 </div>
               ))}
-              {shownRows.length === 0 && <p className="compare-same-note">These two match in everything shown here.</p>}
+              {shownRows.length === 0 && <p className="compare-same-note">{t.sameNote}</p>}
             </div>
-            <p className="compare-table-foot">Both: picked fresh, hygienically packed, express delivery in your city.</p>
+            <p className="compare-table-foot">{t.tableFoot}</p>
           </section>
         </div>
 
@@ -276,10 +289,10 @@ export default function CompareDetails({ products, onClose, onBackToList }: Comp
           {onBackToList && (
             <button type="button" className="compare-details-back-btn" onClick={() => closeWithAnimation(onBackToList)}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
-              Back to List
+              {t.backToList}
             </button>
           )}
-          <button type="button" className="compare-details-done-btn" onClick={() => closeWithAnimation()}>Close</button>
+          <button type="button" className="compare-details-done-btn" onClick={() => closeWithAnimation()}>{t.closeButton}</button>
         </footer>
       </div>
     </div>

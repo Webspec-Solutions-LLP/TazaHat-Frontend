@@ -1,0 +1,33 @@
+{
+  "language": "bn",
+  "closeAria": "মতামত ফর্ম বন্ধ করুন",
+  "titleShare": "আপনার মতামত জানান",
+  "titleThankYou": "ধন্যবাদ",
+  "subtitleShare": "আপনার অভিজ্ঞতা সম্পর্কে জানতে আমরা আগ্রহী",
+  "subtitleThankYou": "আপনার মতামত আমাদের সেবার মান উন্নত করতে সাহায্য করে",
+  "successTitle": "মতামত গৃহীত হয়েছে",
+  "successMessage": "TazaHaat-কে আরও উন্নত করতে সাহায্য করার জন্য ধন্যবাদ।",
+  "doneButton": "সম্পন্ন",
+  "ratingHeading": "আমাদের কীভাবে রেটিং দেবেন?",
+  "ratingGroupAria": "আপনার অভিজ্ঞতা রেট করুন",
+  "starAria": "{count} {star}",
+  "starSingle": "স্টার",
+  "starPlural": "স্টার",
+  "topicLabel": "আপনার মতামত কী সম্পর্কিত?",
+  "selectTopicPlaceholder": "একটি বিষয় বেছে নিন",
+  "topics": [
+    { "id": "Product quality", "label": "পণ্যের গুণমান" },
+    { "id": "Delivery", "label": "ডেলিভারি" },
+    { "id": "Website experience", "label": "ওয়েবসাইটের অভিজ্ঞতা" },
+    { "id": "Customer support", "label": "কাস্টমার সাপোর্ট" },
+    { "id": "Other", "label": "অন্যান্য" }
+  ],
+  "commentsLabel": "আপনার মন্তব্য",
+  "commentsPlaceholder": "কী ভালো লেগেছে বা আমরা কীভাবে আরও উন্নতি করতে পারি জানান...",
+  "charCount": "{count}/১০০০ অক্ষর",
+  "emailLabel": "ইমেল ঠিকানা",
+  "emailOptional": "(ঐচ্ছিক, যদি আপনি উত্তর পেতে চান)",
+  "emailPlaceholder": "you@example.com",
+  "cancelButton": "বাতিল",
+  "sendFeedbackButton": "মতামত পাঠান"
+}

@@ -1,0 +1,33 @@
+{
+  "language": "hi",
+  "closeAria": "प्रतिक्रिया फॉर्म बंद करें",
+  "titleShare": "अपनी प्रतिक्रिया साझा करें",
+  "titleThankYou": "धन्यवाद",
+  "subtitleShare": "हम आपके अनुभव के बारे में जानना चाहते हैं",
+  "subtitleThankYou": "आपकी राय हमें बेहतर बनाने में मदद करती है",
+  "successTitle": "प्रतिक्रिया प्राप्त हुई",
+  "successMessage": "TazaHaat को बेहतर बनाने में मदद के लिए धन्यवाद।",
+  "doneButton": "हो गया",
+  "ratingHeading": "आप हमें कैसी रेटिंग देंगे?",
+  "ratingGroupAria": "अपने अनुभव को रेट करें",
+  "starAria": "{count} {star}",
+  "starSingle": "स्टार",
+  "starPlural": "स्टार",
+  "topicLabel": "आपकी प्रतिक्रिया किस विषय में है?",
+  "selectTopicPlaceholder": "एक विषय चुनें",
+  "topics": [
+    { "id": "Product quality", "label": "उत्पाद की गुणवत्ता" },
+    { "id": "Delivery", "label": "डिलीवरी" },
+    { "id": "Website experience", "label": "वेबसाइट का अनुभव" },
+    { "id": "Customer support", "label": "ग्राहक सहायता" },
+    { "id": "Other", "label": "अन्य" }
+  ],
+  "commentsLabel": "आपकी टिप्पणी",
+  "commentsPlaceholder": "हमें बताएं कि क्या अच्छा रहा या हम क्या सुधार कर सकते हैं...",
+  "charCount": "{count}/1000 अक्षर",
+  "emailLabel": "ईमेल पता",
+  "emailOptional": "(वैकल्पिक, यदि आप जवाब चाहते हैं)",
+  "emailPlaceholder": "you@example.com",
+  "cancelButton": "रद्द करें",
+  "sendFeedbackButton": "प्रतिक्रिया भेजें"
+}

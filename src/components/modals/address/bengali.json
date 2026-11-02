@@ -1,0 +1,33 @@
+{
+  "language": "bn",
+  "closeAria": "ঠিকানা ফর্ম বন্ধ করুন",
+  "editTitle": "ঠিকানা সম্পাদনা করুন",
+  "addTitle": "নতুন ঠিকানা যোগ করুন",
+  "subtitle": "আপনার ডেলিভারির বিবরণ লিখুন",
+  "addressTypeLegend": "ঠিকানার ধরন",
+  "addressTypeAria": "ঠিকানার ধরন",
+  "addressTypes": [
+    { "id": "Home", "label": "বাড়ি" },
+    { "id": "Office", "label": "অফিস" },
+    { "id": "Other", "label": "অন্যান্য" }
+  ],
+  "contactNameLabel": "ডেলিভারির জন্য যোগাযোগের নাম",
+  "contactNamePlaceholder": "নাম লিখুন",
+  "phoneLabel": "আপনার ফোন নম্বর লিখুন",
+  "phonePlaceholder": "১০ ডিজিটের নম্বর",
+  "altPhoneLabel": "বিকল্প ফোন নম্বর লিখুন",
+  "altPhonePlaceholder": "১০ ডিজিটের নম্বর",
+  "localityLabel": "এলাকা / লোকালিটি",
+  "houseNumberLabel": "বাড়ি / ফ্ল্যাট নম্বর",
+  "addressLine1Label": "ঠিকানা লাইন ১",
+  "addressLine2Label": "ঠিকানা লাইন ২",
+  "landmarkLabel": "ল্যান্ডমার্ক (নিকটবর্তী পরিচিত স্থান)",
+  "pincodeLabel": "পিন কোড",
+  "pincodePlaceholder": "পিন কোড লিখুন",
+  "pincodeServiceable": "আমরা এখানে ডেলিভারি দিই: {locations}",
+  "pincodeNotServiceable": "আমরা এখনও এই পিন কোডে ডেলিভারি শুরু করিনি।",
+  "cancelButton": "বাতিল",
+  "savingButton": "সংরক্ষণ করা হচ্ছে…",
+  "saveAddressButton": "ঠিকানা সংরক্ষণ করুন",
+  "addAddressButton": "ঠিকানা যোগ করুন"
+}

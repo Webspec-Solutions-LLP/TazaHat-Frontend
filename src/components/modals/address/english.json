@@ -1,0 +1,33 @@
+{
+  "language": "en",
+  "closeAria": "Close address form",
+  "editTitle": "Edit Address",
+  "addTitle": "Add New Address",
+  "subtitle": "Enter your delivery details",
+  "addressTypeLegend": "Address Type",
+  "addressTypeAria": "Address type",
+  "addressTypes": [
+    { "id": "Home", "label": "Home" },
+    { "id": "Office", "label": "Office" },
+    { "id": "Other", "label": "Other" }
+  ],
+  "contactNameLabel": "Contact Name for Delivery",
+  "contactNamePlaceholder": "Enter Name",
+  "phoneLabel": "Enter your phone number",
+  "phonePlaceholder": "10-digit number",
+  "altPhoneLabel": "Enter alternate phone number",
+  "altPhonePlaceholder": "10-digit number",
+  "localityLabel": "Locality",
+  "houseNumberLabel": "House Number",
+  "addressLine1Label": "Address line 1",
+  "addressLine2Label": "Address line 2",
+  "landmarkLabel": "Landmark",
+  "pincodeLabel": "Pin code",
+  "pincodePlaceholder": "Enter PIN",
+  "pincodeServiceable": "We deliver here: {locations}",
+  "pincodeNotServiceable": "We do not deliver to this PIN code yet.",
+  "cancelButton": "Cancel",
+  "savingButton": "SAVING…",
+  "saveAddressButton": "SAVE ADDRESS",
+  "addAddressButton": "ADD ADDRESS"
+}

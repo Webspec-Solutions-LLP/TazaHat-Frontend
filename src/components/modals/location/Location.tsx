@@ -9,17 +9,29 @@ import type { ApiCity } from "@/lib/api";
 import { useCity } from "@/lib/city";
 import { loadGoogleMaps } from "@/lib/googleMaps";
 import "./Location.css";
+import { type SupportedLang, useLanguage } from "@/lib/language";
+import englishText from "./english.json";
+import bengaliText from "./bengali.json";
+import hindiText from "./hindi.json";
+
+const textMap: Record<SupportedLang, typeof englishText> = {
+  en: englishText,
+  bn: bengaliText,
+  hi: hindiText,
+};
 
 interface LocationProps {
   onClose: () => void;
 }
 
 const INDIA_CENTER = { lat: 22.5726, lng: 88.3639 }; // Kolkata, used until a city or the visitor's position is known
-const LOCATION_BLOCKED = "Location access is blocked for this site. To see products near you, allow Location in your browser's site settings (the lock icon next to the address), or drag the pin / pick a city below.";
 
 type Verdict = { serviceable: true; city: ApiCity; pincode?: string } | { serviceable: false; message: string };
 
 export default function Location({ onClose }: LocationProps) {
+  const [lang] = useLanguage();
+  const t = textMap[lang] || englishText;
+
   const router = useRouter();
   const { city: savedCity } = useCity();
   const [cities, setCities] = useState<ApiCity[]>([]);
@@ -44,10 +56,10 @@ export default function Location({ onClose }: LocationProps) {
     void listCitiesAction().then((res) => {
       if (cancelled) return;
       if (res.cities) setCities(res.cities);
-      else setCitiesError(res.error ?? "We could not load the delivery cities.");
+      else setCitiesError(res.error ?? t.citiesLoadError);
     });
     return () => { cancelled = true; };
-  }, []);
+  }, [t.citiesLoadError]);
 
   const moveTo = useCallback((position: google.maps.LatLngLiteral, zoom?: number) => {
     markerRef.current?.setPosition(position);
@@ -63,13 +75,13 @@ export default function Location({ onClose }: LocationProps) {
     setVerdict(null);
     const res = await checkLocationAction(position.lat, position.lng).catch(() => null);
     if (request !== requestRef.current) return;
-    if (!res || !res.ok) setVerdict({ serviceable: false, message: res?.error ?? "We could not check this location. Please try again or pick a city below." });
+    if (!res || !res.ok) setVerdict({ serviceable: false, message: res?.error ?? t.locationCheckError });
     else {
       setAddress(res.address);
       setVerdict(res.serviceable ? { serviceable: true, city: res.city, pincode: res.pincode } : { serviceable: false, message: res.message });
     }
     setBusy(false);
-  }, []);
+  }, [t.locationCheckError]);
 
   useEffect(() => {
     let cancelled = false;
@@ -79,7 +91,7 @@ export default function Location({ onClose }: LocationProps) {
         const map = new g.maps.Map(mapElementRef.current, {
           center: INDIA_CENTER, zoom: 11, disableDefaultUI: true, zoomControl: true, gestureHandling: "greedy", clickableIcons: false,
         });
-        const marker = new g.maps.Marker({ map, position: INDIA_CENTER, draggable: true, title: "Drag to choose your delivery location" });
+        const marker = new g.maps.Marker({ map, position: INDIA_CENTER, draggable: true, title: t.dragMarkerTitle });
         marker.addListener("dragend", () => { const p = marker.getPosition(); if (p) void pick(p.toJSON()); });
         map.addListener("click", (event: google.maps.MapMouseEvent) => {
           if (!event.latLng) return;
@@ -99,7 +111,7 @@ export default function Location({ onClose }: LocationProps) {
         }
       })
       .catch((error: unknown) => {
-        if (!cancelled) setMapError(error instanceof Error ? error.message : "The map could not be loaded.");
+        if (!cancelled) setMapError(error instanceof Error ? error.message : t.mapLoadError);
       });
     return () => {
       cancelled = true;
@@ -107,7 +119,7 @@ export default function Location({ onClose }: LocationProps) {
       mapRef.current = null;
       markerRef.current = null;
     };
-  }, [pick]);
+  }, [pick, t.dragMarkerTitle, t.mapLoadError]);
 
   // Google place search on the map's search box
   useEffect(() => {
@@ -154,10 +166,10 @@ export default function Location({ onClose }: LocationProps) {
   // Ask the browser for the visitor's position. Browsers show their own "Allow location?" prompt; when it was blocked before
   // we explain how to switch it on again.
   const detectLocation = useCallback(async () => {
-    if (!("geolocation" in navigator)) return setVerdict({ serviceable: false, message: "Your browser cannot share its location. Please drag the pin or pick a city." });
+    if (!("geolocation" in navigator)) return setVerdict({ serviceable: false, message: t.geoNotSupported });
     try {
       const status = await navigator.permissions?.query({ name: "geolocation" });
-      if (status?.state === "denied") return setVerdict({ serviceable: false, message: LOCATION_BLOCKED });
+      if (status?.state === "denied") return setVerdict({ serviceable: false, message: t.locationBlocked });
     } catch {
       // Permissions API missing (older Safari / Firefox): the prompt below still works.
     }
@@ -170,11 +182,11 @@ export default function Location({ onClose }: LocationProps) {
       },
       (error) => {
         setBusy(false);
-        setVerdict({ serviceable: false, message: error.code === error.PERMISSION_DENIED ? LOCATION_BLOCKED : "We could not get your location. Please drag the pin or pick a city." });
+        setVerdict({ serviceable: false, message: error.code === error.PERMISSION_DENIED ? t.locationBlocked : t.geoFailed });
       },
       { timeout: 15000, maximumAge: 300000, enableHighAccuracy: true },
     );
-  }, [moveTo, pick]);
+  }, [moveTo, pick, t.geoNotSupported, t.locationBlocked, t.geoFailed]);
 
   // First visit (no delivery city yet): ask for location permission as soon as the map is ready.
   useEffect(() => {
@@ -189,7 +201,7 @@ export default function Location({ onClose }: LocationProps) {
     const res = await selectCityAction(verdict.city, verdict.pincode).catch(() => ({ ok: false }));
     if (!res.ok) {
       setSaving(false);
-      return setVerdict({ serviceable: false, message: "We could not save this city. Please try again." });
+      return setVerdict({ serviceable: false, message: t.citySaveError });
     }
     router.refresh();
     closeWithAnimation();
@@ -199,7 +211,7 @@ export default function Location({ onClose }: LocationProps) {
 
   return (
     <div className={`location-backdrop${isClosing ? " is-closing" : ""}`} onMouseDown={(event) => { if (event.target === event.currentTarget) closeWithAnimation(); }}>
-      <section className="location-modal" role="dialog" aria-modal="true" aria-labelledby="location-title">
+      <section className="location-modal" role="dialog" aria-modal="true" aria-labelledby="location-title" lang={t.language}>
         <header className="location-modal-header">
           <div className="location-header-main">
             <span className="location-header-icon" aria-hidden="true">
@@ -210,45 +222,54 @@ export default function Location({ onClose }: LocationProps) {
             </span>
             <div className="location-header-copy">
               <h2 id="location-title" className="location-header-title">
-                Fresh picks, <span>closer to home.</span>
+                {t.titlePrefix} <span>{t.titleHighlight}</span>
               </h2>
-              <p className="location-header-subtitle">Choose where you’d like your TazaHaat order delivered.</p>
+              <p className="location-header-subtitle">{t.subtitle}</p>
             </div>
           </div>
 
           <div className="location-header-actions">
-            <button type="button" className="location-close" onClick={() => closeWithAnimation()} aria-label="Close location selector">×</button>
+            <button type="button" className="location-close" onClick={() => closeWithAnimation()} aria-label={t.closeAria}>×</button>
           </div>
         </header>
 
         <div className="location-content">
-          <section className="location-map-section" aria-label="Delivery map">
+          <section className="location-map-section" aria-label={t.deliveryMapAria}>
             <div className="location-map">
-              <div ref={mapElementRef} className="location-map-canvas" role="application" aria-label="Interactive delivery map. Drag the pin to choose a location." />
-              {mapError && <p className="location-map-error">{mapError} You can still pick a city below.</p>}
+              <div ref={mapElementRef} className="location-map-canvas" role="application" aria-label={t.interactiveMapAria} />
+              {mapError && <p className="location-map-error">{mapError} {t.stillPickCity}</p>}
               {/* search and "use my location" sit on top of the map */}
               <div className="location-map-toolbar">
                 <label className="location-map-search-field">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
-                  <input ref={searchInputRef} placeholder="Search area, street or landmark" aria-label="Search area, street or landmark" />
+                  <input ref={searchInputRef} placeholder={t.searchPlaceholder} aria-label={t.searchPlaceholder} />
                 </label>
-                <button type="button" className="location-map-locate" onClick={() => void detectLocation()} disabled={busy}>Use my current location</button>
+                <button type="button" className="location-map-locate" onClick={() => void detectLocation()} disabled={busy}>{t.useCurrentLocation}</button>
               </div>
-              <span className="location-map-caption">{busy ? "Checking this location…" : verdict?.serviceable ? `Delivery area · ${verdict.city.name}${verdict.pincode ? `, ${verdict.pincode}` : ""}` : "Drag the pin to your address"}</span>
+              <span className="location-map-caption">
+                {busy
+                  ? t.checkingLocation
+                  : verdict?.serviceable
+                  ? t.deliveryAreaCaption.replace(
+                      "{location}",
+                      `${verdict.city.name}${verdict.pincode ? `, ${verdict.pincode}` : ""}`
+                    )
+                  : t.dragPinCaption}
+              </span>
             </div>
           </section>
 
           <div className={`location-current${verdict && !verdict.serviceable ? " is-unavailable" : ""}`}>
             <span className="location-current-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="9" r="2.5"/></svg></span>
-            <span><small>{verdict?.serviceable ? "We deliver here" : "Selected location"}</small><strong>{address || "No location selected yet"}</strong></span>
-            {verdict?.serviceable && <span className="location-current-check" aria-label="Delivery available">✓</span>}
+            <span><small>{verdict?.serviceable ? t.weDeliverHere : t.selectedLocation}</small><strong>{address || t.noLocationSelected}</strong></span>
+            {verdict?.serviceable && <span className="location-current-check" aria-label={t.deliveryAvailableAria}>✓</span>}
           </div>
           {verdict && !verdict.serviceable && <p className="location-unavailable" role="alert">{verdict.message}</p>}
 
-          <div className="location-popular-heading"><span>Our delivery cities</span><span className="location-heading-rule" /></div>
+          <div className="location-popular-heading"><span>{t.deliveryCitiesHeading}</span><span className="location-heading-rule" /></div>
           <div className="location-chips">
             {citiesError && <p className="location-no-results">{citiesError}</p>}
-            {!citiesError && cities.length === 0 && <p className="location-no-results">Loading cities…</p>}
+            {!citiesError && cities.length === 0 && <p className="location-no-results">{t.loadingCities}</p>}
             {cities.map((city, index) => (
               <button type="button" key={city.id} className={`location-chip${selectedCityId === city.id ? " is-selected" : ""}`} style={{ "--chip-index": index } as React.CSSProperties} onClick={() => void chooseCity(city)}>{city.name}</button>
             ))}
@@ -256,10 +277,10 @@ export default function Location({ onClose }: LocationProps) {
         </div>
         <div className="location-actions">
           <button type="button" className="location-confirm" onClick={() => void confirm()} disabled={!verdict?.serviceable || busy || saving}>
-            {verdict?.serviceable ? `Deliver to ${verdict.city.name}` : "Choose a delivery location"}
+            {verdict?.serviceable ? t.deliverToCity.replace("{city}", verdict.city.name) : t.chooseLocationBtn}
           </button>
         </div>
-        <div className="location-modal-footer"><span>Delivering freshness across India</span><span className="location-footer-dot" /> TazaHat</div>
+        <div className="location-modal-footer"><span>{t.footerFreshness}</span><span className="location-footer-dot" /> {t.brandName}</div>
       </section>
     </div>
   );

@@ -1,0 +1,19 @@
+{
+  "language": "en",
+  "chooseSize": "Choose your preferred size",
+  "closeAria": "Close variant selection",
+  "selectedSize": "Selected size",
+  "availableSizes": "Available sizes",
+  "fromLabel": "From {date}",
+  "outOfStock": "Out of stock",
+  "quantityForVariantAria": "Quantity for {label}",
+  "decreaseQuantityAria": "Decrease quantity",
+  "increaseQuantityAria": "Increase quantity",
+  "loadingDressingAria": "Loading dressing options",
+  "dressingType": "Dressing Type",
+  "selectDressingType": "Select Dressing Type",
+  "dressingRequiredError": "Please choose a dressing type first.",
+  "specialInstruction": "Special instruction",
+  "specialInstructionPlaceholder": "Tell us how you want it cut (e.g. 6 pieces, head removed...)",
+  "goToCart": "Go to Cart"
+}

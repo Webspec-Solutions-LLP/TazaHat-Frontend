@@ -1,0 +1,15 @@
+{
+  "language": "en",
+  "closeAria": "Close dialog",
+  "badge": "Wait, before you go",
+  "title": "Leaving TazaHat so soon?",
+  "desc": "Fresh farm groceries, daily discounts, and express delivery are waiting for you. Are you sure you want to leave?",
+  "perks": [
+    { "title": "Fast Delivery", "sub": "30-60 mins" },
+    { "title": "100% Fresh", "sub": "Farm picked" },
+    { "title": "Daily Deals", "sub": "Best savings" }
+  ],
+  "stayBtn": "Stay & Keep Shopping",
+  "leaveBtn": "Exit Website",
+  "savedNote": "Your cart and preferences are securely saved"
+}

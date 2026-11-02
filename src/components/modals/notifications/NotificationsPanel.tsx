@@ -6,12 +6,25 @@ import { markNotificationsReadAction, notificationsPageAction, type AppNotificat
 import { useBackClose } from "@/lib/backLayers";
 import { timeAgo } from "@/lib/timeAgo";
 import "./NotificationsPanel.css";
+import { type SupportedLang, useLanguage } from "@/lib/language";
+import englishText from "./english.json";
+import bengaliText from "./bengali.json";
+import hindiText from "./hindi.json";
+
+const textMap: Record<SupportedLang, typeof englishText> = {
+  en: englishText,
+  bn: bengaliText,
+  hi: hindiText,
+};
 
 /**
  * All of the customer's notifications in a side panel: 10 at a time, the next 10 load as the list is scrolled to its end.
  * "Mark all as read" marks every notification (not only the ones loaded). Opened by "View all" in the bell's popup.
  */
 export default function NotificationsPanel({ unread, onClose, onChanged }: { unread: number; onClose: () => void; onChanged: () => void }) {
+  const [lang] = useLanguage();
+  const t = textMap[lang] || englishText;
+
   const router = useRouter();
   const [items, setItems] = useState<AppNotification[]>([]);
   const [hasMore, setHasMore] = useState(true);
@@ -97,12 +110,21 @@ export default function NotificationsPanel({ unread, onClose, onChanged }: { unr
 
   return (
     <div className={`notif-backdrop${closing ? " is-closing" : ""}`} onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}>
-      <aside className="notif-panel" role="dialog" aria-modal="true" aria-labelledby="notif-title">
+      <aside className="notif-panel" role="dialog" aria-modal="true" aria-labelledby="notif-title" lang={t.language}>
         <header className="notif-head">
-          <div><h2 id="notif-title">Notifications</h2><p>{unread > 0 ? `${unread > 99 ? "99+" : unread} unread` : "You are all caught up"}</p></div>
+          <div>
+            <h2 id="notif-title">{t.title}</h2>
+            <p>
+              {unread > 0
+                ? t.unreadCount.replace("{count}", unread > 99 ? t.maxUnreadCount : String(unread))
+                : t.allCaughtUp}
+            </p>
+          </div>
           <div className="notif-head-actions">
-            <button type="button" className="notif-markall" onClick={() => void markAll()} disabled={marking || unread === 0}>{marking ? "Marking…" : "Mark all as read"}</button>
-            <button type="button" className="notif-close" onClick={close} aria-label="Close notifications">×</button>
+            <button type="button" className="notif-markall" onClick={() => void markAll()} disabled={marking || unread === 0}>
+              {marking ? t.marking : t.markAllRead}
+            </button>
+            <button type="button" className="notif-close" onClick={close} aria-label={t.closeAria}>×</button>
           </div>
         </header>
         <div className="notif-list" ref={list}>
@@ -112,10 +134,20 @@ export default function NotificationsPanel({ unread, onClose, onChanged }: { unr
               <span className="notif-copy"><strong>{n.title}</strong><span>{n.body}</span><time dateTime={n.createdAt}>{timeAgo(n.createdAt)}</time></span>
             </button>
           ))}
-          {loading && Array.from({ length: items.length ? 2 : 6 }, (_, i) => <div className="notif-skeleton" key={i} role="status" aria-label="Loading notifications"><span className="sk" /><span className="sk" /><span className="sk" /></div>)}
-          {failed && <p className="notif-note" role="alert">We could not load notifications. <button type="button" onClick={() => void loadMore()}>Try again</button></p>}
-          {!loading && !failed && items.length === 0 && !hasMore && <p className="notif-note">No notifications yet. Tap “Notify me” on a sold out item and we will tell you here when it is back.</p>}
-          {!hasMore && items.length > 0 && <p className="notif-note">That is everything.</p>}
+          {loading && Array.from({ length: items.length ? 2 : 6 }, (_, i) => (
+            <div className="notif-skeleton" key={i} role="status" aria-label={t.loadingAria}>
+              <span className="sk" /><span className="sk" /><span className="sk" />
+            </div>
+          ))}
+          {failed && (
+            <p className="notif-note" role="alert">
+              {t.loadFailed} <button type="button" onClick={() => void loadMore()}>{t.tryAgain}</button>
+            </p>
+          )}
+          {!loading && !failed && items.length === 0 && !hasMore && (
+            <p className="notif-note">{t.emptyNotice}</p>
+          )}
+          {!hasMore && items.length > 0 && <p className="notif-note">{t.endOfList}</p>}
           {hasMore && !failed && <div ref={sentinel} className="notif-sentinel" aria-hidden="true" />}
         </div>
       </aside>

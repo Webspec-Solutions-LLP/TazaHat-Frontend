@@ -1,0 +1,23 @@
+{
+  "language": "bn",
+  "closeAria": "তুলনা তালিকা বন্ধ করুন",
+  "title": "পণ্য তুলনা",
+  "productsCountAria": "{count}টি পণ্য",
+  "subtitle": "পাশাপাশি তুলনা করতে ২টি পণ্য নির্বাচন করুন",
+  "emptyTitle": "তুলনা করার মতো কোনো পণ্য নেই",
+  "emptyDescription": "দাম ও রেটিং তুলনা করতে পণ্যের পেজ থেকে আইটেম যোগ করুন।",
+  "itemsListAria": "তুলনার পণ্যসমূহ",
+  "selectForComparisonAria": "তুলনার জন্য {name} নির্বাচন করুন",
+  "deselectForComparisonAria": "তুলনা থেকে {name} বাদ দিন",
+  "clickToSelectTitle": "তুলনার জন্য নির্বাচন করতে ক্লিক করুন",
+  "clickToDeselectTitle": "নির্বাচন বাতিল করতে ক্লিক করুন",
+  "deleteItemAria": "{name} মুছুন",
+  "perUnit": "/ {unit}",
+  "clearAll": "সব মুছুন",
+  "continueCompare": "তুলনা চালিয়ে যান",
+  "close": "বন্ধ করুন",
+  "continueCompareTitle": "নির্বাচিত পণ্যগুলো তুলনা করতে এগিয়ে যান",
+  "selectMoreTitle": "তুলনা করতে আরও {count}টি {unit} নির্বাচন করুন",
+  "moreProductSingle": "পণ্য",
+  "moreProductPlural": "পণ্য"
+}

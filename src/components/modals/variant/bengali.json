@@ -1,0 +1,19 @@
+{
+  "language": "bn",
+  "chooseSize": "আপনার পছন্দের সাইজ বেছে নিন",
+  "closeAria": "ভ্যারিয়েন্ট নির্বাচন বন্ধ করুন",
+  "selectedSize": "নির্বাচিত সাইজ",
+  "availableSizes": "উপলব্ধ সাইজসমূহ",
+  "fromLabel": "{date} থেকে",
+  "outOfStock": "স্টক শেষ",
+  "quantityForVariantAria": "{label}-এর পরিমাণ",
+  "decreaseQuantityAria": "পরিমাণ কমান",
+  "increaseQuantityAria": "পরিমাণ বাড়ান",
+  "loadingDressingAria": "ড্রেসিং অপশন লোড হচ্ছে",
+  "dressingType": "কাটিং / ড্রেসিংয়ের ধরন",
+  "selectDressingType": "ড্রেসিংয়ের ধরন বেছে নিন",
+  "dressingRequiredError": "অনুগ্রহ করে প্রথমে একটি ড্রেসিংয়ের ধরন বেছে নিন।",
+  "specialInstruction": "বিশেষ নির্দেশনা",
+  "specialInstructionPlaceholder": "কীভাবে কাটতে হবে জানান (যেমন: ৬ টুকরো, মাথা ছাড়া...)",
+  "goToCart": "কার্টে যান"
+}

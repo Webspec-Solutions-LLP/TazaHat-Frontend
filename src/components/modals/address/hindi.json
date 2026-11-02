@@ -1,0 +1,33 @@
+{
+  "language": "hi",
+  "closeAria": "पता फॉर्म बंद करें",
+  "editTitle": "पता संपादित करें",
+  "addTitle": "नया पता जोड़ें",
+  "subtitle": "अपने डिलीवरी विवरण दर्ज करें",
+  "addressTypeLegend": "पते का प्रकार",
+  "addressTypeAria": "पते का प्रकार",
+  "addressTypes": [
+    { "id": "Home", "label": "घर" },
+    { "id": "Office", "label": "कार्यालय" },
+    { "id": "Other", "label": "अन्य" }
+  ],
+  "contactNameLabel": "डिलीवरी के लिए संपर्क नाम",
+  "contactNamePlaceholder": "नाम दर्ज करें",
+  "phoneLabel": "अपना फ़ोन नंबर दर्ज करें",
+  "phonePlaceholder": "10-अंकों का नंबर",
+  "altPhoneLabel": "वैकल्पिक फ़ोन नंबर दर्ज करें",
+  "altPhonePlaceholder": "10-अंकों का नंबर",
+  "localityLabel": "इलाका / मोहल्ला",
+  "houseNumberLabel": "मकान / फ्लैट नंबर",
+  "addressLine1Label": "पता पंक्ति 1",
+  "addressLine2Label": "पता पंक्ति 2",
+  "landmarkLabel": "लैंडमार्क (पहचान का स्थान)",
+  "pincodeLabel": "पिन कोड",
+  "pincodePlaceholder": "पिन कोड दर्ज करें",
+  "pincodeServiceable": "हम यहां डिलीवरी करते हैं: {locations}",
+  "pincodeNotServiceable": "हम अभी इस पिन कोड पर डिलीवरी नहीं करते हैं।",
+  "cancelButton": "रद्द करें",
+  "savingButton": "सहेजा जा रहा है…",
+  "saveAddressButton": "पता सहेजें",
+  "addAddressButton": "पता जोड़ें"
+}

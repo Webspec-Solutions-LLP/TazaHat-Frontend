@@ -1,0 +1,15 @@
+{
+  "language": "en",
+  "title": "Notifications",
+  "unreadCount": "{count} unread",
+  "maxUnreadCount": "99+",
+  "allCaughtUp": "You are all caught up",
+  "marking": "Marking…",
+  "markAllRead": "Mark all as read",
+  "closeAria": "Close notifications",
+  "loadingAria": "Loading notifications",
+  "loadFailed": "We could not load notifications.",
+  "tryAgain": "Try again",
+  "emptyNotice": "No notifications yet. Tap “Notify me” on a sold out item and we will tell you here when it is back.",
+  "endOfList": "That is everything."
+}

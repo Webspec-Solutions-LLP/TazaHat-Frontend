@@ -6,6 +6,16 @@ import { useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import { fallbackImage, isRemoteImage, PLACEHOLDER_IMAGE } from "@/lib/api";
 import "./CompareList.css";
+import { type SupportedLang, useLanguage } from "@/lib/language";
+import englishText from "./english.json";
+import bengaliText from "./bengali.json";
+import hindiText from "./hindi.json";
+
+const textMap: Record<SupportedLang, typeof englishText> = {
+  en: englishText,
+  bn: bengaliText,
+  hi: hindiText,
+};
 
 export interface CompareProduct {
   id: string;
@@ -40,6 +50,9 @@ export default function CompareList({
   onClearAll,
   onContinueCompare,
 }: CompareListProps) {
+  const [lang] = useLanguage();
+  const t = textMap[lang] || englishText;
+
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [closing, setClosing] = useState(false);
   const titleId = useId();
@@ -185,12 +198,12 @@ export default function CompareList({
         if (event.target === event.currentTarget) close();
       }}
     >
-      <section className="compare-sidebar-panel">
+      <section className="compare-sidebar-panel" lang={t.language}>
         <header className="compare-sidebar-header">
           <button
             className="compare-sidebar-close"
             type="button"
-            aria-label="Close compare list"
+            aria-label={t.closeAria}
             onClick={close}
           >
             <svg
@@ -207,13 +220,13 @@ export default function CompareList({
           </button>
           <div className="compare-sidebar-title-group">
             <div className="compare-sidebar-heading-row">
-              <h2 id={titleId}>Compare Products</h2>
-              <span className="compare-sidebar-count-badge" aria-label={`${items.length} products`}>
+              <h2 id={titleId}>{t.title}</h2>
+              <span className="compare-sidebar-count-badge" aria-label={t.productsCountAria.replace("{count}", String(items.length))}>
                 {items.length}
               </span>
             </div>
             <p className="compare-sidebar-instruction">
-              Select 2 products to compare side by side
+              {t.subtitle}
             </p>
           </div>
         </header>
@@ -236,11 +249,11 @@ export default function CompareList({
                   <path d="M4 17h16" />
                 </svg>
               </span>
-              <h3>No products to compare</h3>
-              <p>Add items from product pages to compare their price and rating.</p>
+              <h3>{t.emptyTitle}</h3>
+              <p>{t.emptyDescription}</p>
             </div>
           ) : (
-            <ul className="compare-items-list" aria-label="Compare items">
+            <ul className="compare-items-list" aria-label={t.itemsListAria}>
               {items.map(item => {
                 const isSelected = selectedIds.includes(item.id);
                 return (
@@ -250,9 +263,9 @@ export default function CompareList({
                     className={`compare-item-card${isSelected ? " is-selected" : ""}`}
                     role="checkbox"
                     aria-checked={isSelected}
-                    aria-label={`${isSelected ? "Deselect" : "Select"} ${item.name} for comparison`}
+                    aria-label={isSelected ? t.deselectForComparisonAria.replace("{name}", item.name) : t.selectForComparisonAria.replace("{name}", item.name)}
                     tabIndex={0}
-                    title={isSelected ? "Click to deselect" : "Click to select for comparison"}
+                    title={isSelected ? t.clickToDeselectTitle : t.clickToSelectTitle}
                     onClick={() => toggleSelect(item.id)}
                     onKeyDown={event => {
                       if (event.key === " " || event.key === "Enter") {
@@ -287,8 +300,8 @@ export default function CompareList({
                         <button
                           type="button"
                           className="compare-item-remove"
-                          aria-label={`Delete ${item.name}`}
-                          title={`Delete ${item.name}`}
+                          aria-label={t.deleteItemAria.replace("{name}", item.name)}
+                          title={t.deleteItemAria.replace("{name}", item.name)}
                           onClick={event => {
                             event.stopPropagation();
                             handleRemove(item.id);
@@ -338,7 +351,7 @@ export default function CompareList({
                         )}
                         {item.unit && (
                           <span className="compare-unit-val">
-                            / {item.unit}
+                            {t.perUnit.replace("{unit}", item.unit)}
                           </span>
                         )}
                       </div>
@@ -357,7 +370,7 @@ export default function CompareList({
               className="compare-clear-btn"
               onClick={handleClear}
             >
-              Clear All
+              {t.clearAll}
             </button>
           )}
           <button
@@ -367,13 +380,18 @@ export default function CompareList({
             onClick={items.length === 0 ? close : handleContinueCompare}
             title={
               items.length === 0
-                ? "Close"
+                ? t.close
                 : selectedIds.length >= 2
-                ? "Continue to compare selected products"
-                : `Select ${2 - selectedIds.length} more product${2 - selectedIds.length === 1 ? "" : "s"} to compare`
+                ? t.continueCompareTitle
+                : t.selectMoreTitle
+                    .replace("{count}", String(2 - selectedIds.length))
+                    .replace(
+                      "{unit}",
+                      2 - selectedIds.length === 1 ? t.moreProductSingle : t.moreProductPlural
+                    )
             }
           >
-            {items.length > 0 ? "Continue Compare" : "Close"}
+            {items.length > 0 ? t.continueCompare : t.close}
           </button>
         </footer>
       </section>

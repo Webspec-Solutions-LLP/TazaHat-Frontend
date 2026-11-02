@@ -7,6 +7,16 @@ import { useBackClose } from "@/lib/backLayers";
 import { useCallback, useEffect, useId, useState } from "react";
 import Image from "next/image";
 import "./Confermation.css";
+import { type SupportedLang, useLanguage } from "@/lib/language";
+import englishText from "./confermation.english.json";
+import bengaliText from "./confermation.bengali.json";
+import hindiText from "./confermation.hindi.json";
+
+const textMap: Record<SupportedLang, typeof englishText> = {
+  en: englishText,
+  bn: bengaliText,
+  hi: hindiText,
+};
 
 export interface ConfermationProps {
   onClose: () => void;
@@ -23,8 +33,11 @@ export default function Confermation({
   onNo,
   productName,
   productImage,
-  message = "Do you want to compare this to other product?",
+  message,
 }: ConfermationProps) {
+  const [lang] = useLanguage();
+  const t = textMap[lang] || englishText;
+  const displayMessage = message || t.defaultMessage;
   const [isClosing, setIsClosing] = useState(false);
   const titleId = useId();
 
@@ -87,7 +100,7 @@ export default function Confermation({
           type="button"
           className="confermation-close"
           onClick={() => closeWithAnimation()}
-          aria-label="Close confirmation"
+          aria-label={t.closeAria}
         >
           <svg
             viewBox="0 0 24 24"
@@ -120,7 +133,7 @@ export default function Confermation({
         </div>
 
         <h3 id={titleId} className="confermation-title">
-          {message}
+          {displayMessage}
         </h3>
 
         {productName && (
@@ -145,7 +158,7 @@ export default function Confermation({
         )}
 
         <p className="confermation-desc">
-          Compare this item side-by-side with other products in your compare list.
+          {t.desc}
         </p>
 
         <div className="confermation-actions">
@@ -154,14 +167,14 @@ export default function Confermation({
             className="confermation-btn confermation-no-btn"
             onClick={handleNo}
           >
-            No
+            {t.noBtn}
           </button>
           <button
             type="button"
             className="confermation-btn confermation-yes-btn"
             onClick={handleYes}
           >
-            Yes
+            {t.yesBtn}
           </button>
         </div>
       </div>
