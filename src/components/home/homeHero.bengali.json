@@ -1,0 +1,33 @@
+{
+  "language": "bn",
+  "heroAriaLabel": "TazaHaat থেকে তাজা খাবার",
+  "sliderContainerMessage": "তাজা খাবারের ব্যানার",
+  "fallbackEyebrow": "TazaHat অফার",
+  "fallbackTitle": "প্রতিদিন টাটকা",
+  "fallbackAction": "এখনই কিনুন",
+  "promoKicker": "ভালো খাবার, সহজে",
+  "promoTitle": "আপনার পরিবারের জন্য সেরা নির্বাচন",
+  "promoLink": "বাজার ঘুরে দেখুন",
+  "banners": [
+    {
+      "image": "/images/banner6.webp",
+      "alt": "হুগলি নদী ও হাওড়া ব্রিজের কাছে তাজা মাছ ও সামুদ্রিক খাবার",
+      "sideImage": "/images/banner2.webp",
+      "sideAlt": "টাটকা মাছ, সামুদ্রিক খাবার, মাংস ও পোল্ট্রি",
+      "eyebrow": "নদী থেকে সরাসরি টাটকা",
+      "title": "টাটকা মাছ। সেরা স্বাদ।",
+      "description": "যত্নসহকারে বাছাই করা সামুদ্রিক খাবার, সরাসরি আপনার রান্নাঘরে।",
+      "action": "সি-ফুড কিনুন"
+    },
+    {
+      "image": "/images/banner7.webp",
+      "alt": "খামার থেকে তাজা শাকসবজি, ফলমূল এবং দুগ্ধজাত পণ্য",
+      "sideImage": "/images/banner3.webp",
+      "sideAlt": "দুধ, পনির এবং দই সহ তাজা দুগ্ধজাত পণ্য",
+      "eyebrow": "প্রতিদিনের সুস্বাদু পুষ্টিকর খাবার",
+      "title": "টাটকা ফসল আপনার ঘরে।",
+      "description": "খামারের টাটকা পণ্য ও নিত্যপ্রয়োজনীয় সামগ্রী, পৌঁছে যাবে যত্নসহকারে।",
+      "action": "টাটকা পণ্য কিনুন"
+    }
+  ]
+}

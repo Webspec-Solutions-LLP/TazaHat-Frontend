@@ -1,0 +1,29 @@
+{
+  "language": "hi",
+  "heading": "श्रेणी के अनुसार खरीदारी करें",
+  "description": "अपनी दैनिक ज़रूरतों के लिए ताज़ा उत्पाद देखें",
+  "viewAll": "सभी देखें",
+  "showLess": "कम देखें",
+  "productType": "प्रकार के उत्पाद",
+  "productTypes": "प्रकार के उत्पाद",
+  "allCategoriesLabel": "सभी उत्पाद श्रेणियां",
+  "sliderAccessibility": {
+    "containerMessage": "उत्पाद श्रेणियां। देखने के लिए स्वाइप करें या एरो कीज का उपयोग करें।",
+    "containerRoleDescriptionMessage": "कैरोसेल",
+    "itemRoleDescriptionMessage": "स्लाइड",
+    "slideLabelMessage": "{{index}} / {{slidesLength}}",
+    "prevSlideMessage": "पिछली श्रेणी",
+    "nextSlideMessage": "अगली श्रेणी",
+    "firstSlideMessage": "यह पहली श्रेणी है",
+    "lastSlideMessage": "यह आखिरी श्रेणी है"
+  },
+  "categories": [
+    { "id": "vegetables", "name": "सब्जियां", "types": 32, "image": "/images/category/category2.webp", "color": "#edf6e8" },
+    { "id": "fruits", "name": "फल", "types": 24, "image": "/images/category/category3.webp", "color": "#fff4db" },
+    { "id": "fish-seafood", "name": "मछली और सीफ़ूड", "types": 18, "image": "/images/category/category1.png", "color": "#eaf4fc" },
+    { "id": "meat-poultry", "name": "मीट और पोल्ट्री", "types": 12, "image": "/images/category/category5.webp", "color": "#fcecee" },
+    { "id": "dairy-eggs", "name": "डेयरी और अंडे", "types": 16, "image": "/images/category/category4.webp", "color": "#f0edfc" },
+    { "id": "grocery-staples", "name": "किराना और आवश्यक सामग्री", "types": 45, "image": "/images/category/category6.webp", "color": "#f9f1e3" },
+    { "id": "snacks-bakery", "name": "स्नैक्स और बेकरी", "types": 28, "image": "/images/category/category7.webp", "color": "#e8f5ef" }
+  ]
+}

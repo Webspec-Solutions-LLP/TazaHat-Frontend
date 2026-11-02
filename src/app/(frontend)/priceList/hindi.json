@@ -1,0 +1,245 @@
+{
+  "language": "hi",
+  "locale": "hi-IN",
+  "currency": "INR",
+  "brand": "TazaHaat",
+  "region": "पश्चिम बंगाल",
+  "heroTitle": "मूल्य",
+  "heroHighlight": "सूची",
+  "tagline": "विश्वसनीय ताज़गी। स्वाद में गुणवत्ता।",
+  "heading": "TazaHaat पश्चिम बंगाल",
+  "headingHighlight": "मूल्य सूची",
+  "demoNotice": "पूर्वावलोकन के लिए नमूना मूल्य। ऑर्डर करने से पहले उपलब्धता और मौजूदा कीमतों की पुष्टि करें।",
+  "validLabel": "नमूना मूल्य अवधि",
+  "validFrom": "2026-10-15",
+  "validTo": "2026-10-16",
+  "orderNow": "अभी ऑर्डर करें",
+  "browse": "उत्पाद ब्राउज़ करें",
+  "appLabel": "Google Play पर पाएं",
+  "appNote": "ताज़े उत्पाद, अब आपकी उंगलियों पर",
+  "offerTitle": "ताज़ा उत्पाद",
+  "offerText": "हर दिन शानदार बचत",
+  "off": "छूट",
+  "perUnit": "/{unit}",
+  "empty": "इस श्रेणी में अभी कोई उत्पाद नहीं है।",
+  "close": "बंद करें",
+  "preview": "उत्पाद पूर्वावलोकन",
+  "orderNote": "ऑनलाइन ऑर्डरिंग अभी उपलब्ध नहीं है। अधिक ताज़ा उत्पादों के लिए हमारा कैटलॉग देखें।",
+  "heroImage": "/images/priceListHero section.webp",
+  "playstoreImage": "/images/playstore.webp",
+  "logo": "/images/logo.webp",
+  "benefits": [
+    {
+      "icon": "leaf",
+      "label": "ताज़ा और गुणवत्तापूर्ण"
+    },
+    {
+      "icon": "cut",
+      "label": "स्पेशल कट्स"
+    },
+    {
+      "icon": "snow",
+      "label": "पकाने के लिए तैयार"
+    },
+    {
+      "icon": "box",
+      "label": "सावधानी से पैक किया गया"
+    }
+  ],
+  "categories": [
+    {
+      "id": "fish",
+      "name": "मछली और सीफ़ूड",
+      "image": "/images/category/category1.png",
+      "icon": ""
+    },
+    {
+      "id": "vegetables",
+      "name": "सब्जियां",
+      "image": "/images/category/category2.webp",
+      "icon": ""
+    },
+    {
+      "id": "fruits",
+      "name": "फल",
+      "image": "/images/category/category3.webp",
+      "icon": ""
+    },
+    {
+      "id": "dairy",
+      "name": "डेयरी और अंडे",
+      "image": "/images/category/category4.webp",
+      "icon": ""
+    },
+    {
+      "id": "meat",
+      "name": "मीट और पोल्ट्री",
+      "image": "/images/category/category5.webp",
+      "icon": ""
+    },
+    {
+      "id": "grocery",
+      "name": "किराना और आवश्यक सामग्री",
+      "image": "/images/category/category6.webp",
+      "icon": ""
+    },
+    {
+      "id": "bakery",
+      "name": "स्नैक्स और बेकरी",
+      "image": "/images/category/category7.webp",
+      "icon": ""
+    },
+    {
+      "id": "offers",
+      "name": "ऑफ़र्स",
+      "image": "",
+      "icon": "percent"
+    }
+  ],
+  "products": [
+    {
+      "id": "rohu",
+      "name": "रोहू मछली - ताज़ा",
+      "image": "/images/products/product--2.png",
+      "category": "fish",
+      "price": 360,
+      "originalPrice": 440,
+      "unit": "किग्रा"
+    },
+    {
+      "id": "pomfret",
+      "name": "ताज़ा पोंफ्रेट - साबुत",
+      "image": "/images/products/product16.png",
+      "category": "fish",
+      "price": 699,
+      "originalPrice": 850,
+      "unit": "किग्रा"
+    },
+    {
+      "id": "hilsa",
+      "name": "हिल्सा / इलिश - साबुत",
+      "image": "/images/products/product18.png",
+      "category": "fish",
+      "price": 1099,
+      "originalPrice": 1299,
+      "unit": "किग्रा"
+    },
+    {
+      "id": "prawns",
+      "name": "ताज़ा मध्यम झींगा",
+      "image": "/images/products/product--6.png",
+      "category": "fish",
+      "price": 640,
+      "originalPrice": 790,
+      "unit": "किग्रा"
+    },
+    {
+      "id": "crab",
+      "name": "ताज़ा मड क्रैब (केकड़ा)",
+      "image": "/images/products/product17.png",
+      "category": "fish",
+      "price": 580,
+      "originalPrice": 700,
+      "unit": "किग्रा"
+    },
+    {
+      "id": "fish-cuts",
+      "name": "रोहू करी कट",
+      "image": "/images/products/product--2.png",
+      "category": "fish",
+      "price": 390,
+      "originalPrice": 480,
+      "unit": "किग्रा"
+    },
+    {
+      "id": "chicken",
+      "name": "चिकन करी कट",
+      "image": "/images/products/product--1.png",
+      "category": "meat",
+      "price": 220,
+      "originalPrice": 260,
+      "unit": "500 ग्राम"
+    },
+    {
+      "id": "mutton",
+      "name": "मटन करी कट",
+      "image": "/images/products/product--7.png",
+      "category": "meat",
+      "price": 480,
+      "originalPrice": 560,
+      "unit": "500 ग्राम"
+    },
+    {
+      "id": "ready-fish",
+      "name": "साफ की गई मछली - पकाने के लिए तैयार",
+      "image": "/images/products/product16.png",
+      "category": "fish",
+      "price": 420,
+      "originalPrice": 500,
+      "unit": "500 ग्राम"
+    },
+    {
+      "id": "tomato",
+      "name": "ताज़ा टमाटर",
+      "image": "/images/products/product--3.png",
+      "category": "vegetables",
+      "price": 30,
+      "originalPrice": 40,
+      "unit": "किग्रा"
+    },
+    {
+      "id": "apple",
+      "name": "ताज़ा सेब",
+      "image": "/images/products/product--5.png",
+      "category": "fruits",
+      "price": 90,
+      "originalPrice": 120,
+      "unit": "500 ग्राम"
+    },
+    {
+      "id": "milk",
+      "name": "ताज़ा दूध",
+      "image": "/images/products/product--4.png",
+      "category": "dairy",
+      "price": 60,
+      "originalPrice": 70,
+      "unit": "लीटर"
+    },
+    {
+      "id": "staples",
+      "name": "चावल और दाल कॉम्बो",
+      "image": "/images/category/category6.webp",
+      "category": "grocery",
+      "price": 180,
+      "originalPrice": 220,
+      "unit": "पैक"
+    },
+    {
+      "id": "bakery",
+      "name": "अस्सोर्टेड बेकरी पैक",
+      "image": "/images/category/category7.webp",
+      "category": "bakery",
+      "price": 140,
+      "originalPrice": 175,
+      "unit": "पैक"
+    }
+  ],
+  "socialLabel": "सोशल मीडिया",
+  "socials": [
+    {
+      "id": "instagram",
+      "name": "Instagram",
+      "url": "https://www.instagram.com/"
+    },
+    {
+      "id": "whatsapp",
+      "name": "WhatsApp",
+      "url": "https://www.whatsapp.com/"
+    },
+    {
+      "id": "facebook",
+      "name": "Facebook",
+      "url": "https://www.facebook.com/"
+    }
+  ]
+}

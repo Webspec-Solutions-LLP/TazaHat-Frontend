@@ -1,0 +1,29 @@
+{
+  "language": "bn",
+  "heading": "ক্যাটাগরি অনুযায়ী কেনাকাটা",
+  "description": "আপনার দৈনন্দিন প্রয়োজনে টাটকা নিত্যপ্রয়োজনীয় পণ্য ঘুরে দেখুন",
+  "viewAll": "সব দেখুন",
+  "showLess": "কম দেখুন",
+  "productType": "ধরনের পণ্য",
+  "productTypes": "ধরনের পণ্য",
+  "allCategoriesLabel": "সকল পণ্যের ক্যাটাগরি",
+  "sliderAccessibility": {
+    "containerMessage": "পণ্যের ক্যাটাগরি। দেখতে সোয়াইপ করুন অথবা তীর কী ব্যবহার করুন।",
+    "containerRoleDescriptionMessage": "ক্যারোসেল",
+    "itemRoleDescriptionMessage": "স্লাইড",
+    "slideLabelMessage": "{{index}} / {{slidesLength}}",
+    "prevSlideMessage": "পূর্ববর্তী ক্যাটাগরি",
+    "nextSlideMessage": "পরবর্তী ক্যাটাগরি",
+    "firstSlideMessage": "এটি প্রথম ক্যাটাগরি",
+    "lastSlideMessage": "এটি শেষ ক্যাটাগরি"
+  },
+  "categories": [
+    { "id": "vegetables", "name": "শাকসবজি", "types": 32, "image": "/images/category/category2.webp", "color": "#edf6e8" },
+    { "id": "fruits", "name": "ফলমূল", "types": 24, "image": "/images/category/category3.webp", "color": "#fff4db" },
+    { "id": "fish-seafood", "name": "মাছ ও সামুদ্রিক খাবার", "types": 18, "image": "/images/category/category1.png", "color": "#eaf4fc" },
+    { "id": "meat-poultry", "name": "মাংস ও পোল্ট্রি", "types": 12, "image": "/images/category/category5.webp", "color": "#fcecee" },
+    { "id": "dairy-eggs", "name": "দুগ্ধজাত ও ডিম", "types": 16, "image": "/images/category/category4.webp", "color": "#f0edfc" },
+    { "id": "grocery-staples", "name": "মুদি ও নিত্যপ্রয়োজনীয় সামগ্রী", "types": 45, "image": "/images/category/category6.webp", "color": "#f9f1e3" },
+    { "id": "snacks-bakery", "name": "স্ন্যাকস ও বেকারি", "types": 28, "image": "/images/category/category7.webp", "color": "#e8f5ef" }
+  ]
+}

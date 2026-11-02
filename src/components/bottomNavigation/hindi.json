@@ -1,0 +1,27 @@
+{
+  "language": "hi",
+  "navAriaLabel": "मोबाइल नेविगेशन",
+  "openCartAria": "कार्ट खोलें",
+  "items": [
+    {
+      "id": "home",
+      "label": "होम",
+      "href": "/"
+    },
+    {
+      "id": "delivery",
+      "label": "डिलीवरी",
+      "href": "/deliveryService"
+    },
+    {
+      "id": "account",
+      "label": "अकाउंट",
+      "href": "/myprofile"
+    },
+    {
+      "id": "cart",
+      "label": "कार्ट",
+      "href": "/cart"
+    }
+  ]
+}

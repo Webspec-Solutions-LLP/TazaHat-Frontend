@@ -1,0 +1,27 @@
+{
+  "language": "en",
+  "navAriaLabel": "Mobile navigation",
+  "openCartAria": "Open cart",
+  "items": [
+    {
+      "id": "home",
+      "label": "Home",
+      "href": "/"
+    },
+    {
+      "id": "delivery",
+      "label": "Delivery",
+      "href": "/deliveryService"
+    },
+    {
+      "id": "account",
+      "label": "Account",
+      "href": "/myprofile"
+    },
+    {
+      "id": "cart",
+      "label": "Cart",
+      "href": "/cart"
+    }
+  ]
+}
