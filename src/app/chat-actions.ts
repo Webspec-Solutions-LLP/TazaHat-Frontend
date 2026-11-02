@@ -3,7 +3,13 @@
 import { userApi } from "@/lib/server/session";
 
 /** Support chat of the signed-in customer (server actions: the login tokens stay in httpOnly cookies). */
-export interface ChatMsg { id: string; threadId: string; text: string; fromSupport: boolean; createdAt: string; readAt: string | null; clientId: string | null; imageUrl: string | null }
+export interface ChatMsg {
+  id: string; threadId: string; text: string; fromSupport: boolean; createdAt: string; readAt: string | null; clientId: string | null; imageUrl: string | null;
+  voiceUrl: string | null; voiceSeconds: number | null; transcript: string | null;
+  /** the old system's pictures / recordings: the file is gone, a "not available" card is shown */
+  legacyMedia: "image" | "voice" | "video" | "document" | null;
+}
+export interface ChatMedia { imageUrl?: string; voiceUrl?: string; voiceSeconds?: number; transcript?: string }
 export interface ChatOpen { threadId: string; messages: ChatMsg[]; hasMore: boolean; unread: number }
 type Result<T> = { ok: true; data: T } | { ok: false; error: string };
 
@@ -20,8 +26,11 @@ export async function chatOlderAction(before: { createdAt: string; id: string })
   return res.ok ? { ok: true, data: res.data } : { ok: false, error: res.message };
 }
 
-export async function chatSendAction(text: string, clientId: string): Promise<Result<ChatMsg>> {
-  const res = await userApi<{ message: ChatMsg }>("/chat/messages", { method: "POST", body: { text: String(text).slice(0, 2000), clientId: String(clientId).slice(0, 60) } });
+export async function chatSendAction(text: string, clientId: string, media?: ChatMedia): Promise<Result<ChatMsg>> {
+  const res = await userApi<{ message: ChatMsg }>("/chat/messages", {
+    method: "POST",
+    body: { text: String(text).slice(0, 2000), clientId: String(clientId).slice(0, 60), ...(media?.imageUrl ? { imageUrl: String(media.imageUrl).slice(0, 200) } : {}), ...(media?.voiceUrl ? { voiceUrl: String(media.voiceUrl).slice(0, 200), voiceSeconds: Math.min(60, Math.max(1, Math.round(Number(media.voiceSeconds) || 1))), transcript: String(media.transcript ?? "").slice(0, 3000) } : {}) },
+  });
   return res.ok ? { ok: true, data: res.data.message } : { ok: false, error: res.message };
 }
 
