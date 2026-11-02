@@ -107,7 +107,7 @@ export default function Products({ heading, products, showViewAll = true, layout
         <div className="products-header"><h2 id="products-heading">{sectionHeading}</h2>{showViewAll && <Link href="/products" className="products-view-all">{text.viewAll}</Link>}</div>
         {layout === "grid" ? <div id="products-list" className="products-grid">{displayedProducts.map(renderProduct)}</div> : <div id="products-list">
             <Swiper className="products-slider" modules={[A11y, Keyboard, Mousewheel]} slidesPerView={1.7} spaceBetween={8} breakpoints={{ 451: { slidesPerView: 2.1, spaceBetween: 9 }, 576: { slidesPerView: 2.7, spaceBetween: 10 }, 679: { slidesPerView: 3.5, spaceBetween: 10 }, 877: { slidesPerView: 4.5, spaceBetween: 12 }, 1300: { slidesPerView: 5.5, spaceBetween: 12 } }} keyboard={{ enabled: true, onlyInViewport: true }} mousewheel={{ forceToAxis: true }} a11y={{ containerMessage: sliderLabel, slideLabelMessage: text.columnLabel }} tabIndex={0} onReachEnd={() => onReachEnd?.()} onAfterInit={swiper => { if (swiper.isEnd) onReachEnd?.(); }}>
-              {columns.map((column) => <SwiperSlide key={column[0].id}><div className="products-column">{column.map(renderProduct)}</div></SwiperSlide>)}
+              {columns.map((column) => <SwiperSlide key={column[0].id}><div className={`products-column${productsPerSlide === 1 ? " is-single" : ""}`}>{column.map(renderProduct)}</div></SwiperSlide>)}
               {loadingMore && <SwiperSlide key="loading-more"><div className="products-column" role="status" aria-label="Loading more products"><ProductCardSkeleton />{productsPerSlide === 2 && <ProductCardSkeleton />}</div></SwiperSlide>}
             </Swiper>
         </div>}

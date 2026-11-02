@@ -106,6 +106,11 @@
   gap: 12px;
 }
 
+/* one card per column (a shelf with few products): no empty second row */
+.products-column.is-single {
+  grid-template-rows: auto;
+}
+
 .products-grid {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
