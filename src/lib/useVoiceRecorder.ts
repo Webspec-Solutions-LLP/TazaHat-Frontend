@@ -11,7 +11,41 @@ import { useCallback, useEffect, useRef, useState } from "react";
  */
 export const MAX_VOICE_SECONDS = 60;
 
-export interface VoiceResult { blob: Blob; seconds: number; transcript: string; mime: string }
+export interface VoiceResult { blob: Blob; seconds: number; transcript: string; mime: string; /** loudness along the recording: 40 numbers, 0-100 (the bars of the voice message) */ waveform: number[] }
+export const WAVE_BARS = 40;
+
+/** any number of loudness samples -> WAVE_BARS bars: the loudest part is full height, quiet parts stay visible */
+export function toBars(samples: number[], bars = WAVE_BARS): number[] {
+  if (!samples.length) return [];
+  const out: number[] = [];
+  for (let i = 0; i < bars; i++) {
+    const a = Math.floor((i * samples.length) / bars), b = Math.max(a + 1, Math.floor(((i + 1) * samples.length) / bars));
+    let peak = 0;
+    for (let k = a; k < b && k < samples.length; k++) peak = Math.max(peak, samples[k]);
+    out.push(peak);
+  }
+  const max = Math.max(...out, 0.0001);
+  return out.map((v) => Math.max(8, Math.round(Math.pow(v / max, 0.7) * 100)));
+}
+
+const peaksCache = new Map<string, number[]>();
+/** bars for a recording that has none stored (made before they existed): decoded in the browser once */
+export async function peaksFromUrl(url: string): Promise<number[]> {
+  const hit = peaksCache.get(url);
+  if (hit) return hit;
+  try {
+    const buf = await (await fetch(url)).arrayBuffer();
+    const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const ctx = new Ctx();
+    const audio = await ctx.decodeAudioData(buf);
+    void ctx.close();
+    const data = audio.getChannelData(0), step = Math.max(1, Math.floor(data.length / 400)), rms: number[] = [];
+    for (let i = 0; i < data.length; i += step) { let sum = 0, n = 0; for (let k = i; k < Math.min(data.length, i + step); k += 8) { sum += data[k] * data[k]; n++; } rms.push(Math.sqrt(sum / Math.max(1, n))); }
+    const bars = toBars(rms);
+    peaksCache.set(url, bars);
+    return bars;
+  } catch { return []; }
+}
 type Recognition = { start: () => void; stop: () => void; abort: () => void; lang: string; continuous: boolean; interimResults: boolean; onresult: ((e: { resultIndex: number; results: ArrayLike<{ isFinal: boolean; 0: { transcript: string } }> }) => void) | null; onend: (() => void) | null; onerror: (() => void) | null };
 
 const MIMES = ["audio/mp4;codecs=mp4a.40.2", "audio/mp4", "audio/webm;codecs=opus", "audio/webm", "audio/ogg;codecs=opus"];
@@ -24,6 +58,11 @@ export function voiceSupported() {
 export function useVoiceRecorder(language = "en", onLimit?: (r: VoiceResult) => void) {
   const [recording, setRecording] = useState(false);
   const [seconds, setSeconds] = useState(0);
+  /** the last moments of the voice, for the moving bars while recording */
+  const [live, setLive] = useState<number[]>([]);
+  const samples = useRef<number[]>([]);
+  const audioCtx = useRef<AudioContext | null>(null);
+  const meter = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
   const [error, setError] = useState("");
   const rec = useRef<MediaRecorder | null>(null);
   const stream = useRef<MediaStream | null>(null);
@@ -39,6 +78,9 @@ export function useVoiceRecorder(language = "en", onLimit?: (r: VoiceResult) => 
 
   const cleanup = useCallback(() => {
     clearInterval(timer.current);
+    clearInterval(meter.current);
+    void audioCtx.current?.close().catch(() => undefined);
+    audioCtx.current = null;
     stream.current?.getTracks().forEach((t) => t.stop());
     stream.current = null;
     try { recog.current?.abort(); } catch { /* not running */ }
@@ -62,14 +104,31 @@ export function useVoiceRecorder(language = "en", onLimit?: (r: VoiceResult) => 
       stream.current = s;
       const mime = MIMES.find((m) => MediaRecorder.isTypeSupported(m));
       const r = new MediaRecorder(s, mime ? { mimeType: mime } : undefined);
-      chunks.current = []; said.current = ""; keep.current = true;
+      chunks.current = []; said.current = ""; keep.current = true; samples.current = []; setLive([]);
+      // how loud it is, 12 times a second: the bars of the message (and the moving bars while recording)
+      try {
+        const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        const ctx = new Ctx(), an = ctx.createAnalyser();
+        an.fftSize = 512;
+        ctx.createMediaStreamSource(s).connect(an);
+        audioCtx.current = ctx;
+        const buf = new Uint8Array(an.fftSize);
+        meter.current = setInterval(() => {
+          an.getByteTimeDomainData(buf);
+          let sum = 0;
+          for (let i = 0; i < buf.length; i++) { const x = (buf[i] - 128) / 128; sum += x * x; }
+          const level = Math.sqrt(sum / buf.length);
+          samples.current.push(level);
+          setLive((cur) => [...cur.slice(-35), level]);
+        }, 80);
+      } catch { /* no meter: the message simply has no bars until they are read from the file */ }
       r.ondataavailable = (e) => { if (e.data.size) chunks.current.push(e.data); };
       r.onstop = () => {
         const secs = Math.min(MAX_VOICE_SECONDS, Math.max(1, Math.round((Date.now() - started.current) / 1000)));
         const type = (r.mimeType || mime || "audio/webm").split(";")[0];
         const blob = new Blob(chunks.current, { type });
         cleanup();
-        const result = keep.current && blob.size > 0 ? { blob, seconds: secs, transcript: said.current.replace(/\s+/g, " ").trim(), mime: type } : null;
+        const result = keep.current && blob.size > 0 ? { blob, seconds: secs, transcript: said.current.replace(/\s+/g, " ").trim(), mime: type, waveform: toBars(samples.current) } : null;
         if (settle.current) { settle.current(result); settle.current = null; } else if (result) limit.current?.(result);
       };
       rec.current = r;
@@ -110,7 +169,7 @@ export function useVoiceRecorder(language = "en", onLimit?: (r: VoiceResult) => 
 
   const cancel = useCallback(() => { settle.current = null; finish(false); cleanup(); }, [cleanup, finish]);
 
-  return { recording, seconds, error, start, stop, cancel, supported: voiceSupported() };
+  return { recording, seconds, live, error, start, stop, cancel, supported: voiceSupported() };
 }
 
 /** uploads a picture or a recording of the chat; returns the address to put on the message */

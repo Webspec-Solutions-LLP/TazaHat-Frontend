@@ -560,3 +560,17 @@
 .chat-lightbox img { max-width: 100%; max-height: 100%; border-radius: 8px; object-fit: contain; }
 .chat-lightbox button { position: absolute; top: 14px; right: 16px; width: 38px; height: 38px; border: 0; border-radius: 50%; background: rgb(255 255 255 / 18%); color: #fff; font-size: 24px; line-height: 1; cursor: pointer; }
 @media (prefers-reduced-motion: reduce) { .chat-rec-dot { animation: none; } }
+
+/* sound bars (tall where the voice is loud) */
+.chat-wave { display: flex; flex: 1; min-width: 0; height: 30px; align-items: center; gap: 2px; cursor: pointer; touch-action: none; }
+.chat-wave i { display: block; flex: 1; min-width: 2px; max-width: 4px; border-radius: 2px; background: #b9c6c0; transition: background-color .12s; }
+.chat-wave i.is-played { background: #0b6ab8; }
+.chat-rec-wave { display: flex; flex: 1; min-width: 20px; height: 28px; align-items: center; gap: 2px; overflow: hidden; }
+.chat-rec-wave i { display: block; flex: 1; min-width: 2px; max-width: 4px; border-radius: 2px; background: #e44c43; transition: height .08s linear; }
+
+/* skeleton bubbles */
+.chat-sk-group { display: flex; flex-direction: column; gap: 9px; padding: 4px 2px 8px; }
+.chat-sk-row { display: flex; justify-content: flex-start; }
+.chat-sk-row.is-mine { justify-content: flex-end; }
+.chat-sk-row .sk { border-radius: 11px 11px 11px 3px; background: #e3ebe5; }
+.chat-sk-row.is-mine .sk { border-radius: 11px 11px 3px 11px; background: #d9ecd4; }

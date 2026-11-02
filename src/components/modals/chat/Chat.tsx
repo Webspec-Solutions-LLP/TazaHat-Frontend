@@ -4,6 +4,7 @@ import { useBackClose } from "@/lib/backLayers";
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
 import "./Chat.css";
+import "@/components/skeleton/Skeleton.css";
 import { useAuth } from "@/lib/auth";
 import { MAX_VOICE_SECONDS, uploadChatMedia, useVoiceRecorder, type VoiceResult } from "@/lib/useVoiceRecorder";
 import { useLanguage } from "@/lib/language";
@@ -11,7 +12,7 @@ import VoiceBubble from "./VoiceBubble";
 import { chatOlderAction, chatOpenAction, chatReadAction, chatSendAction, chatTypingAction, type ChatMedia, type ChatMsg } from "@/app/chat-actions";
 
 /** a message on screen: the saved one, or one still being sent / that failed (kept with its own id so a retry never duplicates it) */
-type Row = ChatMsg & { state?: "sending" | "failed"; /** kept so a failed message can be sent again */ retry?: { media?: ChatMedia; blob?: Blob; kind?: "image" | "voice"; transcript?: string; seconds?: number } };
+type Row = ChatMsg & { state?: "sending" | "failed"; /** kept so a failed message can be sent again */ retry?: { media?: ChatMedia; blob?: Blob; kind?: "image" | "voice"; transcript?: string; seconds?: number; waveform?: number[] } };
 
 export interface ChatProps {
   onClose: () => void;
@@ -31,6 +32,12 @@ function dayLabel(iso: string) {
   return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Kolkata" });
 }
 const newId = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `c${Date.now()}${Math.random().toString(36).slice(2, 8)}`);
+
+/** grey bubbles with a soft shine while the conversation loads (alternating sides, like real messages) */
+function ChatSkeleton({ rows }: { rows: number }) {
+  const widths = [62, 44, 74, 38, 56, 68];
+  return <>{Array.from({ length: rows }, (_, i) => <div key={i} className={`chat-sk-row${i % 2 ? " is-mine" : ""}`}><span className="sk" style={{ width: `${widths[i % widths.length]}%`, height: i % 3 === 2 ? 46 : 30 }} /></div>)}</>;
+}
 
 /** WhatsApp-style support chat: signed-in customers only, the last 20 messages first, 10 more each time you scroll up, live replies, ticks and "typing...". */
 export default function Chat({ onClose, product, requestCloseRef }: ChatProps) {
@@ -143,10 +150,10 @@ export default function Chat({ onClose, product, requestCloseRef }: ChatProps) {
   };
 
   /** sends a message; a picture / recording is uploaded first. A failed one stays on screen with "Tap to retry". */
-  const send = async (text: string, opts: { clientId?: string; retry?: boolean; blob?: Blob; kind?: "image" | "voice"; seconds?: number; transcript?: string; preview?: string } = {}) => {
+  const send = async (text: string, opts: { clientId?: string; retry?: boolean; blob?: Blob; kind?: "image" | "voice"; seconds?: number; transcript?: string; waveform?: number[]; preview?: string } = {}) => {
     const clientId = opts.clientId ?? newId();
     const now = new Date().toISOString();
-    const local: Row = { id: `local-${clientId}`, threadId: "", text, fromSupport: false, createdAt: now, readAt: null, clientId, imageUrl: opts.kind === "image" ? opts.preview ?? null : null, voiceUrl: opts.kind === "voice" && opts.blob ? URL.createObjectURL(opts.blob) : null, voiceSeconds: opts.seconds ?? null, transcript: opts.transcript || null, legacyMedia: null, state: "sending", retry: { blob: opts.blob, kind: opts.kind, seconds: opts.seconds, transcript: opts.transcript } };
+    const local: Row = { id: `local-${clientId}`, threadId: "", text, fromSupport: false, createdAt: now, readAt: null, clientId, imageUrl: opts.kind === "image" ? opts.preview ?? null : null, voiceUrl: opts.kind === "voice" && opts.blob ? URL.createObjectURL(opts.blob) : null, voiceSeconds: opts.seconds ?? null, transcript: opts.transcript || null, waveform: opts.waveform ?? [], legacyMedia: null, state: "sending", retry: { blob: opts.blob, kind: opts.kind, seconds: opts.seconds, transcript: opts.transcript, waveform: opts.waveform } };
     if (!opts.retry) setRows((cur) => [...cur, local]);
     else setRows((cur) => cur.map((r) => (r.clientId === clientId ? { ...r, state: "sending" } : r)));
     stickToEnd.current = true;
@@ -154,7 +161,7 @@ export default function Chat({ onClose, product, requestCloseRef }: ChatProps) {
     if (opts.blob && opts.kind) {
       const up = await uploadChatMedia(opts.kind, opts.blob);
       if (!up.ok) { setMediaError(up.error); setRows((cur) => cur.map((r) => (r.clientId === clientId ? { ...r, state: "failed" } : r))); return; }
-      media = opts.kind === "image" ? { imageUrl: up.url } : { voiceUrl: up.url, voiceSeconds: opts.seconds, transcript: opts.transcript };
+      media = opts.kind === "image" ? { imageUrl: up.url } : { voiceUrl: up.url, voiceSeconds: opts.seconds, transcript: opts.transcript, waveform: opts.waveform };
     }
     const res = await chatSendAction(text, clientId, media);
     setRows((cur) => {
@@ -166,7 +173,7 @@ export default function Chat({ onClose, product, requestCloseRef }: ChatProps) {
   };
 
   // ---- voice recording ----------------------------------------------------------------------------------------------
-  const sendVoice = (r: VoiceResult) => void send("", { blob: r.blob, kind: "voice", seconds: r.seconds, transcript: r.transcript });
+  const sendVoice = (r: VoiceResult) => void send("", { blob: r.blob, kind: "voice", seconds: r.seconds, transcript: r.transcript, waveform: r.waveform });
   const voice = useVoiceRecorder(language, sendVoice); // the one-minute limit hands the recording over by itself
   const startVoice = async () => { setMediaError(""); await voice.start(); };
   const finishVoice = async () => { const r = await voice.stop(); if (r) sendVoice(r); };
@@ -223,8 +230,8 @@ export default function Chat({ onClose, product, requestCloseRef }: ChatProps) {
       ) : (
         <>
           <div className="chat-messages" ref={scroller} onScroll={onScroll} aria-live="polite" aria-relevant="additions text">
-            {loadingOlder && <div className="chat-older" role="status">Loading earlier messages…</div>}
-            {state === "loading" && <div className="chat-older" role="status">Loading your chat…</div>}
+            {loadingOlder && <div className="chat-sk-group" role="status" aria-label="Loading earlier messages"><ChatSkeleton rows={2} /></div>}
+            {state === "loading" && <div className="chat-sk-group" role="status" aria-label="Loading your chat"><ChatSkeleton rows={6} /></div>}
             {state === "error" && <div className="chat-older">Could not load the chat. <button type="button" className="chat-retry" onClick={() => void open()}>Try again</button></div>}
             {state === "ready" && rows.length === 0 && <div className="chat-empty"><strong>Say hello 👋</strong><span>Ask about an order, a product or delivery. Our team will reply here.</span></div>}
             {rows.map((m) => {
@@ -239,13 +246,13 @@ export default function Chat({ onClose, product, requestCloseRef }: ChatProps) {
                     {!mine && <span className="chat-message-author">TazaHat Support</span>}
                     {m.legacyMedia && <div className="chat-media-missing"><span aria-hidden="true">{m.legacyMedia === "image" ? "📷" : m.legacyMedia === "voice" ? "🎤" : m.legacyMedia === "video" ? "🎥" : "📎"}</span><span>{m.legacyMedia === "image" ? "Photo" : m.legacyMedia === "voice" ? "Voice message" : m.legacyMedia === "video" ? "Video" : "Document"} is no longer available</span></div>}
                     {m.imageUrl && <button type="button" className="chat-photo" onClick={() => setLightbox(m.imageUrl)} aria-label="Open photo">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={m.imageUrl} alt="Photo in chat" loading="lazy" /></button>}
-                    {m.voiceUrl && <VoiceBubble src={m.voiceUrl} seconds={m.voiceSeconds ?? 1} transcript={m.transcript} />}
+                    {m.voiceUrl && <VoiceBubble src={m.voiceUrl} seconds={m.voiceSeconds ?? 1} transcript={m.transcript} waveform={m.waveform} />}
                     {m.text && <p>{m.text}</p>}
                     <time>
                       {timeOf(m.createdAt)}
                       {mine && (m.state === "sending" ? <span className="chat-tick" aria-label="Sending">🕓</span> : m.state === "failed" ? null : <span className={`chat-tick${m.readAt ? " is-read" : ""}`} aria-label={m.readAt ? "Read" : "Sent"}>{m.readAt ? "✓✓" : "✓"}</span>)}
                     </time>
-                    {m.state === "failed" && <button type="button" className="chat-retry" onClick={() => void send(m.text, { clientId: m.clientId ?? newId(), retry: true, blob: m.retry?.blob, kind: m.retry?.kind, seconds: m.retry?.seconds, transcript: m.retry?.transcript, preview: m.imageUrl ?? undefined })}>Not sent · Tap to retry</button>}
+                    {m.state === "failed" && <button type="button" className="chat-retry" onClick={() => void send(m.text, { clientId: m.clientId ?? newId(), retry: true, blob: m.retry?.blob, kind: m.retry?.kind, seconds: m.retry?.seconds, transcript: m.retry?.transcript, waveform: m.retry?.waveform, preview: m.imageUrl ?? undefined })}>Not sent · Tap to retry</button>}
                   </article>
                 </div>
               );
@@ -270,7 +277,7 @@ export default function Chat({ onClose, product, requestCloseRef }: ChatProps) {
                 <button type="button" className="chat-rec-cancel" onClick={voice.cancel} aria-label="Cancel recording"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14" /></svg></button>
                 <span className="chat-rec-dot" aria-hidden="true" />
                 <span className="chat-rec-time">{Math.floor(voice.seconds / 60)}:{String(voice.seconds % 60).padStart(2, "0")} <small>/ {Math.floor(MAX_VOICE_SECONDS / 60)}:00</small></span>
-                <span className="chat-rec-bar" aria-hidden="true"><i style={{ width: `${(voice.seconds / MAX_VOICE_SECONDS) * 100}%` }} /></span>
+                <span className="chat-rec-wave" aria-hidden="true">{Array.from({ length: 36 }, (_, i) => { const v = voice.live[voice.live.length - 36 + i] ?? 0; return <i key={i} style={{ height: `${Math.max(12, Math.min(100, v * 380))}%` }} />; })}</span>
                 <button type="button" className="chat-send-button" onClick={() => void finishVoice()} aria-label="Send voice message">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 18-8-7 18-3-7-8-3Z" /><path d="m11 14 4-4" /></svg>
                 </button>
