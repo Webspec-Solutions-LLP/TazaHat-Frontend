@@ -8,6 +8,7 @@
   "description": "শীতের দিনে উপভোগ করুন টাটকা ও পছন্দের খাবার। আপনার জন্য নির্বাচিত বিশেষ মৌসুমি ছাড়।",
   "offerLabel": "মৌসুমি সাশ্রয়",
   "heroBadge": "৩৫% পর্যন্ত ছাড়",
+  "heroBadgeWithDiscount": "{percent}% পর্যন্ত ছাড়",
   "heroBadgeFoot": "মৌসুমি পছন্দ",
   "collectionLabel": "দ্য উইন্টার এডিট",
   "collectionHeading": "আরামদায়ক খাবার, সেরা দাম",

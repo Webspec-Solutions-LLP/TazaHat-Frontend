@@ -3,11 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LANGUAGE_CHANGE_EVENT,
-  LANGUAGE_STORAGE_KEY,
-  type SupportedLang,
-} from "../navbar/Navbar";
+import { type SupportedLang, useLanguage } from "@/lib/language";
 import englishText from "./english.json";
 import bengaliText from "./bengali.json";
 import hindiText from "./hindi.json";
@@ -45,30 +41,10 @@ const itemIcons: Record<string, React.ReactNode> = {
 };
 
 export default function BottomNavigation() {
-  const [currentLang, setCurrentLang] = useState<SupportedLang>("en");
+  const [currentLang] = useLanguage();
   const pathname = usePathname();
   const [isHidden, setIsHidden] = useState(false);
   const lastScrollY = useRef(0);
-
-  useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY) as SupportedLang | null;
-      if (stored === "en" || stored === "bn" || stored === "hi") {
-        setCurrentLang(stored);
-      }
-    } catch {
-      // Use fallback
-    }
-
-    const handleLanguageChange = (event: Event) => {
-      const newLang = (event as CustomEvent<SupportedLang>).detail;
-      if (newLang && (newLang === "en" || newLang === "bn" || newLang === "hi")) {
-        setCurrentLang(newLang);
-      }
-    };
-    window.addEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange);
-    return () => window.removeEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange);
-  }, []);
 
   useEffect(() => {
     const handleScroll = () => {

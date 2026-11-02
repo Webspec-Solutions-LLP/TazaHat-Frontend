@@ -13,7 +13,10 @@ import Variant from "../modals/variant/Variant";
 import type { CartItem } from "../modals/cart/Cart";
 import { readWishlistIds, subscribeToWishlist, toggleWishlistId } from "../../lib/wishlist";
 import catalog from "../products/english.json";
-import text from "./english.json";
+import englishText from "./english.json";
+import bengaliText from "./bengali.json";
+import hindiText from "./hindi.json";
+import { type SupportedLang, useLanguage } from "@/lib/language";
 import { fallbackImage, isRemoteImage } from "@/lib/api";
 import "./OfferLayout4.css";
 import VariantChips from "@/components/products/VariantChips";
@@ -22,11 +25,11 @@ type CatalogProduct = (typeof catalog.products)[number];
 type Deal = CatalogProduct & { tag?: string; description?: string };
 export type StealTab = { id: string; label: string; type: string; badge?: string; priceTag?: string; maxPrice?: number };
 
-const money = new Intl.NumberFormat(text.locale, {
-  style: "currency",
-  currency: text.currency,
-  maximumFractionDigits: 0,
-});
+const textMap: Record<SupportedLang, typeof englishText> = {
+  en: englishText,
+  bn: bengaliText,
+  hi: hindiText,
+};
 
 function toCatalogProduct(deal: Deal): CatalogProduct {
   return {
@@ -70,7 +73,7 @@ function CartIcon() {
   );
 }
 
-function FlameBadge() {
+function FlameBadge({ label }: { label: string }) {
   return (
     <div className="steal-tab-flame-wrap">
       <svg className="steal-tab-flame-icon" viewBox="0 0 32 32" fill="none" aria-hidden="true">
@@ -94,15 +97,25 @@ function FlameBadge() {
           fill="url(#stealFlameInner)"
         />
       </svg>
-      <span className="steal-tab-hot-tag">HOT ITEM</span>
+      <span className="steal-tab-hot-tag">{label}</span>
     </div>
   );
 }
 
 /** Products from the API (`products`, first tab = trending) with price tabs; without them the sample deals from english.json are shown. */
 export default function OfferLayout4({ products, tabs }: { products?: CatalogProduct[]; tabs?: StealTab[] }) {
+  const [language] = useLanguage();
+  const text = textMap[language];
+  const money = new Intl.NumberFormat(text.locale, {
+    style: "currency",
+    currency: text.currency,
+    maximumFractionDigits: 0,
+  });
   const allDeals = (products ?? text.deals) as Deal[];
-  const allTabs: StealTab[] = tabs ?? text.tabs;
+  const allTabs: StealTab[] = (tabs ?? text.tabs).map(tab => {
+    const translatedTab = text.tabs.find(item => item.id === tab.id);
+    return translatedTab ? { ...tab, ...translatedTab } : tab;
+  });
   const [activeTabId, setActiveTabId] = useState<string>(allTabs[0]?.id ?? "trending");
   const [saved, setSaved] = useState<string[]>([]);
   const [selected, setSelected] = useState<CatalogProduct | null>(null);
@@ -151,7 +164,7 @@ export default function OfferLayout4({ products, tabs }: { products?: CatalogPro
         : 0;
     const description =
       product.description ||
-      `${product.name} selected for freshness and quality, ready for your everyday meals.`;
+      text.productDescription.replace("{name}", product.name);
 
     return (
       <article
@@ -213,7 +226,7 @@ export default function OfferLayout4({ products, tabs }: { products?: CatalogPro
         <VariantChips name={product.name} variants={variants} selected={selectedIndex} onSelect={index => setVariantIndexes(current => ({ ...current, [cardProduct.id]: index }))} onMore={() => setVariantProduct(cardProduct)} />
         <div className="product-card-actions">
           <button className="product-details-button" type="button" onClick={() => setVariantProduct(cardProduct)}><CartIcon />{text.addToCart}</button>
-          <button className="product-quick-view" type="button" aria-label={`View ${product.name} details`} onClick={() => setSelected(cardProduct)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          <button className="product-quick-view" type="button" aria-label={text.quickView.replace("{name}", product.name)} onClick={() => setSelected(cardProduct)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
         </div>
       </article>
     );
@@ -230,7 +243,7 @@ export default function OfferLayout4({ products, tabs }: { products?: CatalogPro
         </div>
 
         {/* Store Tabs Bar */}
-        <div className="steal-tabs-bar" role="tablist" aria-label="Steal deals categories">
+        <div className="steal-tabs-bar" role="tablist" aria-label={text.tabsAriaLabel}>
           {allTabs.map(tab => {
             const isActive = tab.id === activeTabId;
             return (
@@ -244,7 +257,7 @@ export default function OfferLayout4({ products, tabs }: { products?: CatalogPro
               >
                 {tab.type === "trending" ? (
                   <>
-                    <FlameBadge />
+                    <FlameBadge label={tab.badge ?? text.hotItem} />
                     <span className="steal-tab-label">{tab.label}</span>
                   </>
                 ) : (

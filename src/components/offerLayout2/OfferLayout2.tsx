@@ -2,9 +2,18 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import text from "./english.json";
+import englishText from "./english.json";
+import bengaliText from "./bengali.json";
+import hindiText from "./hindi.json";
+import { type SupportedLang, useLanguage } from "@/lib/language";
 import { fallbackImage, isRemoteImage } from "@/lib/api";
 import "./OfferLayout2.css";
+
+const textMap: Record<SupportedLang, typeof englishText> = {
+  en: englishText,
+  bn: bengaliText,
+  hi: hindiText,
+};
 
 function FreshIcon({ kind }: { kind: string }) {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -14,7 +23,10 @@ function FreshIcon({ kind }: { kind: string }) {
 
 export interface FreshPick { id: string; name: string; image: string; discount: number; theme: string; slug?: string }
 
-export default function OfferLayout2({ items = text.categories }: { items?: FreshPick[] }) {
+export default function OfferLayout2({ items }: { items?: FreshPick[] }) {
+  const [language] = useLanguage();
+  const text = textMap[language];
+  const picks = items ?? text.categories;
   const router = useRouter();
   const shop = (category?: string) => {
     router.push(category ? `/products?category=${encodeURIComponent(category)}` : "/products");
@@ -37,7 +49,7 @@ export default function OfferLayout2({ items = text.categories }: { items?: Fres
             <a href="#category-list" className="fresh-view-all">{text.viewAll}<span aria-hidden="true">→</span></a>
           </header>
           <div className="fresh-pick-cards">
-            {items.map(category => <article className={`fresh-pick-card fresh-theme--${category.theme}`} key={category.id}>
+            {picks.map(category => <article className={`fresh-pick-card fresh-theme--${category.theme}`} key={category.id}>
               <div className="fresh-pick-discount"><small>{text.upTo}</small><strong>{category.discount}%</strong><span>{text.off}</span></div>
               <div className="fresh-pick-image"><span className="fresh-pick-image-art"><Image src={isRemoteImage(category.image) ? category.image : `${category.image}?v=transparent-2`} alt={category.name} fill unoptimized onError={fallbackImage} sizes="(max-width: 600px) 40vw, 160px" /></span></div>
               <div className="fresh-pick-details"><FreshIcon kind="leaf" /><h3><span>{text.fresh}</span>{category.name}</h3><button type="button" onClick={() => shop((category as FreshPick).slug ?? category.name)}>{text.shopNow}<span aria-hidden="true">→</span></button></div>

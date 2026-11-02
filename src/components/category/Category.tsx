@@ -6,10 +6,18 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { A11y, Keyboard, Mousewheel } from "swiper/modules";
 import "swiper/css";
 import "./Category.css";
-import english from "./english.json";
+import englishText from "./english.json";
+import bengaliText from "./bengali.json";
+import hindiText from "./hindi.json";
+import { type SupportedLang, useLanguage } from "@/lib/language";
 import { fallbackImage, isRemoteImage } from "@/lib/api";
 
-const { categories: sampleCategories } = english;
+const textMap: Record<SupportedLang, typeof englishText> = {
+  en: englishText,
+  bn: bengaliText,
+  hi: hindiText,
+};
+
 export type CategoryTile = { id: string; name: string; types: number; image: string; color: string; href?: string };
 /** old name of the type */
 export type CategoryItem = CategoryTile;
@@ -17,7 +25,7 @@ export type CategoryItem = CategoryTile;
 /** How many categories the home page shows before it offers "View All Categories". */
 export const HOME_CATEGORY_LIMIT = 7;
 
-function renderCard(category: CategoryTile) {
+function renderCard(category: CategoryTile, text: typeof englishText) {
   return (
     <>
       <div className="category-image">
@@ -33,7 +41,7 @@ function renderCard(category: CategoryTile) {
       </div>
       <div className="category-details">
         <h3>{category.name}</h3>
-        <p className="category-count"><strong>{category.types}</strong> {category.types === 1 ? english.productType : english.productTypes}</p>
+        <p className="category-count"><strong>{category.types}</strong> {category.types === 1 ? text.productType : text.productTypes}</p>
         <span className="category-arrow" aria-hidden="true">→</span>
       </div>
     </>
@@ -44,26 +52,29 @@ function renderCard(category: CategoryTile) {
  * Shop by Category. Up to 7 categories: on a desktop they sit in one row, centred. More than 7: the first 7 and a "View All
  * Categories" link to the full list. Phones and tablets get the swipeable row.
  */
-export default function Category({ items = sampleCategories }: { items?: CategoryTile[] }) {
-  const shown = items.slice(0, HOME_CATEGORY_LIMIT);
-  const hasMore = items.length > HOME_CATEGORY_LIMIT;
+export default function Category({ items }: { items?: CategoryTile[] }) {
+  const [language] = useLanguage();
+  const text = textMap[language];
+  const categories = items ?? text.categories;
+  const shown = categories.slice(0, HOME_CATEGORY_LIMIT);
+  const hasMore = categories.length > HOME_CATEGORY_LIMIT;
   const link = (category: CategoryTile) => category.href ?? `/products?category=${encodeURIComponent(category.name)}`;
   return (
-    <section className="category-section" aria-labelledby="category-title" lang={english.language}>
+    <section className="category-section" aria-labelledby="category-title" lang={text.language}>
       <div className="category-container">
         <div className="category-header">
           <div>
-            <h2 id="category-title">{english.heading}</h2>
-            <p>{english.description}</p>
+            <h2 id="category-title">{text.heading}</h2>
+            <p>{text.description}</p>
           </div>
-          {hasMore && <Link className="category-view-all" href="/allCategory">{english.viewAll}</Link>}
+          {hasMore && <Link className="category-view-all" href="/allCategory">{text.viewAll}</Link>}
         </div>
         <div id="category-list">
           {/* desktop: one centred row */}
-          <ul className="category-desktop-row" aria-label={english.heading}>
+          <ul className="category-desktop-row" aria-label={text.heading}>
             {shown.map((category) => (
               <li key={category.id}>
-                <Link className="category-card" href={link(category)} style={{ backgroundColor: category.color }}>{renderCard(category)}</Link>
+                <Link className="category-card" href={link(category)} style={{ backgroundColor: category.color }}>{renderCard(category, text)}</Link>
               </li>
             ))}
           </ul>
@@ -76,12 +87,12 @@ export default function Category({ items = sampleCategories }: { items?: Categor
             breakpoints={{ 451: { slidesPerView: 3.1, spaceBetween: 8 }, 576: { slidesPerView: 3.8, spaceBetween: 9 }, 679: { slidesPerView: 4.5, spaceBetween: 9 }, 877: { slidesPerView: 5.6, spaceBetween: 10 } }}
             keyboard={{ enabled: true, onlyInViewport: true }}
             mousewheel={{ forceToAxis: true }}
-            a11y={english.sliderAccessibility}
+            a11y={text.sliderAccessibility}
             tabIndex={0}
           >
             {shown.map((category) => (
               <SwiperSlide key={category.id}>
-                <Link className="category-card" href={link(category)} style={{ backgroundColor: category.color }}>{renderCard(category)}</Link>
+                <Link className="category-card" href={link(category)} style={{ backgroundColor: category.color }}>{renderCard(category, text)}</Link>
               </SwiperSlide>
             ))}
           </Swiper>

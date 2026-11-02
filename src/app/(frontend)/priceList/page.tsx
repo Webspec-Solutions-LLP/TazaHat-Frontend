@@ -6,15 +6,19 @@ import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { A11y, Keyboard, Mousewheel } from "swiper/modules";
 import "swiper/css";
-import text from "./english.json";
+import englishText from "./english.json";
+import bengaliText from "./bengali.json";
+import hindiText from "./hindi.json";
+import { type SupportedLang, useLanguage } from "@/lib/language";
 import "./PriceList.css";
 
-type Product = (typeof text.products)[number];
-const money = new Intl.NumberFormat(text.locale, { style: "currency", currency: text.currency, maximumFractionDigits: 0 });
-const categoryGroups = text.categories.map(category => ({
-  ...category,
-  products: text.products.filter(product => category.id === "offers" ? product.originalPrice > product.price : product.category === category.id),
-}));
+type Product = (typeof englishText.products)[number];
+
+const textMap: Record<SupportedLang, typeof englishText> = {
+  en: englishText,
+  bn: bengaliText,
+  hi: hindiText,
+};
 
 function Icon({ kind }: { kind: string }) {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -23,7 +27,14 @@ function Icon({ kind }: { kind: string }) {
 }
 
 export default function PriceList() {
-  const [category, setCategory] = useState(text.categories[0].id);
+  const [language] = useLanguage();
+  const text = textMap[language];
+  const money = new Intl.NumberFormat(text.locale, { style: "currency", currency: text.currency, maximumFractionDigits: 0 });
+  const categoryGroups = text.categories.map(category => ({
+    ...category,
+    products: text.products.filter(product => category.id === "offers" ? product.originalPrice > product.price : product.category === category.id),
+  }));
+  const [category, setCategory] = useState(englishText.categories[0].id);
   const [selected, setSelected] = useState<Product | null>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   function scrollToCategory(id: string) {

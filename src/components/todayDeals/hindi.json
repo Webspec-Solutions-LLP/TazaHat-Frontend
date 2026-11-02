@@ -19,5 +19,11 @@
   "days": "दिन",
   "hours": "घंटे",
   "minutes": "मिनट",
-  "seconds": "सेकंड"
+  "seconds": "सेकंड",
+  "floatingLabel": "आज का ऑफ़र",
+  "shopDeals": "ऑफ़र देखें",
+  "returnToDeals": "आज के ऑफ़र पर लौटें",
+  "addToCart": "कार्ट में जोड़ें",
+  "quickView": "{name} का विवरण देखें",
+  "productDescription": "ताज़गी और गुणवत्ता के लिए चुना गया {name}, आपके रोज़मर्रा के भोजन के लिए तैयार।"
 }

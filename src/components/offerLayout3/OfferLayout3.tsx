@@ -8,30 +8,31 @@ import "swiper/css";
 import AddToCart from "../modals/AddToCart/AddToCart";
 import Variant from "../modals/variant/Variant";
 import type { CartItem } from "../modals/cart/Cart";
-import catalog from "../products/english.json";
+import englishCatalog from "../products/english.json";
+import bengaliCatalog from "../products/bengali.json";
+import hindiCatalog from "../products/hindi.json";
 import { readWishlistIds, subscribeToWishlist, toggleWishlistId } from "../../lib/wishlist";
-import text from "./english.json";
+import englishText from "./english.json";
+import bengaliText from "./bengali.json";
+import hindiText from "./hindi.json";
+import { type SupportedLang, useLanguage } from "@/lib/language";
 import { fallbackImage, isRemoteImage } from "@/lib/api";
 import "./OfferLayout3.css";
 import VariantChips from "@/components/products/VariantChips";
 
-type Product = (typeof catalog.products)[number];
+type Product = (typeof englishCatalog.products)[number];
 
-const money = new Intl.NumberFormat(text.locale, {
-  style: "currency",
-  currency: text.currency,
-  maximumFractionDigits: 0,
-});
+const textMap: Record<SupportedLang, typeof englishText> = {
+  en: englishText,
+  bn: bengaliText,
+  hi: hindiText,
+};
 
-const dealProducts: Record<string, Product> = Object.fromEntries(
-  text.deals.map(deal => {
-    const product = catalog.products.find(item => item.id === deal.productId);
-    if (!product) {
-      throw new Error(`Winter deal "${deal.id}" references missing product "${deal.productId}"`);
-    }
-    return [deal.id, { ...product, name: deal.name, price: deal.price, originalPrice: deal.originalPrice, variants: [] }];
-  }),
-);
+const catalogMap: Record<SupportedLang, typeof englishCatalog> = {
+  en: englishCatalog,
+  bn: bengaliCatalog,
+  hi: hindiCatalog,
+};
 
 function CartIcon() {
   return <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M2 3h2l2.4 12.2a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6L22 8H5" /><circle cx="9" cy="21" r="1" /><circle cx="19" cy="21" r="1" /></svg>;
@@ -45,6 +46,23 @@ type DealView = { id: string; name: string; image: string; description: string; 
 
 /** Deals from the API (`products`); without them the sample deals from english.json are shown. */
 export default function OfferLayout3({ products }: { products?: Product[] }) {
+  const [language] = useLanguage();
+  const text = textMap[language];
+  const catalog = catalogMap[language];
+  const money = new Intl.NumberFormat(text.locale, {
+    style: "currency",
+    currency: text.currency,
+    maximumFractionDigits: 0,
+  });
+  const dealProducts: Record<string, Product> = Object.fromEntries(
+    text.deals.map(deal => {
+      const product = catalog.products.find(item => item.id === deal.productId);
+      if (!product) {
+        throw new Error(`Winter deal "${deal.id}" references missing product "${deal.productId}"`);
+      }
+      return [deal.id, { ...product, name: deal.name, price: deal.price, originalPrice: deal.originalPrice, variants: [] }];
+    }),
+  );
   const items: { deal: DealView; product: Product }[] = products
     ? products.map(p => ({ deal: { id: p.id, name: p.name, image: p.image, description: `${p.subcategory} · ${p.weight}`, weight: p.weight, rating: p.rating, reviews: p.reviews, price: p.price, originalPrice: p.originalPrice }, product: p }))
     : text.deals.map(deal => ({ deal, product: dealProducts[deal.id] }));
@@ -69,7 +87,7 @@ export default function OfferLayout3({ products }: { products?: Product[] }) {
           <p className="winter-editorial-description">{text.description}</p>
           <div className="winter-editorial-offer">
             <span>{text.offerLabel}</span>
-            <strong>{products && topDiscount > 0 ? `Up to ${topDiscount}% off` : text.heroBadge}</strong>
+            <strong>{products && topDiscount > 0 ? text.heroBadgeWithDiscount.replace("{percent}", String(topDiscount)) : text.heroBadge}</strong>
           </div>
           <p className="winter-editorial-note">{text.heroBadgeFoot}</p>
           <div className="winter-editorial-decoration" aria-hidden="true"><span /><span /><span /></div>

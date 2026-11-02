@@ -19,5 +19,11 @@
   "days": "Days",
   "hours": "Hours",
   "minutes": "Minutes",
-  "seconds": "Seconds"
+  "seconds": "Seconds",
+  "floatingLabel": "Today's Deal",
+  "shopDeals": "Shop deals",
+  "returnToDeals": "Return to today's deals",
+  "addToCart": "Add to Cart",
+  "quickView": "View {name} details",
+  "productDescription": "{name} selected for freshness and quality, ready for your everyday meals."
 }

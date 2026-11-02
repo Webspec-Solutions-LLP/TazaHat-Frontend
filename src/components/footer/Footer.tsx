@@ -3,11 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  LANGUAGE_CHANGE_EVENT,
-  LANGUAGE_STORAGE_KEY,
-  type SupportedLang,
-} from "../navbar/Navbar";
+import { type SupportedLang, useLanguage } from "@/lib/language";
 import englishText from "./english.json";
 import bengaliText from "./bengali.json";
 import hindiText from "./hindi.json";
@@ -32,30 +28,9 @@ const LANGUAGES: LanguageOption[] = [
 ];
 
 export default function Footer() {
-  const [currentLang, setCurrentLang] = useState<SupportedLang>("en");
+  const [currentLang, setSiteLanguage] = useLanguage();
   const [isLangOpen, setIsLangOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY) as SupportedLang | null;
-      if (stored === "en" || stored === "bn" || stored === "hi") {
-        setCurrentLang(stored);
-      }
-    } catch {
-      // Use fallback
-    }
-
-    const handleLanguageChange = (event: Event) => {
-      const newLang = (event as CustomEvent<SupportedLang>).detail;
-      if (newLang === "en" || newLang === "bn" || newLang === "hi") {
-        setCurrentLang(newLang);
-      }
-    };
-
-    window.addEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange);
-    return () => window.removeEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange);
-  }, []);
 
   useEffect(() => {
     if (!isLangOpen) return;
@@ -79,16 +54,8 @@ export default function Footer() {
   }, [isLangOpen]);
 
   const handleLanguageSelect = (code: SupportedLang) => {
-    setCurrentLang(code);
+    setSiteLanguage(code);
     setIsLangOpen(false);
-    try {
-      window.localStorage.setItem(LANGUAGE_STORAGE_KEY, code);
-      window.dispatchEvent(
-        new CustomEvent(LANGUAGE_CHANGE_EVENT, { detail: code })
-      );
-    } catch {
-      // Ignore if localStorage is restricted
-    }
   };
 
   const activeLangOption =
@@ -239,8 +206,10 @@ export default function Footer() {
             <Image src="/images/category/category2.webp?v=transparent-2" alt="" width={120} height={120} unoptimized className="footer-seller-produce" />
           </div>
           <div className="footer-app-col">
-            <h3 className="footer-col-title">{t.appTitle}</h3>
-            <p>{t.appDescLine1}<br />{t.appDescLine2}</p>
+            <div className="footer-app-info">
+              <h3 className="footer-col-title">{t.appTitle}</h3>
+              <p>{t.appDescLine1}<br />{t.appDescLine2}</p>
+            </div>
             <div className="footer-play-badge">
               <Image src="/images/playstore_img.webp" alt={t.playStoreAlt} width={715} height={212} className="footer-play-image" />
             </div>

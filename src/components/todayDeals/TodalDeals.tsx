@@ -6,8 +6,13 @@ import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { A11y, Keyboard, Mousewheel } from "swiper/modules";
 import "swiper/css";
-import text from "./english.json";
-import catalog from "../products/english.json";
+import englishText from "./english.json";
+import bengaliText from "./bengali.json";
+import hindiText from "./hindi.json";
+import englishCatalog from "../products/english.json";
+import bengaliCatalog from "../products/bengali.json";
+import hindiCatalog from "../products/hindi.json";
+import { type SupportedLang, useLanguage } from "@/lib/language";
 import { readWishlistIds, subscribeToWishlist, toggleWishlistId } from "../../lib/wishlist";
 import AddToCart from "../modals/AddToCart/AddToCart";
 import Variant from "../modals/variant/Variant";
@@ -16,14 +21,30 @@ import { fallbackImage, isRemoteImage } from "../../lib/api";
 import "./TodayDeals.css";
 import VariantChips from "@/components/products/VariantChips";
 
-type Product = (typeof catalog.products)[number];
-const money = new Intl.NumberFormat(text.locale, { style: "currency", currency: text.currency, maximumFractionDigits: 0 });
+type Product = (typeof englishCatalog.products)[number];
+
+const textMap: Record<SupportedLang, typeof englishText> = {
+  en: englishText,
+  bn: bengaliText,
+  hi: hindiText,
+};
+
+const catalogMap: Record<SupportedLang, typeof englishCatalog> = {
+  en: englishCatalog,
+  bn: bengaliCatalog,
+  hi: hindiCatalog,
+};
 
 function CartIcon() {
   return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M2 3h2l2.4 12.2a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6L22 8H5" /><circle cx="9" cy="21" r="1" /><circle cx="19" cy="21" r="1" /></svg>;
 }
 
-export default function TodalDeals({ products = catalog.products }: { products?: Product[] }) {
+export default function TodalDeals({ products }: { products?: Product[] }) {
+  const [language] = useLanguage();
+  const text = textMap[language];
+  const catalog = catalogMap[language];
+  const dealProducts = products ?? catalog.products;
+  const money = new Intl.NumberFormat(catalog.locale, { style: "currency", currency: catalog.currency, maximumFractionDigits: 0 });
   const [remaining, setRemaining] = useState<number | null>(null);
   const [showFloatingTimer, setShowFloatingTimer] = useState(false);
   const [navbarOffset, setNavbarOffset] = useState(72);
@@ -81,7 +102,7 @@ export default function TodalDeals({ products = catalog.products }: { products?:
     const selectedIndex = variantIndexes[product.id] ?? initialVariant;
     const variant = variants[selectedIndex] ?? variants[0];
     const discount = variant.originalPrice > 0 ? Math.max(0, Math.round((1 - variant.price / variant.originalPrice) * 100)) : 0;
-    const description = `${product.name} selected for freshness and quality, ready for your everyday meals.`;
+    const description = text.productDescription.replace("{name}", product.name);
     return (
       <article className="product-card" key={product.id}>
         <div className="product-image">
@@ -97,8 +118,8 @@ export default function TodalDeals({ products = catalog.products }: { products?:
         <div className="product-pricing"><strong>{money.format(variant.price)}</strong><del>{money.format(variant.originalPrice)}</del></div>
         <VariantChips name={product.name} variants={variants} selected={selectedIndex} onSelect={index => setVariantIndexes(current => ({ ...current, [product.id]: index }))} onMore={() => setVariantProduct(product)} />
         <div className="product-card-actions">
-          <button className="product-details-button" type="button" onClick={() => setVariantProduct(product)}><CartIcon />Add to Cart</button>
-          <button className="product-quick-view" type="button" aria-label={`View ${product.name} details`} onClick={() => setSelected(product)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          <button className="product-details-button" type="button" onClick={() => setVariantProduct(product)}><CartIcon />{text.addToCart}</button>
+          <button className="product-quick-view" type="button" aria-label={text.quickView.replace("{name}", product.name)} onClick={() => setSelected(product)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
         </div>
       </article>
     );
@@ -113,7 +134,7 @@ export default function TodalDeals({ products = catalog.products }: { products?:
         </div>
         <div id="deals-list">
           <Swiper className="products-slider" modules={[A11y, Keyboard, Mousewheel]} slidesPerView={1.7} spaceBetween={8} breakpoints={{ 451: { slidesPerView: 2.1, spaceBetween: 9 }, 576: { slidesPerView: 2.7, spaceBetween: 10 }, 679: { slidesPerView: 3.5, spaceBetween: 10 }, 877: { slidesPerView: 4.5, spaceBetween: 12 }, 1300: { slidesPerView: 5.5, spaceBetween: 12 } }} keyboard={{ enabled: true, onlyInViewport: true }} mousewheel={{ forceToAxis: true }} a11y={{ containerMessage: text.sliderLabel, slideLabelMessage: text.columnLabel }} tabIndex={0}>
-            {products.map(product => <SwiperSlide key={product.id}>{renderProduct(product)}</SwiperSlide>)}
+            {dealProducts.map(product => <SwiperSlide key={product.id}>{renderProduct(product)}</SwiperSlide>)}
           </Swiper>
         </div>
       </div>
@@ -122,17 +143,17 @@ export default function TodalDeals({ products = catalog.products }: { products?:
           type="button"
           className="deals-floating-timer"
           style={{ top: navbarOffset }}
-          aria-label="Return to today's deals"
+          aria-label={text.returnToDeals}
           onClick={() => dealsSection.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
         >
-          <span className="deals-floating-label"><strong>Today&apos;s Deal</strong><small>{text.offerEnds}</small></span>
+          <span className="deals-floating-label"><strong>{text.floatingLabel}</strong><small>{text.offerEnds}</small></span>
           <span className="deals-floating-clock">
             {clock.map(unit => <span className="deals-floating-time" key={unit.label}>
               <strong>{unit.value === null ? "--" : String(unit.value).padStart(2, "0")}</strong>
               <small>{unit.label}</small>
             </span>)}
           </span>
-          <span className="deals-floating-cta">Shop deals <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 10h13m-5-5 5 5-5 5" /></svg></span>
+          <span className="deals-floating-cta">{text.shopDeals} <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 10h13m-5-5 5 5-5 5" /></svg></span>
         </button>
       )}
       {selected && <AddToCart key={selected.id} product={selected} locale={catalog.locale} currency={catalog.currency} saved={saved.includes(selected.id)} onToggleWishlist={() => setSaved(toggleWishlistId(selected.id))} onClose={() => setSelected(null)} onOpenProduct={setSelected} />}

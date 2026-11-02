@@ -8,6 +8,7 @@
   "description": "सर्दियों के दिनों में ताज़ा पसंदीदा चीज़ों का आनंद लें। खास आपके लिए चुने गए मौसमी बचत ऑफ़र।",
   "offerLabel": "मौसमी बचत",
   "heroBadge": "35% तक की छूट",
+  "heroBadgeWithDiscount": "{percent}% तक की छूट",
   "heroBadgeFoot": "मौसमी पसंदीदा",
   "collectionLabel": "द विंटर एडिट",
   "collectionHeading": "पसंदीदा खाना, कम कीमतें",
