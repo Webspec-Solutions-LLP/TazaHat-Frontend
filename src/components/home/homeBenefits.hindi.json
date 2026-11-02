@@ -1,0 +1,10 @@
+{
+  "language": "hi",
+  "benefitsAriaLabel": "TazaHaat से खरीदारी क्यों करें",
+  "benefits": [
+    { "icon": "leaf", "title": "100% ताज़ा", "description": "खेत से घर तक" },
+    { "icon": "shield", "title": "स्वच्छ और सुरक्षित", "description": "साफ और पैक किया हुआ" },
+    { "icon": "truck", "title": "तेज़ और समय पर", "description": "डिलीवरी" },
+    { "icon": "quality", "title": "सर्वोत्तम गुणवत्ता", "description": "किफायती दामों पर" }
+  ]
+}

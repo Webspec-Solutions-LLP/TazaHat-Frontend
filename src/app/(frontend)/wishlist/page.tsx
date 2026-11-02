@@ -6,22 +6,21 @@ import { ProductGridSkeleton } from "@/components/skeleton/Skeletons";
 import PackAction, { StockRibbon, firstOrderable } from "@/components/availability/PackAction";
 import type { Product } from "@/lib/api";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import AddToCart from "@/components/modals/AddToCart/AddToCart";
 import Variant from "@/components/modals/variant/Variant";
 import type { CartItem } from "@/components/modals/cart/Cart";
-import catalog from "@/components/products/english.json";
+import englishText from "./english.json";
+import bengaliText from "./bengali.json";
+import hindiText from "./hindi.json";
+import { type SupportedLang, useLanguage } from "@/lib/language";
 import { toggleWishlistId } from "@/lib/wishlist";
 import "./Wishlist.css";
 import VariantChips from "@/components/products/VariantChips";
 
-const money = new Intl.NumberFormat(catalog.locale, {
-  style: "currency",
-  currency: catalog.currency,
-  maximumFractionDigits: 0,
-});
+const textMap: Record<SupportedLang, typeof englishText> = { en: englishText, bn: bengaliText, hi: hindiText };
 
 function HeartIcon() {
   return (
@@ -42,6 +41,9 @@ function CartIcon() {
 }
 
 export default function WishlistPage() {
+  const [currentLang] = useLanguage();
+  const t = textMap[currentLang] || englishText;
+  const money = useMemo(() => new Intl.NumberFormat(t.locale, { style: "currency", currency: t.currency, maximumFractionDigits: 0 }), [t.locale, t.currency]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [variantProduct, setVariantProduct] = useState<Product | null>(null);
   const [variantIndexes, setVariantIndexes] = useState<Record<string, number>>({});
@@ -50,18 +52,18 @@ export default function WishlistPage() {
   const toggleProduct = (productId: string) => toggleWishlistId(productId);
 
   return (
-    <section className="wishlist-page" aria-labelledby="wishlist-heading" lang={catalog.language}>
+    <section className="wishlist-page" aria-labelledby="wishlist-heading" lang={t.language}>
       <div className="wishlist-container">
         <header className="wishlist-heading">
           <div className="wishlist-heading-copy">
             <span className="wishlist-heading-icon"><HeartIcon /></span>
             <div>
-              <h1 id="wishlist-heading">My Wishlist</h1>
-              <p>Your favourite fresh picks, all in one place.</p>
+              <h1 id="wishlist-heading">{t.heading}</h1>
+              <p>{t.subheading}</p>
             </div>
           </div>
           <span className="wishlist-count" aria-live="polite">
-            {products.length} {products.length === 1 ? "item" : "items"}
+            {products.length} {products.length === 1 ? t.item : t.items}
           </span>
         </header>
 
@@ -77,7 +79,7 @@ export default function WishlistPage() {
               const discount = variant.originalPrice > 0
                 ? Math.max(0, Math.round((1 - variant.price / variant.originalPrice) * 100))
                 : 0;
-              const description = `${product.name} selected for freshness and quality, ready for your everyday meals.`;
+              const description = t.description.replace("{name}", product.name);
               return (
                 <article className="product-card" key={product.id}>
                   <div className="product-image">
@@ -90,11 +92,11 @@ export default function WishlistPage() {
                     />
                     <StockRibbon pack={variant} />
           <span className="product-discount-badge">
-                      {catalog.discount.replace("{percent}", String(discount))}
+                      {t.discount.replace("{percent}", String(discount))}
                     </span>
                     <span
                       className="product-image-rating"
-                      aria-label={catalog.rating
+                      aria-label={t.rating
                         .replace("{rating}", String(product.rating))
                         .replace("{reviews}", String(product.reviews))}
                     >
@@ -104,7 +106,7 @@ export default function WishlistPage() {
                       type="button"
                       className="product-save"
                       aria-pressed="true"
-                      aria-label={`Remove ${product.name} from wishlist`}
+                      aria-label={t.removeAria.replace("{name}", product.name)}
                       onClick={() => toggleProduct(product.id)}
                     >
                       <HeartIcon />
@@ -118,8 +120,8 @@ export default function WishlistPage() {
                   </div>
                   <VariantChips name={product.name} variants={variants} selected={selectedIndex} onSelect={index => setVariantIndexes(current => ({ ...current, [product.id]: index }))} onMore={() => setVariantProduct(product)} />
                   <div className="product-card-actions">
-                    <PackAction pack={variant} className="product-details-button" onAdd={() => setVariantProduct(product)}><CartIcon />Add to Cart</PackAction>
-                    <button className="product-quick-view" type="button" aria-label={`View ${product.name} details`} onClick={() => setSelectedProduct(product)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                    <PackAction pack={variant} className="product-details-button" onAdd={() => setVariantProduct(product)}><CartIcon />{t.addToCart}</PackAction>
+                    <button className="product-quick-view" type="button" aria-label={t.quickViewAria.replace("{name}", product.name)} onClick={() => setSelectedProduct(product)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
                   </div>
                 </article>
               );
@@ -128,9 +130,9 @@ export default function WishlistPage() {
         ) : (
           <div className="wishlist-empty">
             <span className="wishlist-empty-icon"><HeartIcon /></span>
-            <h2>Your wishlist is waiting for favourites</h2>
-            <p>Tap the heart on any product to save it here and find it whenever you need it.</p>
-            <Link className="wishlist-browse-link" href="/products">Browse products</Link>
+            <h2>{t.emptyTitle}</h2>
+            <p>{t.emptyDescription}</p>
+            <Link className="wishlist-browse-link" href="/products">{t.browseProducts}</Link>
           </div>
         )}
       </div>
@@ -139,8 +141,8 @@ export default function WishlistPage() {
         <AddToCart
           key={selectedProduct.id}
           product={selectedProduct}
-          locale={catalog.locale}
-          currency={catalog.currency}
+          locale={t.locale}
+          currency={t.currency}
           saved={products.some((p) => p.id === selectedProduct.id)}
           onToggleWishlist={() => toggleProduct(selectedProduct.id)}
           onClose={() => setSelectedProduct(null)}
@@ -150,7 +152,7 @@ export default function WishlistPage() {
       {variantProduct && (
         <Variant
           product={variantProduct}
-          currency={catalog.currency}
+          currency={t.currency}
           onClose={() => setVariantProduct(null)}
           onGoToCart={(item: CartItem) => {
             window.dispatchEvent(new CustomEvent("tazahat:add-cart-item", { detail: item }));

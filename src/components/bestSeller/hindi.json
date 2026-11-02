@@ -1,0 +1,146 @@
+{
+  "language": "hi",
+  "heading": "सबसे ज़्यादा बिकने वाले उत्पाद",
+  "moreLabel": "+{count} और",
+  "browseLabel": "{name} देखें",
+  "groups": [
+    {
+      "id": "vegetables",
+      "name": "सब्जियां और साग",
+      "more": 155,
+      "images": [
+        {
+          "src": "/images/products/product--3.png",
+          "alt": "टमाटर"
+        },
+        {
+          "src": "/images/products/product--8.png",
+          "alt": "खीरा"
+        },
+        {
+          "src": "/images/products/product12.png",
+          "alt": "फूलगोभी"
+        },
+        {
+          "src": "/images/products/product15.png",
+          "alt": "बैंगन"
+        }
+      ]
+    },
+    {
+      "id": "fruits",
+      "name": "ताज़ा फल",
+      "more": 84,
+      "images": [
+        {
+          "src": "/images/products/product--5.png",
+          "alt": "लाल सेब"
+        },
+        {
+          "src": "/images/products/product13.png",
+          "alt": "आम"
+        },
+        {
+          "src": "/images/products/product13.png",
+          "alt": "पके आम"
+        },
+        {
+          "src": "/images/products/product--5.png",
+          "alt": "ताज़ा सेब"
+        }
+      ]
+    },
+    {
+      "id": "fish",
+      "name": "मछली और सीफ़ूड",
+      "more": 98,
+      "images": [
+        {
+          "src": "/images/products/product--2.png",
+          "alt": "रोहू मछली"
+        },
+        {
+          "src": "/images/products/product--6.png",
+          "alt": "झींगा"
+        },
+        {
+          "src": "/images/products/product16.png",
+          "alt": "ताज़ा मछली"
+        },
+        {
+          "src": "/images/products/product17.png",
+          "alt": "केकड़ा"
+        }
+      ]
+    },
+    {
+      "id": "meat",
+      "name": "मीट और पोल्ट्री",
+      "more": 62,
+      "images": [
+        {
+          "src": "/images/products/product--1.png",
+          "alt": "चिकन"
+        },
+        {
+          "src": "/images/products/product--7.png",
+          "alt": "मटन"
+        },
+        {
+          "src": "/images/products/product11.png",
+          "alt": "अंडे"
+        },
+        {
+          "src": "/images/products/product--1.png",
+          "alt": "चिकन कट्स"
+        }
+      ]
+    },
+    {
+      "id": "dairy",
+      "name": "डेयरी और अंडे",
+      "more": 79,
+      "images": [
+        {
+          "src": "/images/products/product--4.png",
+          "alt": "दूध"
+        },
+        {
+          "src": "/images/products/product--9.png",
+          "alt": "पनीर"
+        },
+        {
+          "src": "/images/products/product11.png",
+          "alt": "अंडे"
+        },
+        {
+          "src": "/images/products/product--9.png",
+          "alt": "ताज़ा पनीर"
+        }
+      ]
+    },
+    {
+      "id": "essentials",
+      "name": "दैनिक आवश्यक वस्तुएं",
+      "more": 120,
+      "images": [
+        {
+          "src": "/images/products/product--10.png",
+          "alt": "आलू"
+        },
+        {
+          "src": "/images/products/product14.png",
+          "alt": "प्याज"
+        },
+        {
+          "src": "/images/products/product--3.png",
+          "alt": "टमाटर"
+        },
+        {
+          "src": "/images/products/product11.png",
+          "alt": "अंडे"
+        }
+      ]
+    }
+  ]
+}

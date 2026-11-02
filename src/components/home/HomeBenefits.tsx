@@ -1,9 +1,20 @@
-const benefits = [
-  { icon: "leaf", title: "100% Fresh", description: "Farm to Home" },
-  { icon: "shield", title: "Hygienic & Safe", description: "Cleaned & Packed" },
-  { icon: "truck", title: "Fast & On-Time", description: "Delivery" },
-  { icon: "quality", title: "Best Quality", description: "At Best Price" },
-];
+"use client";
+
+import { useEffect, useState } from "react";
+import {
+  LANGUAGE_CHANGE_EVENT,
+  LANGUAGE_STORAGE_KEY,
+  type SupportedLang,
+} from "../navbar/Navbar";
+import englishText from "./homeBenefits.english.json";
+import bengaliText from "./homeBenefits.bengali.json";
+import hindiText from "./homeBenefits.hindi.json";
+
+const textMap: Record<SupportedLang, typeof englishText> = {
+  en: englishText,
+  bn: bengaliText,
+  hi: hindiText,
+};
 
 function BenefitIcon({ kind }: { kind: string }) {
   return (
@@ -28,10 +39,34 @@ function BenefitIcon({ kind }: { kind: string }) {
 }
 
 export default function HomeBenefits() {
+  const [currentLang, setCurrentLang] = useState<SupportedLang>("en");
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY) as SupportedLang | null;
+      if (stored === "en" || stored === "bn" || stored === "hi") {
+        setCurrentLang(stored);
+      }
+    } catch {
+      // Use fallback
+    }
+
+    const handleLanguageChange = (event: Event) => {
+      const newLang = (event as CustomEvent<SupportedLang>).detail;
+      if (newLang && (newLang === "en" || newLang === "bn" || newLang === "hi")) {
+        setCurrentLang(newLang);
+      }
+    };
+    window.addEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange);
+    return () => window.removeEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange);
+  }, []);
+
+  const t = textMap[currentLang] || englishText;
+
   return (
-    <div className="home-content-container home-benefits-container">
-      <ul className="home-benefits" aria-label="Why shop with TazaHaat">
-        {benefits.map(({ icon, title, description }) => (
+    <div className="home-content-container home-benefits-container" lang={t.language}>
+      <ul className="home-benefits" aria-label={t.benefitsAriaLabel}>
+        {t.benefits.map(({ icon, title, description }) => (
           <li className="home-benefit" key={icon}>
             <span className="home-benefit-icon"><BenefitIcon kind={icon} /></span>
             <div><h2>{title}</h2><p>{description}</p></div>

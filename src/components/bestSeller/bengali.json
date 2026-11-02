@@ -1,0 +1,146 @@
+{
+  "language": "bn",
+  "heading": "সেরা বিক্রিত পণ্য",
+  "moreLabel": "+{count} আরও",
+  "browseLabel": "{name} দেখুন",
+  "groups": [
+    {
+      "id": "vegetables",
+      "name": "শাকসবজি ও শাকপাতা",
+      "more": 155,
+      "images": [
+        {
+          "src": "/images/products/product--3.png",
+          "alt": "টমেটো"
+        },
+        {
+          "src": "/images/products/product--8.png",
+          "alt": "শসা"
+        },
+        {
+          "src": "/images/products/product12.png",
+          "alt": "ফুলকপি"
+        },
+        {
+          "src": "/images/products/product15.png",
+          "alt": "বেগুন"
+        }
+      ]
+    },
+    {
+      "id": "fruits",
+      "name": "টাটকা ফলমূল",
+      "more": 84,
+      "images": [
+        {
+          "src": "/images/products/product--5.png",
+          "alt": "লাল আপেল"
+        },
+        {
+          "src": "/images/products/product13.png",
+          "alt": "আম"
+        },
+        {
+          "src": "/images/products/product13.png",
+          "alt": "পাকা আম"
+        },
+        {
+          "src": "/images/products/product--5.png",
+          "alt": "টাটকা আপেল"
+        }
+      ]
+    },
+    {
+      "id": "fish",
+      "name": "মাছ ও সামুদ্রিক খাবার",
+      "more": 98,
+      "images": [
+        {
+          "src": "/images/products/product--2.png",
+          "alt": "রুই মাছ"
+        },
+        {
+          "src": "/images/products/product--6.png",
+          "alt": "চিংড়ি"
+        },
+        {
+          "src": "/images/products/product16.png",
+          "alt": "টাটকা মাছ"
+        },
+        {
+          "src": "/images/products/product17.png",
+          "alt": "কাঁকড়া"
+        }
+      ]
+    },
+    {
+      "id": "meat",
+      "name": "মাংস ও পোল্ট্রি",
+      "more": 62,
+      "images": [
+        {
+          "src": "/images/products/product--1.png",
+          "alt": "চিকেন"
+        },
+        {
+          "src": "/images/products/product--7.png",
+          "alt": "খাসির মাংস"
+        },
+        {
+          "src": "/images/products/product11.png",
+          "alt": "ডিম"
+        },
+        {
+          "src": "/images/products/product--1.png",
+          "alt": "চিকেন কাট"
+        }
+      ]
+    },
+    {
+      "id": "dairy",
+      "name": "দুগ্ধজাত ও ডিম",
+      "more": 79,
+      "images": [
+        {
+          "src": "/images/products/product--4.png",
+          "alt": "দুধ"
+        },
+        {
+          "src": "/images/products/product--9.png",
+          "alt": "পনির"
+        },
+        {
+          "src": "/images/products/product11.png",
+          "alt": "ডিম"
+        },
+        {
+          "src": "/images/products/product--9.png",
+          "alt": "টাটকা পনির"
+        }
+      ]
+    },
+    {
+      "id": "essentials",
+      "name": "নিত্যপ্রয়োজনীয় সামগ্রী",
+      "more": 120,
+      "images": [
+        {
+          "src": "/images/products/product--10.png",
+          "alt": "আলু"
+        },
+        {
+          "src": "/images/products/product14.png",
+          "alt": "পেঁয়াজ"
+        },
+        {
+          "src": "/images/products/product--3.png",
+          "alt": "টমেটো"
+        },
+        {
+          "src": "/images/products/product11.png",
+          "alt": "ডিম"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "language": "hi",
+  "locale": "hi-IN",
+  "currency": "INR",
+
+  "choosePhotoAria": "प्रोफ़ाइल फ़ोटो चुनें",
+  "uploadPhotoAria": "प्रोफ़ाइल फ़ोटो अपलोड करें",
+  "photoAlt": "आपकी प्रोफ़ाइल फ़ोटो",
+  "welcomeBack": "स्वागत है",
+  "goodFood": "अच्छा भोजन",
+  "goodLife": "अच्छा जीवन",
+  "editProfile": "प्रोफ़ाइल संपादित करें",
+
+  "orderSummaryAria": "ऑर्डर सारांश",
+  "statTotalOrders": "कुल ऑर्डर्स",
+  "statTotalOrdersDetail": "अपने सभी ऑर्डर्स देखें",
+  "statDelivered": "डिलीवर किए गए",
+  "statDeliveredDetail": "पूर्ण ऑर्डर्स",
+  "statPending": "लंबित",
+  "statPendingDetail": "प्रक्रियाधीन ऑर्डर्स",
+  "statCancelled": "रद्द",
+  "statCancelledDetail": "रद्द किए गए ऑर्डर्स",
+
+  "bannerTitle": "आपके सभी ऑर्डर्स, एक ही जगह",
+  "bannerSubtitle": "डिलीवरी स्थिति, ऑर्डर इतिहास और अन्य विवरण देखें।",
+  "viewMyOrders": "मेरे ऑर्डर्स देखें",
+
+  "addressesHeading": "डिलीवरी पते",
+  "addressesSubtitle": "अपने डिलीवरी पते प्रबंधित करें",
+  "addAddress": "पता जोड़ें",
+  "setDefaultAddressAria": "{type} को डिफ़ॉल्ट डिलीवरी पता बनाएं",
+  "editAddressAria": "{type} पता संपादित करें",
+  "deleteAddressAria": "{type} पता हटाएं",
+
+  "editProfileTitle": "प्रोफ़ाइल संपादित करें",
+  "editProfileSubtitle": "अपने संपर्क विवरण अपडेट करें।",
+  "closeFormAria": "फ़ॉर्म बंद करें",
+  "fullName": "पूरा नाम",
+  "emailAddress": "ईमेल पता",
+  "phoneNumber": "फ़ोन नंबर",
+  "cancel": "रद्द करें",
+  "saveProfile": "प्रोफ़ाइल सहेजें",
+
+  "likedProductsHeading": "आपके पसंदीदा उत्पाद",
+
+  "supportTicketsTitle": "सपोर्ट टिकट्स",
+  "supportTicketsSubtitle": "अपनी दर्ज समस्याओं और हमारी टीम के अपडेट ट्रैक करें।",
+  "ticketsCount": "{count} टिकट्स",
+  "ticketPrefix": "टिकट #",
+  "yourIssue": "आपकी समस्या",
+  "resolution": "समाधान",
+  "latestUpdate": "नवीनतम अपडेट",
+  "raised": "दर्ज",
+  "updated": "अपडेट"
+}

@@ -1,10 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import faqContent from "./english.json";
+import englishText from "./english.json";
+import bengaliText from "./bengali.json";
+import hindiText from "./hindi.json";
+import { type SupportedLang, useLanguage } from "@/lib/language";
 import "./Faq.css";
 
+const textMap: Record<SupportedLang, typeof englishText> = {
+  en: englishText,
+  bn: bengaliText,
+  hi: hindiText,
+};
+
 export default function Faq() {
+  const [language] = useLanguage();
+  const faqContent = textMap[language];
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (

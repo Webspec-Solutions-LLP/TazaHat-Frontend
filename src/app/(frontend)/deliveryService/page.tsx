@@ -1,8 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Address, { type AddressFormValues } from "@/components/modals/address/Address";
+import englishText from "./english.json";
+import bengaliText from "./bengali.json";
+import hindiText from "./hindi.json";
+import {
+  LANGUAGE_CHANGE_EVENT,
+  LANGUAGE_STORAGE_KEY,
+  type SupportedLang,
+} from "@/components/navbar/Navbar";
 import "./DeliveryService.css";
+
+const textMap: Record<SupportedLang, typeof englishText> = {
+  en: englishText,
+  bn: bengaliText,
+  hi: hindiText,
+};
 
 // Icons matching the design screenshot
 function PinIcon() {
@@ -180,45 +194,32 @@ const timeSlots = [
   "08:00 PM - 10:00 PM",
 ];
 
-const packageContainOptions = [
-  "Fresh Fish & Seafood",
-  "Fresh Meat & Poultry",
-  "Fresh Vegetables & Fruits",
-  "Dairy & Grocery Staples",
-  "Home Cooked Food / Bakery",
-  "Important Documents / Parcels",
-  "Medicines / Healthcare Items",
-  "Clothes / Personal Belongings",
-  "Others",
-];
-
-const packageWeightOptions = [
-  "Up to 1 KG",
-  "1 KG - 3 KG",
-  "3 KG - 5 KG",
-  "5 KG - 10 KG",
-  "10 KG - 15 KG",
-  "Above 15 KG",
-];
-
-const packageSizeOptions = [
-  "Small (Envelope / Pouch)",
-  "Medium (Standard Shoebox size)",
-  "Large (Big Carton / Sack)",
-  "Extra Large (Heavy / Bulk Parcel)",
-];
-
-const packetCountOptions = [
-  "1 Packet",
-  "2 Packets",
-  "3 Packets",
-  "4 Packets",
-  "5 Packets",
-  "6 - 10 Packets",
-  "More than 10 Packets",
-];
-
 export default function DeliveryServicePage() {
+  const [currentLang, setCurrentLang] = useState<SupportedLang>("en");
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY) as SupportedLang | null;
+      if (stored === "en" || stored === "bn" || stored === "hi") {
+        setCurrentLang(stored);
+      }
+    } catch {
+      // Use fallback
+    }
+
+    const handleLanguageChange = (event: Event) => {
+      const newLang = (event as CustomEvent<SupportedLang>).detail;
+      if (newLang === "en" || newLang === "bn" || newLang === "hi") {
+        setCurrentLang(newLang);
+      }
+    };
+
+    window.addEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange);
+    return () => window.removeEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange);
+  }, []);
+
+  const t = textMap[currentLang] || englishText;
+
   const [addresses, setAddresses] = useState<string[]>(initialAddresses);
   const [pickupAddress, setPickupAddress] = useState<string>("");
   const [deliveryAddress, setDeliveryAddress] = useState<string>("");
@@ -267,41 +268,41 @@ export default function DeliveryServicePage() {
     e.preventDefault();
 
     if (!pickupAddress) {
-      alert("Please select or add a Pickup address.");
+      alert(t.alertPickupAddress);
       return;
     }
     if (!deliveryAddress) {
-      alert("Please select or add a Delivery address.");
+      alert(t.alertDeliveryAddress);
       return;
     }
     if (!pickupDate) {
-      alert("Please select a Pickup date.");
+      alert(t.alertPickupDate);
       return;
     }
     if (!pickupTime) {
-      alert("Please select a Pick-up time slot.");
+      alert(t.alertPickupTime);
       return;
     }
     if (!packageContains) {
-      alert("Please choose what the package contains.");
+      alert(t.alertPackageContains);
       return;
     }
     if (!packageWeight) {
-      alert("Please choose package weight.");
+      alert(t.alertPackageWeight);
       return;
     }
     if (!packageSize) {
-      alert("Please choose package size.");
+      alert(t.alertPackageSize);
       return;
     }
     if (!totalPackets) {
-      alert("Please choose total number of packets.");
+      alert(t.alertTotalPackets);
       return;
     }
 
     const trackingId = `TH-DS-${Math.floor(100000 + Math.random() * 900000)}`;
     setSubmittedMessage(
-      `Delivery request booked successfully! Your tracking code is #${trackingId}. Our rider will contact you soon.`
+      t.bookingSuccess.replace("{trackingId}", trackingId)
     );
 
     // Scroll smoothly to top of card to show confirmation
@@ -309,7 +310,7 @@ export default function DeliveryServicePage() {
   };
 
   return (
-    <main className="delivery-page">
+    <main className="delivery-page" lang={t.language}>
       <div className="delivery-card-container">
         <div className="delivery-card">
           {submittedMessage && (
@@ -319,7 +320,7 @@ export default function DeliveryServicePage() {
                 type="button"
                 className="delivery-modal-close"
                 onClick={() => setSubmittedMessage(null)}
-                aria-label="Dismiss alert"
+                aria-label={t.dismissAlert}
               >
                 <CloseIcon />
               </button>
@@ -328,10 +329,10 @@ export default function DeliveryServicePage() {
 
           <form className="delivery-form" onSubmit={handleSubmit}>
             <div className="delivery-form-intro">
-              <span className="delivery-form-eyebrow">FAST & RELIABLE</span>
-              <h2 className="delivery-form-title">Book a delivery</h2>
+              <span className="delivery-form-eyebrow">{t.eyebrow}</span>
+              <h2 className="delivery-form-title">{t.title}</h2>
               <p className="delivery-form-description">
-                Share your pickup and delivery details to arrange a convenient doorstep service.
+                {t.description}
               </p>
             </div>
 
@@ -345,7 +346,7 @@ export default function DeliveryServicePage() {
                       <PinIcon />
                     </span>
                     <label htmlFor="pickup-address-select" className="delivery-label">
-                      Pickup address <span className="delivery-required">*</span>
+                      {t.pickupAddress} <span className="delivery-required">*</span>
                     </label>
                   </div>
                   <button
@@ -353,7 +354,7 @@ export default function DeliveryServicePage() {
                     className="delivery-add-btn"
                     onClick={() => openAddressModal("pickup")}
                   >
-                    <PlusIcon /> Add New Address
+                    <PlusIcon /> {t.addNewAddress}
                   </button>
                 </div>
                 <div className="delivery-input-control">
@@ -364,7 +365,7 @@ export default function DeliveryServicePage() {
                     onChange={e => setPickupAddress(e.target.value)}
                     required
                   >
-                    <option value="">Select Pickup Address</option>
+                    <option value="">{t.selectPickupAddress}</option>
                     {addresses.map((addr, idx) => (
                       <option key={`pickup-${idx}`} value={addr}>
                         {addr}
@@ -385,7 +386,7 @@ export default function DeliveryServicePage() {
                       <TruckIcon />
                     </span>
                     <label htmlFor="delivery-address-select" className="delivery-label">
-                      Delivery address <span className="delivery-required">*</span>
+                      {t.deliveryAddress} <span className="delivery-required">*</span>
                     </label>
                   </div>
                   <button
@@ -393,7 +394,7 @@ export default function DeliveryServicePage() {
                     className="delivery-add-btn"
                     onClick={() => openAddressModal("delivery")}
                   >
-                    <PlusIcon /> Add New Address
+                    <PlusIcon /> {t.addNewAddress}
                   </button>
                 </div>
                 <div className="delivery-input-control">
@@ -404,7 +405,7 @@ export default function DeliveryServicePage() {
                     onChange={e => setDeliveryAddress(e.target.value)}
                     required
                   >
-                    <option value="">Select Delivery Address</option>
+                    <option value="">{t.selectDeliveryAddress}</option>
                     {addresses.map((addr, idx) => (
                       <option key={`delivery-${idx}`} value={addr}>
                         {addr}
@@ -426,7 +427,7 @@ export default function DeliveryServicePage() {
                     <CalendarBadgeIcon />
                   </span>
                   <span className="delivery-label">
-                    Pickup date &amp; time <span className="delivery-required">*</span>
+                    {t.pickupDateTime} <span className="delivery-required">*</span>
                   </span>
                 </div>
               </div>
@@ -443,10 +444,10 @@ export default function DeliveryServicePage() {
                     className="delivery-date-input"
                     value={pickupDate}
                     onChange={e => setPickupDate(e.target.value)}
-                    placeholder="Choose Pickup Date.."
+                    placeholder={t.choosePickupDatePlaceholder}
                     min={new Date().toISOString().split("T")[0]}
                     required
-                    aria-label="Choose Pickup Date"
+                    aria-label={t.choosePickupDateAria}
                   />
                 </div>
 
@@ -461,9 +462,9 @@ export default function DeliveryServicePage() {
                     value={pickupTime}
                     onChange={e => setPickupTime(e.target.value)}
                     required
-                    aria-label="Select Pick-up Time"
+                    aria-label={t.selectPickupTime}
                   >
-                    <option value="">Select Pick-up Time</option>
+                    <option value="">{t.selectPickupTime}</option>
                     {timeSlots.map(slot => (
                       <option key={slot} value={slot}>
                         {slot}
@@ -483,8 +484,8 @@ export default function DeliveryServicePage() {
                 <InfoCircleIcon />
               </span>
               <p className="delivery-notice-text">
-                Please note, we deliver all packages on same day as soon as those are picked up. In case, storage is needed after pick up and delivery needs to be halted, please contact{" "}
-                <strong className="delivery-notice-highlight">customer care in Live Chat for special request</strong>.
+                {t.noticeText}{" "}
+                <strong className="delivery-notice-highlight">{t.noticeHighlight}</strong>.
               </p>
             </div>
 
@@ -496,7 +497,7 @@ export default function DeliveryServicePage() {
                     <PackageBoxIcon />
                   </span>
                   <label htmlFor="package-contains-select" className="delivery-label">
-                    Package contains <span className="delivery-required">*</span>
+                    {t.packageContains} <span className="delivery-required">*</span>
                   </label>
                 </div>
               </div>
@@ -508,8 +509,8 @@ export default function DeliveryServicePage() {
                   onChange={e => setPackageContains(e.target.value)}
                   required
                 >
-                  <option value="">Select Package Contain</option>
-                  {packageContainOptions.map(item => (
+                  <option value="">{t.selectPackageContain}</option>
+                  {t.packageContainOptions.map(item => (
                     <option key={item} value={item}>
                       {item}
                     </option>
@@ -531,7 +532,7 @@ export default function DeliveryServicePage() {
                       <WeightBagIcon />
                     </span>
                     <label htmlFor="package-weight-select" className="delivery-label">
-                      Package weight <span className="delivery-required">*</span>
+                      {t.packageWeight} <span className="delivery-required">*</span>
                     </label>
                   </div>
                 </div>
@@ -543,8 +544,8 @@ export default function DeliveryServicePage() {
                     onChange={e => setPackageWeight(e.target.value)}
                     required
                   >
-                    <option value="">Select Package Weight</option>
-                    {packageWeightOptions.map(weight => (
+                    <option value="">{t.selectPackageWeight}</option>
+                    {t.packageWeightOptions.map(weight => (
                       <option key={weight} value={weight}>
                         {weight}
                       </option>
@@ -564,7 +565,7 @@ export default function DeliveryServicePage() {
                       <CubeSizeIcon />
                     </span>
                     <label htmlFor="package-size-select" className="delivery-label">
-                      Package size <span className="delivery-required">*</span>
+                      {t.packageSize} <span className="delivery-required">*</span>
                     </label>
                   </div>
                 </div>
@@ -576,8 +577,8 @@ export default function DeliveryServicePage() {
                     onChange={e => setPackageSize(e.target.value)}
                     required
                   >
-                    <option value="">Select Package Size</option>
-                    {packageSizeOptions.map(size => (
+                    <option value="">{t.selectPackageSize}</option>
+                    {t.packageSizeOptions.map(size => (
                       <option key={size} value={size}>
                         {size}
                       </option>
@@ -600,7 +601,7 @@ export default function DeliveryServicePage() {
                       <LayersIcon />
                     </span>
                     <label htmlFor="total-packet-select" className="delivery-label">
-                      Total no of packet <span className="delivery-required">*</span>
+                      {t.totalPackets} <span className="delivery-required">*</span>
                     </label>
                   </div>
                 </div>
@@ -612,8 +613,8 @@ export default function DeliveryServicePage() {
                     onChange={e => setTotalPackets(e.target.value)}
                     required
                   >
-                    <option value="">Select Total No Of Packet</option>
-                    {packetCountOptions.map(count => (
+                    <option value="">{t.selectTotalPackets}</option>
+                    {t.packetCountOptions.map(count => (
                       <option key={count} value={count}>
                         {count}
                       </option>
@@ -633,11 +634,11 @@ export default function DeliveryServicePage() {
                       <CardPaymentIcon />
                     </span>
                     <span className="delivery-label">
-                      Payment mode <span className="delivery-required">*</span>
+                      {t.paymentMode} <span className="delivery-required">*</span>
                     </span>
                   </div>
                 </div>
-                <div className="delivery-payment-modes" role="radiogroup" aria-label="Payment Mode">
+                <div className="delivery-payment-modes" role="radiogroup" aria-label={t.paymentMode}>
                   <label className="delivery-radio-option">
                     <input
                       type="radio"
@@ -650,7 +651,7 @@ export default function DeliveryServicePage() {
                     <span className="delivery-radio-custom" aria-hidden="true">
                       <span className="delivery-radio-dot" />
                     </span>
-                    <span className="delivery-radio-text">Pay on pickup</span>
+                    <span className="delivery-radio-text">{t.payOnPickup}</span>
                   </label>
 
                   <label className="delivery-radio-option">
@@ -665,7 +666,7 @@ export default function DeliveryServicePage() {
                     <span className="delivery-radio-custom" aria-hidden="true">
                       <span className="delivery-radio-dot" />
                     </span>
-                    <span className="delivery-radio-text">Pay on delivery</span>
+                    <span className="delivery-radio-text">{t.payOnDelivery}</span>
                   </label>
                 </div>
               </div>
@@ -679,7 +680,7 @@ export default function DeliveryServicePage() {
                     <NoteIcon />
                   </span>
                   <label htmlFor="special-instructions" className="delivery-label">
-                    Please write here if any special instructions for us.
+                    {t.specialInstructionsLabel}
                   </label>
                 </div>
               </div>
@@ -687,7 +688,7 @@ export default function DeliveryServicePage() {
                 id="special-instructions"
                 className="delivery-textarea"
                 rows={3}
-                placeholder="Please write here if any special instructions for us."
+                placeholder={t.specialInstructionsPlaceholder}
                 value={specialInstructions}
                 onChange={e => setSpecialInstructions(e.target.value)}
               />
@@ -697,7 +698,7 @@ export default function DeliveryServicePage() {
             <div className="delivery-submit-wrap">
               <button type="submit" className="delivery-submit-btn">
                 <SendPlaneIcon />
-                <span>SUBMIT</span>
+                <span>{t.submit}</span>
               </button>
             </div>
           </form>

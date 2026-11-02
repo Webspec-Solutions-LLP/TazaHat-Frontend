@@ -1,0 +1,10 @@
+{
+  "language": "bn",
+  "benefitsAriaLabel": "কেন TazaHaat থেকে কিনবেন",
+  "benefits": [
+    { "icon": "leaf", "title": "১০০% টাটকা", "description": "খামার থেকে ঘরে" },
+    { "icon": "shield", "title": "স্বাস্থ্যকর ও নিরাপদ", "description": "পরিষ্কার ও প্যাক করা" },
+    { "icon": "truck", "title": "দ্রুত ও সঠিক সময়ে", "description": "ডেলিভারি" },
+    { "icon": "quality", "title": "সেরা গুণমান", "description": "সেরা মূল্যে" }
+  ]
+}

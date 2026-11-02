@@ -20,6 +20,10 @@ import { searchSuggestionsAction } from "@/app/actions";
 import { SearchHistorySkeleton, SearchSuggestionSkeleton } from "../skeleton/Skeletons";
 import { fallbackImage, isRemoteImage, type Product as CatalogProduct } from "@/lib/api";
 import { readWishlistIds, subscribeToWishlist, toggleWishlistId } from "../../lib/wishlist";
+import {
+  type SupportedLang,
+  useLanguage,
+} from "@/lib/language";
 import { OPEN_LOCATION_EVENT, useCity } from "../../lib/city";
 import englishText from "./english.json";
 import bengaliText from "./bengali.json";
@@ -30,11 +34,9 @@ const SEARCH_HISTORY_KEY = "tazahat-search-history";
 const MAX_SEARCH_HISTORY = 30;
 const MIN_HISTORY_LENGTH = 4; // shorter searches are not remembered
 const HISTORY_PAGE_SIZE = 5;
-export const LANGUAGE_STORAGE_KEY = "tazahat-language";
 const CART_STORAGE_KEY = "tazahat-cart-v1";
-export const LANGUAGE_CHANGE_EVENT = "tazahat:change-language";
-
-export type SupportedLang = "en" | "bn" | "hi";
+export { LANGUAGE_CHANGE_EVENT, LANGUAGE_STORAGE_KEY } from "@/lib/language";
+export type { SupportedLang } from "@/lib/language";
 
 const textMap: Record<SupportedLang, typeof englishText> = {
   en: englishText,
@@ -55,16 +57,7 @@ export default function Navbar({
   lang,
   onLanguageChange,
 }: NavbarProps) {
-  const [currentLang, setCurrentLang] = useState<SupportedLang>(() => {
-    if (lang) return lang;
-    try {
-      const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY) as SupportedLang | null;
-      if (stored === "en" || stored === "bn" || stored === "hi") return stored;
-    } catch {
-      // Use English when localStorage is unavailable.
-    }
-    return "en";
-  });
+  const [currentLang, setSiteLanguage] = useLanguage();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -125,25 +118,8 @@ export default function Navbar({
 
   const activeLang = lang || currentLang;
 
-  useEffect(() => {
-    const handleLanguageChange = (event: Event) => {
-      const newLang = (event as CustomEvent<SupportedLang>).detail;
-      if (newLang && (newLang === "en" || newLang === "bn" || newLang === "hi")) {
-        setCurrentLang(newLang);
-      }
-    };
-    window.addEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange);
-    return () => window.removeEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange);
-  }, []);
-
   const changeLanguage = (newLang: SupportedLang) => {
-    setCurrentLang(newLang);
-    try {
-      window.localStorage.setItem(LANGUAGE_STORAGE_KEY, newLang);
-      window.dispatchEvent(new CustomEvent(LANGUAGE_CHANGE_EVENT, { detail: newLang }));
-    } catch {
-      // Ignore if localStorage unavailable
-    }
+    setSiteLanguage(newLang);
     onLanguageChange?.(newLang);
   };
 
@@ -737,6 +713,8 @@ export default function Navbar({
                   <button
                     type="button"
                     className={`navbar-lang-pill${currentLang === "en" ? " is-active" : ""}`}
+                    aria-label="English"
+                    aria-pressed={currentLang === "en"}
                     onClick={() => changeLanguage("en")}
                   >
                     EN
@@ -744,6 +722,8 @@ export default function Navbar({
                   <button
                     type="button"
                     className={`navbar-lang-pill${currentLang === "bn" ? " is-active" : ""}`}
+                    aria-label="বাংলা"
+                    aria-pressed={currentLang === "bn"}
                     onClick={() => changeLanguage("bn")}
                   >
                     বাং
@@ -751,6 +731,8 @@ export default function Navbar({
                   <button
                     type="button"
                     className={`navbar-lang-pill${currentLang === "hi" ? " is-active" : ""}`}
+                    aria-label="हिन्दी"
+                    aria-pressed={currentLang === "hi"}
                     onClick={() => changeLanguage("hi")}
                   >
                     हिं

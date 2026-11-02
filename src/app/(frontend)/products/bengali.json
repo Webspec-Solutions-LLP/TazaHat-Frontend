@@ -1,0 +1,54 @@
+{
+  "language": "bn",
+  "locale": "bn-IN",
+  "currency": "INR",
+
+  "allProducts": "সকল পণ্য",
+  "searchResultsTitle": "“{query}”-এর ফলাফল",
+  "productsCount": "{city}-তে {total}টি পণ্যের মধ্যে {count}টি",
+
+  "sortLabel": "সাজান:",
+  "sortAria": "পণ্য সাজান",
+  "sortName": "নাম: ক থেকে জ্ঞ",
+  "sortPriceAsc": "মূল্য: কম থেকে বেশি",
+  "sortPriceDesc": "মূল্য: বেশি থেকে কম",
+  "sortDiscount": "সর্বোচ্চ ছাড়",
+  "sortBestMatch": "সেরা মিল",
+
+  "filterTitle": "ফিল্টার",
+  "filterReset": "রিসেট",
+  "filterCloseAria": "ফিল্টার বন্ধ করুন",
+  "filterTrigger": "ফিল্টার",
+  "filterAria": "পণ্য ফিল্টার",
+
+  "filterCategory": "ক্যাটাগরি অনুযায়ী ফিল্টার",
+  "filterAllCategories": "সকল ক্যাটাগরি",
+  "filterSubcategory": "সাবক্যাটাগরি অনুযায়ী ফিল্টার",
+  "filterAllInSubcategory": "{category}-এর সব",
+  "filterChooseCategoryFirst": "প্রথমে একটি ক্যাটাগরি নির্বাচন করুন।",
+
+  "filterPrice": "মূল্য অনুযায়ী ফিল্টার",
+  "filterAnyPrice": "যেকোনো মূল্য",
+  "filterUnderPrice": "{price}-এর নিচে",
+
+  "viewGroupAria": "পণ্য প্রদর্শন",
+  "viewGridAria": "গ্রিড ভিউ",
+  "viewListAria": "লিস্ট ভিউ",
+
+  "loadingProducts": "পণ্য লোড হচ্ছে",
+  "loadMoreError": "আরও পণ্য লোড করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।",
+  "tryAgain": "আবার চেষ্টা করুন",
+  "seenAllProducts": "আপনি সব {total}টি পণ্য দেখেছেন।",
+
+  "emptyTitle": "কোনো পণ্য পাওয়া যায়নি",
+  "emptySubtitle": "আরও পণ্য দেখতে আপনার ফিল্টার পরিবর্তন করে চেষ্টা করুন।",
+  "clearFilters": "ফিল্টার মুছুন",
+
+  "discount": "{percent}% ছাড়",
+  "rating": "{reviews}টি পর্যালোচনার মধ্যে ৫-এ {rating} রেটিং",
+  "productDescription": "টাটকা ও গুণগত মানের নিশ্চয়তা সহ {name}, আপনার দৈনন্দিন খাবারের জন্য প্রস্তুত।",
+  "save": "পছন্দের তালিকায় {name} যোগ করুন",
+  "unsave": "পছন্দের তালিকা থেকে {name} সরান",
+  "addToCart": "কার্টে যোগ করুন",
+  "quickViewAria": "{name} এর বিস্তারিত দেখুন"
+}

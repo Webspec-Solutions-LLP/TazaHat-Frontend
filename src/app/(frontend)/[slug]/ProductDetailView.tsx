@@ -12,9 +12,22 @@ import { dressingChargeRupees } from "@/lib/cartLine";
 import { cardToProduct, fallbackImage, isRemoteImage, mediaSrc, PLACEHOLDER_IMAGE, shortName, type ApiProductDetail } from "@/lib/api";
 import { readWishlistIds, subscribeToWishlist, toggleWishlistId } from "@/lib/wishlist";
 import { useImageZoom } from "@/lib/useImageZoom";
+import {
+  LANGUAGE_CHANGE_EVENT,
+  LANGUAGE_STORAGE_KEY,
+  type SupportedLang,
+} from "@/components/navbar/Navbar";
+import englishText from "./english.json";
+import bengaliText from "./bengali.json";
+import hindiText from "./hindi.json";
 import "./ProductDetails.css";
 
-const money = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 });
+const textMap: Record<SupportedLang, typeof englishText> = {
+  en: englishText,
+  bn: bengaliText,
+  hi: hindiText,
+};
+
 function Icon({ name }: { name: "fish" | "leaf" | "shield" | "flask" | "box" | "cart" | "heart" | "minus" | "plus" | "info" | "compare" }) {
   const paths: Record<typeof name, React.ReactNode> = {
     fish: <><path d="M3 12C8 2 17 5 20 12c-3 7-12 10-17 0Zm0 0-2-4v8l2-4Z"/><circle cx="16" cy="11" r=".8"/></>,
@@ -31,27 +44,36 @@ function Icon({ name }: { name: "fish" | "leaf" | "shield" | "flask" | "box" | "
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
 }
 
-
-const FISH_TRUST = [
-  { icon: "fish" as const, title: "100% Fresh Catch", text: "Daily fresh supply" },
-  { icon: "leaf" as const, title: "Naturally Sourced", text: "From clean rivers" },
-  { icon: "shield" as const, title: "Hygienically Cleaned", text: "Safe for your family" },
-  { icon: "flask" as const, title: "No Preservatives", text: "Pure & natural" },
-  { icon: "box" as const, title: "Packed with Care", text: "Leak proof packaging" },
-];
-const GENERAL_TRUST = [
-  { icon: "leaf" as const, title: "Fresh & Natural", text: "Quality checked daily" },
-  { icon: "shield" as const, title: "Hygienically Handled", text: "Safe for your family" },
-  { icon: "flask" as const, title: "No Preservatives", text: "Pure & natural" },
-  { icon: "box" as const, title: "Packed with Care", text: "Leak proof packaging" },
-];
-
 const plainText = (html: string | null | undefined) => (html ?? "").replace(/<[^>]*>/g, " ").replace(/&nbsp;/gi, " ").replace(/&amp;/gi, "&").replace(/&lt;/gi, "<").replace(/&gt;/gi, ">").replace(/&quot;/gi, "\"").replace(/&#39;/g, "'").replace(/\s+/g, " ").trim();
 
 /** One product for the visitor's city: packs, prices and cutting options come from the API. */
 export default function ProductDetailView({ detail }: { detail: ApiProductDetail }) {
+  const [currentLang, setCurrentLang] = useState<SupportedLang>("en");
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY) as SupportedLang | null;
+      if (stored === "en" || stored === "bn" || stored === "hi") {
+        setCurrentLang(stored);
+      }
+    } catch {
+      // Use fallback
+    }
+
+    const handleLanguageChange = (event: Event) => {
+      const newLang = (event as CustomEvent<SupportedLang>).detail;
+      if (newLang && (newLang === "en" || newLang === "bn" || newLang === "hi")) {
+        setCurrentLang(newLang);
+      }
+    };
+    window.addEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange);
+    return () => window.removeEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange);
+  }, []);
+
+  const t = textMap[currentLang] || englishText;
+  const money = new Intl.NumberFormat(t.locale, { style: "currency", currency: t.currency, maximumFractionDigits: 0 });
+
   const isFish = /fish|seafood/i.test(detail.category.slug + detail.category.name);
-  const trustItems = isFish ? FISH_TRUST : GENERAL_TRUST;
+  const trustItems = isFish ? t.fishTrust : t.generalTrust;
   const name = shortName(detail.name);
   const gallery = detail.images.length ? detail.images.map(mediaSrc) : [PLACEHOLDER_IMAGE];
   const [activeImage, setActiveImage] = useState(0);
@@ -132,7 +154,7 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
   const mainImage = gallery[Math.min(activeImage, gallery.length - 1)];
   // short description; when the product has none, the start of the full description
   const longText = plainText(detail.description);
-  const shortText = plainText(detail.shortDescription) || (longText.length > 260 ? `${longText.slice(0, 260).trimEnd()}…` : longText) || `${name} is selected for freshness and quality, then carefully packed to arrive ready for your kitchen.`;
+  const shortText = plainText(detail.shortDescription) || (longText.length > 260 ? `${longText.slice(0, 260).trimEnd()}…` : longText) || t.defaultFallbackDescription.replace("{name}", name);
 
   // Zoom. Mouse on a wide screen: a lens follows the pointer over the picture and a larger preview opens beside it (Amazon / Flipkart
   // style). Touch or narrow screens: tap the picture to zoom in at that spot, tap again to zoom out.
@@ -180,27 +202,27 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
   };
   const changeQuantity = (delta: number) => window.dispatchEvent(new CustomEvent("tazahat:update-cart-quantity", { detail: { id: lineId, delta } }));
 
-  return <main className="product-details-page">
+  return <main className="product-details-page" lang={t.language}>
     <div className="product-details-shell">
       <div className="pd-layout">
-        <div className="pd-left-column" ref={leftRef}><section className="pd-gallery" aria-label="Product images" ref={galleryRef}>
+        <div className="pd-left-column" ref={leftRef}><section className="pd-gallery" aria-label={t.productImagesAria} ref={galleryRef}>
 
           <div className={`pd-main-image${lens ? " is-zooming" : ""}${imageProps.style ? " is-tap-zoom" : ""}${hasThumbs ? " has-thumbs" : ""}`}
             {...containerProps}>
             <Image src={mainImage} alt={name} fill priority sizes="(max-width: 900px) 100vw, 40vw" unoptimized={isRemoteImage(mainImage)} onError={fallbackImage} {...imageProps} />
             {lens && <span className="pd-zoom-lens" aria-hidden="true" style={lens.lens} />}
             <StockRibbon pack={pack} />
-            {isFish ? <span className="pd-fresh">🐟 &nbsp;Fresh Catch</span> : <span className="pd-fresh">🌿 &nbsp;Fresh &amp; Quality Checked</span>}<span className="pd-natural">◉ &nbsp;100% Fresh &amp; Natural</span>
+            {isFish ? <span className="pd-fresh">🐟 &nbsp;{t.freshCatch}</span> : <span className="pd-fresh">🌿 &nbsp;{t.freshQualityChecked}</span>}<span className="pd-natural">◉ &nbsp;{t.freshNatural}</span>
           </div>
-          {hasThumbs && <div className="pd-thumbnails" role="tablist" aria-label="Product pictures">{gallery.map((src, index) => <button key={`${src}-${index}`} className={mainImage === src ? "is-active" : ""} onClick={() => { setActiveImage(index); reset(); }} aria-label={`Show product image ${index + 1}`} role="tab" aria-selected={mainImage === src}><Image src={src} alt={`${name} - picture ${index + 1}`} fill sizes="76px" unoptimized={isRemoteImage(src)} onError={fallbackImage} /></button>)}</div>}
+          {hasThumbs && <div className="pd-thumbnails" role="tablist" aria-label={t.productPicturesAria}>{gallery.map((src, index) => <button key={`${src}-${index}`} className={mainImage === src ? "is-active" : ""} onClick={() => { setActiveImage(index); reset(); }} aria-label={t.showImageAria.replace("{index}", String(index + 1))} role="tab" aria-selected={mainImage === src}><Image src={src} alt={`${name} - picture ${index + 1}`} fill sizes="76px" unoptimized={isRemoteImage(src)} onError={fallbackImage} /></button>)}</div>}
           {lens && <div className="pd-zoom-pane" aria-hidden="true" style={lens.pane}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={shownSrc ?? mainImage} alt="" style={{ position: "absolute", maxWidth: "none", ...lens.img }} />
           </div>}
         </section>
-        <aside className="pd-trust" aria-label="Product quality promises">
-          <h2 className="pd-trust-heading">Our Quality Promise</h2>
-          <ul>{trustItems.map(item => <li key={item.title}><span className="pd-trust-icon"><Icon name={item.icon} /></span><span><strong>{item.title}</strong><small>{item.text}</small></span></li>)}</ul>
+        <aside className="pd-trust" aria-label={t.qualityPromisesAria}>
+          <h2 className="pd-trust-heading">{t.qualityPromise}</h2>
+          <ul>{trustItems.map(item => <li key={item.title}><span className="pd-trust-icon"><Icon name={item.icon as "fish" | "leaf" | "shield" | "flask" | "box"} /></span><span><strong>{item.title}</strong><small>{item.text}</small></span></li>)}</ul>
           <div className="pd-river-art"><span aria-hidden="true">{isFish ? "🐟　🌿" : "🌿　🥬"}</span></div>
         </aside>
         </div>
@@ -209,47 +231,47 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
         <section className="pd-info" aria-labelledby="pd-title">
           <h1 id="pd-title">{name}</h1>
           {pack ? <>
-            <div className="pd-price-row"><strong>{money.format(unitPrice)}</strong>{unitMrp > unitPrice && <del>{money.format(unitMrp)}</del>}<span>({pack.weight ? `${money.format(pack.ratePaisa / 100)} / kg · ` : ""}{money.format(unitPrice)} per {pack.label}){pack.discountPercent > 0 ? ` · ${pack.discountPercent}% off` : ""}</span></div>
+            <div className="pd-price-row"><strong>{money.format(unitPrice)}</strong>{unitMrp > unitPrice && <del>{money.format(unitMrp)}</del>}<span>({pack.weight ? `${money.format(pack.ratePaisa / 100)} / kg · ` : ""}{money.format(unitPrice)} {t.per} {pack.label}){pack.discountPercent > 0 ? ` · ${pack.discountPercent}% ${t.off}` : ""}</span></div>
             <fieldset className="pd-variant-picker">
-              <legend><strong>Weight / Pack size</strong><span>{pack.label}</span></legend>
+              <legend><strong>{t.weightPackSize}</strong><span>{pack.label}</span></legend>
               <div className="pd-weights">{detail.packs.map((option, index) => <label key={option.id} className={`pd-weight-option${packIndex === index ? " is-selected" : ""}${option.inStock ? "" : " is-sold-out"}`}>
                 <input type="radio" name={`weight-${detail.id}`} value={option.label} checked={packIndex === index} onChange={() => setPackIndex(index)} />
-                <span className="pd-weight-option-card"><strong>{option.label}</strong>{option.availableFromLabel ? <small>From {option.availableFromLabel}</small> : !option.inStock && <small>Out of stock</small>}</span>
+                <span className="pd-weight-option-card"><strong>{option.label}</strong>{option.availableFromLabel ? <small>From {option.availableFromLabel}</small> : !option.inStock && <small>{t.outOfStock}</small>}</span>
               </label>)}</div>
             </fieldset>
-          </> : <p className="pd-description">This product is not on sale in your city right now.</p>}
-          {detail.cutting.length > 0 && <label className={`pd-field${dressingError ? " has-error" : ""}`}><span>Dressing Type{detail.dressingRequired ? <b className="pd-required" aria-hidden="true"> *</b> : null}</span><select ref={dressingSelect} required={detail.dressingRequired} aria-invalid={dressingError || undefined} value={dressingId} onChange={event => { setDressingId(event.target.value); setSpecialInstruction(""); setDressingError(false); }}><option value="">Select Dressing Type</option>{detail.cutting.map(c => <option key={c.id} value={c.id}>{c.name}{c.chargePaisa > 0 ? ` (+${money.format(c.chargePaisa / 100)})` : ""}</option>)}</select>{dressingError && <small className="pd-field-error" role="alert">Please choose a dressing type before adding to the cart.</small>}</label>}
-          {isCustomDressing && <label className="pd-field"><span>Special instruction</span><textarea rows={4} value={specialInstruction} onChange={event => setSpecialInstruction(event.target.value)} placeholder="Tell us how you want it cut (e.g. 6 pieces, head removed, small pieces for curry...)" maxLength={250} autoFocus /><small className="pd-field-count">{specialInstruction.length}/250</small></label>}
+          </> : <p className="pd-description">{t.notOnSale}</p>}
+          {detail.cutting.length > 0 && <label className={`pd-field${dressingError ? " has-error" : ""}`}><span>{t.dressingType}{detail.dressingRequired ? <b className="pd-required" aria-hidden="true"> *</b> : null}</span><select ref={dressingSelect} required={detail.dressingRequired} aria-invalid={dressingError || undefined} value={dressingId} onChange={event => { setDressingId(event.target.value); setSpecialInstruction(""); setDressingError(false); }}><option value="">Select Dressing Type</option>{detail.cutting.map(c => <option key={c.id} value={c.id}>{c.name}{c.chargePaisa > 0 ? ` (+${money.format(c.chargePaisa / 100)})` : ""}</option>)}</select>{dressingError && <small className="pd-field-error" role="alert">Please choose a dressing type before adding to the cart.</small>}</label>}
+          {isCustomDressing && <label className="pd-field"><span>{t.specialInstruction}</span><textarea rows={4} value={specialInstruction} onChange={event => setSpecialInstruction(event.target.value)} placeholder={t.specialInstructionPlaceholder} maxLength={250} autoFocus /><small className="pd-field-count">{specialInstruction.length}/250</small></label>}
           <AvailabilityNote pack={pack} />
           <div className="pd-actions">
             {inCart ? (
-              <div className="pd-quantity" role="group" aria-label={`Quantity of ${name} in your cart`}>
-                <button type="button" aria-label={inCart.quantity <= 1 ? "Remove from cart" : "Decrease quantity"} onClick={() => changeQuantity(-1)}><Icon name="minus" /></button>
-                <output aria-live="polite" aria-label="Quantity in cart">{inCart.quantity}</output>
-                <button type="button" aria-label="Increase quantity" disabled={inCart.quantity >= 99} onClick={() => changeQuantity(1)}><Icon name="plus" /></button>
+              <div className="pd-quantity" role="group" aria-label={t.quantityAria.replace("{name}", name)}>
+                <button type="button" aria-label={inCart.quantity <= 1 ? t.removeFromCartAria : t.decreaseQuantityAria} onClick={() => changeQuantity(-1)}><Icon name="minus" /></button>
+                <output aria-live="polite" aria-label={t.quantityInCartAria}>{inCart.quantity}</output>
+                <button type="button" aria-label={t.increaseQuantityAria} disabled={inCart.quantity >= 99} onClick={() => changeQuantity(1)}><Icon name="plus" /></button>
               </div>
             ) : (
-              pack ? <PackAction pack={pack} className="pd-add-cart" onAdd={addToCart}><Icon name="cart" /> Add to Cart</PackAction> : <button type="button" className="pd-add-cart" disabled><Icon name="cart" /> Add to Cart</button>
+              pack ? <PackAction pack={pack} className="pd-add-cart" onAdd={addToCart}><Icon name="cart" /> {t.addToCart}</PackAction> : <button type="button" className="pd-add-cart" disabled><Icon name="cart" /> {t.addToCart}</button>
             )}
-            <button type="button" className="pd-wishlist pd-wishlist--icon" aria-pressed={saved} aria-label={saved ? "Remove from wishlist" : "Add to wishlist"} title={saved ? "Remove from wishlist" : "Add to wishlist"} onClick={() => setSaved(toggleWishlistId(detail.slug).includes(detail.slug))}><Icon name="heart" /></button>
-            <button type="button" className={`pd-compare${isCompared ? " is-compared" : ""}`} disabled={isCompared} onClick={handleAddToCompare} title={isCompared ? "Already added to compare" : "Add to compare"}><Icon name="compare" /><span>{isCompared ? "Added to Compare" : "Add to Compare"}</span></button>
+            <button type="button" className="pd-wishlist pd-wishlist--icon" aria-pressed={saved} aria-label={saved ? t.removeFromWishlist : t.addToWishlist} title={saved ? t.removeFromWishlist : t.addToWishlist} onClick={() => setSaved(toggleWishlistId(detail.slug).includes(detail.slug))}><Icon name="heart" /></button>
+            <button type="button" className={`pd-compare${isCompared ? " is-compared" : ""}`} disabled={isCompared} onClick={handleAddToCompare} title={isCompared ? t.alreadyAddedToCompare : t.addToCompare}><Icon name="compare" /><span>{isCompared ? t.addedToCompare : t.addToCompare}</span></button>
           </div>
-          <div className="pd-order-note"><span><Icon name="shield" /></span><p><strong>Freshness you can trust</strong><small>Carefully selected, hygienically handled and packed fresh for delivery.</small></p></div>
+          <div className="pd-order-note"><span><Icon name="shield" /></span><p><strong>{t.trustHeading}</strong><small>{t.trustText}</small></p></div>
         </section>
       </div>
-          <section className="pd-extra" ref={extraRef} aria-label="More product information" style={descMax ? { maxHeight: descMax } : undefined} tabIndex={0}>
+          <section className="pd-extra" ref={extraRef} aria-label={t.moreInfoAria} style={descMax ? { maxHeight: descMax } : undefined} tabIndex={0}>
             <ol className="pd-info-list">
-              <li><h2>Short Description</h2><p>{shortText}</p></li>
-              <li><h2>Shipping &amp; Delivery</h2><p>We carefully pack every order to keep it fresh. Delivery availability and timing depend on your location.</p></li>
+              <li><h2>{t.shortDescription}</h2><p>{shortText}</p></li>
+              <li><h2>{t.shippingDelivery}</h2><p>{t.shippingDeliveryText}</p></li>
             </ol>
           </section>
         </div>
       </div>
       {detail.description && <section className="pd-full-description" aria-labelledby="pd-full-description-title">
-        <h2 id="pd-full-description-title">Product Description</h2>
+        <h2 id="pd-full-description-title">{t.productDescription}</h2>
         <div className="pd-description-html" dangerouslySetInnerHTML={{ __html: detail.description }} />
       </section>}
-      {detail.related.length > 0 && <div className="pd-related"><Products heading="Related Products" products={detail.related.map(cardToProduct)} showViewAll={false} layout="related" /></div>}
+      {detail.related.length > 0 && <div className="pd-related"><Products heading={t.relatedProducts} products={detail.related.map(cardToProduct)} showViewAll={false} layout="related" /></div>}
     </div>
     {isCompareOpen && (
       <CompareList

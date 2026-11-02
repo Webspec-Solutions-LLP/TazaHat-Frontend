@@ -8,6 +8,7 @@
   "description": "Cold days call for fresh favourites. Enjoy seasonal savings, picked just for you.",
   "offerLabel": "SEASONAL SAVINGS",
   "heroBadge": "Up to 35% off",
+  "heroBadgeWithDiscount": "Up to {percent}% off",
   "heroBadgeFoot": "Seasonal favourites",
   "collectionLabel": "THE WINTER EDIT",
   "collectionHeading": "Comfort food, cooler prices",

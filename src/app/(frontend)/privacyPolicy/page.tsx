@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
+import { type SupportedLang, useLanguage } from "@/lib/language";
 import "./PrivacyPolicy.css";
 import englishData from "./english.json";
 import bengaliData from "./bengali.json";
 
 export default function PrivacyPolicyPage() {
-  const [lang, setLang] = useState<"en" | "bn">("en");
+  const [lang, setSiteLanguage] = useLanguage();
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -17,6 +18,10 @@ export default function PrivacyPolicyPage() {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const data = lang === "bn" ? bengaliData : englishData;
+  const selectLanguage = (language: SupportedLang) => {
+    setSiteLanguage(language);
+    setIsLangOpen(false);
+  };
 
   // Close language dropdown on outside click
   useEffect(() => {
@@ -160,7 +165,7 @@ export default function PrivacyPolicyPage() {
                   aria-expanded={isLangOpen}
                 >
                   <span className="privacy-lang-current">
-                    {lang === "en" ? "English" : "বাংলা (Bengali)"}
+                    {lang === "en" ? "English" : lang === "bn" ? "বাংলা (Bengali)" : "हिन्दी (Hindi)"}
                   </span>
                   <svg
                     className={`privacy-lang-chevron ${isLangOpen ? "is-open" : ""}`}
@@ -181,8 +186,7 @@ export default function PrivacyPolicyPage() {
                       type="button"
                       className={`privacy-lang-item ${lang === "en" ? "is-active" : ""}`}
                       onClick={() => {
-                        setLang("en");
-                        setIsLangOpen(false);
+                        selectLanguage("en");
                       }}
                     >
                       <span>English</span>
@@ -196,12 +200,23 @@ export default function PrivacyPolicyPage() {
                       type="button"
                       className={`privacy-lang-item ${lang === "bn" ? "is-active" : ""}`}
                       onClick={() => {
-                        setLang("bn");
-                        setIsLangOpen(false);
+                        selectLanguage("bn");
                       }}
                     >
                       <span>বাংলা (Bengali)</span>
                       {lang === "bn" && (
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      className={`privacy-lang-item ${lang === "hi" ? "is-active" : ""}`}
+                      onClick={() => selectLanguage("hi")}
+                    >
+                      <span>हिन्दी (Hindi)</span>
+                      {lang === "hi" && (
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                           <polyline points="20 6 9 17 4 12" />
                         </svg>

@@ -1,0 +1,33 @@
+{
+  "language": "hi",
+  "heroAriaLabel": "TazaHaat से ताज़ा भोजन",
+  "sliderContainerMessage": "ताज़ा खाद्य बैनर",
+  "fallbackEyebrow": "TazaHat ऑफ़र",
+  "fallbackTitle": "हर दिन ताज़ा",
+  "fallbackAction": "अभी खरीदें",
+  "promoKicker": "अच्छा खाना, अब आसान",
+  "promoTitle": "आपके परिवार के लिए ताज़ा उत्पाद",
+  "promoLink": "बाज़ार देखें",
+  "banners": [
+    {
+      "image": "/images/banner6.webp",
+      "alt": "हुगली नदी और हावड़ा ब्रिज के पास ताज़ा मछली और सीफ़ूड",
+      "sideImage": "/images/banner2.webp",
+      "sideAlt": "ताज़ा मछली, सीफ़ूड, मीट और पोल्ट्री",
+      "eyebrow": "नदी से सीधे ताज़ा",
+      "title": "ताज़ा कैच। बेहतरीन स्वाद।",
+      "description": "सावधानीपूर्वक चयनित सीफ़ूड, सीधे आपकी रसोई तक।",
+      "action": "सीफ़ूड खरीदें"
+    },
+    {
+      "image": "/images/banner7.webp",
+      "alt": "खेत से ताज़ा सब्जियां, फल और डेयरी उत्पाद",
+      "sideImage": "/images/banner3.webp",
+      "sideAlt": "दूध, पनीर और दही सहित ताज़ा डेयरी उत्पाद",
+      "eyebrow": "हर दिन अच्छा और पौष्टिक भोजन",
+      "title": "खेतों की ताज़गी आपके घर।",
+      "description": "खेत के ताज़े उत्पाद और रोज़मर्रा की ज़रूरी चीज़ें, सावधानी से पहुंचाई जाती हैं।",
+      "action": "ताज़ा उत्पाद खरीदें"
+    }
+  ]
+}

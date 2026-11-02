@@ -1,0 +1,106 @@
+{
+  "language": "en",
+  "locale": "en-IN",
+  "currency": "INR",
+
+  "liveSupportCommand": "TRIPURA 24/7 LIVE SUPPORT COMMAND",
+  "heroHeading": "Customer Care & Rapid Resolution Desk",
+  "heroDescription": "Need help with early morning catch cuts, farm harvest quality, delivery rerouting, or vendor partnerships? We guarantee live Tripura-based resolution within 15 minutes.",
+
+  "promiseTimeValue": "< 15 Mins",
+  "promiseTimeLabel": "Avg. WhatsApp Response",
+  "promiseFreshValue": "100% Replacement",
+  "promiseFreshLabel": "Instant Freshness Guarantee",
+
+  "contactCards": [
+    {
+      "eyebrow": "WHATSAPP CHATBOT",
+      "title": "Order Issues & Live Refund",
+      "description": "Instant photo upload, live fish exchange, or wallet credit in seconds.",
+      "badge": "Instant Active",
+      "action": "Chat on WhatsApp"
+    },
+    {
+      "eyebrow": "CALL CENTER HELPLINE",
+      "title": "1800–TAZA–HAAT",
+      "description": "+91 98300 42288 • Dedicated Bengali & English support executives.",
+      "badge": "Toll-Free",
+      "action": "6:00 AM – 10:00 PM Daily"
+    },
+    {
+      "eyebrow": "FISHERMEN & GROWERS",
+      "title": "B2B & Farmer Network",
+      "description": "partner@tazahaat.in • Fast 48-hr dock & field inspection.",
+      "badge": "Vendor Onboarding",
+      "action": "Reach Onboard Lead"
+    },
+    {
+      "eyebrow": "HEADQUARTERS & COLD STORAGE",
+      "title": "Agartala Distribution Hub",
+      "description": "Agartala, Tripura 799001 • Local delivery and cold storage hub.",
+      "badge": "Central Hub",
+      "action": "Track Hub & Coverage"
+    }
+  ],
+
+  "expressResolutionDesk": "EXPRESS RESOLUTION DESK",
+  "submitDirectTicket": "Submit Direct Ticket",
+  "guaranteedReply": "Guaranteed reply < 15 mins",
+  "selectIssueCategory": "Select Issue Category",
+
+  "issueCategories": [
+    { "id": "order", "label": "Where is my order?" },
+    { "id": "freshness", "label": "Freshness / Cut Issue" },
+    { "id": "refund", "label": "Refund / Replacement" },
+    { "id": "partner", "label": "Partner with Us" }
+  ],
+
+  "fullNameLabel": "Full Name",
+  "fullNamePlaceholder": "Your full name",
+  "phoneLabel": "Phone / WhatsApp Number",
+  "phonePlaceholder": "+91 9XXXXXXXXX",
+  "emailLabel": "Email Address",
+  "emailPlaceholder": "name@domain.com",
+  "orderIdLabel": "Order ID",
+  "orderIdTag": "Fast-track lookup",
+  "orderIdPlaceholder": "e.g. TH-2026-98214",
+
+  "messageLabel": "Describe Your Concern",
+  "messagePlaceholder": "Please describe what happened (e.g., delayed delivery, freshness concern, missing item, or partnership enquiry)…",
+
+  "attachPhoto": "Attach a photo or bill",
+  "optional": "(optional)",
+  "fileFormatHint": "JPG, PNG or PDF, up to 10 MB",
+  "chooseFile": "Choose file",
+
+  "submitTicket": "Submit Ticket",
+  "coldChainSupport": "Tripura cold-chain support",
+
+  "dispatchStatus": "TRIPURA REAL-TIME DISPATCH STATUS",
+  "deliveryHubMonitor": "Delivery Hub Monitor",
+
+  "deliveryHubs": [
+    { "name": "Agartala City", "details": "Central Distribution Hub | 22 Riders Active", "eta": "Express 30m" },
+    { "name": "Agartala North", "details": "Hub 2 | 18 Riders Active", "eta": "Express 35m" },
+    { "name": "Udaipur", "details": "South Tripura Hub | 25 Riders Active", "eta": "Express 30m" },
+    { "name": "Dharmanagar", "details": "North Tripura Transit Hub | 14 Riders Active", "eta": "Express 40m" },
+    { "name": "Khowai & Teliamura", "details": "West Tripura Route | 16 Riders Active", "eta": "Express 35m" }
+  ],
+
+  "morningHaat": "MORNING HAAT",
+  "morningHaatTime": "6:00 - 10:00 AM",
+  "middayExpress": "MIDDAY EXPRESS",
+  "middayExpressTime": "12:00 - 3:00 PM",
+  "eveningDinner": "EVENING DINNER",
+  "eveningDinnerTime": "4:30 - 9:00 PM",
+
+  "whatsappEscalation": "Instant WhatsApp Escalation",
+  "guaranteeTitle": "Zero-Hassle Freshness Guarantee",
+  "guaranteeDescription": "If your fresh order does not meet expectations, report it to our support team. We’ll review your concern and help with the next steps.",
+
+  "urgentReroute": "URGENT ORDER REROUTE",
+  "emergencyTitle": "Cold-Chain Emergency Dispatcher Hotline",
+  "emergencyDescription": "Is your delivery vehicle delayed, or do you need gate access coordination? Speak right now to the on-duty hub manager.",
+  "callHotlineNow": "Call Hotline Now",
+  "whatsappDispatch": "WhatsApp Dispatch"
+}

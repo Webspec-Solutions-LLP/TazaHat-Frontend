@@ -1,0 +1,54 @@
+{
+  "language": "hi",
+  "locale": "hi-IN",
+  "currency": "INR",
+
+  "allProducts": "सभी उत्पाद",
+  "searchResultsTitle": "“{query}” के परिणाम",
+  "productsCount": "{city} में {total} उत्पादों में से {count}",
+
+  "sortLabel": "क्रमबद्ध करें:",
+  "sortAria": "उत्पाद क्रमबद्ध करें",
+  "sortName": "नाम: अ से ज्ञ",
+  "sortPriceAsc": "मूल्य: कम से ज्यादा",
+  "sortPriceDesc": "मूल्य: ज्यादा से कम",
+  "sortDiscount": "सबसे बड़ी छूट",
+  "sortBestMatch": "सर्वोत्तम मिलान",
+
+  "filterTitle": "फ़िल्टर",
+  "filterReset": "रीसेट",
+  "filterCloseAria": "फ़िल्टर बंद करें",
+  "filterTrigger": "फ़िल्टर",
+  "filterAria": "उत्पाद फ़िल्टर",
+
+  "filterCategory": "श्रेणी अनुसार फ़िल्टर",
+  "filterAllCategories": "सभी श्रेणियां",
+  "filterSubcategory": "उप-श्रेणी अनुसार फ़िल्टर",
+  "filterAllInSubcategory": "{category} में सभी",
+  "filterChooseCategoryFirst": "पहले एक श्रेणी चुनें।",
+
+  "filterPrice": "मूल्य अनुसार फ़िल्टर",
+  "filterAnyPrice": "कोई भी मूल्य",
+  "filterUnderPrice": "{price} से कम",
+
+  "viewGroupAria": "उत्पाद प्रदर्शन",
+  "viewGridAria": "ग्रिड दृश्य",
+  "viewListAria": "सूची दृश्य",
+
+  "loadingProducts": "उत्पाद लोड हो रहे हैं",
+  "loadMoreError": "अधिक उत्पाद लोड नहीं हो सके। कृपया पुन: प्रयास करें।",
+  "tryAgain": "पुन: प्रयास करें",
+  "seenAllProducts": "आपने सभी {total} उत्पाद देख लिए हैं।",
+
+  "emptyTitle": "कोई उत्पाद नहीं मिला",
+  "emptySubtitle": "अधिक ताज़ा विकल्प देखने के लिए अपने फ़िल्टर बदलकर देखें।",
+  "clearFilters": "फ़िल्टर हटाएं",
+
+  "discount": "{percent}% छूट",
+  "rating": "{reviews} समीक्षाओं में से 5 में से {rating} रेटिंग",
+  "productDescription": "ताज़गी और गुणवत्ता के साथ चुनी गई {name}, आपके दैनिक भोजन के लिए तैयार।",
+  "save": "{name} को विशलिस्ट में जोड़ें",
+  "unsave": "{name} को विशलिस्ट से हटाएं",
+  "addToCart": "कार्ट में जोड़ें",
+  "quickViewAria": "{name} का विवरण देखें"
+}

@@ -1,0 +1,245 @@
+{
+  "language": "bn",
+  "locale": "bn-IN",
+  "currency": "INR",
+  "brand": "TazaHaat",
+  "region": "পশ্চিমবঙ্গ",
+  "heroTitle": "মূল্য",
+  "heroHighlight": "তালিকা",
+  "tagline": "বিশ্বাসযোগ্য সতেজতা। অতুলনীয় স্বাদ।",
+  "heading": "TazaHaat পশ্চিমবঙ্গ",
+  "headingHighlight": "মূল্য তালিকা",
+  "demoNotice": "পূর্বরূপের জন্য নমুনা মূল্য। অর্ডার করার আগে প্রাপ্যতা এবং বর্তমান মূল্য যাচাই করুন।",
+  "validLabel": "নমুনা মূল্যের সময়সীমা",
+  "validFrom": "2026-10-15",
+  "validTo": "2026-10-16",
+  "orderNow": "এখনই অর্ডার করুন",
+  "browse": "পণ্য দেখুন",
+  "appLabel": "Google Play-তে পান",
+  "appNote": "তাজা পণ্য, এখন আপনার হাতের নাগালে",
+  "offerTitle": "তাজা পণ্য",
+  "offerText": "প্রতিদিন দারুণ সাশ্রয়",
+  "off": "ছাড়",
+  "perUnit": "/{unit}",
+  "empty": "এই বিভাগে এখনও কোনো পণ্য নেই।",
+  "close": "বন্ধ করুন",
+  "preview": "পণ্যের পূর্বরূপ",
+  "orderNote": "অনলাইন অর্ডারিং এখনও উপলব্ধ নেই। আরও তাজা পণ্যের জন্য আমাদের ক্যাটালগ দেখুন।",
+  "heroImage": "/images/priceListHero section.webp",
+  "playstoreImage": "/images/playstore.webp",
+  "logo": "/images/logo.webp",
+  "benefits": [
+    {
+      "icon": "leaf",
+      "label": "তাজা ও মানসম্মত"
+    },
+    {
+      "icon": "cut",
+      "label": "স্পেশাল কাটস"
+    },
+    {
+      "icon": "snow",
+      "label": "রান্নার জন্য প্রস্তুত"
+    },
+    {
+      "icon": "box",
+      "label": "যত্নসহকারে প্যাক করা"
+    }
+  ],
+  "categories": [
+    {
+      "id": "fish",
+      "name": "মাছ ও সামুদ্রিক খাবার",
+      "image": "/images/category/category1.png",
+      "icon": ""
+    },
+    {
+      "id": "vegetables",
+      "name": "শাকসবজি",
+      "image": "/images/category/category2.webp",
+      "icon": ""
+    },
+    {
+      "id": "fruits",
+      "name": "ফলমূল",
+      "image": "/images/category/category3.webp",
+      "icon": ""
+    },
+    {
+      "id": "dairy",
+      "name": "দুগ্ধজাত ও ডিম",
+      "image": "/images/category/category4.webp",
+      "icon": ""
+    },
+    {
+      "id": "meat",
+      "name": "মাংস ও পোল্ট্রি",
+      "image": "/images/category/category5.webp",
+      "icon": ""
+    },
+    {
+      "id": "grocery",
+      "name": "মুদি ও নিত্যপ্রয়োজনীয় সামগ্রী",
+      "image": "/images/category/category6.webp",
+      "icon": ""
+    },
+    {
+      "id": "bakery",
+      "name": "স্ন্যাকস ও বেকারি",
+      "image": "/images/category/category7.webp",
+      "icon": ""
+    },
+    {
+      "id": "offers",
+      "name": "অফার",
+      "image": "",
+      "icon": "percent"
+    }
+  ],
+  "products": [
+    {
+      "id": "rohu",
+      "name": "রুই মাছ - টাটকা",
+      "image": "/images/products/product--2.png",
+      "category": "fish",
+      "price": 360,
+      "originalPrice": 440,
+      "unit": "কেজি"
+    },
+    {
+      "id": "pomfret",
+      "name": "টাটকা পমফ্রেট - গোটা",
+      "image": "/images/products/product16.png",
+      "category": "fish",
+      "price": 699,
+      "originalPrice": 850,
+      "unit": "কেজি"
+    },
+    {
+      "id": "hilsa",
+      "name": "ইলিশ মাছ - গোটা",
+      "image": "/images/products/product18.png",
+      "category": "fish",
+      "price": 1099,
+      "originalPrice": 1299,
+      "unit": "কেজি"
+    },
+    {
+      "id": "prawns",
+      "name": "টাটকা মাঝারি চিংড়ি",
+      "image": "/images/products/product--6.png",
+      "category": "fish",
+      "price": 640,
+      "originalPrice": 790,
+      "unit": "কেজি"
+    },
+    {
+      "id": "crab",
+      "name": "টাটকা মাড ক্র্যাব (কাঁকড়া)",
+      "image": "/images/products/product17.png",
+      "category": "fish",
+      "price": 580,
+      "originalPrice": 700,
+      "unit": "কেজি"
+    },
+    {
+      "id": "fish-cuts",
+      "name": "রুই মাছ কারি কাট",
+      "image": "/images/products/product--2.png",
+      "category": "fish",
+      "price": 390,
+      "originalPrice": 480,
+      "unit": "কেজি"
+    },
+    {
+      "id": "chicken",
+      "name": "চিকেন কারি কাট",
+      "image": "/images/products/product--1.png",
+      "category": "meat",
+      "price": 220,
+      "originalPrice": 260,
+      "unit": "500 গ্রাম"
+    },
+    {
+      "id": "mutton",
+      "name": "খাসির মাংস কারি কাট",
+      "image": "/images/products/product--7.png",
+      "category": "meat",
+      "price": 480,
+      "originalPrice": 560,
+      "unit": "500 গ্রাম"
+    },
+    {
+      "id": "ready-fish",
+      "name": "পরিষ্কার করা মাছ - রান্নার জন্য প্রস্তুত",
+      "image": "/images/products/product16.png",
+      "category": "fish",
+      "price": 420,
+      "originalPrice": 500,
+      "unit": "500 গ্রাম"
+    },
+    {
+      "id": "tomato",
+      "name": "টাটকা টমেটো",
+      "image": "/images/products/product--3.png",
+      "category": "vegetables",
+      "price": 30,
+      "originalPrice": 40,
+      "unit": "কেজি"
+    },
+    {
+      "id": "apple",
+      "name": "টাটকা আপেল",
+      "image": "/images/products/product--5.png",
+      "category": "fruits",
+      "price": 90,
+      "originalPrice": 120,
+      "unit": "500 গ্রাম"
+    },
+    {
+      "id": "milk",
+      "name": "টাটকা দুধ",
+      "image": "/images/products/product--4.png",
+      "category": "dairy",
+      "price": 60,
+      "originalPrice": 70,
+      "unit": "লিটার"
+    },
+    {
+      "id": "staples",
+      "name": "চাল ও ডাল কম্বো",
+      "image": "/images/category/category6.webp",
+      "category": "grocery",
+      "price": 180,
+      "originalPrice": 220,
+      "unit": "প্যাক"
+    },
+    {
+      "id": "bakery",
+      "name": "অ্যাসর্টেড বেকারি প্যাক",
+      "image": "/images/category/category7.webp",
+      "category": "bakery",
+      "price": 140,
+      "originalPrice": 175,
+      "unit": "প্যাক"
+    }
+  ],
+  "socialLabel": "সোশ্যাল মিডিয়া",
+  "socials": [
+    {
+      "id": "instagram",
+      "name": "Instagram",
+      "url": "https://www.instagram.com/"
+    },
+    {
+      "id": "whatsapp",
+      "name": "WhatsApp",
+      "url": "https://www.whatsapp.com/"
+    },
+    {
+      "id": "facebook",
+      "name": "Facebook",
+      "url": "https://www.facebook.com/"
+    }
+  ]
+}

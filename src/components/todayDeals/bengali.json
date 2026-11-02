@@ -19,5 +19,11 @@
   "days": "দিন",
   "hours": "ঘণ্টা",
   "minutes": "মিনিট",
-  "seconds": "সেকেন্ড"
+  "seconds": "সেকেন্ড",
+  "floatingLabel": "আজকের অফার",
+  "shopDeals": "অফার দেখুন",
+  "returnToDeals": "আজকের অফারে ফিরে যান",
+  "addToCart": "কার্টে যোগ করুন",
+  "quickView": "{name}-এর বিবরণ দেখুন",
+  "productDescription": "সতেজতা ও গুণমানের জন্য বেছে নেওয়া {name}, প্রতিদিনের খাবারের জন্য উপযুক্ত।"
 }

@@ -1,10 +1,21 @@
 "use client";
 
 import Image from "next/image";
-import text from "./english.json";
+import englishText from "./english.json";
+import bengaliText from "./bengali.json";
+import hindiText from "./hindi.json";
+import { type SupportedLang, useLanguage } from "@/lib/language";
 import "./OfferLayout1.css";
 
+const textMap: Record<SupportedLang, typeof englishText> = {
+  en: englishText,
+  bn: bengaliText,
+  hi: hindiText,
+};
+
 export default function OfferLayout1() {
+  const [language] = useLanguage();
+  const text = textMap[language];
   const startShopping = () => {
     document.querySelector<HTMLInputElement>(".navbar-search-input")?.focus();
   };

@@ -1,0 +1,10 @@
+{
+  "language": "en",
+  "benefitsAriaLabel": "Why shop with TazaHaat",
+  "benefits": [
+    { "icon": "leaf", "title": "100% Fresh", "description": "Farm to Home" },
+    { "icon": "shield", "title": "Hygienic & Safe", "description": "Cleaned & Packed" },
+    { "icon": "truck", "title": "Fast & On-Time", "description": "Delivery" },
+    { "icon": "quality", "title": "Best Quality", "description": "At Best Price" }
+  ]
+}

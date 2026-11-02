@@ -2,9 +2,18 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import text from "./english.json";
+import englishText from "./english.json";
+import bengaliText from "./bengali.json";
+import hindiText from "./hindi.json";
+import { type SupportedLang, useLanguage } from "@/lib/language";
 import { fallbackImage, isRemoteImage } from "@/lib/api";
 import "./BestSeller.css";
+
+const textMap: Record<SupportedLang, typeof englishText> = {
+  en: englishText,
+  bn: bengaliText,
+  hi: hindiText,
+};
 
 const categoryByGroup: Record<string, string> = {
   vegetables: "Vegetables",
@@ -17,7 +26,10 @@ const categoryByGroup: Record<string, string> = {
 
 export interface BestSellerGroup { id: string; name: string; slug?: string; more: number; images: { src: string; alt: string }[] }
 
-export default function BestSeller({ groups }: { groups: BestSellerGroup[] }) {
+export default function BestSeller({ groups }: { groups?: BestSellerGroup[] }) {
+  const [language] = useLanguage();
+  const text = textMap[language];
+  const shownGroups = groups ?? text.groups;
   const router = useRouter();
   const browse = (group: BestSellerGroup) => {
     if (group.slug) return router.push(`/products?category=${encodeURIComponent(group.slug)}`);
@@ -30,7 +42,7 @@ export default function BestSeller({ groups }: { groups: BestSellerGroup[] }) {
       <div className="bestseller-container">
         <h2 id="bestseller-heading">{text.heading}</h2>
         <ul className="bestseller-grid">
-          {groups.map(group => (
+          {shownGroups.map(group => (
             <li key={group.id}>
               <button className="bestseller-card" type="button" onClick={() => browse(group)} aria-label={text.browseLabel.replace("{name}", group.name)}>
                 <span className="bestseller-collage">
