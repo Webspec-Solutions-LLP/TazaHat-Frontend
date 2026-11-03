@@ -42,6 +42,18 @@
   "saveProfile": "Save profile",
 
   "likedProductsHeading": "Your liked products",
+  "mobileOptionsAria": "Account options",
+  "mobileWishlist": "Wishlist",
+  "mobileWishlistDescription": "View your saved products",
+  "mobileLanguage": "Language",
+  "mobileLanguageDescription": "Choose your preferred language",
+  "languageEnglishAria": "English",
+  "languageBengaliAria": "Bengali",
+  "languageHindiAria": "Hindi",
+  "mobileLogin": "Login",
+  "mobileLoginDescription": "Sign in to your account",
+  "mobileLogout": "Logout",
+  "mobileLogoutDescription": "Sign out of your account",
 
   "supportTicketsTitle": "Support tickets",
   "supportTicketsSubtitle": "Track the issues you reported and our team’s updates.",

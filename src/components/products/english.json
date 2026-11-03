@@ -13,6 +13,8 @@
   "rating": "Rated {rating} out of 5 from {reviews} reviews",
   "addToCart": "Add to Cart",
   "quickView": "View {name} details",
+  "compare": "Add {name} to compare",
+  "compared": "{name} added to compare",
   "productDescription": "{name} selected for freshness and quality, ready for your everyday meals.",
   "demoNote": "Demo product details. Prices and availability are illustrative.",
   "sliderLabel": "Best selling products. Swipe or use arrow keys to explore.",

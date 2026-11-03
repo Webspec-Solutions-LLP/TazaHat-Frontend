@@ -9,8 +9,10 @@
   "productTypes": "পণ্যের ধরণ",
   "allCategoriesLabel": "সকল পণ্যের বিভাগ",
   "loadingMore": "আরও বিভাগ লোড হচ্ছে...",
+  "loadingCategories": "বিভাগ লোড হচ্ছে...",
   "tryAgain": "আবার চেষ্টা করুন",
   "allCategoriesEnd": "আপনার শহরের সমস্ত বিভাগ এখানেই শেষ।",
+  "closeCategoryModal": "বিভাগ বন্ধ করুন",
   "categoryNames": {
     "Vegetables": "সবজি",
     "Fruits": "ফলমূল",

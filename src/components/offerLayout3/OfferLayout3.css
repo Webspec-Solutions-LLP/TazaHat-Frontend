@@ -244,11 +244,11 @@
   margin-bottom: 5px;
   overflow: hidden;
   border-radius: 9px;
-  background: linear-gradient(145deg, #f7fbff, #edf5fa);
+  background: transparent;
 }
 
 .winter-product-image > img {
-  padding: 12px;
+  padding: 0;
   object-fit: contain;
   user-select: none;
 }
@@ -290,6 +290,16 @@
 .winter-product-save[aria-pressed="true"] {
   color: #e24c64;
 }
+
+.winter-product-image .winter-product-compare {
+  top: 47px;
+  right: 7px;
+  width: 34px;
+  height: 34px;
+}
+
+.winter-product-image .winter-product-compare svg { width: 19px; height: 19px; }
+.winter-product-image .winter-product-compare[aria-pressed="true"] { color: #0864b7; }
 
 .winter-product-save svg {
   width: 20px;
@@ -621,7 +631,6 @@
   .winter-editorial-note { font-size: 8px; }
   .winter-products-heading h3 { font-size: 14px; }
   .winter-product-card { padding: 6px; }
-  .winter-product-image > img { padding: 6px; }
   .winter-product-save { width: 25px; height: 25px; }
   .winter-product-save svg { width: 15px; height: 15px; }
   .winter-product-discount { top: 5px; left: 5px; min-height: 17px; padding: 3px 5px; font-size: 7px; }
@@ -681,4 +690,25 @@
 @media (prefers-reduced-motion: reduce) {
   .winter-product-variant-trigger svg, .winter-product-quick-view { transition: none; }
   .winter-product-variant-menu { animation: none; }
+}
+
+.winter-product-card { gap: 0; padding: 0; border-radius: 11px; }
+.winter-product-image { aspect-ratio: .92 / 1; margin: 0; border-radius: 10px 10px 0 0; }
+.winter-product-card h4 { margin: 7px 9px 1px; }
+.winter-product-description,
+.winter-product-pricing,
+.winter-product-card .variant-chips { margin-inline: 9px; }
+.winter-product-card .variant-chips { margin-top: 3px; }
+.winter-product-actions { gap: 6px; margin: auto 9px 9px; padding-top: 6px; }
+.winter-product-cart { min-height: 36px; border-radius: 7px; }
+.winter-product-quick-view { flex: 0 0 42px; min-height: 36px; border-radius: 7px; }
+
+@media (max-width: 575px) {
+  .winter-product-card h4 { margin: 6px 7px 1px; font-size: 13px; }
+  .winter-product-description,
+  .winter-product-pricing,
+  .winter-product-card .variant-chips { margin-inline: 7px; }
+  .winter-product-actions { gap: 5px; margin: auto 7px 7px; }
+  .winter-product-cart { min-height: 31px; padding-inline: 5px; font-size: 9px; }
+  .winter-product-quick-view { flex-basis: 36px; min-height: 31px; }
 }

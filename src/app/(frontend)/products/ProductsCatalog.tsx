@@ -20,6 +20,7 @@ import { readWishlistIds, subscribeToWishlist, toggleWishlistId } from "@/lib/wi
 import { ProductCardsSkeleton } from "@/components/skeleton/Skeletons";
 import "./ProductsList.css";
 import VariantChips from "@/components/products/VariantChips";
+import CompareButton from "@/components/products/CompareButton";
 
 const textMap: Record<SupportedLang, typeof englishText> = {
   en: englishText,
@@ -175,10 +176,19 @@ export default function ProductsCatalog({ initial, total, categories, query, cit
           <StockRibbon pack={variant} />
           <span className="product-discount-badge">{t.discount.replace("{percent}", String(discount))}</span>
           {product.rating > 0 && <span className="product-image-rating" aria-label={t.rating.replace("{rating}", String(product.rating)).replace("{reviews}", String(product.reviews))}>★ {product.rating}</span>}
+          {view === "grid" && <>
+            <button type="button" className="product-save" aria-pressed={isSaved} aria-label={(isSaved ? t.unsave : t.save).replace("{name}", product.name)} onClick={() => setSaved(toggleWishlistId(product.id))}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" /></svg>
+            </button>
+            <CompareButton product={{ id: product.id, name: product.name, image: product.image, price: product.price, originalPrice: product.originalPrice, rating: product.rating, reviews: product.reviews, unit: product.weight }} label={t.compare} addedLabel={t.compared} />
+          </>}
+        </div>
+        {view === "list" && <div className="catalog-list-card-tools">
           <button type="button" className="product-save" aria-pressed={isSaved} aria-label={(isSaved ? t.unsave : t.save).replace("{name}", product.name)} onClick={() => setSaved(toggleWishlistId(product.id))}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" /></svg>
           </button>
-        </div>
+          <CompareButton product={{ id: product.id, name: product.name, image: product.image, price: product.price, originalPrice: product.originalPrice, rating: product.rating, reviews: product.reviews, unit: product.weight }} label={t.compare} addedLabel={t.compared} />
+        </div>}
         <h3><Link href={`/${encodeURIComponent(product.id)}`}>{product.name}</Link></h3>
         <p className="product-description" title={description}>{description}</p>
         <div className="product-pricing"><strong>{money.format(variant.price)}</strong><del>{money.format(variant.originalPrice)}</del></div>
@@ -227,50 +237,52 @@ export default function ProductsCatalog({ initial, total, categories, query, cit
         <header className="catalog-toolbar">
           <div><h1 id="catalog-heading">{heading}</h1><p role="status">{productsCountText}</p></div>
           <div className="catalog-toolbar-actions">
-            <div className={`catalog-sort${isSortOpen ? " is-open" : ""}`} ref={sortRef}>
-              <button
-                type="button"
-                className="catalog-sort-trigger"
-                aria-haspopup="listbox"
-                aria-expanded={isSortOpen}
-                aria-controls="catalog-sort-options"
-                onClick={() => setIsSortOpen(open => !open)}
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 6h16M7 12h10m-7 6h4" /></svg>
-                <span>{t.sortLabel} <strong>{sortOptions.find(option => option.value === sortBy)?.label}</strong></span>
-                <svg className="catalog-sort-chevron" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m5 7.5 5 5 5-5" /></svg>
-              </button>
-              <div
-                id="catalog-sort-options"
-                className="catalog-sort-menu"
-                role="listbox"
-                aria-label={t.sortAria}
-                aria-hidden={!isSortOpen}
-              >
-                <div className="catalog-sort-menu-inner">
-                  {sortOptions.map(option => (
-                    <button
-                      type="button"
-                      role="option"
-                      aria-selected={sortBy === option.value}
-                      tabIndex={isSortOpen ? 0 : -1}
-                      key={option.value}
-                      onClick={() => {
-                        go({ ...query, sort: option.value || undefined });
-                        setIsSortOpen(false);
-                      }}
-                    >
-                      {option.label}
-                      {sortBy === option.value && <span aria-hidden="true">✓</span>}
-                    </button>
-                  ))}
+            <div className="catalog-sort-filter-actions">
+              <div className={`catalog-sort${isSortOpen ? " is-open" : ""}`} ref={sortRef}>
+                <button
+                  type="button"
+                  className="catalog-sort-trigger"
+                  aria-haspopup="listbox"
+                  aria-expanded={isSortOpen}
+                  aria-controls="catalog-sort-options"
+                  onClick={() => setIsSortOpen(open => !open)}
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 6h16M7 12h10m-7 6h4" /></svg>
+                  <span>{t.sortLabel} <strong>{sortOptions.find(option => option.value === sortBy)?.label}</strong></span>
+                  <svg className="catalog-sort-chevron" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m5 7.5 5 5 5-5" /></svg>
+                </button>
+                <div
+                  id="catalog-sort-options"
+                  className="catalog-sort-menu"
+                  role="listbox"
+                  aria-label={t.sortAria}
+                  aria-hidden={!isSortOpen}
+                >
+                  <div className="catalog-sort-menu-inner">
+                    {sortOptions.map(option => (
+                      <button
+                        type="button"
+                        role="option"
+                        aria-selected={sortBy === option.value}
+                        tabIndex={isSortOpen ? 0 : -1}
+                        key={option.value}
+                        onClick={() => {
+                          go({ ...query, sort: option.value || undefined });
+                          setIsSortOpen(false);
+                        }}
+                      >
+                        {option.label}
+                        {sortBy === option.value && <span aria-hidden="true">✓</span>}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
+              <button className="catalog-filter-trigger" type="button" aria-expanded={isFilterOpen} onClick={() => setIsFilterOpen(open => !open)}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 6h16M7 12h10m-7 6h4" /></svg>
+                <span>{t.filterTrigger}</span>
+              </button>
             </div>
-            <button className="catalog-filter-trigger" type="button" aria-expanded={isFilterOpen} onClick={() => setIsFilterOpen(open => !open)}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 6h16M7 12h10m-7 6h4" /></svg>
-              <span>{t.filterTrigger}</span>
-            </button>
             <div className="catalog-view-toggle" role="group" aria-label={t.viewGroupAria}><button type="button" aria-label={t.viewGridAria} aria-pressed={view === 'grid'} onClick={() => setView('grid')}><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button><button type="button" aria-label={t.viewListAria} aria-pressed={view === 'list'} onClick={() => setView('list')}><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M9 5h12M9 12h12M9 19h12M3 5h2M3 12h2M3 19h2"/></svg></button></div>
           </div>
         </header>

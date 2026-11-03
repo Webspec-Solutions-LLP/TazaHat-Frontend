@@ -20,6 +20,7 @@ import { type SupportedLang, useLanguage } from "@/lib/language";
 import { fallbackImage, isRemoteImage } from "@/lib/api";
 import "./OfferLayout4.css";
 import VariantChips from "@/components/products/VariantChips";
+import CompareButton from "@/components/products/CompareButton";
 
 type CatalogProduct = (typeof catalog.products)[number];
 type Deal = CatalogProduct & { tag?: string; description?: string };
@@ -214,6 +215,7 @@ export default function OfferLayout4({ products, tabs }: { products?: CatalogPro
               <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" />
             </svg>
           </button>
+          <CompareButton product={{ id: cardProduct.id, name: cardProduct.name, image: cardProduct.image, price: cardProduct.price, originalPrice: cardProduct.originalPrice, rating: cardProduct.rating, reviews: cardProduct.reviews, unit: cardProduct.weight }} label={text.compare} addedLabel={text.compared} />
         </div>
         <h3><Link href={`/${encodeURIComponent(product.id)}`}>{product.name}</Link></h3>
         <p className="product-description" title={description}>

@@ -23,7 +23,9 @@
   "floatingLabel": "আজকের অফার",
   "shopDeals": "অফার দেখুন",
   "returnToDeals": "আজকের অফারে ফিরে যান",
-  "addToCart": "কার্টে যোগ করুন",
+  "addToCart": "Add to Cart",
   "quickView": "{name}-এর বিবরণ দেখুন",
+  "compare": "{name} তুলনার জন্য যোগ করুন",
+  "compared": "{name} তুলনার তালিকায় যোগ হয়েছে",
   "productDescription": "সতেজতা ও গুণমানের জন্য বেছে নেওয়া {name}, প্রতিদিনের খাবারের জন্য উপযুক্ত।"
 }

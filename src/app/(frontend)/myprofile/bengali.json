@@ -42,6 +42,18 @@
   "saveProfile": "প্রোফাইল সংরক্ষণ করুন",
 
   "likedProductsHeading": "আপনার পছন্দের পণ্যসমূহ",
+  "mobileOptionsAria": "অ্যাকাউন্টের অপশন",
+  "mobileWishlist": "উইশলিস্ট",
+  "mobileWishlistDescription": "আপনার সেভ করা পণ্য দেখুন",
+  "mobileLanguage": "ভাষা",
+  "mobileLanguageDescription": "আপনার পছন্দের ভাষা বেছে নিন",
+  "languageEnglishAria": "ইংরেজি",
+  "languageBengaliAria": "বাংলা",
+  "languageHindiAria": "হিন্দি",
+  "mobileLogin": "লগইন",
+  "mobileLoginDescription": "আপনার অ্যাকাউন্টে লগইন করুন",
+  "mobileLogout": "লগআউট",
+  "mobileLogoutDescription": "আপনার অ্যাকাউন্ট থেকে লগআউট করুন",
 
   "supportTicketsTitle": "সাপোর্ট টিকিট",
   "supportTicketsSubtitle": "আপনার রিপোর্ট করা সমস্যা ও আমাদের টিমের আপডেট ট্র্যাক করুন।",

@@ -49,6 +49,8 @@
   "productDescription": "{name} selected for freshness and quality, ready for your everyday meals.",
   "save": "Add {name} to wishlist",
   "unsave": "Remove {name} from wishlist",
+  "compare": "Add {name} to compare",
+  "compared": "{name} added to compare",
   "addToCart": "Add to Cart",
   "quickViewAria": "View {name} details"
 }

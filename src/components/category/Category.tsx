@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { A11y, Keyboard, Mousewheel } from "swiper/modules";
 import "swiper/css";
@@ -24,6 +25,13 @@ export type CategoryItem = CategoryTile;
 
 /** How many categories the home page shows before it offers "View All Categories". */
 export const HOME_CATEGORY_LIMIT = 7;
+
+function getCategoryCardStyle(category: CategoryTile): CSSProperties & { "--category-shadow-color": string } {
+  return {
+    backgroundColor: category.color,
+    "--category-shadow-color": category.color,
+  };
+}
 
 function renderCard(category: CategoryTile, text: typeof englishText) {
   return (
@@ -74,7 +82,7 @@ export default function Category({ items }: { items?: CategoryTile[] }) {
           <ul className="category-desktop-row" aria-label={text.heading}>
             {shown.map((category) => (
               <li key={category.id}>
-                <Link className="category-card" href={link(category)} style={{ backgroundColor: category.color }}>{renderCard(category, text)}</Link>
+                <Link className="category-card" href={link(category)} style={getCategoryCardStyle(category)}>{renderCard(category, text)}</Link>
               </li>
             ))}
           </ul>
@@ -92,7 +100,7 @@ export default function Category({ items }: { items?: CategoryTile[] }) {
           >
             {shown.map((category) => (
               <SwiperSlide key={category.id}>
-                <Link className="category-card" href={link(category)} style={{ backgroundColor: category.color }}>{renderCard(category, text)}</Link>
+                <Link className="category-card" href={link(category)} style={getCategoryCardStyle(category)}>{renderCard(category, text)}</Link>
               </SwiperSlide>
             ))}
           </Swiper>

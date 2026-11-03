@@ -308,6 +308,9 @@
 .pd-field textarea::placeholder { color: #9aabc0; }
 .pd-field-count { align-self: flex-end; color: #8aa0b8; font-size: 11px; font-weight: 400; }
 
+.pd-main-image img,
+.pd-main-image.has-thumbs img { padding: 0; }
+
 /* product description: same height as the left column, scrolls inside */
 .pd-extra { overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: #b7cde2 transparent; }
 .pd-extra:focus-visible { outline: 2px solid #0875d1; outline-offset: 2px; }

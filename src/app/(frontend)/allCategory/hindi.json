@@ -9,8 +9,10 @@
   "productTypes": "उत्पाद प्रकार",
   "allCategoriesLabel": "सभी उत्पाद श्रेणियां",
   "loadingMore": "और श्रेणियां लोड हो रही हैं...",
+  "loadingCategories": "श्रेणियां लोड हो रही हैं...",
   "tryAgain": "पुनः प्रयास करें",
   "allCategoriesEnd": "यह आपके शहर की सभी श्रेणियां हैं।",
+  "closeCategoryModal": "श्रेणियां बंद करें",
   "categoryNames": {
     "Vegetables": "सब्जियां",
     "Fruits": "फल",

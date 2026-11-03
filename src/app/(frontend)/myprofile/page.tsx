@@ -3,6 +3,7 @@
 import { useWishlistProducts } from "@/lib/useWishlistProducts";
 
 import RequireLogin from "@/components/auth/RequireLogin";
+import { useAuth } from "@/lib/auth";
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -12,7 +13,7 @@ import { myOrderCountsAction } from "@/app/checkout-actions";
 import englishText from "./english.json";
 import bengaliText from "./bengali.json";
 import hindiText from "./hindi.json";
-import { type SupportedLang, useLanguage } from "@/lib/language";
+import { setSiteLanguage, type SupportedLang, useLanguage } from "@/lib/language";
 import "./MyProfile.css";
 
 const supportTickets = [
@@ -126,6 +127,68 @@ function GroceryIllustration() {
       <circle cx="224" cy="115" r="18" fill="#fff" fillOpacity=".6" />
       <path d="M216 115h16m-8-8v16" stroke="#3F8DD4" strokeWidth="2.5" strokeLinecap="round" />
     </svg>
+  );
+}
+
+function MobileWishlistOption() {
+  const [currentLang] = useLanguage();
+  const t = textMap[currentLang] || englishText;
+
+  return (
+    <section className="profile-mobile-option-section" aria-label={t.mobileWishlist}>
+      <Link className="profile-mobile-option profile-mobile-wishlist" href="/wishlist">
+        <span className="profile-mobile-option-icon"><ProfileIcon><path d="M20.8 8.7c0 5.1-8.8 10.2-8.8 10.2S3.2 13.8 3.2 8.7A4.7 4.7 0 0 1 12 6.1a4.7 4.7 0 0 1 8.8 2.6Z" /></ProfileIcon></span>
+        <span className="profile-mobile-option-copy"><strong>{t.mobileWishlist}</strong><small>{t.mobileWishlistDescription}</small></span>
+        <span className="profile-mobile-option-arrow" aria-hidden="true">→</span>
+      </Link>
+    </section>
+  );
+}
+
+function MobileLanguageOption() {
+  const [currentLang] = useLanguage();
+  const t = textMap[currentLang] || englishText;
+
+  return (
+    <section className="profile-mobile-option-section" aria-label={t.mobileLanguage}>
+      <div className="profile-mobile-language">
+        <span className="profile-mobile-option-icon"><ProfileIcon><path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1m8 16 4-9 4 9m-6-3h4" /></ProfileIcon></span>
+        <span className="profile-mobile-option-copy"><strong>{t.mobileLanguage}</strong><small>{t.mobileLanguageDescription}</small></span>
+        <div className="profile-mobile-language-buttons" role="group" aria-label={t.mobileLanguage}>
+          {(["en", "bn", "hi"] as const).map((language) => (
+            <button
+              type="button"
+              key={language}
+              className={currentLang === language ? "is-active" : ""}
+              aria-label={language === "en" ? t.languageEnglishAria : language === "bn" ? t.languageBengaliAria : t.languageHindiAria}
+              aria-pressed={currentLang === language}
+              onClick={() => setSiteLanguage(language)}
+            >
+              {language === "en" ? "EN" : language === "bn" ? "বাং" : "हि"}
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function MobileAuthOption() {
+  const [currentLang] = useLanguage();
+  const { user, ready, openLogin, logout } = useAuth();
+  const t = textMap[currentLang] || englishText;
+
+  return (
+    <section className="profile-mobile-auth-section" aria-label={user ? t.mobileLogout : t.mobileLogin}>
+      <button className={`profile-mobile-option profile-mobile-auth${user ? " is-logout" : " is-login"}`} type="button" disabled={!ready} onClick={() => user ? void logout() : openLogin()}>
+        <span className="profile-mobile-option-icon"><ProfileIcon>{user
+          ? <><path d="M10 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5" /><path d="m14 16 4-4-4-4m4 4H8" /></>
+          : <><path d="M14 4h5a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-5" /><path d="m10 16-4-4 4-4m-4 4h10" /></>
+        }</ProfileIcon></span>
+        <span className="profile-mobile-option-copy"><strong>{user ? t.mobileLogout : t.mobileLogin}</strong><small>{user ? t.mobileLogoutDescription : t.mobileLoginDescription}</small></span>
+        <span className="profile-mobile-option-arrow" aria-hidden="true">→</span>
+      </button>
+    </section>
   );
 }
 
@@ -306,6 +369,8 @@ function MyProfileContent() {
           <span><strong>{t.bannerTitle}</strong><small>{t.bannerSubtitle}</small></span>
           <Link href="/orders">{t.viewMyOrders} <span aria-hidden="true">→</span></Link>
         </section>
+        <MobileWishlistOption />
+        <MobileLanguageOption />
 
         <section className="profile-addresses" aria-labelledby="profile-addresses-heading">
           <div className="profile-addresses-header">
@@ -404,5 +469,10 @@ function MyProfileContent() {
 
 /** Needs a login: without one the page asks the visitor to log in. */
 export default function MyProfilePage() {
-  return <RequireLogin what="your profile"><MyProfileContent /></RequireLogin>;
+  return (
+    <>
+      <RequireLogin what="your profile"><MyProfileContent /></RequireLogin>
+      <MobileAuthOption />
+    </>
+  );
 }

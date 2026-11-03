@@ -42,6 +42,18 @@
   "saveProfile": "प्रोफ़ाइल सहेजें",
 
   "likedProductsHeading": "आपके पसंदीदा उत्पाद",
+  "mobileOptionsAria": "अकाउंट विकल्प",
+  "mobileWishlist": "विशलिस्ट",
+  "mobileWishlistDescription": "अपने सेव किए गए उत्पाद देखें",
+  "mobileLanguage": "भाषा",
+  "mobileLanguageDescription": "अपनी पसंदीदा भाषा चुनें",
+  "languageEnglishAria": "अंग्रेज़ी",
+  "languageBengaliAria": "बंगाली",
+  "languageHindiAria": "हिंदी",
+  "mobileLogin": "लॉगिन",
+  "mobileLoginDescription": "अपने अकाउंट में लॉगिन करें",
+  "mobileLogout": "लॉगआउट",
+  "mobileLogoutDescription": "अपने अकाउंट से लॉगआउट करें",
 
   "supportTicketsTitle": "सपोर्ट टिकट्स",
   "supportTicketsSubtitle": "अपनी दर्ज समस्याओं और हमारी टीम के अपडेट ट्रैक करें।",

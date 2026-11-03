@@ -32,7 +32,7 @@
   "selectDressingType": "ड्रेसिंग का प्रकार चुनें",
   "specialInstruction": "विशेष निर्देश",
   "specialInstructionPlaceholder": "हमें बताएं कि आप इसे कैसे कटवाना चाहते हैं (उदा. 6 टुकड़े, बिना सिर के, करी के लिए छोटे टुकड़े...)",
-  "addToCart": "कार्ट में जोड़ें",
+  "addToCart": "Add to Cart",
   "quantityAria": "कार्ट में {name} की मात्रा",
   "removeFromCartAria": "कार्ट से हटाएं",
   "decreaseQuantityAria": "मात्रा घटाएं",

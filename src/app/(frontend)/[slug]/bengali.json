@@ -32,7 +32,7 @@
   "selectDressingType": "ড্রেসিংয়ের ধরন বেছে নিন",
   "specialInstruction": "বিশেষ নির্দেশনা",
   "specialInstructionPlaceholder": "কীভাবে কাটতে হবে জানান (যেমন: ৬ টুকরো, মাথা ছাড়া, কারির জন্য ছোট টুকরো...)",
-  "addToCart": "কার্টে যোগ করুন",
+  "addToCart": "Add to Cart",
   "quantityAria": "কার্টে {name}-এর পরিমাণ",
   "removeFromCartAria": "কার্ট থেকে সরান",
   "decreaseQuantityAria": "পরিমাণ কমান",
