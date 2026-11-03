@@ -116,6 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         else if (message.event === "wishlist") window.dispatchEvent(new CustomEvent("tazahat:wishlist-remote", { detail: message }));
         // the delivery city was changed on another device (the app)
         else if (message.event === "city") window.dispatchEvent(new CustomEvent("tazahat:city-remote", { detail: message }));
+        else if (message.event === "cart") window.dispatchEvent(new CustomEvent("tazahat:cart-remote", { detail: message }));
       } catch { /* not for us */ }
     };
     return () => { source.close(); setLive(false); };

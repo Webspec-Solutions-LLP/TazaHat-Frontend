@@ -1,0 +1,25 @@
+.share-backdrop { position: fixed; inset: 0; z-index: 1200; background: rgba(8, 20, 36, .45); display: flex; align-items: flex-end; justify-content: center; animation: share-fade .18s ease; }
+.share-sheet { width: min(100%, 460px); background: #fff; border-radius: 20px 20px 0 0; padding: 18px 18px calc(18px + env(safe-area-inset-bottom)); box-shadow: 0 -12px 40px rgba(8, 20, 36, .25); animation: share-up .24s cubic-bezier(.2, .8, .2, 1); }
+@media (min-width: 700px) { .share-backdrop { align-items: center; } .share-sheet { border-radius: 20px; } }
+.share-sheet h3 { margin: 0 0 4px; font-size: 17px; font-weight: 800; color: #0f2a52; }
+.share-sheet p { margin: 0 0 14px; font-size: 13px; color: #5d7187; }
+.share-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.share-close { border: 0; background: #eef3f8; color: #38506b; width: 30px; height: 30px; border-radius: 50%; font-size: 16px; cursor: pointer; flex: none; }
+.share-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.share-opt { display: flex; flex-direction: column; align-items: center; gap: 6px; border: 0; background: none; font-size: 12px; font-weight: 600; color: #26405c; cursor: pointer; text-decoration: none; }
+.share-opt span { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 18px; }
+.share-link { margin-top: 14px; display: flex; gap: 8px; align-items: center; background: #f1f5f9; border-radius: 12px; padding: 8px 8px 8px 12px; }
+.share-link input { flex: 1; min-width: 0; border: 0; background: transparent; font-size: 12.5px; color: #38506b; outline: none; }
+.share-link button { border: 0; background: #0875d1; color: #fff; font-weight: 700; font-size: 12.5px; border-radius: 9px; padding: 8px 14px; cursor: pointer; }
+.share-icon-btn { display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; border: 1px solid #cfe0f1; background: #f0f7ff; color: #0875d1; cursor: pointer; }
+.share-icon-btn:hover { background: #e2f0fd; }
+.share-icon-btn svg { width: 20px; height: 20px; }
+.app-sheet-stores { display: grid; gap: 10px; margin-top: 6px; }
+.app-sheet-store { display: flex; align-items: center; gap: 12px; border: 1px solid #d6e3f0; border-radius: 14px; padding: 11px 14px; text-decoration: none; color: #0f2a52; font-weight: 700; font-size: 15px; background: #f7fbff; }
+.app-sheet-store small { display: block; font-weight: 500; color: #5d7187; font-size: 11.5px; }
+.app-sheet-store svg { width: 26px; height: 26px; flex: none; }
+.app-sheet-skip { margin-top: 12px; width: 100%; border: 0; background: none; color: #5d7187; font-size: 13px; font-weight: 600; cursor: pointer; padding: 6px; }
+.app-sheet-hero { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; }
+.app-sheet-hero img { width: 54px; height: 54px; border-radius: 14px; object-fit: contain; background: #f1f6fb; padding: 6px; }
+@keyframes share-up { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes share-fade { from { opacity: 0; } to { opacity: 1; } }

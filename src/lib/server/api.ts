@@ -25,6 +25,9 @@ export const getShopCatalog = (cityId: string, query: CatalogQuery, page: number
 export const getShopCategories = (cityId: string) => get<{ categories: ApiFacetCategory[] }>("/shop/categories", { cityId }).then((d) => d.categories);
 export const getShopCategoryPage = (cityId: string, page: number, limit: number) =>
   get<{ categories: ApiFacetCategory[]; total: number; page: number; limit: number }>("/shop/categories", { cityId, page: String(page), limit: String(limit) });
+/** the name, text and picture a shared link shows: the same for every city */
+export type ProductShare = { slug: string; name: string; description: string; image: string | null };
+export const getProductShare = (slug: string) => get<ProductShare>(`/shop/products/${encodeURIComponent(slug)}/share`);
 export const getShopProduct = (cityId: string, slug: string) => get<ApiProductDetail>(`/shop/products/${encodeURIComponent(slug)}`, { cityId });
 export async function getCartRelated(cityId: string, slugs: string[]): Promise<ApiCard[]> {
   const res = await fetch(`${API_BASE}/api/public/shop/cart/related`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ cityId, slugs }), cache: "no-store" });

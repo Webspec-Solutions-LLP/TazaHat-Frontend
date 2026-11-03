@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useAuth } from "@/lib/auth";
-import { getWishlistAction, saveWishlistAction } from "@/app/wishlist-actions";
+import { getWishlistAction, saveWishlistAction } from "@/lib/sync-client";
 import { readWishlistIds, replaceWishlistIds, subscribeToWishlist } from "@/lib/wishlist";
 
 /**
