@@ -333,3 +333,7 @@ html, body { width: 100%; }
   .login-modal-backdrop.is-closing,
   .login-modal-backdrop.is-closing .login-modal-dialog { animation-duration: .01ms; }
 }
+
+.login-legal { margin: 12px 0 0; font-size: 12px; line-height: 1.5; color: #5d7187; text-align: center; }
+.login-legal a { color: #0875d1; font-weight: 600; text-decoration: none; }
+.login-legal a:hover { text-decoration: underline; }

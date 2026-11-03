@@ -53,3 +53,9 @@ export const checkServiceability = (q: { pincode?: string; city?: string }) => g
 
 /** the CRM's switches for the floating buttons (all on when the shop cannot be reached) */
 export const getUiConfig = () => get<{ feedbackButton: boolean }>("/ui-config").catch(() => ({ feedbackButton: true }));
+
+/** the legal documents written in the CRM (Privacy Policy, Terms ...): the published ones, and where each shows */
+export type LegalListItem = { slug: string; title: string; footer: boolean; login: boolean; updatedAt: string };
+export type LegalDoc = { slug: string; title: string; html: string; updatedAt: string };
+export const getLegalList = () => get<{ documents: LegalListItem[] }>("/legal").then((d) => d.documents).catch(() => [] as LegalListItem[]);
+export const getLegalDoc = (slug: string) => get<LegalDoc>(`/legal/${encodeURIComponent(slug)}`);

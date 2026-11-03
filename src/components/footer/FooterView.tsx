@@ -48,7 +48,7 @@ const LANGUAGES: LanguageOption[] = [
   { code: "bn", label: "Bengali", nativeName: "বাংলা" },
 ];
 
-export default function FooterView({ apps }: { apps: AppLinks }) {
+export default function FooterView({ apps, legal = [] }: { apps: AppLinks; legal?: { slug: string; title: string }[] }) {
   const [currentLang, setSiteLanguage] = useLanguage();
   const [isLangOpen, setIsLangOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
@@ -214,11 +214,20 @@ export default function FooterView({ apps }: { apps: AppLinks }) {
                     {t.linkAboutUs}
                   </Link>
                 </li>
-                <li>
-                  <Link href="/privacyPolicy" className="footer-link">
-                    {t.linkPrivacyPolicy}
-                  </Link>
-                </li>
+                {legal.length === 0 && (
+                  <li>
+                    <Link href="/legal/privacy-policy" className="footer-link">
+                      {t.linkPrivacyPolicy}
+                    </Link>
+                  </li>
+                )}
+                {legal.map((d) => (
+                  <li key={d.slug}>
+                    <Link href={`/legal/${d.slug}`} className="footer-link">
+                      {d.title}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>

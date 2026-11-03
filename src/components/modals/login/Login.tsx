@@ -26,6 +26,9 @@ const emptyOtp = () => Array<string>(OTP_LENGTH).fill("");
 
 export default function Login({ onClose, onLoggedIn }: LoginModalProps) {
   const [lang] = useLanguage();
+  // the legal documents linked on the sign-in screen (set in the CRM)
+  const [legalLinks, setLegalLinks] = useState<{ slug: string; title: string }[]>([]);
+  useEffect(() => { void fetch("/api/legal").then((r) => (r.ok ? r.json() : null)).then((d: { documents?: { slug: string; title: string }[] } | null) => setLegalLinks(d?.documents ?? [])).catch(() => undefined); }, []);
   const text = textMap[lang] || englishText;
 
   const [mobile, setMobile] = useState("");
@@ -153,6 +156,7 @@ export default function Login({ onClose, onLoggedIn }: LoginModalProps) {
               </label>
               {!otpRequested && <button className="login-send-otp" type="submit" disabled={busy}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4 20-7Z"/><path d="M22 2 11 13"/></svg>{text.sendOtp}</button>}
             </form>
+            {legalLinks.length > 0 && <p className="login-legal">By continuing you agree to our {legalLinks.map((d, i) => <span key={d.slug}>{i > 0 && (i === legalLinks.length - 1 ? " and " : ", ")}<Link href={`/legal/${d.slug}`} target="_blank" rel="noopener">{d.title}</Link></span>)}.</p>}
             {notice && <p className={`login-notice${notice.startsWith(text.noSmsNotice) || notice.startsWith("No SMS service yet") ? "" : " is-error"}`} role="status">{notice}</p>}
 
             {otpRequested && <div className="login-otp-step">

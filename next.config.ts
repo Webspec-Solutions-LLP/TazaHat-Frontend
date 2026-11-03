@@ -8,6 +8,8 @@ const nextConfig: NextConfig = {
     return [
       { source: "/myOrders/orderDetails", has: [{ type: "query", key: "orderId", value: "(?<id>[\\w-]+)" }], destination: "/orders/:id", permanent: false },
       { source: "/myOrders", destination: "/orders", permanent: false },
+      // the privacy policy now lives in the CRM's legal documents
+      { source: "/privacyPolicy", destination: "/legal/privacy-policy", permanent: true },
     ];
   },
   async rewrites() {
