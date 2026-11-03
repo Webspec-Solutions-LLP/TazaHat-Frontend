@@ -16,7 +16,7 @@
     {
       "id": "account",
       "label": "Account",
-      "href": "/myprofile"
+      "href": "/profile"
     },
     {
       "id": "cart",

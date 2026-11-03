@@ -19,6 +19,8 @@ interface AuthValue {
   ready: boolean;
   openLogin: (afterLogin?: () => void) => void;
   logout: () => Promise<void>;
+  /** the customer's details changed (profile saved): every screen shows the new ones */
+  updateUser: (user: SessionUser) => void;
   /** pack ids this customer is waiting for in the chosen city */
   waiting: ReadonlySet<string>;
   /** start waiting for these packs (asks the customer to log in first when needed) */
@@ -172,8 +174,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [loadAccount]);
 
   const value = useMemo<AuthValue>(
-    () => ({ user, ready, openLogin, logout, waiting, requestNotify, cancelNotify, notifications, unread, reloadNotifications, markRead, openNotifications }),
-    [user, ready, openLogin, logout, waiting, requestNotify, cancelNotify, notifications, unread, reloadNotifications, markRead, openNotifications],
+    () => ({ user, ready, openLogin, logout, updateUser: setUser, waiting, requestNotify, cancelNotify, notifications, unread, reloadNotifications, markRead, openNotifications }),
+    [user, ready, openLogin, logout, setUser, waiting, requestNotify, cancelNotify, notifications, unread, reloadNotifications, markRead, openNotifications],
   );
 
   return (
