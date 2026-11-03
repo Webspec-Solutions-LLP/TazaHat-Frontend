@@ -50,3 +50,6 @@ export const getAppLinks = () => get<{ android: AppLink; ios: AppLink }>("/app-l
 export const getCities = () => get<{ cities: ApiCity[] }>("/cities").then((d) => d.cities);
 export const getShopHome = (cityId: string) => get<ShopHome>("/shop/home", { cityId });
 export const checkServiceability = (q: { pincode?: string; city?: string }) => get<Serviceability>("/serviceability", q);
+
+/** the CRM's switches for the floating buttons (all on when the shop cannot be reached) */
+export const getUiConfig = () => get<{ feedbackButton: boolean }>("/ui-config").catch(() => ({ feedbackButton: true }));
