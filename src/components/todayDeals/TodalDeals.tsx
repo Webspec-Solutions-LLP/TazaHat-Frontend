@@ -148,7 +148,7 @@ export default function TodalDeals({ products, deal }: { products?: Product[]; d
           </Swiper>
         </div>
       </div>
-      {showFloatingTimer && hasTimer && (
+      {showFloatingTimer && (
         <div className="deals-floating-timer" style={{ top: navbarOffset }} role="region" aria-label={text.floatingLabel}>
           <div className="deals-floating-inner">
             {/* left: the names of the products in today's deals drift slowly from right to left (a link each); still when motion is reduced */}
@@ -172,13 +172,13 @@ export default function TodalDeals({ products, deal }: { products?: Product[]; d
             </div>
             {/* right: Today's Deal, the countdown and the way back to the deals */}
             <button type="button" className="deals-floating-action" aria-label={text.returnToDeals} onClick={() => dealsSection.current?.scrollIntoView({ behavior: "smooth", block: "start" })}>
-              <span className="deals-floating-label"><strong>{text.floatingLabel}</strong><small>{text.offerEnds}</small></span>
-              <span className="deals-floating-clock">
+              <span className="deals-floating-label"><strong>{text.floatingLabel}</strong>{hasTimer && <small>{text.offerEnds}</small>}</span>
+              {hasTimer && <span className="deals-floating-clock">
                 {clock.map(unit => <span className="deals-floating-time" key={unit.label}>
                   <strong>{unit.value === null ? "--" : String(unit.value).padStart(2, "0")}</strong>
                   <small>{unit.label}</small>
                 </span>)}
-              </span>
+              </span>}
               <span className="deals-floating-cta" aria-label={text.shopDeals}><span className="deals-cta-text">{text.shopDeals}</span> <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 10h13m-5-5 5 5-5 5" /></svg></span>
             </button>
           </div>
