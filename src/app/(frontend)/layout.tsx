@@ -7,6 +7,7 @@ import FeedbackButton from "@/components/feedbackButton/FeedbackButton";
 import HomeBackConfirmation from "@/components/modals/confermation/HomeBackConfirmation";
 import WishlistSync from "@/components/home/WishlistSync";
 import CitySync from "@/components/home/CitySync";
+import CartSync from "@/components/home/CartSync";
 import CompareSync from "@/components/modals/compareList/CompareSync";
 import { CityProvider } from "@/lib/city";
 import { AuthProvider } from "@/lib/auth";
@@ -31,6 +32,7 @@ export default async function RootLayout({
         <AuthProvider>
         <CompareSync />
         <CitySync />
+        <CartSync />
         <WishlistSync />
         <Navbar />
         <main className="flex-1 frontend-layout-main">{children}</main>
