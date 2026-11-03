@@ -48,7 +48,7 @@ const LANGUAGES: LanguageOption[] = [
   { code: "bn", label: "Bengali", nativeName: "বাংলা" },
 ];
 
-export default function FooterView({ apps, legal = [] }: { apps: AppLinks; legal?: { slug: string; title: string }[] }) {
+export default function FooterView({ apps, legal = [], bottom = [] }: { apps: AppLinks; legal?: { slug: string; title: string }[]; bottom?: { slug: string; title: string }[] }) {
   const [currentLang, setSiteLanguage] = useLanguage();
   const [isLangOpen, setIsLangOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
@@ -164,70 +164,7 @@ export default function FooterView({ apps, legal = [] }: { apps: AppLinks; legal
                 </svg>
               </a>
             </div>
-          </div>
-
-          {/* Links Grid */}
-          <div className="footer-links-grid">
-            {/* Need Help? */}
-            <div className="footer-links-col">
-              <h3 className="footer-col-title">{t.needHelpTitle}</h3>
-              <ul className="footer-links-list footer-links-list--help">
-                <li>
-                  <Link href="/contactUs" className="footer-link">
-                    {t.linkContactUs}
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/aboutUs" className="footer-link">
-                    {t.linkAboutUs}
-                  </Link>
-                </li>
-                {legal.length === 0 && (
-                  <li>
-                    <Link href="/legal/privacy-policy" className="footer-link">
-                      {t.linkPrivacyPolicy}
-                    </Link>
-                  </li>
-                )}
-                {legal.map((d) => (
-                  <li key={d.slug}>
-                    <Link href={`/legal/${d.slug}`} className="footer-link">
-                      {d.title}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-          <div className="footer-seller-card">
-            <div className="footer-seller-heading">
-              <svg className="footer-store-icon" viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M10 26h44v32H10z" fill="#e7f2ff"/><path d="M7 26 14 8h36l7 18" fill="#8bc943"/><path d="m20 8-3 18m15-18v18M44 8l3 18" stroke="#fff" strokeWidth="7"/><path d="M7 26h50v6H7z" fill="#b5e278"/><path d="M16 39h12v19H16zM36 38h12v12H36z" fill="#08609e"/><path d="M6 58h52" stroke="#a3c9ec" strokeWidth="4"/></svg>
-              <div><h3>{t.sellerTitle}</h3><p>{t.sellerDesc}</p></div>
-            </div>
-            <Link href="/sell-with-us" className="footer-sell-button">{t.sellerButton} <span aria-hidden="true">&rarr;</span></Link>
-            <div className="footer-seller-links"><Link href="/seller-guidelines">{t.sellerGuidelines}</Link><Link href="/partnership">{t.partnershipProgram}</Link></div>
-            <Image src="/images/category/category2.webp?v=transparent-2" alt="" width={120} height={120} unoptimized className="footer-seller-produce" />
-          </div>
-          <div className="footer-app-col">
-            <div className="footer-app-info">
-              <h3 className="footer-col-title">{t.appTitle}</h3>
-              <p>{t.appDescLine1}<br />{t.appDescLine2}</p>
-            </div>
-            {(apps.android.state !== "hidden" || apps.ios.state !== "hidden") && (
-              <div className="footer-store-buttons">
-                <StoreButton link={apps.android} label={t.playStoreAlt}><Image src="/images/playstore.webp" alt={t.playStoreAlt} width={756} height={227} className="footer-play-image" /></StoreButton>
-                <StoreButton link={apps.ios} label="Download on the App Store"><AppStoreBadge /></StoreButton>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Bottom Bar */}
-        <div className="footer-bottom">
-          <p className="footer-bottom-copy">
-            {t.copyright}
-          </p>
-          {/* Language Selector Dropdown */}
+            {/* Language: under the social links */}
           <div className="footer-lang-selector" ref={langRef}>
             <button
               type="button"
@@ -314,6 +251,62 @@ export default function FooterView({ apps, legal = [] }: { apps: AppLinks; legal
               </div>
             )}
           </div>
+          </div>
+
+          {/* Links Grid: only what the CRM has set */}
+          {legal.length > 0 && <div className="footer-links-grid">
+            {/* Need Help? */}
+            <div className="footer-links-col">
+              <h3 className="footer-col-title">{t.needHelpTitle}</h3>
+              <ul className="footer-links-list footer-links-list--help">
+                {legal.map((d) => (
+                  <li key={d.slug}>
+                    <Link href={`/legal/${d.slug}`} className="footer-link">
+                      {d.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>}
+          <div className="footer-seller-card">
+            <div className="footer-seller-heading">
+              <svg className="footer-store-icon" viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M10 26h44v32H10z" fill="#e7f2ff"/><path d="M7 26 14 8h36l7 18" fill="#8bc943"/><path d="m20 8-3 18m15-18v18M44 8l3 18" stroke="#fff" strokeWidth="7"/><path d="M7 26h50v6H7z" fill="#b5e278"/><path d="M16 39h12v19H16zM36 38h12v12H36z" fill="#08609e"/><path d="M6 58h52" stroke="#a3c9ec" strokeWidth="4"/></svg>
+              <div><h3>{t.sellerTitle}</h3><p>{t.sellerDesc}</p></div>
+            </div>
+            <Link href="/sell-with-us" className="footer-sell-button">{t.sellerButton} <span aria-hidden="true">&rarr;</span></Link>
+            <div className="footer-seller-links"><Link href="/seller-guidelines">{t.sellerGuidelines}</Link><Link href="/partnership">{t.partnershipProgram}</Link></div>
+            <Image src="/images/category/category2.webp?v=transparent-2" alt="" width={120} height={120} unoptimized className="footer-seller-produce" />
+          </div>
+          <div className="footer-app-col">
+            <div className="footer-app-info">
+              <h3 className="footer-col-title">{t.appTitle}</h3>
+              <p>{t.appDescLine1}<br />{t.appDescLine2}</p>
+            </div>
+            {(apps.android.state !== "hidden" || apps.ios.state !== "hidden") && (
+              <div className="footer-store-buttons">
+                <StoreButton link={apps.android} label={t.playStoreAlt}><Image src="/images/playstore.webp" alt={t.playStoreAlt} width={756} height={227} className="footer-play-image" /></StoreButton>
+                <StoreButton link={apps.ios} label="Download on the App Store"><AppStoreBadge /></StoreButton>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Bottom Bar */}
+        <div className="footer-bottom">
+          <p className="footer-bottom-copy">
+            {t.copyright}
+          </p>
+          {bottom.length > 0 ? (
+            <nav className="footer-bottom-links" aria-label="Contact and about">
+              {bottom.map((d, i) => (
+                <span key={d.slug}>
+                  {i > 0 && <span className="footer-bottom-dot" aria-hidden="true">•</span>}
+                  <Link href={`/legal/${d.slug}`}>{d.title}</Link>
+                </span>
+              ))}
+            </nav>
+          ) : (
           <p className="footer-bottom-values">
             <svg
               width="14"
@@ -331,6 +324,7 @@ export default function FooterView({ apps, legal = [] }: { apps: AppLinks; legal
             <span>•</span>
             <span>{t.valueHappyFamily}</span>
           </p>
+          )}
         </div>
       </div>
     </footer>
