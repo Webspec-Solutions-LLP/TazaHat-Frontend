@@ -82,7 +82,7 @@ export default function Category({ items }: { items?: CategoryTile[] }) {
           <ul className="category-desktop-row" aria-label={text.heading}>
             {shown.map((category) => (
               <li key={category.id}>
-                <Link className="category-card" href={link(category)} style={getCategoryCardStyle(category)}>{renderCard(category, text)}</Link>
+                <Link className="category-card category-card--pill" href={link(category)} style={getCategoryCardStyle(category)}>{renderCard(category, text)}</Link>
               </li>
             ))}
           </ul>
@@ -100,7 +100,7 @@ export default function Category({ items }: { items?: CategoryTile[] }) {
           >
             {shown.map((category) => (
               <SwiperSlide key={category.id}>
-                <Link className="category-card" href={link(category)} style={getCategoryCardStyle(category)}>{renderCard(category, text)}</Link>
+                <Link className="category-card category-card--pill" href={link(category)} style={getCategoryCardStyle(category)}>{renderCard(category, text)}</Link>
               </SwiperSlide>
             ))}
           </Swiper>

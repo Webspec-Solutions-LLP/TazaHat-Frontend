@@ -71,6 +71,7 @@
 .category-slider .swiper-wrapper { align-items: stretch; }
 .category-slider .swiper-slide { height: auto; display: flex; align-items: flex-start; }
 .category-slider .category-card { flex: 0 0 100%; width: 100%; height: auto; aspect-ratio: 1; }
+.category-slider .category-card--pill { aspect-ratio: 0.64; }
 .category-slider:focus-visible { outline: 2px solid #0864b7; outline-offset: 2px; }
 
 .category-card {
@@ -100,6 +101,57 @@
 }
 
 .category-card:hover .category-arrow { background: #087cff; }
+
+.category-card--pill {
+  aspect-ratio: 0.64;
+  border-radius: 50% / 32%;
+  box-shadow: none;
+}
+
+.category-card--pill .category-image {
+  height: 64%;
+  aspect-ratio: auto;
+}
+
+.category-card--pill .category-image::after {
+  display: block;
+  height: 42%;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    color-mix(in srgb, var(--category-shadow-color) 35%, transparent) 55%,
+    var(--category-shadow-color) 100%
+  );
+}
+.category-card--pill .category-image img {
+  object-fit: cover;
+  object-position: center;
+  transform: scale(1.12);
+}
+
+.category-card--pill .category-details {
+  height: 46%;
+  justify-content: flex-start;
+  padding: 14% 8px 10px;
+  background: transparent;
+}
+
+.category-card.category-card--pill h2,
+.category-card.category-card--pill h3 {
+  font-size: 16px;
+  line-height: 1.25;
+}
+
+.category-card--pill .category-count { padding-top: 4px; font-size: 13px; }
+.category-card--pill .category-arrow {
+  width: 16%;
+  max-width: 36px;
+  min-width: 24px;
+  height: auto;
+  aspect-ratio: 1;
+  margin-top: 8px;
+  font-size: 18px;
+}
 
 .category-image {
   position: absolute;

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import { loadCategoriesAction } from "@/app/actions";
 import type { CategoryTile } from "@/components/category/Category";
 import { fallbackImage, isRemoteImage } from "@/lib/api";
@@ -24,9 +25,13 @@ const textMap: Record<SupportedLang, typeof englishText> = {
 
 function Tile({ category, t }: { category: CategoryTile; t: typeof englishText }) {
   const categoryName = (t.categoryNames as Record<string, string>)?.[category.name] || category.name;
+  const cardStyle: CSSProperties & { "--category-shadow-color": string } = {
+    backgroundColor: category.color,
+    "--category-shadow-color": category.color,
+  };
   return (
     <li>
-      <Link className="category-card" href={category.href ?? `/products?category=${encodeURIComponent(category.name)}`} style={{ backgroundColor: category.color }}>
+      <Link className="category-card category-card--pill" href={category.href ?? `/products?category=${encodeURIComponent(category.name)}`} style={cardStyle}>
         <div className="category-image">
           <Image src={isRemoteImage(category.image) ? category.image : `${category.image}?v=transparent-2`} unoptimized onError={fallbackImage} draggable={false} alt={categoryName} fill sizes="(max-width: 600px) 42vw, (max-width: 1023px) 26vw, 190px" />
         </div>
