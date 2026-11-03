@@ -1,10 +1,10 @@
 import { cache } from "react";
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import { notFound, permanentRedirect } from "next/navigation";
 import CityPrompt from "@/components/home/CityPrompt";
 import { shortName, type ApiProductDetail } from "@/lib/api";
 import { getProductShare, getShopProduct } from "@/lib/server/api";
+import { absoluteUrl, getSiteIdentity } from "@/lib/server/site";
 import { readCityCookie } from "@/lib/server/city";
 import ProductDetailView from "./ProductDetailView";
 import "./ProductDetails.css";
@@ -21,33 +21,45 @@ const loadProduct = cache(async (cityId: string, slug: string): Promise<ApiProdu
 // something that looks like a file (favicon.ico, robots.txt ...) is never a product
 const looksLikeFile = (slug: string) => /\.[a-z0-9]{2,5}$/i.test(slug);
 
-/** the address this site is reached at (link previews need absolute addresses) */
-async function siteOrigin() {
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host");
-  if (!host) return process.env.NEXT_PUBLIC_SITE_URL ?? "https://tazahat.in";
-  const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-  return `${proto}://${host}`;
-}
-
-/** The tags a shared link is previewed with (WhatsApp, Facebook, Telegram, Google ...): they do not need a delivery city. */
+/** The tags a product is shown with in search results and when a link is shared (WhatsApp, Facebook, Telegram, Google ...): no delivery city is needed. */
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug: raw } = await params;
   const slug = decodeURIComponent(raw);
   if (looksLikeFile(slug)) return { title: "TazaHat" };
-  const share = await getProductShare(slug).catch(() => null);
-  if (!share) return { title: "TazaHat" };
-  const origin = await siteOrigin();
-  const title = `${shortName(share.name)} | TazaHat`;
-  const description = share.description || `Fresh ${shortName(share.name)} delivered to your door by TazaHat.`;
-  const url = `${origin}/${encodeURIComponent(share.slug)}`;
-  const image = share.image ? (/^https?:\/\//.test(share.image) ? share.image : `${origin}${share.image.startsWith("/") ? "" : "/"}${share.image}`) : `${origin}/images/logo.webp`;
+  const [share, id] = await Promise.all([getProductShare(slug).catch(() => null), getSiteIdentity()]);
+  if (!share) return { title: "Product not found", robots: { index: false, follow: false } };
+  const name = shortName(share.name);
+  const price = share.price ? ` From ₹${Math.round(share.price.lowPaisa / 100)}.` : "";
+  const description = `${share.description ? `${share.description}. ` : ""}Buy fresh ${name} online${share.category ? ` (${shortName(share.category.name)})` : ""} and get it delivered by ${id.name}.${price}`.replace(/\.\s*\./g, ".").slice(0, 300);
+  const url = `${id.origin}/${encodeURIComponent(share.slug)}`;
+  const image = absoluteUrl(id.origin, share.image) ?? id.logo;
   return {
-    title, description,
+    title: name, description,
     alternates: { canonical: url },
-    openGraph: { type: "website", siteName: "TazaHat", title, description, url, images: [{ url: image, alt: share.name }] },
-    twitter: { card: "summary_large_image", title, description, images: [image] },
+    openGraph: { type: "website", siteName: id.name, title: `${name} | ${id.name}`, description, url, images: [{ url: image, alt: share.name }], locale: "en_IN" },
+    twitter: { card: "summary_large_image", title: `${name} | ${id.name}`, description, images: [image] },
   };
+}
+
+/** The product as structured data (Google shows the price and picture in the result): name, pictures, category, the price range over the cities. */
+async function ProductJsonLd({ slug }: { slug: string }) {
+  const [share, id] = await Promise.all([getProductShare(slug).catch(() => null), getSiteIdentity()]);
+  if (!share) return null;
+  const url = `${id.origin}/${encodeURIComponent(share.slug)}`;
+  const images = (share.images?.length ? share.images : share.image ? [share.image] : []).map((i) => absoluteUrl(id.origin, i)).filter((x): x is string => !!x);
+  const ld: Record<string, unknown>[] = [
+    {
+      "@context": "https://schema.org", "@type": "Product", name: shortName(share.name), description: share.description || undefined, image: images.length ? images : undefined, sku: share.slug, url,
+      brand: { "@type": "Brand", name: id.name }, category: share.category?.name,
+      ...(share.price ? { offers: { "@type": "AggregateOffer", priceCurrency: "INR", lowPrice: (share.price.lowPaisa / 100).toFixed(2), highPrice: ((share.price.highPaisa ?? share.price.lowPaisa) / 100).toFixed(2), availability: share.price.inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock", url, seller: { "@type": "Organization", name: id.name } } } : {}),
+    },
+    { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: id.origin },
+      ...(share.category ? [{ "@type": "ListItem", position: 2, name: shortName(share.category.name), item: `${id.origin}/products?category=${share.category.slug}` }] : []),
+      { "@type": "ListItem", position: share.category ? 3 : 2, name: shortName(share.name), item: url },
+    ] },
+  ];
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, "\\u003c") }} />;
 }
 
 /** A product page: tazahat.in/<product-slug>. Fetched on the server for the visitor's city. */
@@ -63,5 +75,5 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   if (detail === undefined) return <main className="product-details-page"><p className="home-city-status home-city-status--error" role="alert">We could not load this product right now. Please try again.</p></main>;
   // the product was renamed: its old address leads to the new one
   if (detail.redirectSlug) permanentRedirect(`/${encodeURIComponent(detail.redirectSlug)}`);
-  return <ProductDetailView detail={detail} />;
+  return <><ProductJsonLd slug={detail.slug} /><ProductDetailView detail={detail} /></>;
 }

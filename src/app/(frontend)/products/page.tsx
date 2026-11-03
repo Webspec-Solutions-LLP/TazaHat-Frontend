@@ -5,7 +5,7 @@ import { getShopCatalog, getShopCategories } from "@/lib/server/api";
 import { readCityCookie } from "@/lib/server/city";
 import ProductsCatalog, { type CatalogQueryProps } from "./ProductsCatalog";
 
-export const metadata: Metadata = { title: "Products | TazaHat" };
+export const metadata: Metadata = { title: "Fresh fish, meat & groceries", description: "Browse fresh fish, meat, vegetables and groceries and order online for delivery." };
 
 const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) || undefined;
 

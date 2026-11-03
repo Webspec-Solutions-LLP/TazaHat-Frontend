@@ -26,7 +26,6 @@ export const getShopCategories = (cityId: string) => get<{ categories: ApiFacetC
 export const getShopCategoryPage = (cityId: string, page: number, limit: number) =>
   get<{ categories: ApiFacetCategory[]; total: number; page: number; limit: number }>("/shop/categories", { cityId, page: String(page), limit: String(limit) });
 /** the name, text and picture a shared link shows: the same for every city */
-export type ProductShare = { slug: string; name: string; description: string; image: string | null };
 export const getProductShare = (slug: string) => get<ProductShare>(`/shop/products/${encodeURIComponent(slug)}/share`);
 export const getShopProduct = (cityId: string, slug: string) => get<ApiProductDetail>(`/shop/products/${encodeURIComponent(slug)}`, { cityId });
 export async function getCartRelated(cityId: string, slugs: string[]): Promise<ApiCard[]> {
@@ -59,3 +58,20 @@ export type LegalListItem = { slug: string; title: string; footer: boolean; logi
 export type LegalDoc = { slug: string; title: string; html: string; updatedAt: string };
 export const getLegalList = () => get<{ documents: LegalListItem[] }>("/legal").then((d) => d.documents).catch(() => [] as LegalListItem[]);
 export const getLegalDoc = (slug: string) => get<LegalDoc>(`/legal/${encodeURIComponent(slug)}`);
+
+/** the shop's name, logo and favicon (CRM > Settings > General): what the browser tab, the share cards and the search results carry */
+export type SiteSettings = { appName: string; supportPhone: string | null; supportEmail: string | null; logoUrl: string | null; faviconUrl: string | null };
+export async function getSiteSettings(): Promise<SiteSettings> {
+  try {
+    const res = await fetch(`${API_BASE}/api/settings`, { next: { revalidate: 300 } });
+    const json = (await res.json()) as { status?: string; data?: SiteSettings };
+    if (res.ok && json.status === "success" && json.data) return json.data;
+  } catch { /* the defaults below */ }
+  return { appName: "TazaHat", supportPhone: null, supportEmail: null, logoUrl: null, faviconUrl: null };
+}
+
+export type SitemapData = { products: { slug: string; updatedAt: string }[]; categories: { slug: string; subs: string[] }[]; legal: { slug: string; updatedAt: string }[] };
+export const getSitemapData = () => get<SitemapData>("/sitemap").catch(() => ({ products: [], categories: [], legal: [] }) as SitemapData);
+
+/** the picture, name and price range of a product, the same for every city (link previews and the product's structured data) */
+export type ProductShare = { slug: string; name: string; description: string; image: string | null; images?: string[]; updatedAt?: string; category?: { name: string; slug: string }; subCategory?: { name: string; slug: string }; price?: { lowPaisa: number; highPaisa: number | null; inStock: boolean } | null };

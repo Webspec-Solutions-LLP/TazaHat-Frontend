@@ -4,7 +4,7 @@ import { getShopCatalog, getShopCategories } from "@/lib/server/api";
 import { readCityCookie } from "@/lib/server/city";
 import PriceListView, { type PriceGroup } from "./PriceListView";
 
-export const metadata: Metadata = { title: "Price List" };
+export const metadata: Metadata = { title: "Price list", description: "Today's prices of fresh fish, meat and groceries in your city." };
 
 /** The price list of the visitor's city: every category with the products on sale there and their prices today (read from the shop). */
 export default async function PriceListPage() {

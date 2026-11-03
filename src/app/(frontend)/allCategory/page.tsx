@@ -7,7 +7,7 @@ import AllCategories from "./AllCategories";
 import "@/components/category/Category.css";
 import "./AllCategory.css";
 
-export const metadata: Metadata = { title: "All categories | TazaHat" };
+export const metadata: Metadata = { title: "All categories", description: "Shop by category: fish, meat, vegetables, fruit, dairy and more." };
 const PAGE_SIZE = 12;
 
 /** Server component: the first page of the visitor's city categories; the rest load while scrolling. */
