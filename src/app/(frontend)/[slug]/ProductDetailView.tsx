@@ -2,6 +2,7 @@
 
 import PackAction, { AvailabilityNote, StockRibbon } from "@/components/availability/PackAction";
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Products from "@/components/products/Products";
 import CompareList, { COMPARE_CHANGE_EVENT, COMPARE_STORAGE_KEY, type CompareProduct } from "@/components/modals/compareList/CompareList";
@@ -48,6 +49,10 @@ const plainText = (html: string | null | undefined) => (html ?? "").replace(/<[^
 
 /** One product for the visitor's city: packs, prices and cutting options come from the API. */
 export default function ProductDetailView({ detail }: { detail: ApiProductDetail }) {
+  const router = useRouter();
+  // this page is its own screen: the bottom navigation steps aside while it is open (see ProductDetails.css)
+  useEffect(() => { document.body.classList.add("pd-page"); return () => document.body.classList.remove("pd-page"); }, []);
+  const goBack = () => { if (window.history.length > 1) router.back(); else router.push("/"); };
   const [currentLang, setCurrentLang] = useState<SupportedLang>("en");
   useEffect(() => {
     try {
@@ -211,6 +216,7 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
             {...containerProps}>
             <Image src={mainImage} alt={name} fill priority sizes="(max-width: 900px) 100vw, 40vw" unoptimized={isRemoteImage(mainImage)} onError={fallbackImage} {...imageProps} />
             {lens && <span className="pd-zoom-lens" aria-hidden="true" style={lens.lens} />}
+            <button type="button" className="pd-back" aria-label="Back" onClick={goBack}><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg></button>
             <StockRibbon pack={pack} />
             {isFish ? <span className="pd-fresh">🐟 &nbsp;{t.freshCatch}</span> : <span className="pd-fresh">🌿 &nbsp;{t.freshQualityChecked}</span>}<span className="pd-natural">◉ &nbsp;{t.freshNatural}</span>
           </div>

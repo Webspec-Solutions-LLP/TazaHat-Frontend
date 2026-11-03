@@ -10,7 +10,7 @@
 .pd-main-image { position: relative; width: 100%; aspect-ratio: 1.08 / 1; overflow: hidden; border-radius: 12px; background: #d7f2e9; }
 .pd-main-image img { object-fit: cover; }
 .pd-fresh, .pd-natural { position: absolute; z-index: 1; left: 14px; padding: 8px 12px; border-radius: 30px; color: #fff; background: #00613fda; font-size: 12px; font-weight: 700; }
-.pd-fresh { top: 18px; }.pd-natural { bottom: 16px; background: #342b27d9; }
+.pd-fresh { top: 62px; }.pd-natural { bottom: 16px; background: #342b27d9; }
 .pd-info { padding: 5px 22px 0 0; border-right: 1px solid #e0edf6; }
 .pd-category { display: inline-flex; align-items: center; gap: 7px; padding: 5px 10px; border-radius: 20px; color: #0762b4; background: #eaf5ff; font-size: 11px; font-weight: 700; }
 .pd-category svg { width: 21px; height: 21px; }
@@ -344,3 +344,10 @@
 .pd-required { color: #d53c3c; }
 .pd-field.has-error select { border-color: #d53c3c; box-shadow: 0 0 0 3px #d53c3c1f; }
 .pd-field-error { color: #d53c3c; font-size: 12.5px; font-weight: 600; }
+
+/* the round back button on the picture */
+.pd-back { position: absolute; top: 12px; left: 12px; z-index: 6; display: grid; width: 40px; height: 40px; padding: 0; place-items: center; border: 0; border-radius: 50%; background: #ffffffe6; color: #16336b; box-shadow: 0 3px 10px #06336126; cursor: pointer; }
+.pd-back:hover { background: #fff; }
+.pd-back:focus-visible { outline: 2px solid #0878d1; outline-offset: 2px; }
+/* the product page is its own screen: no bottom navigation over it */
+body.pd-page .mobile-bottom-navigation { display: none !important; }
