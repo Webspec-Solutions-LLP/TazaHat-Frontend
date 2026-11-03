@@ -110,6 +110,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         // the compare list was changed on another device
         else if (message.event === "compare") window.dispatchEvent(new CustomEvent("tazahat:compare-remote", { detail: message }));
+        // the delivery city was changed on another device (the app)
+        else if (message.event === "city") window.dispatchEvent(new CustomEvent("tazahat:city-remote", { detail: message }));
       } catch { /* not for us */ }
     };
     return () => { source.close(); setLive(false); };

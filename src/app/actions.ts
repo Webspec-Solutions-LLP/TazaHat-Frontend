@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { readPlace, type GeocodeResult } from "@/lib/places";
 import { checkServiceability, checkShopCart, getCartRelated, getCities, getShopCatalog, getShopCategoryPage, getShopProduct, getShopProducts, type CatalogQuery } from "@/lib/server/api";
 import { readCityCookie, writeCityCookie } from "@/lib/server/city";
+import { userApi } from "@/lib/server/session";
 import { cardToProduct, type CartLineCheck, categoryToItem, type ApiCity, type ApiProductDetail, type Product } from "@/lib/api";
 import type { CategoryTile } from "@/components/category/Category";
 
@@ -62,9 +63,28 @@ export async function locateCityAction(name: string): Promise<{ lat: number; lng
 }
 
 /** Remember the visitor's delivery city (cookie) and refresh the page data for it. */
-export async function selectCityAction(city: ApiCity, pincode?: string): Promise<{ ok: boolean }> {
+export async function selectCityAction(city: ApiCity, pincode?: string, address?: string): Promise<{ ok: boolean }> {
   const cities = await getCities().catch(() => [] as ApiCity[]);
   const real = cities.find((c) => c.id === city.id);
+  if (!real) return { ok: false };
+  const pin = pincode && /^\d{6}$/.test(pincode) ? pincode : undefined;
+  await writeCityCookie({ id: real.id, name: real.name, ...(pin ? { pincode: pin } : {}) });
+  // a signed-in customer's other devices (the app) follow at once: the choice is kept on the server (guests: nothing to send)
+  await userApi<unknown>("/city", { method: "PUT", body: { cityId: real.id, pincode: pin ?? null, address: address?.slice(0, 300) ?? null } }).catch(() => undefined);
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
+/** the delivery city the signed-in customer has on the server (null: none, or not signed in) */
+export async function serverCityAction(): Promise<{ city: ApiCity; pincode: string | null } | null> {
+  const res = await userApi<{ city: ApiCity | null; pincode: string | null }>("/city");
+  return res.ok && res.data.city ? { city: res.data.city, pincode: res.data.pincode } : null;
+}
+
+/** the city was changed on another device: take it over here (cookie only, nothing is sent back) */
+export async function applyRemoteCityAction(cityId: string, pincode?: string | null): Promise<{ ok: boolean }> {
+  const cities = await getCities().catch(() => [] as ApiCity[]);
+  const real = cities.find((c) => c.id === cityId);
   if (!real) return { ok: false };
   await writeCityCookie({ id: real.id, name: real.name, ...(pincode && /^\d{6}$/.test(pincode) ? { pincode } : {}) });
   revalidatePath("/", "layout");

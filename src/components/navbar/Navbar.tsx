@@ -175,7 +175,10 @@ export default function Navbar({
       setHasCustomCart(true);
     };
     window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
+    // the delivery city changed: the cart of the old city is emptied (see CitySync and the location pop-up)
+    const onClear = () => { setCartItems([]); setHasCustomCart(true); };
+    window.addEventListener("tazahat:clear-cart", onClear);
+    return () => { window.removeEventListener("storage", onStorage); window.removeEventListener("tazahat:clear-cart", onClear); };
   }, []);
   useEffect(() => {
     if (!cartLoaded.current) return;

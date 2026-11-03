@@ -183,10 +183,19 @@ export default function Location({ onClose }: LocationProps) {
     void detectLocation();
   }, [mapsReady, savedCity, detectLocation]);
 
-  const confirm = async () => {
+  // a different city means a new cart: when the cart has items the visitor is asked first (the old shop's question, word for word)
+  const [askClearCart, setAskClearCart] = useState(false);
+  const cartHasItems = () => {
+    try { const raw: unknown = JSON.parse(window.localStorage.getItem("tazahat-cart-v1") ?? "[]"); return Array.isArray(raw) && raw.length > 0; } catch { return false; }
+  };
+  const confirm = async (cartAnswered = false) => {
     if (!verdict?.serviceable || saving) return;
+    if (!cartAnswered && savedCity && savedCity.id !== verdict.city.id && cartHasItems()) { setAskClearCart(true); return; }
+    setAskClearCart(false);
     setSaving(true);
-    const res = await selectCityAction(verdict.city, verdict.pincode).catch(() => ({ ok: false }));
+    const changedCity = !savedCity || savedCity.id !== verdict.city.id;
+    const res = await selectCityAction(verdict.city, verdict.pincode, address).catch(() => ({ ok: false }));
+    if (res.ok && changedCity) window.dispatchEvent(new Event("tazahat:clear-cart"));
     if (!res.ok) {
       setSaving(false);
       return setVerdict({ serviceable: false, message: "We could not save this city. Please try again." });
@@ -258,10 +267,23 @@ export default function Location({ onClose }: LocationProps) {
           </div>
         </div>
         <div className="location-actions">
-          <button type="button" className="location-confirm" onClick={() => void confirm()} disabled={!verdict?.serviceable || busy || saving}>
+          <button type="button" className="location-confirm" onClick={() => void confirm(false)} disabled={!verdict?.serviceable || busy || saving}>
             {verdict?.serviceable ? `Deliver to ${verdict.city.name}` : "Choose a delivery location"}
           </button>
         </div>
+        {askClearCart && (
+          <div className="location-confirm-backdrop" role="alertdialog" aria-modal="true" aria-labelledby="location-clear-title">
+            <div className="location-confirm-box">
+              <span className="location-confirm-icon" aria-hidden="true">i</span>
+              <h3 id="location-clear-title">Confirmation Message!</h3>
+              <p>Change Service City will remove all the items previously added in your cart. Do you want to continue?</p>
+              <div className="location-confirm-buttons">
+                <button type="button" className="location-confirm-yes" onClick={() => void confirm(true)}>Yes</button>
+                <button type="button" className="location-confirm-no" onClick={() => setAskClearCart(false)}>No</button>
+              </div>
+            </div>
+          </div>
+        )}
         <div className="location-modal-footer"><span>Delivering freshness across India</span><span className="location-footer-dot" /> TazaHat</div>
       </section>
     </div>

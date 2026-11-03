@@ -911,3 +911,14 @@
 .location-actions .location-confirm { margin-top: 0; }
 .location-chip { flex: 1 1 auto; }
 @media (max-width: 576px) { .location-actions { padding: 10px 14px; } }
+
+/* "Change Service City will remove all the items previously added in your cart" */
+.location-confirm-backdrop { position: absolute; inset: 0; z-index: 30; display: grid; place-items: center; padding: 20px; background: #001a3680; }
+.location-confirm-box { width: min(380px, 100%); padding: 24px 22px 20px; border-radius: 14px; background: #fff; text-align: center; box-shadow: 0 20px 50px #00132a55; }
+.location-confirm-icon { display: grid; width: 56px; height: 56px; margin: 0 auto 12px; place-items: center; border: 3px solid #9fd3fa; border-radius: 50%; color: #3fa9f5; font-size: 30px; font-weight: 700; }
+.location-confirm-box h3 { margin: 0 0 8px; color: #123b65; font-size: 21px; }
+.location-confirm-box p { margin: 0 0 18px; color: #4b5c73; font-size: 14.5px; line-height: 1.45; }
+.location-confirm-buttons { display: flex; justify-content: center; gap: 10px; }
+.location-confirm-buttons button { min-width: 86px; padding: 10px 18px; border: 0; border-radius: 8px; color: #fff; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+.location-confirm-yes { background: #3085d6; }
+.location-confirm-no { background: #d33; }
