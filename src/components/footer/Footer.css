@@ -617,3 +617,48 @@
   .footer-bottom { grid-template-columns: 1fr; justify-items: center; gap: 8px; text-align: center; }
   .footer-bottom-copy, .footer-bottom-links, .footer-bottom-values { grid-column: 1; justify-self: center; }
 }
+
+/* ---- phones: a compact footer ------------------------------------------------------------------------------------------------------------ */
+@media (max-width: 678px) {
+  .footer-top { gap: 10px; padding: 12px 0; }
+  .footer-brand-col { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 10px; padding: 0 0 10px; }
+  .footer-brand-col .footer-logo-link { order: 1; flex: 1 1 auto; min-width: 0; gap: 2px; }
+  .footer-brand-col .footer-lang-selector { order: 2; margin: 0; align-self: center; }
+  .footer-brand-col .footer-social-links { order: 3; flex: 1 1 100%; gap: 8px; }
+  .footer-desc { display: none; }
+  .footer-tagline { font-size: 9px; }
+  .footer-logo-img { height: 32px; width: auto; }
+  .footer-brand-name { font-size: 19px; }
+  .footer-social-btn { width: 28px; height: 28px; }
+  .footer-links-grid { padding: 0; }
+  .footer-links-col .footer-col-title { margin: 0; font-size: 13px; }
+  .footer-links-col .footer-col-title::after { margin: 5px 0 7px; }
+  .footer-links-list--help { columns: 2; column-gap: 18px; gap: 0; }
+  .footer-links-list--help li { margin: 0 0 6px; }
+  .footer-links-list--help .footer-link { font-size: 11.5px; line-height: 1.3; }
+  .footer-seller-card { padding: 10px 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+  .footer-seller-card .footer-seller-produce { display: none; }
+  .footer-seller-heading { flex: 1 1 100%; gap: 8px; }
+  .footer-seller-heading p { display: none; }
+  .footer-store-icon { width: 26px; height: 30px; }
+  .footer-sell-button { margin: 0; padding: 6px 12px; font-size: 11px; }
+  .footer-seller-links { flex-direction: row; gap: 8px; font-size: 10px; margin: 0; border: 0; padding: 0; }
+  .footer-app-col { padding: 10px 0 0; gap: 8px 12px; }
+  .footer-app-info p { display: none; }
+  .footer-app-info .footer-col-title { margin: 0; font-size: 13px; }
+  .footer-store-buttons { display: flex; gap: 8px; flex-wrap: nowrap; }
+  .footer-play-image { width: 112px; height: auto; }
+  .footer-store-buttons .footer-play-badge svg { width: 112px; height: auto; }
+  .footer-bottom { gap: 4px; padding: 8px 0 10px; }
+  .footer-bottom-copy { font-size: 10px; }
+  .footer-bottom-links { font-size: 11.5px; }
+}
+@media (max-width: 380px) { .footer-links-list--help { columns: 2; column-gap: 12px; } .footer-links-list--help .footer-link { font-size: 11px; } }
+@media (max-width: 678px) {
+  .tazahat-footer .footer-brand-col { display: flex !important; flex-direction: row !important; flex-wrap: wrap; align-items: center !important; justify-content: space-between !important; text-align: left; }
+  .tazahat-footer .footer-brand-col .footer-logo-link { margin: 0 !important; align-items: flex-start !important; text-align: left; }
+  .tazahat-footer .footer-brand-col .footer-social-links { justify-content: flex-start !important; margin: 0 !important; }
+  .tazahat-footer .footer-links-list--help { display: block !important; columns: 2; column-gap: 18px; }
+  .tazahat-footer .footer-links-list--help li { break-inside: avoid; }
+  .tazahat-footer .footer-store-buttons { margin-left: auto; }
+}
