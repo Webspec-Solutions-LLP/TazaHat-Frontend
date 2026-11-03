@@ -351,3 +351,10 @@
 .pd-back:focus-visible { outline: 2px solid #0878d1; outline-offset: 2px; }
 /* the product page is its own screen: no bottom navigation over it */
 body.pd-page .mobile-bottom-navigation { display: none !important; }
+
+/* on a phone the cart controls sit at the bottom, where the bottom navigation is on other pages */
+@media (max-width: 575px) {
+  .pd-actions { position: fixed; right: 0; bottom: 0; left: 0; z-index: 160; margin: 0; padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); border-radius: 16px 16px 0 0; background: #fff; box-shadow: 0 -6px 22px #06336120; }
+  .pd-compare span { display: none; }
+  .product-details-page { padding-bottom: 96px; }
+}
