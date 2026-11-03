@@ -462,3 +462,8 @@
   .deals-floating-action { gap: 6px; }
   .deals-floating-action .deals-floating-clock { display: none; }
 }
+
+/* the phone view: the sticky deals bar shows only the arrow (the label is for screen readers) */
+@media (max-width: 767px) {
+  .deals-floating-cta .deals-cta-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}

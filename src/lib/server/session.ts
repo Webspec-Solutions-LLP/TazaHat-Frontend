@@ -17,7 +17,7 @@ export interface TokenPair { token: string; refresh_token: string }
 export async function setSession(tokens: TokenPair) {
   const jar = await cookies();
   jar.set(ACCESS, tokens.token, { httpOnly: true, sameSite: "lax", secure, path: "/", maxAge: 60 * 25 });
-  jar.set(REFRESH, tokens.refresh_token, { httpOnly: true, sameSite: "lax", secure, path: "/", maxAge: 60 * 60 * 24 * 30 });
+  jar.set(REFRESH, tokens.refresh_token, { httpOnly: true, sameSite: "lax", secure, path: "/", maxAge: 60 * 60 * 24 * 180 }); // 6 months
 }
 
 export async function clearSession() {
