@@ -171,7 +171,7 @@
   .pd-thumbnails button { width: 66px; height: 66px; border-radius: 10px; }
   .pd-main-image { aspect-ratio: 1.35 / 1; border-radius: 10px; }
   .pd-fresh, .pd-natural { left: 11px; padding: 7px 10px; font-size: 11px; }
-  .pd-fresh { top: 12px; }
+  .pd-fresh { top: 58px; }
   .pd-natural { bottom: 12px; }
   .pd-right-column { position: static; width: 100%; height: auto; max-height: none; min-height: auto; flex: 0 0 auto; overflow: visible; overscroll-behavior: auto; }
   .pd-right-overview { display: block; }
@@ -216,7 +216,7 @@
   .pd-thumbnails button { width: 52px; height: 52px; border-radius: 8px; }
   .pd-main-image { aspect-ratio: 1.25 / 1; border-radius: 9px; }
   .pd-fresh, .pd-natural { left: 8px; padding: 6px 8px; font-size: 10px; }
-  .pd-fresh { top: 9px; }
+  .pd-fresh { top: 54px; }
   .pd-natural { bottom: 9px; }
   .pd-info h1 { margin-bottom: 3px; font-size: 21px; }
   .pd-rating { font-size: 15px; }
