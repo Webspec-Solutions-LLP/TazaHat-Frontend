@@ -10,6 +10,10 @@ import Link from "next/link";
 import { fallbackImage, isRemoteImage, type CartLineCheck } from "@/lib/api";
 import { checkCartAction, cartRelatedAction } from "@/app/actions";
 import Variant from "@/components/modals/variant/Variant";
+import PackAction, { StockRibbon, firstOrderable } from "@/components/availability/PackAction";
+import VariantChips from "@/components/products/VariantChips";
+import { readWishlistIds, subscribeToWishlist, toggleWishlistId } from "@/lib/wishlist";
+import "@/components/products/Products.css";
 import type { Product } from "@/lib/api";
 
 export type CartItem = {
@@ -385,14 +389,7 @@ export default function Cart({
                   <h3>You may also like</h3>
                   <div className="cart-related-row">
                     {related.map(product => (
-                      <article className="cart-related-card" key={product.id}>
-                        <div className="cart-related-image">
-                          <Image src={product.image} alt={product.name} fill sizes="120px" unoptimized={isRemoteImage(product.image)} onError={fallbackImage} />
-                        </div>
-                        <h4 title={product.name}>{product.name}</h4>
-                        <span className="cart-related-price">{currencySymbol} {product.price}</span>
-                        <button type="button" onClick={() => setVariantProduct(product)}>Add</button>
-                      </article>
+                      <RelatedCard key={product.id} product={product} currencySymbol={currencySymbol} onAdd={() => setVariantProduct(product)} />
                     ))}
                   </div>
                 </section>
@@ -452,5 +449,44 @@ export default function Cart({
         )}
       </div>
     </dialog>
+  );
+}
+
+function CartIcon() {
+  return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M2 3h2l2.4 12.2a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6L22 8H5" /><circle cx="9" cy="21" r="1" /><circle cx="19" cy="21" r="1" /></svg>;
+}
+
+/** A "You may also like" card: the same card as everywhere in the shop (picture with stock ribbon, discount and heart, name, price, pack sizes, add button). */
+function RelatedCard({ product, currencySymbol, onAdd }: { product: Product; currencySymbol: string; onAdd: () => void }) {
+  const variants = product.variants?.length ? product.variants : [{ label: product.weight, amount: 1, unit: "pack", price: product.price, originalPrice: product.originalPrice }];
+  const [picked, setPicked] = useState<number | null>(null);
+  const [saved, setSaved] = useState<string[]>([]);
+  useEffect(() => {
+    const refresh = () => setSaved(readWishlistIds());
+    refresh();
+    return subscribeToWishlist(refresh);
+  }, []);
+  const initial = firstOrderable(variants, Math.max(0, variants.findIndex(v => v.price === product.price)));
+  const index = picked ?? initial;
+  const variant = variants[index] ?? variants[0];
+  const discount = variant.originalPrice > 0 ? Math.max(0, Math.round((1 - variant.price / variant.originalPrice) * 100)) : 0;
+  const isSaved = saved.includes(product.id);
+  return (
+    <article className="product-card cart-related-card">
+      <div className="product-image">
+        <Image src={product.image} alt={product.name} fill sizes="180px" draggable={false} unoptimized={isRemoteImage(product.image)} onError={fallbackImage} />
+        <StockRibbon pack={variant} />
+        {discount > 0 && <span className="product-discount-badge">{discount}% OFF</span>}
+        <button type="button" className="product-save" aria-pressed={isSaved} aria-label={`${isSaved ? "Remove" : "Save"} ${product.name} ${isSaved ? "from" : "to"} favourites`} onClick={() => setSaved(toggleWishlistId(product.id))}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" /></svg>
+        </button>
+      </div>
+      <h3><Link href={`/${encodeURIComponent(product.id)}`}>{product.name}</Link></h3>
+      <div className="product-pricing"><strong>{currencySymbol} {variant.price}</strong>{variant.originalPrice > variant.price && <del>{currencySymbol} {variant.originalPrice}</del>}</div>
+      <VariantChips name={product.name} variants={variants} selected={index} onSelect={setPicked} onMore={onAdd} />
+      <div className="product-card-actions">
+        <PackAction pack={variant} className="product-details-button" onAdd={onAdd}><CartIcon />Add to Cart</PackAction>
+      </div>
+    </article>
   );
 }

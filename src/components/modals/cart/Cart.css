@@ -595,12 +595,7 @@
 
 /* "You may also like": a horizontal strip under the items */
 .cart-related { margin-top: 18px; padding-top: 14px; border-top: 1px solid #e3edf6; }
-.cart-related h3 { margin: 0 0 10px; color: #123b6d; font-size: 14px; font-weight: 800; }
+.cart-related > h3 { margin: 0 0 10px; color: #123b6d; font-size: 14px; font-weight: 800; }
 .cart-related-row { display: flex; gap: 10px; padding-bottom: 8px; overflow-x: auto; scrollbar-width: thin; }
-.cart-related-card { display: flex; flex: 0 0 118px; flex-direction: column; gap: 4px; padding: 8px; border: 1px solid #dce8f2; border-radius: 10px; background: #fff; }
-.cart-related-image { position: relative; width: 100%; aspect-ratio: 1; overflow: hidden; border-radius: 8px; background: #f2f6fa; }
-.cart-related-image img { object-fit: cover; }
-.cart-related-card h4 { display: -webkit-box; margin: 2px 0 0; overflow: hidden; color: #123b6d; font-size: 12px; font-weight: 700; line-height: 1.25; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
-.cart-related-price { color: #345879; font-size: 12px; font-weight: 700; }
-.cart-related-card button { margin-top: auto; padding: 6px 0; border: 0; border-radius: 8px; background: #087cff; color: #fff; font-size: 12px; font-weight: 700; cursor: pointer; }
-.cart-related-card button:hover { background: #0666d6; }
+.cart-related-card { flex: 0 0 172px; }
+.cart-related-row { align-items: stretch; }
