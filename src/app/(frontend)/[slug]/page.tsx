@@ -1,9 +1,10 @@
 import { cache } from "react";
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { notFound, permanentRedirect } from "next/navigation";
 import CityPrompt from "@/components/home/CityPrompt";
 import { shortName, type ApiProductDetail } from "@/lib/api";
-import { getShopProduct } from "@/lib/server/api";
+import { getProductShare, getShopProduct } from "@/lib/server/api";
 import { readCityCookie } from "@/lib/server/city";
 import ProductDetailView from "./ProductDetailView";
 import "./ProductDetails.css";
@@ -20,12 +21,33 @@ const loadProduct = cache(async (cityId: string, slug: string): Promise<ApiProdu
 // something that looks like a file (favicon.ico, robots.txt ...) is never a product
 const looksLikeFile = (slug: string) => /\.[a-z0-9]{2,5}$/i.test(slug);
 
+/** the address this site is reached at (link previews need absolute addresses) */
+async function siteOrigin() {
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host");
+  if (!host) return process.env.NEXT_PUBLIC_SITE_URL ?? "https://tazahat.in";
+  const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+  return `${proto}://${host}`;
+}
+
+/** The tags a shared link is previewed with (WhatsApp, Facebook, Telegram, Google ...): they do not need a delivery city. */
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  const { slug } = await params;
-  const city = await readCityCookie();
-  if (!city || looksLikeFile(slug)) return { title: "TazaHat" };
-  const detail = await loadProduct(city.id, slug);
-  return { title: detail ? `${shortName(detail.name)} | TazaHat` : "TazaHat" };
+  const { slug: raw } = await params;
+  const slug = decodeURIComponent(raw);
+  if (looksLikeFile(slug)) return { title: "TazaHat" };
+  const share = await getProductShare(slug).catch(() => null);
+  if (!share) return { title: "TazaHat" };
+  const origin = await siteOrigin();
+  const title = `${shortName(share.name)} | TazaHat`;
+  const description = share.description || `Fresh ${shortName(share.name)} delivered to your door by TazaHat.`;
+  const url = `${origin}/${encodeURIComponent(share.slug)}`;
+  const image = share.image ? (/^https?:\/\//.test(share.image) ? share.image : `${origin}${share.image.startsWith("/") ? "" : "/"}${share.image}`) : `${origin}/images/logo.webp`;
+  return {
+    title, description,
+    alternates: { canonical: url },
+    openGraph: { type: "website", siteName: "TazaHat", title, description, url, images: [{ url: image, alt: share.name }] },
+    twitter: { card: "summary_large_image", title, description, images: [image] },
+  };
 }
 
 /** A product page: tazahat.in/<product-slug>. Fetched on the server for the visitor's city. */

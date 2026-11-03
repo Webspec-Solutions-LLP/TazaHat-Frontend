@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useAuth } from "@/lib/auth";
 import { loadWishlistProductsAction } from "@/app/actions";
-import { getCompareAction, saveCompareAction } from "@/app/compare-actions";
+import { getCompareAction, saveCompareAction } from "@/lib/sync-client";
 import { COMPARE_CHANGE_EVENT, COMPARE_STORAGE_KEY, type CompareProduct } from "./CompareList";
 
 /**
