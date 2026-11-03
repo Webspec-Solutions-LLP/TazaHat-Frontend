@@ -23,6 +23,7 @@ import type { CartItem } from "../modals/cart/Cart";
 import { fallbackImage, isRemoteImage } from "../../lib/api";
 import "./TodayDeals.css";
 import VariantChips from "@/components/products/VariantChips";
+import CompareButton from "@/components/products/CompareButton";
 
 
 const textMap: Record<SupportedLang, typeof englishText> = {
@@ -115,6 +116,7 @@ export default function TodalDeals({ products }: { products?: Product[] }) {
           <button type="button" className="product-save" aria-pressed={isSaved} aria-label={(isSaved ? text.unsave : text.save).replace("{name}", product.name)} onClick={() => setSaved(toggleWishlistId(product.id))}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" /></svg>
           </button>
+          <CompareButton product={{ id: product.id, name: product.name, image: product.image, price: product.price, originalPrice: product.originalPrice, rating: product.rating, reviews: product.reviews, unit: product.weight }} label={text.compare} addedLabel={text.compared} />
         </div>
         <h3><Link href={`/${encodeURIComponent(product.id)}`}>{product.name}</Link></h3>
         <p className="product-description" title={description}>{description}</p>

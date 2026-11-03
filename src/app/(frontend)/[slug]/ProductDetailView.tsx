@@ -60,6 +60,7 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
   const name = shortName(detail.name);
   const gallery = detail.images.length ? detail.images.map(mediaSrc) : [PLACEHOLDER_IMAGE];
   const [activeImage, setActiveImage] = useState(0);
+  const touchStartX = useRef<number | null>(null);
   const firstAvailable = Math.max(0, detail.packs.findIndex(p => p.inStock));
   const [packIndex, setPackIndex] = useState(firstAvailable);
   const [dressingId, setDressingId] = useState("");
@@ -152,6 +153,7 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
     const left = leftRef.current, overview = overviewRef.current, extra = extraRef.current;
     if (!left || !overview || !extra) return;
     const measure = () => {
+      if (window.innerWidth < 576) return setDescMax(null);
       if (window.innerWidth < 877) return setDescMax(420);
       const gap = parseFloat(getComputedStyle(extra).marginTop) || 0;
       setDescMax(Math.max(240, Math.round(left.getBoundingClientRect().height - overview.getBoundingClientRect().height - gap)));
@@ -191,12 +193,28 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
         <div className="pd-left-column" ref={leftRef}><section className="pd-gallery" aria-label={t.productImagesAria} ref={galleryRef}>
 
           <div className={`pd-main-image${lens ? " is-zooming" : ""}${imageProps.style ? " is-tap-zoom" : ""}${hasThumbs ? " has-thumbs" : ""}`}
-            {...containerProps}>
+            {...containerProps}
+            onTouchStart={event => { touchStartX.current = event.touches[0]?.clientX ?? null; }}
+            onTouchEnd={event => {
+              const startX = touchStartX.current;
+              touchStartX.current = null;
+              const endX = event.changedTouches[0]?.clientX;
+              if (!hasThumbs || startX === null || endX === undefined || Math.abs(endX - startX) < 40) return;
+              setActiveImage(index => Math.max(0, Math.min(gallery.length - 1, index + (endX < startX ? 1 : -1))));
+              reset();
+            }}>
             <Image src={mainImage} alt={name} fill priority sizes="(max-width: 900px) 100vw, 40vw" unoptimized={isRemoteImage(mainImage)} onError={fallbackImage} {...imageProps} />
             {lens && <span className="pd-zoom-lens" aria-hidden="true" style={lens.lens} />}
             <button type="button" className="pd-back" aria-label="Back" onClick={goBack}><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg></button>
+            <div className="pd-mobile-image-actions">
+              <button type="button" className="pd-image-action" aria-pressed={saved} aria-label={saved ? t.removeFromWishlist : t.addToWishlist} title={saved ? t.removeFromWishlist : t.addToWishlist} onClick={event => { event.stopPropagation(); setSaved(toggleWishlistId(detail.slug).includes(detail.slug)); }}><Icon name="heart" /></button>
+              <button type="button" className="pd-image-action" aria-label={t.openCartAria} title={t.openCartAria} onClick={event => { event.stopPropagation(); window.dispatchEvent(new Event("tazahat:open-cart")); }}><Icon name="cart" /></button>
+            </div>
             <StockRibbon pack={pack} />
             {isFish ? <span className="pd-fresh">🐟 &nbsp;{t.freshCatch}</span> : <span className="pd-fresh">🌿 &nbsp;{t.freshQualityChecked}</span>}<span className="pd-natural">◉ &nbsp;{t.freshNatural}</span>
+            {hasThumbs && <div className="pd-mobile-image-pagination" role="group" aria-label={t.productPicturesAria}>
+              {gallery.map((src, index) => <button key={`${src}-${index}`} type="button" className={index === activeImage ? "is-active" : ""} aria-label={t.showImageAria.replace("{index}", String(index + 1))} aria-current={index === activeImage ? "true" : undefined} onPointerDown={event => event.stopPropagation()} onPointerUp={event => event.stopPropagation()} onClick={event => { event.stopPropagation(); setActiveImage(index); reset(); }} />)}
+            </div>}
           </div>
           {hasThumbs && <div className="pd-thumbnails" role="tablist" aria-label={t.productPicturesAria}>{gallery.map((src, index) => <button key={`${src}-${index}`} className={mainImage === src ? "is-active" : ""} onClick={() => { setActiveImage(index); reset(); }} aria-label={t.showImageAria.replace("{index}", String(index + 1))} role="tab" aria-selected={mainImage === src}><Image src={src} alt={`${name} - picture ${index + 1}`} fill sizes="76px" unoptimized={isRemoteImage(src)} onError={fallbackImage} /></button>)}</div>}
           {lens && <div className="pd-zoom-pane" aria-hidden="true" style={lens.pane}>
@@ -205,9 +223,8 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
           </div>}
         </section>
         <aside className="pd-trust" aria-label={t.qualityPromisesAria}>
-          <h2 className="pd-trust-heading">{t.qualityPromise}</h2>
+          <h2 className="pd-trust-heading"><span className="pd-trust-heading-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="10" r="8" /><path d="m12 5.5 1.4 2.8 3.1.5-2.2 2.2.5 3.1-2.8-1.5-2.8 1.5.5-3.1-2.2-2.2 3.1-.5L12 5.5Z" /><path d="m8 17-1 5 5-2 5 2-1-5" /></svg></span>{t.qualityPromise}</h2>
           <ul>{trustItems.map(item => <li key={item.title}><span className="pd-trust-icon"><Icon name={item.icon as "fish" | "leaf" | "shield" | "flask" | "box"} /></span><span><strong>{item.title}</strong><small>{item.text}</small></span></li>)}</ul>
-          <div className="pd-river-art"><span aria-hidden="true">{isFish ? "🐟　🌿" : "🌿　🥬"}</span></div>
         </aside>
         </div>
         <div className="pd-right-column">
@@ -215,7 +232,12 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
         <section className="pd-info" aria-labelledby="pd-title">
           <h1 id="pd-title">{name}</h1>
           {pack ? <>
-            <div className="pd-price-row"><strong>{money.format(unitPrice)}</strong>{unitMrp > unitPrice && <del>{money.format(unitMrp)}</del>}<span>({pack.weight ? `${money.format(pack.ratePaisa / 100)} / kg · ` : ""}{money.format(unitPrice)} {t.per} {pack.label}){pack.discountPercent > 0 ? ` · ${pack.discountPercent}% ${t.off}` : ""}</span></div>
+            <div className="pd-price-row">
+              <strong>{money.format(unitPrice)}</strong>
+              {unitMrp > unitPrice && <del>{money.format(unitMrp)}</del>}
+              <span className="pd-unit-price">{pack.weight ? `${money.format(pack.ratePaisa / 100)} / kg · ` : ""}{money.format(unitPrice)} {t.per} {pack.label}</span>
+              {pack.discountPercent > 0 && <span className="pd-price-discount">{pack.discountPercent}% {t.off}</span>}
+            </div>
             <fieldset className="pd-variant-picker">
               <legend><strong>{t.weightPackSize}</strong><span>{pack.label}</span></legend>
               <div className="pd-weights">{detail.packs.map((option, index) => <label key={option.id} className={`pd-weight-option${packIndex === index ? " is-selected" : ""}${option.inStock ? "" : " is-sold-out"}`}>

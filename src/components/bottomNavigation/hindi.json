@@ -9,9 +9,9 @@
       "href": "/"
     },
     {
-      "id": "delivery",
-      "label": "डिलीवरी",
-      "href": "/deliveryService"
+      "id": "category",
+      "label": "श्रेणी",
+      "href": "/allCategory"
     },
     {
       "id": "account",

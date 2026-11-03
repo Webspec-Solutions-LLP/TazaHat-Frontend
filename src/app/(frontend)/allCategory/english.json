@@ -9,8 +9,10 @@
   "productTypes": "product types",
   "allCategoriesLabel": "All product categories",
   "loadingMore": "Loading more categories",
+  "loadingCategories": "Loading categories...",
   "tryAgain": "Try again",
   "allCategoriesEnd": "That is every category in your city.",
+  "closeCategoryModal": "Close categories",
   "categoryNames": {
     "Vegetables": "Vegetables",
     "Fruits": "Fruits",

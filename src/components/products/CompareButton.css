@@ -1,0 +1,22 @@
+.product-compare {
+  position: absolute;
+  top: 42px;
+  right: 6px;
+  z-index: 2;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: #ffffffdf;
+  color: #7890a5;
+  box-shadow: 0 2px 8px #06336116;
+  cursor: pointer;
+  transition: color 180ms ease, background-color 180ms ease;
+}
+
+.product-compare svg { width: 17px; height: 17px; }
+.product-compare:hover { color: #0864b7; background: #fff; }
+.product-compare[aria-pressed="true"] { color: #0864b7; }
+.product-compare:focus-visible { outline: 2px solid #087cff; outline-offset: 2px; }

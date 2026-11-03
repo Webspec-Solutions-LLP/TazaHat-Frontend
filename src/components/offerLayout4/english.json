@@ -11,6 +11,8 @@
   "hotItem": "HOT ITEM",
   "save": "Save {name} to favourites",
   "unsave": "Remove {name} from favourites",
+  "compare": "Add {name} to compare",
+  "compared": "{name} added to compare",
   "discount": "{percent}% OFF",
   "rating": "Rated {rating} out of 5 from {reviews} reviews",
   "close": "Close",

@@ -19,6 +19,7 @@ import { type SupportedLang, useLanguage } from "@/lib/language";
 import { fallbackImage, isRemoteImage } from "@/lib/api";
 import "./OfferLayout3.css";
 import VariantChips from "@/components/products/VariantChips";
+import CompareButton from "@/components/products/CompareButton";
 
 type Product = (typeof englishCatalog.products)[number];
 
@@ -140,6 +141,7 @@ export default function OfferLayout3({ products }: { products?: Product[] }) {
                     >
                       <svg viewBox="0 0 24 24" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" /></svg>
                     </button>
+                    <CompareButton className="product-compare winter-product-compare" product={{ id: product.id, name: deal.name, image: deal.image, price: deal.price, originalPrice: deal.originalPrice, rating: deal.rating, reviews: deal.reviews, unit: deal.weight }} label={text.compare} addedLabel={text.compared} />
                     {deal.rating > 0 && <span className="winter-product-rating" aria-label={text.rating.replace("{rating}", String(deal.rating)).replace("{reviews}", String(deal.reviews))}>★ {deal.rating}</span>}
                   </div>
                   <h4>{deal.name}</h4>

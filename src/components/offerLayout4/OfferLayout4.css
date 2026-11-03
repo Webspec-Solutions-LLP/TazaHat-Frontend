@@ -266,13 +266,13 @@
   height: auto;
   margin-bottom: 6px;
   overflow: hidden;
-  background: linear-gradient(145deg, #f7fbff, #edf5fa);
+  background: transparent;
   border-radius: 9px;
 }
 
 .offer-layout-4 .product-image > img {
   object-fit: contain;
-  padding: 12px;
+  padding: 0;
   user-select: none;
 }
 
@@ -332,6 +332,16 @@
 .offer-layout-4 .product-save[aria-pressed="true"] {
   color: #e24c64;
 }
+
+.offer-layout-4 .product-compare {
+  top: 42px;
+  right: 6px;
+  width: 30px;
+  height: 30px;
+}
+
+.offer-layout-4 .product-compare svg { width: 17px; height: 17px; }
+.offer-layout-4 .product-compare[aria-pressed="true"] { color: #0864b7; }
 
 .offer-layout-4 .product-card h3 {
   display: -webkit-box;
@@ -483,7 +493,6 @@
   .steal-tab-flame-icon { width: 19px; height: 19px; }
   .offer-layout-4 .product-card { gap: 1px; padding: 7px; border-radius: 10px; }
   .offer-layout-4 .product-image { margin-bottom: 3px; border-radius: 7px; }
-  .offer-layout-4 .product-image > img { padding: 8px; }
   .offer-layout-4 .product-discount-badge { top: 6px; left: 6px; min-height: 20px; padding: 3px 6px; font-size: 8px; }
   .offer-layout-4 .product-save { top: 5px; right: 5px; width: 27px; height: 27px; }
   .offer-layout-4 .product-card h3 { min-height: 19px; font-size: 12px; }
@@ -520,9 +529,8 @@
   .steal-tab-flame-icon { width: 17px; height: 17px; }
   .steal-tab-hot-tag { font-size: 4.5px; }
   .offer-layout-4 .product-card { padding: 6px; }
-  .offer-layout-4 .product-image > img { padding: 6px; }
   .offer-layout-4 .product-card h3 { min-height: 17px; font-size: 10px; }
-  .offer-layout-4 .product-description { min-height: 12px; font-size: 7px; }
+  .offer-layout-4 .product-description { min-height: 12px; font-size: 9px; }
   .offer-layout-4 .product-weight { gap: 3px; font-size: 7px; }
   .offer-layout-4 .product-pricing { gap: 4px; min-height: 19px; }
   .offer-layout-4 .product-pricing strong { font-size: 12px; }
@@ -545,7 +553,7 @@
   .offer-layout-4 .product-save svg { width: 14px; height: 14px; }
   .offer-layout-4 .product-image-rating { right: 4px; bottom: 4px; min-height: 16px; padding: 2px 4px; font-size: 7px; }
   .offer-layout-4 .product-card h3 { min-height: 16px; font-size: 9px; }
-  .offer-layout-4 .product-description, .offer-layout-4 .product-weight { font-size: 6px; }
+  .offer-layout-4 .product-description, .offer-layout-4 .product-weight { font-size: 9px; }
   .offer-layout-4 .product-pricing { gap: 3px; min-height: 17px; }
   .offer-layout-4 .product-pricing strong { font-size: 11px; }
   .offer-layout-4 .product-pricing del { font-size: 7px; }
@@ -588,3 +596,25 @@
 @media (max-width: 575px) { .offer-layout-4 .product-details-button { min-height: 30px; font-size: 8px; } .offer-layout-4 .product-quick-view { flex-basis: 36px; min-height: 30px; } }
 @media (max-width: 450px) { .offer-layout-4 .product-details-button { min-height: 28px; padding-inline: 3px; font-size: 7px; } .offer-layout-4 .product-quick-view { flex-basis: 32px; min-height: 28px; padding: 3px; } }
 @media (prefers-reduced-motion: reduce) { .offer-layout-4 .product-variant-trigger svg, .offer-layout-4 .product-quick-view { transition: none; } .offer-layout-4 .product-variant-menu { animation: none; } }
+
+.offer-layout-4 .product-card { gap: 0; padding: 0; border-radius: 11px; }
+.offer-layout-4 .product-image { aspect-ratio: .92 / 1; margin: 0; border-radius: 10px 10px 0 0; }
+.offer-layout-4 .product-card h3 { margin: 7px 9px 1px; }
+.offer-layout-4 .product-description,
+.offer-layout-4 .product-pricing,
+.offer-layout-4 .product-variant-wrap { margin-inline: 9px; }
+.offer-layout-4 .variant-chips { margin: 3px 9px 0; }
+.offer-layout-4 .product-card-actions { gap: 6px; margin: auto 9px 9px; padding-top: 6px; }
+.offer-layout-4 .product-details-button { min-height: 36px; border-radius: 7px; }
+.offer-layout-4 .product-quick-view { flex-basis: 42px; min-height: 36px; border-radius: 7px; }
+
+@media (max-width: 575px) {
+  .offer-layout-4 .product-card h3 { margin: 6px 7px 1px; font-size: 13px; }
+  .offer-layout-4 .product-description,
+  .offer-layout-4 .product-pricing,
+  .offer-layout-4 .product-variant-wrap,
+  .offer-layout-4 .variant-chips { margin-inline: 7px; }
+  .offer-layout-4 .product-card-actions { gap: 5px; margin: auto 7px 7px; }
+  .offer-layout-4 .product-details-button { min-height: 31px; padding-inline: 5px; font-size: 9px; }
+  .offer-layout-4 .product-quick-view { flex-basis: 36px; min-height: 31px; }
+}

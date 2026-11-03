@@ -25,5 +25,7 @@
   "returnToDeals": "Return to today's deals",
   "addToCart": "Add to Cart",
   "quickView": "View {name} details",
+  "compare": "Add {name} to compare",
+  "compared": "{name} added to compare",
   "productDescription": "{name} selected for freshness and quality, ready for your everyday meals."
 }

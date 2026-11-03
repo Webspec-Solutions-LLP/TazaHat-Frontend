@@ -49,6 +49,8 @@
   "productDescription": "ताज़गी और गुणवत्ता के साथ चुनी गई {name}, आपके दैनिक भोजन के लिए तैयार।",
   "save": "{name} को विशलिस्ट में जोड़ें",
   "unsave": "{name} को विशलिस्ट से हटाएं",
-  "addToCart": "कार्ट में जोड़ें",
+  "compare": "{name} को तुलना में जोड़ें",
+  "compared": "{name} तुलना में जोड़ा गया",
+  "addToCart": "Add to Cart",
   "quickViewAria": "{name} का विवरण देखें"
 }

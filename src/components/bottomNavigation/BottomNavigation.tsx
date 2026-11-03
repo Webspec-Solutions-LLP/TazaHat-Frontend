@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { type SupportedLang, useLanguage } from "@/lib/language";
+import ResponsiveCategory from "@/components/modals/responsiveCategory/ResponsiveCategory";
 import englishText from "./english.json";
 import bengaliText from "./bengali.json";
 import hindiText from "./hindi.json";
@@ -18,14 +19,7 @@ const textMap: Record<SupportedLang, typeof englishText> = {
 
 const itemIcons: Record<string, React.ReactNode> = {
   home: <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7h-6v7H4a1 1 0 0 1-1-1z" />,
-  delivery: (
-    <>
-      <path d="M2 6h12v11H2z" />
-      <path d="M14 10h4l4 4v3h-8z" />
-      <circle cx="6" cy="19" r="2" />
-      <circle cx="18" cy="19" r="2" />
-    </>
-  ),
+  category: <path d="M3.5 3.5h7v7h-7zM13.5 3.5h7v7h-7zM3.5 13.5h7v7h-7zM13.5 13.5h7v7h-7z" />,
   account: (
     <>
       <circle cx="12" cy="8" r="4" />
@@ -45,8 +39,11 @@ export default function BottomNavigation() {
   const [currentLang] = useLanguage();
   const pathname = usePathname();
   const { user, ready, openLogin } = useAuth();
+  const isVisiblePath = pathname === "/" || pathname === "/myprofile";
   const [isHidden, setIsHidden] = useState(false);
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const lastScrollY = useRef(0);
+  const closeCategory = useCallback(() => setIsCategoryOpen(false), []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -71,10 +68,14 @@ export default function BottomNavigation() {
 
   const t = textMap[currentLang] || englishText;
 
+  if (!isVisiblePath) return null;
+
   return (
     <nav className={`mobile-bottom-navigation${isHidden ? " is-hidden" : ""}`} aria-label={t.navAriaLabel} aria-hidden={isHidden} lang={t.language}>
       {t.items.map(({ id, label, href }) => {
-        const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
+        const isActive = id === "category"
+          ? isCategoryOpen || pathname.startsWith(href)
+          : href === "/" ? pathname === "/" : pathname.startsWith(href);
         const icon = itemIcons[id];
         const content = (
           <>
@@ -82,6 +83,28 @@ export default function BottomNavigation() {
             <span>{label}</span>
           </>
         );
+
+        if (id === "category") {
+          return (
+            <button
+              className={`mobile-bottom-navigation-item${isActive ? " is-active" : ""}`}
+              type="button"
+              key={id}
+              aria-label={label}
+              aria-expanded={isCategoryOpen}
+              aria-haspopup="dialog"
+              tabIndex={isHidden ? -1 : undefined}
+              disabled={!ready}
+              onClick={() => {
+                if (!ready) return;
+                if (user) setIsCategoryOpen(true);
+                else openLogin(() => setIsCategoryOpen(true));
+              }}
+            >
+              {content}
+            </button>
+          );
+        }
 
         // not signed in: Account opens the login popup instead of a page that needs a login
         if (id === "account" && ready && !user) {
@@ -119,6 +142,7 @@ export default function BottomNavigation() {
           </Link>
         );
       })}
+      <ResponsiveCategory open={isCategoryOpen} onClose={closeCategory} />
     </nav>
   );
 }
