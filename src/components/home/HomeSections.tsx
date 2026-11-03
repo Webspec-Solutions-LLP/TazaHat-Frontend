@@ -5,6 +5,7 @@ import ReloadButton from "@/components/home/ReloadButton";
 import Category, { type CategoryTile } from "@/components/category/Category";
 import Products from "@/components/products/Products";
 import TodalDeals from "@/components/todayDeals/TodalDeals";
+import OfferLayout1 from "@/components/offerLayout1/OfferLayout1";
 import OfferLayout2, { type FreshPick } from "@/components/offerLayout2/OfferLayout2";
 import OfferLayout3 from "@/components/offerLayout3/OfferLayout3";
 import OfferLayout4, { type StealTab } from "@/components/offerLayout4/OfferLayout4";
@@ -32,8 +33,20 @@ type City = { cityId: string; cityName: string };
 /** Banners set up in the CRM for the city (the designed banners when there are none). */
 export async function HeroSection({ cityId }: Pick<City, "cityId">) {
   const home = await loadHome(cityId);
-  const banners: HeroBanner[] = "data" in home ? home.data.banners.filter((b) => b.image).map((b) => ({ id: b.id, image: mediaSrc(b.image), title: b.title, details: b.details, href: b.href })) : [];
-  return <HomeHero items={banners} />;
+  const toBanner = (b: { id: string; image: string | null; title: string | null; details: string | null; href: string | null; buttonText?: string | null }): HeroBanner => ({ id: b.id, image: mediaSrc(b.image), title: b.title, details: b.details, href: b.href, buttonText: b.buttonText });
+  const banners: HeroBanner[] = "data" in home ? home.data.banners.filter((b) => b.image).map(toBanner) : [];
+  const side = "data" in home && home.data.sideBanner?.image ? toBanner(home.data.sideBanner) : null;
+  const slots = "data" in home ? home.data.bannerSlots : undefined;
+  return <HomeHero items={banners} side={side} show={slots ? { hero: slots.HERO, side: slots.SIDE } : undefined} />;
+}
+
+/** The two offer banners under the slider: the CRM's (or the designed ones), and nothing when the CRM switched them off. */
+export async function OfferSection({ cityId }: Pick<City, "cityId">) {
+  const home = await loadHome(cityId);
+  if (!("data" in home)) return <OfferLayout1 />;
+  if (home.data.bannerSlots?.OFFER === false) return null;
+  const items = (home.data.offerBanners ?? []).filter((b) => b.image).map((b) => ({ id: b.id, image: mediaSrc(b.image), title: b.title, details: b.details, buttonText: b.buttonText ?? null, href: b.href }));
+  return <OfferLayout1 items={items} />;
 }
 
 /** Today's deals, categories and the "fresh in your city" shelf (plus the message when there is nothing on sale or the shop is unreachable). */

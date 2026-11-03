@@ -737,3 +737,8 @@ body::-webkit-scrollbar {
 .home-city-status { margin: 22px auto; padding: 0 16px; text-align: center; color: #4d6657; font-size: 14px; }
 .home-city-status--error { color: #b3261e; }
 .home-city-status button { margin-left: 6px; border: 0; background: none; color: inherit; font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; }
+
+/* the CRM switched the slider off: only the column beside it is left */
+.home-banner-grid--no-slider { grid-template-columns: minmax(0, 1fr); aspect-ratio: auto; }
+.home-banner-grid--no-slider .home-banner-right-column { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+@media (max-width: 700px) { .home-banner-grid--no-slider .home-banner-right-column { grid-template-columns: minmax(0, 1fr); } }

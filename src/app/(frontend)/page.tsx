@@ -3,7 +3,7 @@ import HomeHero from "@/components/home/HomeHero";
 import HomeBenefits from "@/components/home/HomeBenefits";
 import CityPrompt from "@/components/home/CityPrompt";
 import NewsletterSection from "@/components/home/NewsletterSection";
-import { AllProductsSection, AvailabilitySections, HeroSection, MiddleSections, TopSections } from "@/components/home/HomeSections";
+import { AllProductsSection, AvailabilitySections, HeroSection, MiddleSections, OfferSection, TopSections } from "@/components/home/HomeSections";
 import OfferLayout1 from "@/components/offerLayout1/OfferLayout1";
 import { HeroSkeleton, HomeMiddleSkeleton, HomeTopSkeleton, ProductGridSkeleton, ProductShelfSkeleton } from "@/components/skeleton/Skeletons";
 import { readCityCookie } from "@/lib/server/city";
@@ -20,7 +20,7 @@ export default async function Home() {
       {city ? <Suspense fallback={<HeroSkeleton />}><HeroSection cityId={city.id} /></Suspense> : <HomeHero />}
       {!city && <CityPrompt />}
       {city && <Suspense fallback={<HomeTopSkeleton />}><TopSections cityId={city.id} cityName={city.name} /></Suspense>}
-      <OfferLayout1 />
+      {city ? <Suspense fallback={null}><OfferSection cityId={city.id} /></Suspense> : <OfferLayout1 />}
       <HomeBenefits />
       {city && <Suspense fallback={<HomeMiddleSkeleton />}><MiddleSections cityId={city.id} /></Suspense>}
       <NewsletterSection />

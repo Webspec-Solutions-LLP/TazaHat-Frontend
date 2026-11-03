@@ -22,12 +22,15 @@ const textMap: Record<SupportedLang, typeof englishText> = {
   hi: hindiText,
 };
 
-export interface HeroBanner { id: string; image: string; title: string | null; details: string | null; href: string | null }
+export interface HeroBanner { id: string; image: string; title: string | null; details: string | null; href: string | null; buttonText?: string | null }
 
 type Slide = (typeof englishText.banners)[number] & { href?: string | null };
 
 /** Banners set up in the CRM (Sliders) for the city; the designed banners are shown when there are none. */
-export default function HomeHero({ items }: { items?: HeroBanner[] }) {
+/** `show`: the CRM's switches (the slider / the picture beside it can be turned off); `side`: the CRM's picture beside the slider. */
+export default function HomeHero({ items, side, show }: { items?: HeroBanner[]; side?: HeroBanner | null; show?: { hero: boolean; side: boolean } }) {
+  const showHero = show?.hero !== false;
+  const showSide = show?.side !== false;
   const [currentLang, setCurrentLang] = useState<SupportedLang>("en");
 
   useEffect(() => {
@@ -65,7 +68,7 @@ export default function HomeHero({ items }: { items?: HeroBanner[] }) {
         eyebrow: t.fallbackEyebrow,
         title: b.title ?? b.details ?? t.fallbackTitle,
         description: b.title ? b.details ?? "" : "",
-        action: t.fallbackAction,
+        action: b.buttonText || t.fallbackAction,
         href: b.href,
       }))
     : banners;
@@ -78,8 +81,8 @@ export default function HomeHero({ items }: { items?: HeroBanner[] }) {
   return (
     <section className="home-hero" aria-label={t.heroAriaLabel} lang={t.language}>
       <div className="home-content-container">
-        <div className="home-banner-grid">
-        <Swiper className="home-banner-slider" modules={[A11y, Autoplay, Keyboard]} slidesPerView={1} spaceBetween={0} autoplay={{ delay: 5000, disableOnInteraction: false, pauseOnMouseEnter: true }} keyboard={{ enabled: true, onlyInViewport: true }} rewind a11y={{ containerMessage: t.sliderContainerMessage }}>
+        <div className={`home-banner-grid${showHero ? "" : " home-banner-grid--no-slider"}`}>
+        {showHero && <Swiper className="home-banner-slider" modules={[A11y, Autoplay, Keyboard]} slidesPerView={1} spaceBetween={0} autoplay={{ delay: 5000, disableOnInteraction: false, pauseOnMouseEnter: true }} keyboard={{ enabled: true, onlyInViewport: true }} rewind a11y={{ containerMessage: t.sliderContainerMessage }}>
           {slides.map((banner, index) => (
             <SwiperSlide key={`${banner.image}-${index}`}>
               <article className="home-main-banner">
@@ -104,16 +107,20 @@ export default function HomeHero({ items }: { items?: HeroBanner[] }) {
               </article>
             </SwiperSlide>
           ))}
-        </Swiper>
+        </Swiper>}
         <div className="home-banner-right-column">
           <button className="home-banner-promo home-banner-promo--reverse" type="button" onClick={startShopping}>
             <span className="home-banner-promo-kicker">{t.promoKicker}</span>
             <span className="home-banner-promo-title">{t.promoTitle}</span>
             <span className="home-banner-promo-link">{t.promoLink} <b aria-hidden="true">&rarr;</b></span>
           </button>
-          <div className="home-banner-side-image">
-            <Image src={banners[1].sideImage} alt={banners[1].sideAlt} fill sizes="(max-width: 700px) 50vw, 510px" className="home-banner-image" />
-          </div>
+          {showSide && (
+            <div className="home-banner-side-image" role={side?.href ? "link" : undefined} onClick={side?.href ? () => open(side.href) : undefined} style={side?.href ? { cursor: "pointer" } : undefined}>
+              {side
+                ? <Image src={side.image} alt={side.title ?? banners[1].sideAlt} fill sizes="(max-width: 700px) 50vw, 510px" className="home-banner-image" unoptimized={isRemoteImage(side.image)} onError={fallbackImage} />
+                : <Image src={banners[1].sideImage} alt={banners[1].sideAlt} fill sizes="(max-width: 700px) 50vw, 510px" className="home-banner-image" />}
+            </div>
+          )}
         </div>
         </div>
       </div>

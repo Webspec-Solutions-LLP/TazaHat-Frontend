@@ -45,11 +45,17 @@ export interface ApiCard {
 }
 export interface ApiPack { id: string; label: string; amount: number; unit: string; pricePaisa: number; mrpPaisa: number; inStock: boolean; availableFrom: string | null; availableFromLabel: string | null }
 export interface ApiHomeCategory { id: string; name: string; slug: string; imageUrl: string | null; subCategories: { id: string; name: string; slug: string }[] }
+export interface ApiBanner { id: string; image: string | null; title: string | null; details: string | null; buttonText?: string | null; href: string | null }
+
 export interface ShopHome {
   cities: ApiCity[];
   city: ApiCity | null;
   categories: ApiHomeCategory[];
-  banners: { id: string; image: string | null; title: string | null; details: string | null; href: string | null }[];
+  banners: ApiBanner[];
+  /** the CRM's switches for the places of the home banners (a place that is off is not shown at all) */
+  bannerSlots?: { HERO: boolean; SIDE: boolean; OFFER: boolean };
+  sideBanner?: ApiBanner | null;
+  offerBanners?: ApiBanner[];
   offers: { maxDiscount: number; items: ApiCard[] };
   special: ApiCard[];
   bestSellers: ApiCard[];
