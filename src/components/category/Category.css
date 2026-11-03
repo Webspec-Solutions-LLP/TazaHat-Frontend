@@ -126,13 +126,13 @@
 .category-card--pill .category-image img {
   object-fit: cover;
   object-position: center;
-  transform: scale(1.12);
+  transform: scale(1);
 }
 
 .category-card--pill .category-details {
   height: 46%;
   justify-content: flex-start;
-  padding: 14% 8px 10px;
+  padding: 18% 8px 10px;
   background: transparent;
 }
 
