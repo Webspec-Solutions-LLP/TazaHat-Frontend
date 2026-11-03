@@ -88,8 +88,8 @@ function CheckoutContent() {
   const [isAddressListOpen, setIsAddressListOpen] = useState(false);
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [editing, setEditing] = useState<SavedAddress | null>(null);
-  const [coupon, setCoupon] = useState("");
-  const [couponMessage, setCouponMessage] = useState("");
+  const [coupon, setCoupon] = useState(""); // what is typed
+  const [couponCode, setCouponCode] = useState(""); // the code asked for (the server prices the order with it)
 
   // the cart is the browser's own (the same one the cart sidebar shows); the address book and the city's choices come from the server
   useEffect(() => {
@@ -116,14 +116,14 @@ function CheckoutContent() {
     if (!lines.length) { setQuote(null); return; }
     let cancelled = false;
     setQuoting(true);
-    checkoutQuoteAction({ lines, deliveryType, addressId: deliveryType === "HOME_DELIVERY" ? addressId || null : null, storeId: deliveryType === "STORE_PICKUP" ? storeId || null : null, deliveryDate: date || null, slotId: slotId || null, useWallet }).then(res => {
+    checkoutQuoteAction({ lines, deliveryType, addressId: deliveryType === "HOME_DELIVERY" ? addressId || null : null, storeId: deliveryType === "STORE_PICKUP" ? storeId || null : null, deliveryDate: date || null, slotId: slotId || null, useWallet, couponCode: couponCode || null }).then(res => {
       if (cancelled) return;
       setQuoting(false);
       if (res.ok) { setQuote(res.quote); setQuoteError(""); } else setQuoteError(res.error);
     });
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [linesKey, deliveryType, addressId, storeId, date, slotId, useWallet]);
+  }, [linesKey, deliveryType, addressId, storeId, date, slotId, useWallet, couponCode]);
 
   const saveAddress = useCallback(async (values: AddressFormValues) => {
     const editId = editing?.id;
@@ -168,7 +168,7 @@ function CheckoutContent() {
   const submit = async () => {
     if (submitting) return;
     setSubmitting(true);
-    const res = await placeOrderAction({ lines, deliveryType, addressId: deliveryType === "HOME_DELIVERY" ? addressId || null : null, storeId: deliveryType === "STORE_PICKUP" ? storeId || null : null, deliveryDate: date, slotId, useWallet, paymentMethod: payment });
+    const res = await placeOrderAction({ lines, deliveryType, addressId: deliveryType === "HOME_DELIVERY" ? addressId || null : null, storeId: deliveryType === "STORE_PICKUP" ? storeId || null : null, deliveryDate: date, slotId, useWallet, couponCode: quote?.couponCode ?? null, paymentMethod: payment });
     if (!res.ok) { setSubmitting(false); showToast(`Error: ${res.error}`); return; }
     writeCart([]);
     try { window.sessionStorage.setItem("tazahat-flash", "Order Submit Successfully."); } catch { /* shown only when storage works */ }
@@ -228,7 +228,11 @@ function CheckoutContent() {
     }
     afterToday();
   };
-  const applyCoupon = () => setCouponMessage(coupon.trim() ? "Coupons are not available yet." : "Enter a coupon code to apply.");
+  const applyCoupon = (code?: string) => { const c = (code ?? coupon).trim(); if (!c) return; setCouponCode(c); setCoupon(code ? "" : c); };
+  const removeCoupon = () => { setCouponCode(""); setCoupon(""); };
+  const couponMessage = couponCode && !quoting && quote?.couponError ? quote.couponError : "";
+  const hasCoupon = !!quote?.couponCode && (quote.couponDiscountPaisa ?? 0) > 0;
+  const couponList = (quote?.couponOptions ?? []).filter(o => o.code !== quote?.couponCode);
   const onlinePay = options?.payments.find(p => p.id === "ONLINE");
   const fee = (paisa: number) => (paisa > 0 ? money(paisa) : "Free");
 
@@ -301,8 +305,25 @@ function CheckoutContent() {
 
         <aside className="checkout-summary">
           <div className="checkout-summary-heading"><span className="checkout-summary-icon"><Icon name="receipt" /></span><div><h2>Estimated Price Details</h2><p>Review your order details and apply coupon code</p></div></div>
-          <form className="checkout-coupon" onSubmit={event => { event.preventDefault(); applyCoupon(); }}><span>♧</span><input aria-label="Coupon code" value={coupon} onChange={event => setCoupon(event.target.value)} placeholder="Enter coupon code"/><button type="submit">Apply</button></form>
-          {couponMessage && <p className="checkout-coupon-message" role="status">{couponMessage}</p>}
+          {hasCoupon ? (
+            <div className="checkout-coupon-applied" role="status"><span>✓</span><p><b>{quote!.couponCode}</b> applied · you save <b>{money(quote!.couponDiscountPaisa)}</b></p><button type="button" onClick={removeCoupon} aria-label="Remove coupon">✕</button></div>
+          ) : (
+            <form className="checkout-coupon" onSubmit={event => { event.preventDefault(); applyCoupon(); }}><span>♧</span><input aria-label="Coupon code" value={coupon} onChange={event => setCoupon(event.target.value)} placeholder="Enter coupon code"/><button type="submit">Apply</button></form>
+          )}
+          {couponMessage && <p className="checkout-coupon-message" role="alert">{couponMessage}</p>}
+          {(quote?.couponHints ?? []).map(h => <p className="checkout-coupon-hint" key={h.code} role="status"><span aria-hidden="true">🎁</span><span>Add <b>{money(h.addPaisa)}</b> more to your order and get <b>{money(h.discountPaisa)} off</b> with <b>{h.name}</b>.</span></p>)}
+          {couponList.length > 0 && (
+            <div className="checkout-coupon-list" aria-label="Coupons for this order">
+              {couponList.map(o => (
+                <div className="checkout-coupon-card" key={o.code}>
+                  <b>{o.name}</b>
+                  <span className="checkout-coupon-code">{o.code}</span>
+                  <span className="checkout-coupon-save">Save {money(o.discountPaisa)}{o.expiresAt ? ` · till ${new Date(o.expiresAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}` : ""}</span>
+                  <button type="button" onClick={() => applyCoupon(o.code)} disabled={quoting}>Apply</button>
+                </div>
+              ))}
+            </div>
+          )}
           <p className="checkout-note"><span>i</span><span>Please note we bill based on the actual wt. of the products. Final amount may vary depending on the actual item wt. during packaging. Thank you.</span></p>
           <div className={`checkout-price-rows${quoting ? " is-updating" : ""}`}>
             <div className="checkout-price-row"><Icon name="box"/><span>Total {itemCount} {itemCount === 1 ? "Item" : "Items"}</span><strong>{money(quote?.itemsPaisa ?? 0)}</strong></div>
@@ -310,7 +331,7 @@ function CheckoutContent() {
             <div className="checkout-price-row"><Icon name="truck"/><span>Delivery Fee</span><b>{deliveryType === "STORE_PICKUP" ? "Free" : fee(quote?.deliveryPaisa ?? 0)}</b></div>
             <div className="checkout-price-row"><Icon name="shield"/><span>Convenience Fee</span><b>{deliveryType === "STORE_PICKUP" ? "Free" : fee(quote?.convenienceFeePaisa ?? 0)}</b></div>
             <div className="checkout-price-row"><span className="checkout-lightning">ϟ</span><span>Fast Processing Charge</span><b>{fee(quote?.slotFeePaisa ?? 0)}</b></div>
-            <div className="checkout-price-row"><Icon name="tag"/><span>Promo</span><b>{money(0)}</b></div>
+            <div className="checkout-price-row"><Icon name="tag"/><span>Promo{hasCoupon ? ` (${quote!.couponCode})` : ""}</span><b>{hasCoupon ? `−${money(quote!.couponDiscountPaisa)}` : money(0)}</b></div>
             {(quote?.walletUsedPaisa ?? 0) > 0 && <div className="checkout-price-row"><Icon name="card"/><span>Wallet</span><b>−{money(quote!.walletUsedPaisa)}</b></div>}
           </div>
           {quote?.notes.map(n => <p className="checkout-hint" key={n}>{n}</p>)}

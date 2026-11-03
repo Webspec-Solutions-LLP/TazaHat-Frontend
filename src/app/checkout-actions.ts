@@ -15,7 +15,7 @@ export interface CheckoutOptions {
   walletBalancePaisa: number;
 }
 export interface CheckoutLineInput { variantId: string; cuttingTypeId?: string | null; quantity: number; instruction?: string | null }
-export interface CheckoutQuoteInput { lines: CheckoutLineInput[]; deliveryType: "HOME_DELIVERY" | "STORE_PICKUP"; addressId?: string | null; storeId?: string | null; deliveryDate?: string | null; slotId?: string | null; useWallet?: boolean }
+export interface CheckoutQuoteInput { lines: CheckoutLineInput[]; deliveryType: "HOME_DELIVERY" | "STORE_PICKUP"; addressId?: string | null; storeId?: string | null; deliveryDate?: string | null; slotId?: string | null; useWallet?: boolean; couponCode?: string | null }
 export type CheckoutPopup =
   | { type: "availability"; title: string; icon: "warning"; submittable: true; availability: { name: string; date: string | null; notes: string[] }[]; advance: { name: string; date: string; note: string }[] }
   | { type: "delivery"; title: string; icon: "info" | "success"; submittable: boolean; message: string };
@@ -28,6 +28,10 @@ export interface CheckoutQuote {
   totalPaisa: number; walletBalancePaisa: number; walletUsedPaisa: number; payablePaisa: number; blockers: string[]; notes: string[];
   slot: { id: string; name: string; time: string | null; chargePaisa: number } | null;
   popup: CheckoutPopup | null; today: { isToday: boolean; processingHours: number };
+  /** the coupon taken off the order (or why the typed one was refused), the coupons that fit this order now and "add this much to get that" hints */
+  couponCode: string | null; couponDiscountPaisa: number; couponError: string | null;
+  couponOptions: { code: string; name: string; kind: "COUPON" | "CODE"; discountPaisa: number; expiresAt: string | null; own: boolean }[];
+  couponHints: { code: string; name: string; addPaisa: number; discountPaisa: number }[];
 }
 
 export async function checkoutOptionsAction(): Promise<CheckoutOptions | null> {
@@ -46,6 +50,7 @@ function orderBody(cityId: string, input: CheckoutQuoteInput) {
   return {
     cityId, lines, deliveryType: input.deliveryType === "STORE_PICKUP" ? "STORE_PICKUP" : "HOME_DELIVERY", addressId: input.addressId ?? null, storeId: input.storeId ?? null,
     deliveryDate: /^\d{4}-\d{2}-\d{2}$/.test(input.deliveryDate ?? "") ? input.deliveryDate : null, slotId: input.slotId ?? null, useWallet: !!input.useWallet,
+    couponCode: typeof input.couponCode === "string" && input.couponCode.trim() ? input.couponCode.trim().slice(0, 40) : null,
   };
 }
 
