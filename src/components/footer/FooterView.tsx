@@ -168,42 +168,10 @@ export default function FooterView({ apps, legal = [] }: { apps: AppLinks; legal
 
           {/* Links Grid */}
           <div className="footer-links-grid">
-            {/* Quick Links */}
-            <div className="footer-links-col">
-              <h3 className="footer-col-title">{t.quickLinksTitle}</h3>
-              <ul className="footer-links-list">
-                <li>
-                  <Link href="/" className="footer-link">
-                    {t.linkHome}
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/products" className="footer-link">
-                    {t.linkProducts}
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/orders" className="footer-link">
-                    {t.linkMyOrders}
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/delivery-service" className="footer-link">
-                    {t.linkDeliveryService}
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/priceList" className="footer-link">
-                    {t.linkPriceList}
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
             {/* Need Help? */}
             <div className="footer-links-col">
               <h3 className="footer-col-title">{t.needHelpTitle}</h3>
-              <ul className="footer-links-list">
+              <ul className="footer-links-list footer-links-list--help">
                 <li>
                   <Link href="/contactUs" className="footer-link">
                     {t.linkContactUs}
