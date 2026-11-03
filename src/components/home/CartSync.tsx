@@ -2,7 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import { useAuth } from "@/lib/auth";
-import { getCartAction, saveCartAction, type RemoteCartLine } from "@/app/cart-actions";
+import { getCartAction, saveCartAction } from "@/lib/sync-client";
+import type { RemoteCartLine } from "@/app/cart-actions";
 import { mediaSrc } from "@/lib/api";
 import type { CartItem } from "@/components/modals/cart/Cart";
 
