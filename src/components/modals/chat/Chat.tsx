@@ -168,10 +168,12 @@ export default function Chat({ onClose, product, requestCloseRef }: ChatProps) {
   };
 
   /** sends a message; a picture / recording is uploaded first. A failed one stays on screen with "Tap to retry". */
-  const send = async (text: string, opts: { clientId?: string; retry?: boolean; blob?: Blob; kind?: "image" | "voice"; seconds?: number; transcript?: string; waveform?: number[]; preview?: string } = {}) => {
+  // "Create ticket": the next message is written as a support ticket
+  const [ticketMode, setTicketMode] = useState(false);
+  const send = async (text: string, opts: { clientId?: string; retry?: boolean; blob?: Blob; kind?: "image" | "voice"; seconds?: number; transcript?: string; waveform?: number[]; preview?: string; ticket?: boolean } = {}) => {
     const clientId = opts.clientId ?? newId();
     const now = new Date().toISOString();
-    const local: Row = { id: `local-${clientId}`, threadId: "", text, fromSupport: false, createdAt: now, readAt: null, clientId, imageUrl: opts.kind === "image" ? opts.preview ?? null : null, voiceUrl: opts.kind === "voice" && opts.blob ? URL.createObjectURL(opts.blob) : null, voiceSeconds: opts.seconds ?? null, transcript: opts.transcript || null, waveform: opts.waveform ?? [], legacyMedia: null, state: "sending", retry: { blob: opts.blob, kind: opts.kind, seconds: opts.seconds, transcript: opts.transcript, waveform: opts.waveform } };
+    const local: Row = { id: `local-${clientId}`, threadId: "", text, fromSupport: false, createdAt: now, readAt: null, clientId, ticket: opts.ticket === true, imageUrl: opts.kind === "image" ? opts.preview ?? null : null, voiceUrl: opts.kind === "voice" && opts.blob ? URL.createObjectURL(opts.blob) : null, voiceSeconds: opts.seconds ?? null, transcript: opts.transcript || null, waveform: opts.waveform ?? [], legacyMedia: null, state: "sending", retry: { blob: opts.blob, kind: opts.kind, seconds: opts.seconds, transcript: opts.transcript, waveform: opts.waveform } };
     if (!opts.retry) setRows((cur) => [...cur, local]);
     else setRows((cur) => cur.map((r) => (r.clientId === clientId ? { ...r, state: "sending" } : r)));
     stickToEnd.current = true;
@@ -181,7 +183,7 @@ export default function Chat({ onClose, product, requestCloseRef }: ChatProps) {
       if (!up.ok) { setMediaError(up.error); setRows((cur) => cur.map((r) => (r.clientId === clientId ? { ...r, state: "failed" } : r))); return; }
       media = opts.kind === "image" ? { imageUrl: up.url } : { voiceUrl: up.url, voiceSeconds: opts.seconds, transcript: opts.transcript, waveform: opts.waveform };
     }
-    const res = await chatSendAction(text, clientId, media);
+    const res = await chatSendAction(text, clientId, media, opts.ticket === true);
     setRows((cur) => {
       if (!res.ok) return cur.map((r) => (r.clientId === clientId ? { ...r, state: "failed" } : r));
       const real = res.data;
@@ -191,7 +193,7 @@ export default function Chat({ onClose, product, requestCloseRef }: ChatProps) {
   };
 
   // ---- voice recording ----------------------------------------------------------------------------------------------
-  const sendVoice = (r: VoiceResult) => void send("", { blob: r.blob, kind: "voice", seconds: r.seconds, transcript: r.transcript, waveform: r.waveform });
+  const sendVoice = (r: VoiceResult) => void send("", { ticket: ticketMode, blob: r.blob, kind: "voice", seconds: r.seconds, transcript: r.transcript, waveform: r.waveform });
   const voice = useVoiceRecorder(language, sendVoice); // the one-minute limit hands the recording over by itself
   const startVoice = async () => { setMediaError(""); await voice.start(); };
   const finishVoice = async () => { const r = await voice.stop(); if (r) sendVoice(r); };
@@ -212,7 +214,9 @@ export default function Chat({ onClose, product, requestCloseRef }: ChatProps) {
     if ((!text && !photo) || isClosing) return;
     setMessage("");
     void chatTypingAction(false);
-    if (photo) { const p = photo; setPhoto(null); void send(text, { blob: p.file, kind: "image", preview: p.url }); } else void send(text);
+    const ticket = ticketMode;
+    setTicketMode(false);
+    if (photo) { const p = photo; setPhoto(null); void send(text, { ticket, blob: p.file, kind: "image", preview: p.url }); } else void send(text, { ticket });
     input.current?.focus();
   };
 
@@ -233,6 +237,12 @@ export default function Chat({ onClose, product, requestCloseRef }: ChatProps) {
           <strong id="chat-title">TazaHat Support</strong>
           <span><i /> {supportTyping ? "typing…" : "We usually reply within a few minutes"}</span>
         </span>
+        {user && (
+          <button className={`chat-ticket-button${ticketMode ? " is-on" : ""}`} type="button" onClick={() => { setTicketMode(on => !on); input.current?.focus(); }} aria-pressed={ticketMode} aria-label="Create a support ticket">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 9a2 2 0 0 0 0 6v3h18v-3a2 2 0 0 1 0-6V6H3v3Z" /><path d="M13 6v12" strokeDasharray="2 2" /></svg>
+            <span>Create ticket</span>
+          </button>
+        )}
         <button className="chat-collapse-button" type="button" onClick={closeChat} aria-label="Minimize chat">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
         </button>
@@ -261,6 +271,7 @@ export default function Chat({ onClose, product, requestCloseRef }: ChatProps) {
                 <div className="chat-row" key={m.clientId ?? m.id} style={{ display: "contents" }}>
                   {divider}
                   <article id={`chat-message-${m.id}`} className={`chat-message chat-message--${mine ? "customer" : "team"}${m.state === "failed" ? " is-failed" : ""}`}>
+                    {m.ticket && <span className="chat-ticket-tag">🎫 Ticket</span>}
                     {!mine && <span className="chat-message-author">TazaHat Support</span>}
                     {m.legacyMedia && <div className="chat-media-missing"><span aria-hidden="true">{m.legacyMedia === "image" ? "📷" : m.legacyMedia === "voice" ? "🎤" : m.legacyMedia === "video" ? "🎥" : "📎"}</span><span>{m.legacyMedia === "image" ? "Photo" : m.legacyMedia === "voice" ? "Voice message" : m.legacyMedia === "video" ? "Video" : "Document"} is no longer available</span></div>}
                     {m.imageUrl && <button type="button" className="chat-photo" onClick={() => setLightbox(m.imageUrl)} aria-label="Open photo">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={m.imageUrl} alt="Photo in chat" loading="lazy" onLoad={scrollEnd} /></button>}
@@ -270,7 +281,7 @@ export default function Chat({ onClose, product, requestCloseRef }: ChatProps) {
                       {timeOf(m.createdAt)}
                       {mine && (m.state === "sending" ? <span className="chat-tick" aria-label="Sending">🕓</span> : m.state === "failed" ? null : <span className={`chat-tick${m.readAt ? " is-read" : ""}`} aria-label={m.readAt ? "Read" : "Sent"}>{m.readAt ? "✓✓" : "✓"}</span>)}
                     </time>
-                    {m.state === "failed" && <button type="button" className="chat-retry" onClick={() => void send(m.text, { clientId: m.clientId ?? newId(), retry: true, blob: m.retry?.blob, kind: m.retry?.kind, seconds: m.retry?.seconds, transcript: m.retry?.transcript, waveform: m.retry?.waveform, preview: m.imageUrl ?? undefined })}>Not sent · Tap to retry</button>}
+                    {m.state === "failed" && <button type="button" className="chat-retry" onClick={() => void send(m.text, { ticket: m.ticket, clientId: m.clientId ?? newId(), retry: true, blob: m.retry?.blob, kind: m.retry?.kind, seconds: m.retry?.seconds, transcript: m.retry?.transcript, waveform: m.retry?.waveform, preview: m.imageUrl ?? undefined })}>Not sent · Tap to retry</button>}
                   </article>
                 </div>
               );
@@ -279,6 +290,13 @@ export default function Chat({ onClose, product, requestCloseRef }: ChatProps) {
           </div>
 
           <form className="chat-composer" onSubmit={submit}>
+            {ticketMode && (
+              <div className="chat-ticket-banner" role="status">
+                <span aria-hidden="true">🎫</span>
+                <span><strong>New ticket</strong><small>What is your problem? Tell us in detail and we will save it as a ticket.</small></span>
+                <button type="button" aria-label="Cancel the ticket" onClick={() => setTicketMode(false)}>×</button>
+              </div>
+            )}
             {mediaError && <p className="chat-attachment-error" role="alert">{mediaError}</p>}
             {voice.error && <p className="chat-attachment-error" role="alert">{voice.error}</p>}
             {photo && (
@@ -303,7 +321,7 @@ export default function Chat({ onClose, product, requestCloseRef }: ChatProps) {
             ) : (
               <>
                 <label className="chat-sr-only" htmlFor="chat-message-input">Message to TazaHat support</label>
-                <input ref={input} id="chat-message-input" value={message} onChange={(e) => onType(e.target.value)} placeholder="Type a message" maxLength={2000} disabled={isClosing || state !== "ready"} autoComplete="off" />
+                <input ref={input} id="chat-message-input" value={message} onChange={(e) => onType(e.target.value)} placeholder={ticketMode ? "What is your problem? Tell us in detail" : "Type a message"} maxLength={2000} disabled={isClosing || state !== "ready"} autoComplete="off" />
                 <button className="chat-attachment-button" type="button" disabled={isClosing || state !== "ready"} aria-label="Send a picture" onClick={() => fileInput.current?.click()}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3" /><circle cx="8.5" cy="9" r="1.6" /><path d="m21 16-5-5-8 8" /></svg>
                 </button>

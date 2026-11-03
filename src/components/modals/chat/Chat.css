@@ -574,3 +574,14 @@
 .chat-sk-row.is-mine { justify-content: flex-end; }
 .chat-sk-row .sk { border-radius: 11px 11px 11px 3px; background: #e3ebe5; }
 .chat-sk-row.is-mine .sk { border-radius: 11px 11px 3px 11px; background: #d9ecd4; }
+
+/* Create ticket */
+.chat-ticket-button { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 11px; margin-right: 6px; border: 1px solid rgba(255,255,255,.35); border-radius: 16px; background: rgba(255,255,255,.1); color: #fff; font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.chat-ticket-button svg { width: 16px; height: 16px; }
+.chat-ticket-button:hover, .chat-ticket-button.is-on { background: #fff; color: #1e3a66; }
+.chat-ticket-banner { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; padding: 8px 10px; border: 1px solid #f0d58a; border-radius: 12px; background: #fff7dc; color: #6b4b00; }
+.chat-ticket-banner > span:nth-child(2) { display: flex; flex: 1; min-width: 0; flex-direction: column; font-size: 13px; }
+.chat-ticket-banner small { font-size: 11.5px; color: #8a6a1a; }
+.chat-ticket-banner button { width: 26px; height: 26px; border: 0; border-radius: 50%; background: transparent; color: inherit; font-size: 18px; cursor: pointer; }
+.chat-ticket-tag { display: inline-block; align-self: flex-start; margin-bottom: 3px; padding: 1px 8px; border-radius: 10px; background: #fff0c2; color: #7a5600; font-size: 11px; font-weight: 800; }
+@media (max-width: 480px) { .chat-ticket-button span { display: none; } .chat-ticket-button { width: 34px; padding: 0; justify-content: center; } }

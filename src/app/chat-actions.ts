@@ -6,6 +6,8 @@ import { userApi } from "@/lib/server/session";
 export interface ChatMsg {
   id: string; threadId: string; text: string; fromSupport: boolean; createdAt: string; readAt: string | null; clientId: string | null; imageUrl: string | null;
   voiceUrl: string | null; voiceSeconds: number | null; transcript: string | null; waveform: number[];
+  /** written as a support ticket ("Create ticket") */
+  ticket?: boolean;
   /** the old system's pictures / recordings: the file is gone, a "not available" card is shown */
   legacyMedia: "image" | "voice" | "video" | "document" | null;
 }
@@ -26,10 +28,10 @@ export async function chatOlderAction(before: { createdAt: string; id: string })
   return res.ok ? { ok: true, data: res.data } : { ok: false, error: res.message };
 }
 
-export async function chatSendAction(text: string, clientId: string, media?: ChatMedia): Promise<Result<ChatMsg>> {
+export async function chatSendAction(text: string, clientId: string, media?: ChatMedia, ticket = false): Promise<Result<ChatMsg>> {
   const res = await userApi<{ message: ChatMsg }>("/chat/messages", {
     method: "POST",
-    body: { text: String(text).slice(0, 2000), clientId: String(clientId).slice(0, 60), ...(media?.imageUrl ? { imageUrl: String(media.imageUrl).slice(0, 200) } : {}), ...(media?.voiceUrl ? { voiceUrl: String(media.voiceUrl).slice(0, 200), voiceSeconds: Math.min(60, Math.max(1, Math.round(Number(media.voiceSeconds) || 1))), transcript: String(media.transcript ?? "").slice(0, 3000), waveform: (media.waveform ?? []).slice(0, 64).map((n) => Math.max(0, Math.min(100, Math.round(Number(n) || 0)))) } : {}) },
+    body: { text: String(text).slice(0, 2000), clientId: String(clientId).slice(0, 60), ...(ticket ? { ticket: true } : {}), ...(media?.imageUrl ? { imageUrl: String(media.imageUrl).slice(0, 200) } : {}), ...(media?.voiceUrl ? { voiceUrl: String(media.voiceUrl).slice(0, 200), voiceSeconds: Math.min(60, Math.max(1, Math.round(Number(media.voiceSeconds) || 1))), transcript: String(media.transcript ?? "").slice(0, 3000), waveform: (media.waveform ?? []).slice(0, 64).map((n) => Math.max(0, Math.min(100, Math.round(Number(n) || 0)))) } : {}) },
   });
   return res.ok ? { ok: true, data: res.data.message } : { ok: false, error: res.message };
 }
