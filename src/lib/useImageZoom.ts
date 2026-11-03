@@ -18,6 +18,7 @@ export interface ZoomLens { lens: Box; pane: Box; img: Box }
 
 export function useImageZoom<T extends HTMLElement>(hasThumbs: boolean) {
   const galleryRef = useRef<T>(null);
+  const pointerStart = useRef<{ x: number; y: number } | null>(null);
   const [natural, setNatural] = useState<{ w: number; h: number } | null>(null);
   // the picture that is really on screen (the logo when the product's own file is missing), so the preview shows the same one
   const [shownSrc, setShownSrc] = useState<string | null>(null);
@@ -59,9 +60,16 @@ export function useImageZoom<T extends HTMLElement>(hasThumbs: boolean) {
 
   const containerProps = {
     onPointerMove: moveLens,
+    onPointerDown: (e: ReactPointerEvent<HTMLDivElement>) => {
+      pointerStart.current = { x: e.clientX, y: e.clientY };
+    },
     onPointerLeave: (e: ReactPointerEvent<HTMLDivElement>) => { if (e.pointerType !== "touch") setLens(null); },
     onPointerUp: (e: ReactPointerEvent<HTMLDivElement>) => {
       if (e.pointerType === "touch" || window.innerWidth < 877) {
+        const start = pointerStart.current;
+        pointerStart.current = null;
+        if (start && Math.hypot(e.clientX - start.x, e.clientY - start.y) > 10) return;
+        if (e.target instanceof Element && e.target.closest("button")) return;
         const { r, cx, cy } = spot(e);
         setTapZoom((current) => (current ? null : { x: (cx / r.width) * 100, y: (cy / r.height) * 100 }));
       }

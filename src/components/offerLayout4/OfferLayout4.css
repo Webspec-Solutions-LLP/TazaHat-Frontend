@@ -530,7 +530,7 @@
   .steal-tab-hot-tag { font-size: 4.5px; }
   .offer-layout-4 .product-card { padding: 6px; }
   .offer-layout-4 .product-card h3 { min-height: 17px; font-size: 10px; }
-  .offer-layout-4 .product-description { min-height: 12px; font-size: 7px; }
+  .offer-layout-4 .product-description { min-height: 12px; font-size: 9px; }
   .offer-layout-4 .product-weight { gap: 3px; font-size: 7px; }
   .offer-layout-4 .product-pricing { gap: 4px; min-height: 19px; }
   .offer-layout-4 .product-pricing strong { font-size: 12px; }
@@ -553,7 +553,7 @@
   .offer-layout-4 .product-save svg { width: 14px; height: 14px; }
   .offer-layout-4 .product-image-rating { right: 4px; bottom: 4px; min-height: 16px; padding: 2px 4px; font-size: 7px; }
   .offer-layout-4 .product-card h3 { min-height: 16px; font-size: 9px; }
-  .offer-layout-4 .product-description, .offer-layout-4 .product-weight { font-size: 6px; }
+  .offer-layout-4 .product-description, .offer-layout-4 .product-weight { font-size: 9px; }
   .offer-layout-4 .product-pricing { gap: 3px; min-height: 17px; }
   .offer-layout-4 .product-pricing strong { font-size: 11px; }
   .offer-layout-4 .product-pricing del { font-size: 7px; }
