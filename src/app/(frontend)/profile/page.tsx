@@ -13,6 +13,7 @@ import { useAuth } from "@/lib/auth";
 import { deleteAddressAction, listAddressesAction, makeDefaultAddressAction, saveAddressAction, type SavedAddress } from "@/app/address-actions";
 import { updateProfileAction } from "@/app/profile-actions";
 import { mediaSrc } from "@/lib/api";
+import ConfirmBox, { type ConfirmConfig } from "@/components/modals/confirmBox/ConfirmBox";
 import englishText from "./english.json";
 import bengaliText from "./bengali.json";
 import hindiText from "./hindi.json";
@@ -65,6 +66,9 @@ function MyProfileContent() {
   const { products: likedProducts } = useWishlistProducts();
   // the real customer (from the account) and the real saved addresses (from the server)
   const { user, updateUser } = useAuth();
+  // a Yes / No question before a change is made (new photo, saving an edited address, deleting an address)
+  const [question, setQuestion] = useState<(ConfirmConfig & { resolve: (yes: boolean) => void }) | null>(null);
+  const ask = (config: ConfirmConfig) => new Promise<boolean>((resolve) => setQuestion({ ...config, resolve }));
   const [avatarBusy, setAvatarBusy] = useState(false);
   const [avatarError, setAvatarError] = useState("");
   const profile = { name: user?.name ?? "", email: user?.email ?? "", phone: user?.phone ? `+91 ${user.phone}` : "" };
@@ -83,6 +87,10 @@ function MyProfileContent() {
   const selectPhoto = async (file?: File) => {
     if (!file) return;
     if (!file.type.startsWith("image/")) { setAvatarError("Choose a picture."); return; }
+    const preview = URL.createObjectURL(file);
+    const yes = await ask({ title: "Confirmation Message!", text: "Do you want to use this picture as your profile photo?", preview });
+    URL.revokeObjectURL(preview);
+    if (!yes) return;
     setAvatarBusy(true); setAvatarError("");
     try {
       const res = await fetch("/api/avatar", { method: "POST", headers: { "content-type": file.type }, body: file });
@@ -99,6 +107,7 @@ function MyProfileContent() {
   };
 
   const saveAddress = async (values: AddressFormValues) => {
+    if (editingAddressId && !(await ask({ title: "Confirmation Message!", text: "Save the changes you made to this address?" }))) return "The changes were not saved.";
     const res = await saveAddressAction({
       label: values.addressType, contactName: values.recipient, phone: values.phone, altPhone: values.alternatePhone || undefined, line1: values.addressLine1,
       line2: values.addressLine2 || undefined, apartmentNumber: values.houseNumber || undefined, landmark: values.landmark || undefined, locality: values.locality || undefined,
@@ -111,6 +120,7 @@ function MyProfileContent() {
 
   const deleteAddress = async (addressId: string) => {
     setAddressNote("");
+    if (!(await ask({ title: "Confirmation Message!", text: "Do you want to delete this address?" }))) return;
     const res = await deleteAddressAction(addressId);
     if (!res.ok) { setAddressNote(res.error); return; }
     setAddresses(await listAddressesAction());
@@ -319,6 +329,7 @@ function MyProfileContent() {
         />
       )}
       {likedProducts.length > 0 && <Products heading={t.likedProductsHeading} products={likedProducts} />}
+      {question && <ConfirmBox config={question} onAnswer={(yes) => { question.resolve(yes); setQuestion(null); }} />}
     </main>
   );
 }
