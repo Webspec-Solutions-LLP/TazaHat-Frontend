@@ -4,14 +4,25 @@ import { useBackClose } from "@/lib/backLayers";
 
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import "./Feedback.css";
+import { type SupportedLang, useLanguage } from "@/lib/language";
+import englishText from "./english.json";
+import bengaliText from "./bengali.json";
+import hindiText from "./hindi.json";
+
+const textMap: Record<SupportedLang, typeof englishText> = {
+  en: englishText,
+  bn: bengaliText,
+  hi: hindiText,
+};
 
 interface FeedbackProps {
   onClose: () => void;
 }
 
-const topics = ["Product quality", "Delivery", "Website experience", "Customer support", "Other"];
-
 export default function Feedback({ onClose }: FeedbackProps) {
+  const [lang] = useLanguage();
+  const t = textMap[lang] || englishText;
+
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [rating, setRating] = useState(0);
   const [topic, setTopic] = useState("");
@@ -58,29 +69,38 @@ export default function Feedback({ onClose }: FeedbackProps) {
       onCancel={event => { event.preventDefault(); close(); }}
       onClick={event => { if (event.target === event.currentTarget) close(); }}
     >
-      <section className="feedback-sidebar-panel">
+      <section className="feedback-sidebar-panel" lang={t.language}>
         <header className="feedback-sidebar-header">
-          <button className="feedback-sidebar-close" type="button" aria-label="Close feedback form" onClick={close}>
+          <button className="feedback-sidebar-close" type="button" aria-label={t.closeAria} onClick={close}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
           </button>
-          <div><h2 id={titleId}>{submitted ? "Thank You" : "Share Your Feedback"}</h2><p>{submitted ? "Your voice helps us improve" : "We’d love to hear about your experience"}</p></div>
+          <div>
+            <h2 id={titleId}>{submitted ? t.titleThankYou : t.titleShare}</h2>
+            <p>{submitted ? t.subtitleThankYou : t.subtitleShare}</p>
+          </div>
         </header>
 
         {submitted ? (
           <div className="feedback-sidebar-success" role="status">
             <span className="feedback-sidebar-success-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6" /></svg></span>
-            <h3>Feedback received</h3>
-            <p>Thanks for helping us make TazaHaat better.</p>
-            <button type="button" onClick={close}>Done</button>
+            <h3>{t.successTitle}</h3>
+            <p>{t.successMessage}</p>
+            <button type="button" onClick={close}>{t.doneButton}</button>
           </div>
         ) : (
           <form className="feedback-sidebar-form" onSubmit={submit}>
             <div className="feedback-sidebar-fields">
               <section className="feedback-rating-field" aria-labelledby={`${titleId}-rating`}>
-                <h3 id={`${titleId}-rating`}>How would you rate us?</h3>
-                <div className="feedback-sidebar-rating" role="group" aria-label="Rate your experience">
+                <h3 id={`${titleId}-rating`}>{t.ratingHeading}</h3>
+                <div className="feedback-sidebar-rating" role="group" aria-label={t.ratingGroupAria}>
                   {[1, 2, 3, 4, 5].map(value => (
-                    <button key={value} type="button" aria-label={`${value} star${value === 1 ? "" : "s"}`} aria-pressed={rating === value} onClick={() => setRating(value)}>
+                    <button
+                      key={value}
+                      type="button"
+                      aria-label={t.starAria.replace("{count}", String(value)).replace("{star}", value === 1 ? t.starSingle : t.starPlural)}
+                      aria-pressed={rating === value}
+                      onClick={() => setRating(value)}
+                    >
                       {value <= rating ? "\u2605" : "\u2606"}
                     </button>
                   ))}
@@ -88,28 +108,42 @@ export default function Feedback({ onClose }: FeedbackProps) {
               </section>
 
               <label className="feedback-sidebar-field">
-                <span>What is your feedback about? <b>*</b></span>
+                <span>{t.topicLabel} <b>*</b></span>
                 <select required value={topic} onChange={event => setTopic(event.target.value)}>
-                  <option value="" disabled>Select a topic</option>
-                  {topics.map(item => <option value={item} key={item}>{item}</option>)}
+                  <option value="" disabled>{t.selectTopicPlaceholder}</option>
+                  {t.topics.map(item => <option value={item.id} key={item.id}>{item.label}</option>)}
                 </select>
               </label>
 
               <label className="feedback-sidebar-field" htmlFor={messageId}>
-                <span>Your comments <b>*</b></span>
-                <textarea id={messageId} required rows={5} maxLength={1000} value={message} onChange={event => setMessage(event.target.value)} placeholder="Tell us what went well or what we can improve..." />
-                <small>{message.length}/1000 characters</small>
+                <span>{t.commentsLabel} <b>*</b></span>
+                <textarea
+                  id={messageId}
+                  required
+                  rows={5}
+                  maxLength={1000}
+                  value={message}
+                  onChange={event => setMessage(event.target.value)}
+                  placeholder={t.commentsPlaceholder}
+                />
+                <small>{t.charCount.replace("{count}", String(message.length))}</small>
               </label>
 
               <label className="feedback-sidebar-field">
-                <span>Email address <small>(optional, if you’d like a reply)</small></span>
-                <input type="email" autoComplete="email" value={email} onChange={event => setEmail(event.target.value)} placeholder="you@example.com" />
+                <span>{t.emailLabel} <small>{t.emailOptional}</small></span>
+                <input
+                  type="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={event => setEmail(event.target.value)}
+                  placeholder={t.emailPlaceholder}
+                />
               </label>
             </div>
 
             <footer className="feedback-sidebar-footer">
-              <button type="button" className="feedback-cancel-button" onClick={close}>Cancel</button>
-              <button type="submit" className="feedback-submit-button" disabled={rating === 0}>SEND FEEDBACK</button>
+              <button type="button" className="feedback-cancel-button" onClick={close}>{t.cancelButton}</button>
+              <button type="submit" className="feedback-submit-button" disabled={rating === 0}>{t.sendFeedbackButton}</button>
             </footer>
           </form>
         )}

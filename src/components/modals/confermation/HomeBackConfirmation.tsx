@@ -4,106 +4,27 @@ import { useCallback, useEffect, useId, useState } from "react";
 import { usePathname } from "next/navigation";
 import { onBackWithoutLayer } from "@/lib/backLayers";
 import "./HomeBackConfirmation.css";
+import { type SupportedLang, useLanguage } from "@/lib/language";
+import englishText from "./homeBackConfirmation.english.json";
+import bengaliText from "./homeBackConfirmation.bengali.json";
+import hindiText from "./homeBackConfirmation.hindi.json";
 
-const LANGUAGE_STORAGE_KEY = "tazahat-language";
-const LANGUAGE_CHANGE_EVENT = "tazahat:change-language";
-
-type SupportedLang = "en" | "bn" | "hi";
-
-const copyData: Record<
-  SupportedLang,
-  {
-    badge: string;
-    title: string;
-    desc: string;
-    perks: Array<{ title: string; sub: string }>;
-    stayBtn: string;
-    leaveBtn: string;
-    savedNote: string;
-  }
-> = {
-  en: {
-    badge: "Wait, before you go",
-    title: "Leaving TazaHat so soon?",
-    desc: "Fresh farm groceries, daily discounts, and express delivery are waiting for you. Are you sure you want to leave?",
-    perks: [
-      { title: "Fast Delivery", sub: "30-60 mins" },
-      { title: "100% Fresh", sub: "Farm picked" },
-      { title: "Daily Deals", sub: "Best savings" },
-    ],
-    stayBtn: "Stay & Keep Shopping",
-    leaveBtn: "Exit Website",
-    savedNote: "Your cart and preferences are securely saved",
-  },
-  bn: {
-    badge: "একটু অপেক্ষা করুন",
-    title: "তাজাহাট থেকে বিদায় নিচ্ছেন?",
-    desc: "তাজা শাকসবজি, ফলমূল এবং সেরা অফারগুলো আপনার জন্য অপেক্ষা করছে। আপনি কি এখনই বের হতে চান?",
-    perks: [
-      { title: "দ্রুত ডেলিভারি", sub: "৩০-৬০ মিনিটে" },
-      { title: "১০০% টাটকা", sub: "বাছাইকৃত পণ্য" },
-      { title: "সেরা অফার", sub: "প্রতিদিনের ছাড়" },
-    ],
-    stayBtn: "এখানেই থাকুন ও কেনাকাটা করুন",
-    leaveBtn: "বের হয়ে যান",
-    savedNote: "আপনার কার্ট ও পছন্দের তালিকা সুরক্ষিত রয়েছে",
-  },
-  hi: {
-    badge: "रुकिए, जाने से पहले",
-    title: "क्या आप ताज़ाहाट छोड़ रहे हैं?",
-    desc: "ताज़ा फल, सब्ज़ियां और खास ऑफर्स आपका इंतज़ार कर रहे हैं। क्या आप सच में बाहर जाना चाहते हैं?",
-    perks: [
-      { title: "फास्ट डिलीवरी", sub: "30-60 मिनट" },
-      { title: "100% ताज़ा", sub: "फार्म से सीधा" },
-      { title: "बेस्ट ऑफर्स", sub: "शानदार बचत" },
-    ],
-    stayBtn: "खरीदारी जारी रखें",
-    leaveBtn: "वेबसाइट छोड़ें",
-    savedNote: "आपका कार्ट और चयन सुरक्षित है",
-  },
+const textMap: Record<SupportedLang, typeof englishText> = {
+  en: englishText,
+  bn: bengaliText,
+  hi: hindiText,
 };
 
 export default function HomeBackConfirmation() {
+  const [lang] = useLanguage();
+  const t = textMap[lang] || englishText;
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [canGoBack, setCanGoBack] = useState(false);
-  const [lang, setLang] = useState<SupportedLang>("en");
 
   const titleId = useId();
   const descId = useId();
-
-  // Read language preference and listen for dynamic switches
-  useEffect(() => {
-    const readCurrentLang = () => {
-      try {
-        const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY) as SupportedLang | null;
-        if (stored === "en" || stored === "bn" || stored === "hi") {
-          setLang(stored);
-        }
-      } catch {
-        // Fallback default
-      }
-    };
-
-    readCurrentLang();
-
-    const handleLangChange = (event: Event) => {
-      const customEvent = event as CustomEvent<{ lang?: SupportedLang }>;
-      if (customEvent.detail?.lang) {
-        setLang(customEvent.detail.lang);
-      } else {
-        readCurrentLang();
-      }
-    };
-
-    window.addEventListener(LANGUAGE_CHANGE_EVENT, handleLangChange);
-    window.addEventListener("storage", readCurrentLang);
-    return () => {
-      window.removeEventListener(LANGUAGE_CHANGE_EVENT, handleLangChange);
-      window.removeEventListener("storage", readCurrentLang);
-    };
-  }, []);
 
   const restoreHomeEntry = useCallback(() => {
     window.history.pushState({ homeBackGuard: true }, "", window.location.href);
@@ -214,8 +135,6 @@ export default function HomeBackConfirmation() {
 
   if (!isOpen) return null;
 
-  const t = copyData[lang] || copyData.en;
-
   return (
     <div
       className={`home-back-backdrop${isClosing ? " is-closing" : ""}`}
@@ -248,7 +167,7 @@ export default function HomeBackConfirmation() {
           type="button"
           className="home-back-close"
           onClick={closeModal}
-          aria-label="Close dialog"
+          aria-label={t.closeAria}
         >
           <svg
             viewBox="0 0 24 24"

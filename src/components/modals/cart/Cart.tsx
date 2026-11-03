@@ -15,6 +15,16 @@ import VariantChips from "@/components/products/VariantChips";
 import { readWishlistIds, subscribeToWishlist, toggleWishlistId } from "@/lib/wishlist";
 import "@/components/products/Products.css";
 import type { Product } from "@/lib/api";
+import { type SupportedLang, useLanguage } from "@/lib/language";
+import englishText from "./english.json";
+import bengaliText from "./bengali.json";
+import hindiText from "./hindi.json";
+
+const textMap: Record<SupportedLang, typeof englishText> = {
+  en: englishText,
+  bn: bengaliText,
+  hi: hindiText,
+};
 
 export type CartItem = {
   id: string;
@@ -50,6 +60,9 @@ export default function Cart({
   currencySymbol = "Rs",
   onCheckout,
 }: CartProps) {
+  const [lang] = useLanguage();
+  const t = textMap[lang] || englishText;
+
   const router = useRouter();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [closing, setClosing] = useState(false);
@@ -155,15 +168,22 @@ export default function Cart({
   const statusOf = (item: CartItem): LineStatus => {
     const c = item.variantId ? checks[lineKey(item)] : undefined;
     if (!c) return { kind: "ok" };
-    if (c.state === "unavailable") return { kind: "blocked", message: "No longer available in your city." };
-    if (c.state === "out_of_stock") return { kind: "blocked", message: "Out of stock right now.", link: true, notify: true };
-    if (c.state === "upcoming") return { kind: "blocked", message: `Not available yet, expected ${c.availableFromLabel ?? "soon"}.`, link: true, notify: true };
-    if (c.dressingRequired && !c.dressing) return { kind: "blocked", message: "This product now needs a dressing type. Choose one on its page.", link: true };
-    if (c.dressing && !c.dressing.offered) return { kind: "blocked", message: "This dressing type is no longer offered.", link: true };
+    if (c.state === "unavailable") return { kind: "blocked", message: t.unavailable };
+    if (c.state === "out_of_stock") return { kind: "blocked", message: t.outOfStock, link: true, notify: true };
+    if (c.state === "upcoming") return { kind: "blocked", message: t.upcoming.replace("{date}", c.availableFromLabel ?? t.expectedSoon), link: true, notify: true };
+    if (c.dressingRequired && !c.dressing) return { kind: "blocked", message: t.dressingRequired, link: true };
+    if (c.dressing && !c.dressing.offered) return { kind: "blocked", message: t.dressingNotOffered, link: true };
     const unit = Math.round((c.pricePaisa ?? 0) / 100) + (c.dressing ? Math.round(c.dressing.chargePaisa / 100) : 0);
     if (c.pricePaisa !== undefined && unit !== item.price) {
-      return { kind: "price", newPrice: unit, newOriginal: Math.round((c.mrpPaisa ?? 0) / 100) + (c.dressing ? Math.round(c.dressing.chargePaisa / 100) : 0),
-        message: unit > item.price ? `Price went up from ${currencySymbol} ${item.price} to ${currencySymbol} ${unit}.` : `Good news, the price dropped from ${currencySymbol} ${item.price} to ${currencySymbol} ${unit}.` };
+      return {
+        kind: "price",
+        newPrice: unit,
+        newOriginal: Math.round((c.mrpPaisa ?? 0) / 100) + (c.dressing ? Math.round(c.dressing.chargePaisa / 100) : 0),
+        message:
+          unit > item.price
+            ? t.priceWentUp.replace("{currency}", currencySymbol).replace("{oldPrice}", String(item.price)).replace("{newPrice}", String(unit))
+            : t.priceDropped.replace("{currency}", currencySymbol).replace("{oldPrice}", String(item.price)).replace("{newPrice}", String(unit)),
+      };
     }
     return { kind: "ok" };
   };
@@ -207,13 +227,13 @@ export default function Cart({
         }
       }}
     >
-      <div className="cart-sidebar-panel">
+      <div className="cart-sidebar-panel" lang={t.language}>
         {/* Fixed Header */}
         <header className="cart-header">
           <button
             type="button"
             className="cart-close-btn"
-            aria-label="Close cart"
+            aria-label={t.closeAria}
             onClick={handleClose}
             autoFocus
           >
@@ -232,12 +252,12 @@ export default function Cart({
           </button>
 
           <h2 id={titleId} className="cart-header-title">
-            My Cart
+            {t.myCart}
           </h2>
 
           {totalItemsCount > 0 && (
             <span className="cart-header-count">
-              {totalItemsCount} {totalItemsCount === 1 ? "item" : "items"}
+              {totalItemsCount} {totalItemsCount === 1 ? t.itemSingle : t.itemPlural}
             </span>
           )}
         </header>
@@ -260,10 +280,10 @@ export default function Cart({
                   <path d="M2 3h2l2.4 12.2a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6L22 8H5" />
                 </svg>
               </div>
-              <h3>Your cart is empty</h3>
-              <p>Looks like you haven&apos;t added any fresh items to your cart yet.</p>
+              <h3>{t.emptyTitle}</h3>
+              <p>{t.emptyDescription}</p>
               <button type="button" className="cart-reset-btn" onClick={handleClose}>
-                Start shopping
+                {t.startShopping}
               </button>
             </div>
           ) : (
@@ -301,7 +321,7 @@ export default function Cart({
                       <button
                         type="button"
                         className="cart-item-delete-btn"
-                        aria-label={`Remove ${item.name} from cart`}
+                        aria-label={t.removeItemAria.replace("{name}", item.name)}
                         onClick={() => removeItem(item.id)}
                       >
                         {/* Trash Icon */}
@@ -328,9 +348,9 @@ export default function Cart({
                         <div className={`cart-item-notice is-${s.kind}`} role="status">
                           <span>{s.message}</span>
                           <span className="cart-item-notice-actions">
-                            {s.kind === "price" && <button type="button" onClick={() => applyPrice(item.id)}>Update price</button>}
-                            {s.link && item.slug && <Link href={`/${encodeURIComponent(item.slug)}`} onClick={handleClose}>{s.notify ? "Notify me" : "Open product"}</Link>}
-                            {s.kind !== "ok" && s.kind !== "price" && <button type="button" onClick={() => removeItem(item.id)}>Remove</button>}
+                            {s.kind === "price" && <button type="button" onClick={() => applyPrice(item.id)}>{t.updatePrice}</button>}
+                            {s.link && item.slug && <Link href={`/${encodeURIComponent(item.slug)}`} onClick={handleClose}>{s.notify ? t.notifyMe : t.openProduct}</Link>}
+                            {s.kind !== "ok" && s.kind !== "price" && <button type="button" onClick={() => removeItem(item.id)}>{t.removeNotice}</button>}
                           </span>
                         </div>
                       );
@@ -340,18 +360,18 @@ export default function Cart({
                     <div className="cart-item-bottom-row">
                       <div className="cart-item-qty-section">
                         <span className="cart-item-qty-text">
-                          qty: {item.quantity}
+                          {t.qtyLabel} {item.quantity}
                         </span>
 
                         <div
                           className="cart-qty-buttons"
                           role="group"
-                          aria-label={`Quantity adjustment for ${item.name}`}
+                          aria-label={t.qtyAdjustmentAria.replace("{name}", item.name)}
                         >
                           <button
                             type="button"
                             className="cart-qty-btn cart-qty-minus"
-                            aria-label="Decrease quantity"
+                            aria-label={t.decreaseQuantityAria}
                             onClick={() => updateQuantity(item.id, -1)}
                             disabled={item.quantity <= 1}
                           >
@@ -360,7 +380,7 @@ export default function Cart({
                           <button
                             type="button"
                             className="cart-qty-btn cart-qty-plus"
-                            aria-label="Increase quantity"
+                            aria-label={t.increaseQuantityAria}
                             onClick={() => updateQuantity(item.id, 1)}
                             disabled={item.quantity >= 99}
                           >
@@ -376,7 +396,7 @@ export default function Cart({
                         </strong>
                         {item.quantity > 1 && (
                           <small className="cart-item-unit-price">
-                            ({currencySymbol} {item.price} each)
+                            {t.eachPrice.replace("{currency}", currencySymbol).replace("{price}", String(item.price))}
                           </small>
                         )}
                       </div>
@@ -385,11 +405,11 @@ export default function Cart({
                 </article>
               ))}
               {related.length > 0 && (
-                <section className="cart-related" aria-label="You may also like">
-                  <h3>You may also like</h3>
+                <section className="cart-related" aria-label={t.relatedHeading}>
+                  <h3>{t.relatedHeading}</h3>
                   <div className="cart-related-row">
                     {related.map(product => (
-                      <RelatedCard key={product.id} product={product} currencySymbol={currencySymbol} onAdd={() => setVariantProduct(product)} />
+                      <RelatedCard key={product.id} product={product} currencySymbol={currencySymbol} onAdd={() => setVariantProduct(product)} addLabel={t.relatedAdd} />
                     ))}
                   </div>
                 </section>
@@ -416,7 +436,7 @@ export default function Cart({
             <button
               type="button"
               className="cart-details-toggle"
-              aria-label={priceDetailsOpen ? "Hide price details" : "Show price details"}
+              aria-label={priceDetailsOpen ? t.hidePriceDetailsAria : t.showPriceDetailsAria}
               aria-expanded={priceDetailsOpen}
               onClick={() => setPriceDetailsOpen(open => !open)}
             >
@@ -426,11 +446,11 @@ export default function Cart({
             </button>
             <div className={`cart-price-details${priceDetailsOpen ? " is-open" : ""}`} aria-hidden={!priceDetailsOpen}>
               <div className="cart-price-details-inner">
-                <h3>Estimated Price Details</h3>
-                <div className="cart-price-row"><span>Total ({totalItemsCount} {totalItemsCount === 1 ? "item" : "items"})</span><span>{currencySymbol} {totalAmount.toFixed(2)}</span></div>
-                <div className="cart-price-row cart-price-discount"><span>Discount</span><span>−{currencySymbol} {discountAmount.toFixed(2)}</span></div>
-                <div className="cart-price-row cart-price-discount"><span>Dressing Price</span><span>{currencySymbol} {dressingTotal.toFixed(2)}</span></div>
-                <div className="cart-price-row cart-price-total"><strong>Total Amount</strong><strong>{currencySymbol} {totalAmount.toFixed(2)}</strong></div>
+                <h3>{t.estimatedPriceTitle}</h3>
+                <div className="cart-price-row"><span>{t.totalItemsRow.replace("{count}", String(totalItemsCount)).replace("{items}", totalItemsCount === 1 ? t.itemSingle : t.itemPlural)}</span><span>{currencySymbol} {totalAmount.toFixed(2)}</span></div>
+                <div className="cart-price-row cart-price-discount"><span>{t.discount}</span><span>−{currencySymbol} {discountAmount.toFixed(2)}</span></div>
+                <div className="cart-price-row cart-price-discount"><span>{t.dressingPrice}</span><span>{currencySymbol} {dressingTotal.toFixed(2)}</span></div>
+                <div className="cart-price-row cart-price-total"><strong>{t.totalAmount}</strong><strong>{currencySymbol} {totalAmount.toFixed(2)}</strong></div>
               </div>
             </div>
             <button
@@ -439,7 +459,7 @@ export default function Cart({
               disabled={checking || unresolved > 0 || !orderable.length}
               onClick={handleCheckoutClick}
             >
-              <span className="cart-checkout-text">{checking ? "Checking your items…" : unresolved > 0 ? `Resolve ${unresolved} ${unresolved === 1 ? "item" : "items"} to continue` : "Proceed to checkout"}</span>
+              <span className="cart-checkout-text">{checking ? t.checkingItems : unresolved > 0 ? t.resolveItems.replace("{count}", String(unresolved)).replace("{items}", unresolved === 1 ? t.itemSingle : t.itemPlural) : t.proceedToCheckout}</span>
               <span className="cart-checkout-price">
                 {currencySymbol}{" "}
                 {totalAmount}
@@ -457,7 +477,7 @@ function CartIcon() {
 }
 
 /** A "You may also like" card: the same card as everywhere in the shop (picture with stock ribbon, discount and heart, name, price, pack sizes, add button). */
-function RelatedCard({ product, currencySymbol, onAdd }: { product: Product; currencySymbol: string; onAdd: () => void }) {
+function RelatedCard({ product, currencySymbol, onAdd, addLabel }: { product: Product; currencySymbol: string; onAdd: () => void; addLabel: string }) {
   const variants = product.variants?.length ? product.variants : [{ label: product.weight, amount: 1, unit: "pack", price: product.price, originalPrice: product.originalPrice }];
   const [picked, setPicked] = useState<number | null>(null);
   const [saved, setSaved] = useState<string[]>([]);
@@ -485,7 +505,7 @@ function RelatedCard({ product, currencySymbol, onAdd }: { product: Product; cur
       <div className="product-pricing"><strong>{currencySymbol} {variant.price}</strong>{variant.originalPrice > variant.price && <del>{currencySymbol} {variant.originalPrice}</del>}</div>
       <VariantChips name={product.name} variants={variants} selected={index} onSelect={setPicked} onMore={onAdd} />
       <div className="product-card-actions">
-        <PackAction pack={variant} className="product-details-button" onAdd={onAdd}><CartIcon />Add to Cart</PackAction>
+        <PackAction pack={variant} className="product-details-button" onAdd={onAdd}><CartIcon />{addLabel}</PackAction>
       </div>
     </article>
   );

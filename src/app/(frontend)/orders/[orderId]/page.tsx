@@ -16,14 +16,22 @@ import type { CartItem } from "@/components/modals/cart/Cart";
 import { OrderDetailsSkeleton } from "@/components/skeleton/Skeletons";
 import { fallbackImage, isRemoteImage } from "@/lib/api";
 import { STATUS_TEXT, statusGroup } from "@/lib/orderStatus";
+import { type SupportedLang, useLanguage } from "@/lib/language";
+import englishText from "./english.json";
+import bengaliText from "./bengali.json";
+import hindiText from "./hindi.json";
 import "./OrderDetails.css";
+
+const textMap: Record<SupportedLang, typeof englishText> = {
+  en: englishText,
+  bn: bengaliText,
+  hi: hindiText,
+};
 
 type Item = MyOrderDetail["items"][number];
 const money = (paisa: number) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 2 }).format(paisa / 100);
 const when = (iso: string, withTime = false) =>
   new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric", ...(withTime ? { hour: "2-digit", minute: "2-digit" } : {}), timeZone: "Asia/Kolkata" });
-const PAYMENT_TEXT: Record<string, string> = { COD: "Cash on delivery", ONLINE: "Online payment", UNKNOWN: "—" };
-const LATE_CANCEL = "Oh No!!! It's too late to cancel this order now. We have already started working on this order. Cancelling this now may impact Your Account Credit. However we can still submit a cancellation request for further review or you can call our Support team for further assistance. Thank you.";
 
 /** the address as it was when the order was placed (a frozen copy), or the old free text of an old order */
 function addressLines(o: MyOrderDetail): string[] {
@@ -43,6 +51,9 @@ function itemState(item: Item): { text: string; group: "delivered" | "on-the-way
 }
 
 function Details({ reference }: { reference: string }) {
+  const [lang] = useLanguage();
+  const text = textMap[lang] || englishText;
+
   const [order, setOrder] = useState<MyOrderDetail | null | undefined>(undefined);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<{ text: string; tone: "ok" | "bad" } | null>(null);
@@ -89,30 +100,37 @@ function Details({ reference }: { reference: string }) {
     return res.ok ? null : res.error;
   };
 
+  const getPaymentText = (method: string) => {
+    if (method === "COD") return text.paymentCashOnDelivery;
+    if (method === "ONLINE") return text.paymentOnline;
+    if (method === "UNKNOWN") return "—";
+    return method;
+  };
+
   /** cancel an item (or the whole order when `item` is null): once the shop has started, say it is only a request first */
   const startCancel = (item: Item | null) => {
     if (order?.cancelMode === "request") {
-      setDialog({ title: "Confirmation Alert.", icon: "warning", body: <p>{LATE_CANCEL}</p>, buttons: [{ label: "Ok", tone: "primary", onClick: () => setCancelling({ item }) }] });
+      setDialog({ title: text.confirmationAlertTitle, icon: "warning", body: <p>{text.lateCancelWarning}</p>, buttons: [{ label: text.ok, tone: "primary", onClick: () => setCancelling({ item }) }] });
     } else setCancelling({ item });
   };
   /** the reason was chosen: ask once more before it is sent ("Are you sure?"), then cancel */
   const submitCancel = (reason: string, details: string): Promise<string | null> => new Promise(resolve => {
     const target = cancelling?.item ?? null;
-    const what = target ? `“${target.name}”` : `order ${order?.orderNumber ?? ""}`;
+    const what = target ? `“${target.name}”` : `${text.orderWord} ${order?.orderNumber ?? ""}`;
     const request = order?.cancelMode === "request";
     setDialog({
-      title: request ? "Send cancellation request?" : `Cancel ${target ? "this item" : "this order"}?`, icon: "warning",
-      body: <><p>{request ? `We will send a request to cancel ${what} for review.` : `${target ? "This item" : "The whole order"} (${what}) will be cancelled. This cannot be undone.`}</p><p><b>Reason:</b> {reason}{details ? ` - ${details}` : ""}</p></>,
+      title: request ? text.sendCancelRequestTitle : (target ? text.cancelThisItemTitle : text.cancelThisOrderTitle), icon: "warning",
+      body: <><p>{request ? text.cancelRequestReviewBody.replace("{what}", what) : (target ? text.cancelItemBody.replace("{what}", what) : text.cancelOrderBody.replace("{what}", what))}</p><p><b>{text.reason}:</b> {reason}{details ? ` - ${details}` : ""}</p></>,
       buttons: [
-        { label: request ? "Yes, send request" : "Yes, cancel", tone: "danger", onClick: async () => {
+        { label: request ? text.yesSendRequest : text.yesCancel, tone: "danger", onClick: async () => {
           const res = target ? await cancelOrderItemAction(reference, target.id, reason, details) : await cancelOrderAction(reference, reason, details);
           if (!res.ok) return resolve(res.error);
           setCancelling(null);
           await refresh();
-          setNotice({ text: res.requested ? "Your cancellation request was sent. We will confirm it shortly." : target ? `${target.name} was cancelled.` : "Your order was cancelled.", tone: "ok" });
+          setNotice({ text: res.requested ? text.cancelRequestSent : target ? text.itemCancelledNotice.replace("{name}", target.name) : text.orderCancelledNotice, tone: "ok" });
           resolve(null);
         } },
-        { label: "No, keep it", tone: "plain", onClick: () => resolve("") },
+        { label: text.noKeepIt, tone: "plain", onClick: () => resolve("") },
       ],
     });
   });
@@ -121,7 +139,7 @@ function Details({ reference }: { reference: string }) {
   if (order === null) {
     return (
       <main className="order-details-page"><div className="order-details-container">
-        <div className="order-details-card"><h2>Order not found</h2><p className="order-details-note">We could not find this order in your account.</p><Link className="order-details-back" href="/orders">Back to My Orders</Link></div>
+        <div className="order-details-card"><h2>{text.orderNotFoundTitle}</h2><p className="order-details-note">{text.orderNotFoundNote}</p><Link className="order-details-back" href="/orders">{text.backToMyOrders}</Link></div>
       </div></main>
     );
   }
@@ -141,80 +159,84 @@ function Details({ reference }: { reference: string }) {
   const finalOther = t.billTotalPaisa - (finalItems + t.cuttingFeePaisa + t.deliveryFeePaisa + t.convenienceFeePaisa + t.deliveryTimeFeePaisa + t.adjustmentPaisa - t.discountPaisa);
   // one table: what was estimated when the order was placed next to the final bill (made after packing and weighing)
   const amountRows: { label: string; est: number; fin: number }[] = [
-    { label: "Items", est: estimatedItems, fin: finalItems },
-    { label: "Dressing fee", est: t.cuttingFeePaisa, fin: t.cuttingFeePaisa },
-    { label: "Delivery fee", est: t.deliveryFeePaisa, fin: t.deliveryFeePaisa },
-    { label: "Convenience fee", est: t.convenienceFeePaisa, fin: t.convenienceFeePaisa },
-    { label: "Fast processing", est: t.deliveryTimeFeePaisa, fin: t.deliveryTimeFeePaisa },
-    { label: "Coupon", est: -t.couponDiscountPaisa, fin: 0 },
-    { label: "Adjustment", est: 0, fin: t.adjustmentPaisa },
-    { label: "Discount", est: 0, fin: -t.discountPaisa },
-    { label: "Waived / adjusted", est: Math.abs(estOther) >= 1 ? estOther : 0, fin: Math.abs(finalOther) >= 1 ? finalOther : 0 },
+    { label: text.rowItems, est: estimatedItems, fin: finalItems },
+    { label: text.rowDressing, est: t.cuttingFeePaisa, fin: t.cuttingFeePaisa },
+    { label: text.rowDelivery, est: t.deliveryFeePaisa, fin: t.deliveryFeePaisa },
+    { label: text.rowConvenience, est: t.convenienceFeePaisa, fin: t.convenienceFeePaisa },
+    { label: text.rowProcessing, est: t.deliveryTimeFeePaisa, fin: t.deliveryTimeFeePaisa },
+    { label: text.rowCoupon, est: -t.couponDiscountPaisa, fin: 0 },
+    { label: text.rowAdjustment, est: 0, fin: t.adjustmentPaisa },
+    { label: text.rowDiscount, est: 0, fin: -t.discountPaisa },
+    { label: text.rowWaived, est: Math.abs(estOther) >= 1 ? estOther : 0, fin: Math.abs(finalOther) >= 1 ? finalOther : 0 },
   ].filter(r => r.est !== 0 || (billed && r.fin !== 0));
-  const places = pickup ? (order.store ? `${order.store.name}${order.store.areaName ? `, ${order.store.areaName}` : ""}${order.store.pincode ? `, ${order.store.pincode}` : ""}` : "Our store") : lines.join(" · ") || "—";
+  const places = pickup ? (order.store ? `${order.store.name}${order.store.areaName ? `, ${order.store.areaName}` : ""}${order.store.pincode ? `, ${order.store.pincode}` : ""}` : text.ourStore) : lines.join(" · ") || "—";
 
   return (
     <main className="order-details-page">
       <div className="order-details-container">
         <header className="order-details-heading">
-          <div>
-            <p>Order details</p>
-            <h1>{order.orderNumber}</h1>
+          <div className="order-details-heading-title">
+            <div className="order-details-heading-meta">
+              <p>{text.headingSubtitle}</p>
+              <span className={`order-details-status order-details-status--${group}`}>
+                <span aria-hidden="true" />
+                {STATUS_TEXT[order.status]}
+              </span>
+            </div>
+            <div className="order-details-heading-main">
+              <h1>{order.orderNumber}</h1>
+              {order.cancelMode && (
+                <span className="order-edit-buttons">
+                  {order.editable && <button type="button" disabled={busy} onClick={() => setPanel(true)}>{text.editOrderBtn}</button>}
+                  {order.editable && <button type="button" className="is-light" disabled={busy} onClick={() => setAdding(true)}>{text.addItemsBtn}</button>}
+                  <button type="button" className="is-danger" disabled={busy} onClick={() => startCancel(null)}>{text.cancelOrderBtn}</button>
+                </span>
+              )}
+            </div>
           </div>
-          <span className={`order-details-status order-details-status--${group}`}>
-            <span aria-hidden="true" />
-            {STATUS_TEXT[order.status]}
-          </span>
-          {order.cancelMode && (
-            <span className="order-edit-buttons">
-              {order.editable && <button type="button" disabled={busy} onClick={() => setPanel(true)}>Edit order</button>}
-              {order.editable && <button type="button" className="is-light" disabled={busy} onClick={() => setAdding(true)}>+ Add items</button>}
-              <button type="button" className="is-danger" disabled={busy} onClick={() => startCancel(null)}>Cancel order</button>
-            </span>
-          )}
         </header>
 
         {notice && <p className={`order-edit-notice is-${notice.tone}`} role="status">{notice.text}</p>}
-        {order.cancelReason && order.status === "CANCELLED" && <p className="order-edit-notice is-bad">Cancelled: {order.cancelReason}</p>}
-        {order.cancelMode && <p className="order-edit-hint">{order.editable ? "You can still edit, add or cancel items until we start processing this order." : "We have started on this order. You can still send a cancellation request."}</p>}
+        {order.cancelReason && order.status === "CANCELLED" && <p className="order-edit-notice is-bad">{text.cancelledPrefix} {order.cancelReason}</p>}
+        {order.cancelMode && <p className="order-edit-hint">{order.editable ? text.editableHint : text.processingHint}</p>}
 
         <div className="order-layout">
           <aside className="order-side">
-            <section className="order-details-card order-summary" aria-label="Order summary">
-              <h2>Order summary</h2>
+            <section className="order-details-card order-summary" aria-label={text.orderSummaryAria}>
+              <h2>{text.orderSummaryHeading}</h2>
               <dl>
-                <div><dt>Placed</dt><dd>{when(order.placedAt, true)}</dd></div>
-                <div><dt>{pickup ? "Pickup" : "Delivery"}</dt><dd>{order.deliveryDate ? when(order.deliveryDate) : "—"}{order.deliverySlotLabel ? ` · ${order.deliverySlotLabel.replace(/\s+/g, " ")}` : order.deliverySlotName ? ` · ${order.deliverySlotName}` : ""}</dd></div>
-                <div><dt>Payment</dt><dd>{PAYMENT_TEXT[order.paymentMethod] ?? order.paymentMethod}{order.paymentState === "PAID" ? " · Paid" : order.paymentState === "PARTIAL" ? " · Part paid" : ""}</dd></div>
-                <div><dt>Items</dt><dd>{active.length} {active.length === 1 ? "item" : "items"}</dd></div>
-                <div className="is-wide"><dt>{pickup ? "Pickup store" : "Address"}</dt><dd>{places}</dd></div>
+                <div><dt>{text.placed}</dt><dd>{when(order.placedAt, true)}</dd></div>
+                <div><dt>{pickup ? text.pickup : text.delivery}</dt><dd>{order.deliveryDate ? when(order.deliveryDate) : "—"}{order.deliverySlotLabel ? ` · ${order.deliverySlotLabel.replace(/\s+/g, " ")}` : order.deliverySlotName ? ` · ${order.deliverySlotName}` : ""}</dd></div>
+                <div><dt>{text.payment}</dt><dd>{getPaymentText(order.paymentMethod)}{order.paymentState === "PAID" ? ` · ${text.paymentPaid}` : order.paymentState === "PARTIAL" ? ` · ${text.paymentPartPaid}` : ""}</dd></div>
+                <div><dt>{text.items}</dt><dd>{active.length} {active.length === 1 ? text.itemSingular : text.itemPlural}</dd></div>
+                <div className="is-wide"><dt>{pickup ? text.pickupStore : text.address}</dt><dd>{places}</dd></div>
               </dl>
             </section>
 
-            <section className="order-details-card order-amounts" aria-label="Estimated and final amount">
+            <section className="order-details-card order-amounts" aria-label={text.amountsCardAria}>
               <table>
-                <thead><tr><th scope="col">Amount</th><th scope="col">Estimated</th><th scope="col">Final</th></tr></thead>
+                <thead><tr><th scope="col">{text.colAmount}</th><th scope="col">{text.colEstimated}</th><th scope="col">{text.colFinal}</th></tr></thead>
                 <tbody>
                   {amountRows.map(r => <tr key={r.label}><th scope="row">{r.label}</th><td>{money(r.est)}</td><td>{billed ? money(r.fin) : <span className="order-wait">—</span>}</td></tr>)}
                 </tbody>
                 <tfoot>
-                  <tr className="is-total"><th scope="row">Total</th><td>{money(t.estimatedTotalPaisa)}</td><td>{billed ? money(t.billTotalPaisa) : <span className="order-wait">after packing</span>}</td></tr>
-                  {billed && <tr><th scope="row">Paid</th><td /><td>{money(order.paidPaisa)}</td></tr>}
-                  {billed && <tr><th scope="row">Due</th><td /><td>{money(due)}</td></tr>}
+                  <tr className="is-total"><th scope="row">{text.rowTotal}</th><td>{money(t.estimatedTotalPaisa)}</td><td>{billed ? money(t.billTotalPaisa) : <span className="order-wait">{text.afterPackingWait}</span>}</td></tr>
+                  {billed && <tr><th scope="row">{text.rowPaid}</th><td /><td>{money(order.paidPaisa)}</td></tr>}
+                  {billed && <tr><th scope="row">{text.rowDue}</th><td /><td>{money(due)}</td></tr>}
                 </tfoot>
               </table>
-              {t.discountPaisa > 0 && <p className="order-amount-saved">You saved {money(t.discountPaisa)} on this order</p>}
-              {!billed && order.status !== "CANCELLED" && <p className="order-amount-wait">The final bill is made after your order is packed and weighed, so it can differ a little from the estimate.</p>}
+              {t.discountPaisa > 0 && <p className="order-amount-saved">{text.savedOnOrder.replace("{amount}", money(t.discountPaisa))}</p>}
+              {!billed && order.status !== "CANCELLED" && <p className="order-amount-wait">{text.finalBillWaitNote}</p>}
             </section>
           </aside>
 
           <section className="order-products-card" aria-labelledby="order-products-heading">
             <div className="order-products-heading">
               <div>
-                <h2 id="order-products-heading">Products in this order</h2>
-                <p>{delivered} of {order.items.length} delivered</p>
+                <h2 id="order-products-heading">{text.productsHeading}</h2>
+                <p>{text.productsDelivered.replace("{delivered}", String(delivered)).replace("{total}", String(order.items.length))}</p>
               </div>
-              <span>{order.items.length} {order.items.length === 1 ? "product" : "products"}</span>
+              <span>{order.items.length} {order.items.length === 1 ? text.productSingular : text.productPlural}</span>
             </div>
 
             <div className="order-products-list">
@@ -230,24 +252,24 @@ function Details({ reference }: { reference: string }) {
                     <div className="order-product-copy">
                       <h3>{name}</h3>
                       <p>
-                        Qty {item.quantity}
-                        {item.packLabel ? <><span>·</span>{item.packLabel}</> : item.weight && item.orderedMeasurement ? <><span>·</span>{item.orderedMeasurement} gm</> : null}
+                        {text.qty} {item.quantity}
+                        {item.packLabel ? <><span>·</span>{item.packLabel}</> : item.weight && item.orderedMeasurement ? <><span>·</span>{item.orderedMeasurement} {text.gm}</> : null}
                         {item.dressing ? <><span>·</span>{item.dressing}</> : null}
                         {item.instruction ? <><span>·</span>“{item.instruction}”</> : null}
                       </p>
-                      {item.cancelNote && (item.status === "CANCELLED" || item.cancelStatus !== "NONE") && <p className="order-item-reason">{item.status === "CANCELLED" ? "Cancelled" : item.cancelStatus === "REJECTED" ? "Cancellation not accepted" : "Cancellation requested"}: {item.cancelNote}</p>}
+                      {item.cancelNote && (item.status === "CANCELLED" || item.cancelStatus !== "NONE") && <p className="order-item-reason">{item.status === "CANCELLED" ? text.cancelled : item.cancelStatus === "REJECTED" ? text.cancellationNotAccepted : text.cancellationRequested}: {item.cancelNote}</p>}
                       {(item.canEdit || item.canCancel) && (
-                        <div className="order-item-edit" role="group" aria-label={`Change ${item.name}`}>
-                          {item.canEdit && <button type="button" disabled={busy} onClick={() => setEditing(item)}>Edit</button>}
-                          {item.canCancel && <button type="button" className="order-item-remove" disabled={busy} onClick={() => startCancel(item)}>Cancel</button>}
+                        <div className="order-item-edit" role="group" aria-label={text.changeItemAria.replace("{name}", item.name)}>
+                          {item.canEdit && <button type="button" disabled={busy} onClick={() => setEditing(item)}>{text.edit}</button>}
+                          {item.canCancel && <button type="button" className="order-item-remove" disabled={busy} onClick={() => startCancel(item)}>{text.cancel}</button>}
                         </div>
                       )}
                     </div>
                     <div className="order-product-amounts">
-                      <span className="order-product-est"><small>Est.</small> {money(item.status === "CANCELLED" ? 0 : item.estimatedLinePaisa)}</span>
+                      <span className="order-product-est"><small>{text.est}</small> {money(item.status === "CANCELLED" ? 0 : item.estimatedLinePaisa)}</span>
                       {item.status !== "CANCELLED" && (item.finalLinePaisa !== null
-                        ? <span className="order-product-final"><small>Final{weighed ? ` · ${item.billedMeasurement} gm` : ""}</small> {money(item.finalLinePaisa)}</span>
-                        : <span className="order-product-final-wait">Final after packing</span>)}
+                        ? <span className="order-product-final"><small>{text.final}{weighed ? ` · ${item.billedMeasurement} ${text.gm}` : ""}</small> {money(item.finalLinePaisa)}</span>
+                        : <span className="order-product-final-wait">{text.finalAfterPackingWait}</span>)}
                     </div>
                     <span className={`order-product-status order-product-status--${state.group}`}>
                       <span aria-hidden="true" />
@@ -277,7 +299,7 @@ function Details({ reference }: { reference: string }) {
           item={editing}
           cityId={order.cityId ?? undefined}
           onClose={() => setEditing(null)}
-          onSave={async change_ => change({ update: [{ itemId: editing.id, variantId: change_.variantId, cuttingTypeId: change_.cuttingTypeId, quantity: change_.quantity, instruction: change_.instruction }] }, `${editing.name} was updated.`)}
+          onSave={async change_ => change({ update: [{ itemId: editing.id, variantId: change_.variantId, cuttingTypeId: change_.cuttingTypeId, quantity: change_.quantity, instruction: change_.instruction }] }, text.itemUpdatedNotice.replace("{name}", editing.name))}
         />
       )}
       {adding && (
@@ -291,8 +313,8 @@ function Details({ reference }: { reference: string }) {
       )}
       {cancelling && (
         <CancelReasonDialog
-          title={cancelling.item ? "Cancel Item" : "Cancel Order"}
-          subject={cancelling.item ? cancelling.item.name : `Order ${order.orderNumber}`}
+          title={cancelling.item ? text.cancelItemDialogTitle : text.cancelOrderDialogTitle}
+          subject={cancelling.item ? cancelling.item.name : `${text.orderPrefix} ${order.orderNumber}`}
           request={order.cancelMode === "request"}
           onSubmit={submitCancel}
           onClose={() => setCancelling(null)}
@@ -311,5 +333,7 @@ function OrderDetailsInner() {
 
 /** Needs a login: without one the page asks the visitor to log in. */
 export default function OrderDetailsPage() {
-  return <RequireLogin what="your order"><OrderDetailsInner /></RequireLogin>;
+  const [lang] = useLanguage();
+  const text = textMap[lang] || englishText;
+  return <RequireLogin what={text.requireLoginWhat}><OrderDetailsInner /></RequireLogin>;
 }

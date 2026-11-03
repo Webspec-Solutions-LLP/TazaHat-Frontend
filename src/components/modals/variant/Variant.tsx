@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useBackClose } from "@/lib/backLayers";
 
@@ -10,6 +10,16 @@ import { dressingChargeRupees } from "@/lib/cartLine";
 import { fallbackImage, isRemoteImage, shortName, type ApiProductDetail, type PackAvailability } from "@/lib/api";
 import { getProductDetailAction } from "@/app/actions";
 import PackAction, { firstOrderable, packStatus } from "@/components/availability/PackAction";
+import { type SupportedLang, useLanguage } from "@/lib/language";
+import englishText from "./english.json";
+import bengaliText from "./bengali.json";
+import hindiText from "./hindi.json";
+
+const textMap: Record<SupportedLang, typeof englishText> = {
+  en: englishText,
+  bn: bengaliText,
+  hi: hindiText,
+};
 
 export type VariantOption = {
   label: string;
@@ -39,6 +49,8 @@ interface VariantProps {
 }
 
 export default function Variant({ product, currency, onClose, onGoToCart, cityId }: VariantProps) {
+  const [lang] = useLanguage();
+  const t = textMap[lang] || englishText;
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeTimer = useRef<number | null>(null);
   const titleId = useId();
@@ -125,10 +137,10 @@ export default function Variant({ product, currency, onClose, onGoToCart, cityId
       <section className="variant-panel">
         <header className="variant-header">
           <div>
-            <p className="variant-eyebrow">Choose your preferred size</p>
+            <p className="variant-eyebrow">{t.chooseSize}</p>
             <h2 id={titleId}>{product.name}</h2>
           </div>
-          <button type="button" className="variant-close" aria-label="Close variant selection" onClick={handleClose}>
+          <button type="button" className="variant-close" aria-label={t.closeAria} onClick={handleClose}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
               <path className="variant-close-x" d="m7 7 10 10M17 7 7 17" />
               <path className="variant-close-chevron" d="m6 9 6 6 6-6" />
@@ -137,23 +149,23 @@ export default function Variant({ product, currency, onClose, onGoToCart, cityId
         </header>
         <div className="variant-product-summary">
           <div className="variant-product-image"><Image src={product.image} alt="" fill sizes="72px" unoptimized={isRemoteImage(product.image)} onError={fallbackImage} /></div>
-          <div className="variant-selected-size"><span>Selected size</span><strong>{selected.label}</strong><small>{money.format(unitPrice)} / {unitLabel}</small></div>
+          <div className="variant-selected-size"><span>{t.selectedSize}</span><strong>{selected.label}</strong><small>{money.format(unitPrice)} / {unitLabel}</small></div>
           <strong className="variant-selected-price">{money.format((selected.price + dressingCharge) * quantity)}</strong>
         </div>
         <fieldset className="variant-options">
-          <legend>Available sizes</legend>
+          <legend>{t.availableSizes}</legend>
           <div className="variant-option-list">
             {variants.map((variant, index) => (
               <div className={`variant-choice${selectedIndex === index ? " is-selected" : ""}`} key={`${product.id}-${variant.label}`} onClick={() => setSelectedIndex(index)}>
                 <label className="variant-option">
                   <input type="radio" name={`variant-${product.id}`} checked={selectedIndex === index} onChange={() => setSelectedIndex(index)} />
-                  <span className="variant-option-copy"><strong>{variant.label}</strong>{packStatus(variant) === "soon" ? <small>From {variant.availableFromLabel}</small> : packStatus(variant) === "out" && <small>Out of stock</small>}</span>
+                  <span className="variant-option-copy"><strong>{variant.label}</strong>{packStatus(variant) === "soon" && variant.availableFromLabel ? <small>{t.fromLabel.replace("{date}", variant.availableFromLabel)}</small> : packStatus(variant) === "out" && <small>{t.outOfStock}</small>}</span>
                 </label>
                 {selectedIndex === index && packStatus(variant) === "ok" && <div className="variant-choice-quantity">
-                  <div className="variant-quantity" role="group" aria-label={`Quantity for ${variant.label}`}>
-                    <button type="button" aria-label="Decrease quantity" onClick={() => setQuantity(count => Math.max(1, count - 1))} disabled={quantity <= 1}>-</button>
+                  <div className="variant-quantity" role="group" aria-label={t.quantityForVariantAria.replace("{label}", variant.label)}>
+                    <button type="button" aria-label={t.decreaseQuantityAria} onClick={() => setQuantity(count => Math.max(1, count - 1))} disabled={quantity <= 1}>-</button>
                     <output aria-live="polite">{quantity}</output>
-                    <button type="button" aria-label="Increase quantity" onClick={() => setQuantity(count => Math.min(99, count + 1))} disabled={quantity >= 99}>+</button>
+                    <button type="button" aria-label={t.increaseQuantityAria} onClick={() => setQuantity(count => Math.min(99, count + 1))} disabled={quantity >= 99}>+</button>
                   </div>
                 </div>}
                 <small className="variant-choice-price">{money.format(variant.price)}</small>
@@ -162,26 +174,26 @@ export default function Variant({ product, currency, onClose, onGoToCart, cityId
             ))}
           </div>
         </fieldset>
-        {detailState === "loading" && <div className="sk variant-dressing-skeleton" role="status" aria-label="Loading dressing options" />}
+        {detailState === "loading" && <div className="sk variant-dressing-skeleton" role="status" aria-label={t.loadingDressingAria} />}
         {detail && detail.cutting.length > 0 && (
           <label className={`variant-dressing-field${dressingError ? " has-error" : ""}`}>
-            <span>Dressing Type{detail.dressingRequired ? <b className="variant-required" aria-hidden="true"> *</b> : null}</span>
+            <span>{t.dressingType}{detail.dressingRequired ? <b className="variant-required" aria-hidden="true"> *</b> : null}</span>
             <select ref={dressingSelect} required={detail.dressingRequired} aria-invalid={dressingError || undefined} value={dressingId} onChange={event => { setDressingId(event.target.value); setInstruction(""); setDressingError(false); }}>
-              <option value="">Select Dressing Type</option>
+              <option value="">{t.selectDressingType}</option>
               {detail.cutting.map(c => <option key={c.id} value={c.id}>{c.name}{c.chargePaisa > 0 ? ` (+${money.format(c.chargePaisa / 100)})` : ""}</option>)}
             </select>
-            {dressingError && <small className="variant-field-error" role="alert">Please choose a dressing type first.</small>}
+            {dressingError && <small className="variant-field-error" role="alert">{t.dressingRequiredError}</small>}
           </label>
         )}
         {isCustomDressing && (
           <label className="variant-dressing-field">
-            <span>Special instruction</span>
-            <textarea rows={3} value={instruction} onChange={event => setInstruction(event.target.value)} placeholder="Tell us how you want it cut (e.g. 6 pieces, head removed...)" maxLength={250} />
+            <span>{t.specialInstruction}</span>
+            <textarea rows={3} value={instruction} onChange={event => setInstruction(event.target.value)} placeholder={t.specialInstructionPlaceholder} maxLength={250} />
           </label>
         )}
         <footer className="variant-footer">
           <PackAction pack={selected} className="variant-go-cart" onAdd={handleGoToCart}>
-            <span className="variant-go-cart-label">Go to Cart</span>
+            <span className="variant-go-cart-label">{t.goToCart}</span>
             <small className="variant-go-cart-meta">{selected.label} x {quantity}</small>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M2 3h2l2.4 12.2a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6L22 8H5"/><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/></svg>
           </PackAction>

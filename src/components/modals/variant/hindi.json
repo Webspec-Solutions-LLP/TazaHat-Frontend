@@ -1,0 +1,19 @@
+{
+  "language": "hi",
+  "chooseSize": "अपना पसंदीदा साइज़ चुनें",
+  "closeAria": "वेरिएंट चयन बंद करें",
+  "selectedSize": "चुना गया साइज़",
+  "availableSizes": "उपलब्ध साइज़",
+  "fromLabel": "{date} से",
+  "outOfStock": "स्टॉक में नहीं है",
+  "quantityForVariantAria": "{label} के लिए मात्रा",
+  "decreaseQuantityAria": "मात्रा घटाएं",
+  "increaseQuantityAria": "मात्रा बढ़ाएं",
+  "loadingDressingAria": "ड्रेसिंग विकल्प लोड हो रहे हैं",
+  "dressingType": "ड्रेसिंग / कटिंग का प्रकार",
+  "selectDressingType": "ड्रेसिंग का प्रकार चुनें",
+  "dressingRequiredError": "कृपया पहले ड्रेसिंग का प्रकार चुनें।",
+  "specialInstruction": "विशेष निर्देश",
+  "specialInstructionPlaceholder": "हमें बताएं कि आप इसे कैसे कटवाना चाहते हैं (उदा. 6 टुकड़े, बिना सिर के...)",
+  "goToCart": "कार्ट पर जाएं"
+}

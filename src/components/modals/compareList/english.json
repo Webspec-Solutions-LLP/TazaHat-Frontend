@@ -1,0 +1,23 @@
+{
+  "language": "en",
+  "closeAria": "Close compare list",
+  "title": "Compare Products",
+  "productsCountAria": "{count} products",
+  "subtitle": "Select 2 products to compare side by side",
+  "emptyTitle": "No products to compare",
+  "emptyDescription": "Add items from product pages to compare their price and rating.",
+  "itemsListAria": "Compare items",
+  "selectForComparisonAria": "Select {name} for comparison",
+  "deselectForComparisonAria": "Deselect {name} for comparison",
+  "clickToSelectTitle": "Click to select for comparison",
+  "clickToDeselectTitle": "Click to deselect",
+  "deleteItemAria": "Delete {name}",
+  "perUnit": "/ {unit}",
+  "clearAll": "Clear All",
+  "continueCompare": "Continue Compare",
+  "close": "Close",
+  "continueCompareTitle": "Continue to compare selected products",
+  "selectMoreTitle": "Select {count} more {unit} to compare",
+  "moreProductSingle": "product",
+  "moreProductPlural": "products"
+}

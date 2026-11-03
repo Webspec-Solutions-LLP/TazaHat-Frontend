@@ -1,0 +1,8 @@
+{
+  "language": "en",
+  "closeAria": "Close confirmation",
+  "defaultMessage": "Do you want to compare this to other product?",
+  "desc": "Compare this item side-by-side with other products in your compare list.",
+  "noBtn": "No",
+  "yesBtn": "Yes"
+}

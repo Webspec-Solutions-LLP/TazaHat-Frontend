@@ -49,7 +49,7 @@ export default function OfferLayout3({ products }: { products?: Product[] }) {
   const [language] = useLanguage();
   const text = textMap[language];
   const catalog = catalogMap[language];
-  const money = new Intl.NumberFormat(text.locale, {
+  const money = new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: text.currency,
     maximumFractionDigits: 0,

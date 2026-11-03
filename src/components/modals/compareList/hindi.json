@@ -1,0 +1,23 @@
+{
+  "language": "hi",
+  "closeAria": "तुलना सूची बंद करें",
+  "title": "उत्पादों की तुलना करें",
+  "productsCountAria": "{count} उत्पाद",
+  "subtitle": "आमने-सामने तुलना करने के लिए 2 उत्पाद चुनें",
+  "emptyTitle": "तुलना करने के लिए कोई उत्पाद नहीं है",
+  "emptyDescription": "कीमत और रेटिंग की तुलना करने के लिए उत्पाद पेजों से आइटम जोड़ें।",
+  "itemsListAria": "तुलना आइटम",
+  "selectForComparisonAria": "तुलना के लिए {name} चुनें",
+  "deselectForComparisonAria": "तुलना से {name} हटाएं",
+  "clickToSelectTitle": "तुलना के लिए चुनने के लिए क्लिक करें",
+  "clickToDeselectTitle": "हटाने के लिए क्लिक करें",
+  "deleteItemAria": "{name} हटाएं",
+  "perUnit": "/ {unit}",
+  "clearAll": "सभी हटाएं",
+  "continueCompare": "तुलना जारी रखें",
+  "close": "बंद करें",
+  "continueCompareTitle": "चयनित उत्पादों की तुलना करने के लिए आगे बढ़ें",
+  "selectMoreTitle": "तुलना करने के लिए {count} और {unit} चुनें",
+  "moreProductSingle": "उत्पाद",
+  "moreProductPlural": "उत्पाद"
+}
