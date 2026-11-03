@@ -55,6 +55,8 @@ export interface ShopHome {
   /** the CRM's switches for the places of the home banners (a place that is off is not shown at all) */
   bannerSlots?: { HERO: boolean; SIDE: boolean; OFFER: boolean };
   sideBanner?: ApiBanner | null;
+  /** the deal running in this city now (null: no deal section) */
+  todayDeal?: { id: string; name: string; startsAt: string | null; endsAt: string | null; now: string } | null;
   offerBanners?: ApiBanner[];
   offers: { maxDiscount: number; items: ApiCard[] };
   special: ApiCard[];

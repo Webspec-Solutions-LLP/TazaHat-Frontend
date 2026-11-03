@@ -42,7 +42,8 @@ function CartIcon() {
   return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M2 3h2l2.4 12.2a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6L22 8H5" /><circle cx="9" cy="21" r="1" /><circle cx="19" cy="21" r="1" /></svg>;
 }
 
-export default function TodalDeals({ products }: { products?: Product[] }) {
+/** `deal`: the running deal of the CRM: `endsAt` is when the timer stops (none = no timer), `now` the server's clock (the timer follows it, not the visitor's). */
+export default function TodalDeals({ products, deal }: { products?: Product[]; deal?: { endsAt: string | null; now: string } | null }) {
   const [language] = useLanguage();
   const text = textMap[language];
   const catalog = catalogMap[language];
@@ -53,14 +54,15 @@ export default function TodalDeals({ products }: { products?: Product[] }) {
   const [navbarOffset, setNavbarOffset] = useState(72);
   const dealsSection = useRef<HTMLElement>(null);
   useEffect(() => {
-    // Demo offer ends at the next midnight in India; use the catalog deadline when available.
-    const offset = 330 * 60 * 1000;
-    const deadline = Math.floor((Date.now() + offset) / 86400000) * 86400000 + 86400000 - offset;
-    const tick = () => setRemaining(Math.max(0, Math.floor((deadline - Date.now()) / 1000)));
+    // the timer counts to the end the CRM set, by the server's clock; without an end there is no timer, and when it reaches zero the section goes
+    if (!deal?.endsAt) { setRemaining(null); return; }
+    const end = new Date(deal.endsAt).getTime();
+    const skew = new Date(deal.now).getTime() - Date.now();
+    const tick = () => setRemaining(Math.max(0, Math.floor((end - (Date.now() + skew)) / 1000)));
     tick();
     const timer = window.setInterval(tick, 1000);
     return () => window.clearInterval(timer);
-  }, []);
+  }, [deal?.endsAt, deal?.now]);
   useEffect(() => {
     let frame = 0;
     const updateFloatingTimer = () => {
@@ -82,6 +84,8 @@ export default function TodalDeals({ products }: { products?: Product[] }) {
       window.removeEventListener("resize", updateFloatingTimer);
     };
   }, []);
+  const ended = !!deal?.endsAt && remaining === 0; // the deal is over: the section goes by itself
+  const hasTimer = !!deal?.endsAt;
   const clock = [
     { label: text.days, value: remaining === null ? null : Math.floor(remaining / 86400) },
     { label: text.hours, value: remaining === null ? null : Math.floor(remaining / 3600) % 24 },
@@ -106,7 +110,8 @@ export default function TodalDeals({ products }: { products?: Product[] }) {
     const variant = variants[selectedIndex] ?? variants[0];
     const discount = variant.originalPrice > 0 ? Math.max(0, Math.round((1 - variant.price / variant.originalPrice) * 100)) : 0;
     const description = text.productDescription.replace("{name}", product.name);
-    return (
+    if (ended) return null;
+  return (
       <article className="product-card" key={product.id}>
         <div className="product-image">
           <Image src={product.image} alt={product.name} fill sizes="(max-width: 600px) 45vw, (max-width: 1023px) 25vw, 180px" draggable={false} unoptimized={isRemoteImage(product.image)} onError={fallbackImage} />
@@ -135,7 +140,7 @@ export default function TodalDeals({ products }: { products?: Product[] }) {
       <div className="products-container today-deals-panel">
         <div className="products-header deals-header">
           <div className="deals-title"><svg viewBox="0 0 24 32" fill="currentColor" aria-hidden="true"><path d="M14 1 2 18h9l-2 13 13-19h-9l3-11Z" /></svg><div><h2 id="deals-heading">{text.heading}</h2><p>{text.description}</p></div></div>
-          <div className="deals-countdown" role="timer" aria-label={text.offerEnds}><span>{text.offerEnds}</span><div className="deals-clock">{clock.map(unit => <div className="deals-time" key={unit.label}><strong>{unit.value === null ? "--" : String(unit.value).padStart(2, "0")}</strong><span>{unit.label}</span></div>)}</div></div>
+          {hasTimer && <div className="deals-countdown" role="timer" aria-label={text.offerEnds}><span>{text.offerEnds}</span><div className="deals-clock">{clock.map(unit => <div className="deals-time" key={unit.label}><strong>{unit.value === null ? "--" : String(unit.value).padStart(2, "0")}</strong><span>{unit.label}</span></div>)}</div></div>}
         </div>
         <div id="deals-list">
           <Swiper className="products-slider" modules={[A11y, Keyboard, Mousewheel]} slidesPerView={1.7} spaceBetween={8} breakpoints={{ 451: { slidesPerView: 2.1, spaceBetween: 9 }, 576: { slidesPerView: 2.7, spaceBetween: 10 }, 679: { slidesPerView: 3.5, spaceBetween: 10 }, 877: { slidesPerView: 4.5, spaceBetween: 12 }, 1300: { slidesPerView: 5.5, spaceBetween: 12 } }} keyboard={{ enabled: true, onlyInViewport: true }} mousewheel={{ forceToAxis: true }} a11y={{ containerMessage: text.sliderLabel, slideLabelMessage: text.columnLabel }} tabIndex={0}>
@@ -143,7 +148,7 @@ export default function TodalDeals({ products }: { products?: Product[] }) {
           </Swiper>
         </div>
       </div>
-      {showFloatingTimer && (
+      {showFloatingTimer && hasTimer && (
         <div className="deals-floating-timer" style={{ top: navbarOffset }} role="region" aria-label={text.floatingLabel}>
           <div className="deals-floating-inner">
             {/* left: the names of the products in today's deals drift slowly from right to left (a link each); still when motion is reduced */}

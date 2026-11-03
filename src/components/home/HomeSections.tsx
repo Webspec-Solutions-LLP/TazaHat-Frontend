@@ -54,13 +54,14 @@ export async function TopSections({ cityId, cityName }: City) {
   const home = await loadHome(cityId);
   if ("error" in home) return <p className="home-city-status home-city-status--error" role="alert">{home.error} <ReloadButton /></p>;
   const { data } = home;
-  const deals = (data.special.length ? data.special : data.offers.items).map(cardToProduct);
+  // today's deals: only while the CRM has a deal running in this city
+  const deals = data.todayDeal ? data.special.map(cardToProduct) : [];
   const fresh = data.latest.map(cardToProduct);
   const categories: CategoryTile[] = data.categories.map(categoryToItem);
   return (
     <>
       {deals.length === 0 && fresh.length === 0 && <p className="home-city-status">No products are on sale in {cityName} right now. Please check back soon.</p>}
-      {deals.length > 0 && <TodalDeals products={deals} />}
+      {deals.length > 0 && data.todayDeal && <TodalDeals products={deals} deal={{ endsAt: data.todayDeal.endsAt, now: data.todayDeal.now }} />}
       {categories.length > 0 && <Category items={categories} />}
       {fresh.length > 0 && <Products products={fresh} heading={`Fresh in ${cityName}`} />}
     </>
@@ -75,7 +76,7 @@ export async function MiddleSections({ cityId }: Pick<City, "cityId">) {
   const bestSellerGroups: BestSellerGroup[] = data.bestSellerGroups.map((g) => ({ id: g.id, name: shortName(g.name), slug: g.slug, more: g.more, images: g.images.map((src) => ({ src: mediaSrc(src), alt: shortName(g.name) })) }));
   const freshPicks: FreshPick[] = data.categoryDiscounts.map((c, index) => ({ id: c.id, name: shortName(c.name), image: mediaSrc(c.imageUrl), discount: c.maxDiscount, theme: FRESH_THEMES[index % FRESH_THEMES.length], slug: c.slug }));
   // when today's special prices already fill the first deals row, this shelf shows the biggest discounts; otherwise the best sellers
-  const dealShelf: Product[] = (data.special.length ? data.offers.items : data.bestSellers).slice(0, 8).map(cardToProduct);
+  const dealShelf: Product[] = (data.todayDeal ? data.offers.items : data.bestSellers).slice(0, 8).map(cardToProduct);
   // "steal deals": one pool of this city's products, filtered by price tabs
   const seen = new Set<string>();
   const pool: ApiCard[] = [...data.bestSellers, ...data.latest, ...data.offers.items, ...data.sections.flatMap((x) => x.products)];
