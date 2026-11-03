@@ -252,8 +252,8 @@ export default function Cart({
                   strokeLinejoin="round"
                 >
                   <circle cx="9" cy="21" r="1" />
-                  <circle cx="20" cy="21" r="1" />
-                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                  <circle cx="19" cy="21" r="1" />
+                  <path d="M2 3h2l2.4 12.2a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6L22 8H5" />
                 </svg>
               </div>
               <h3>Your cart is empty</h3>
