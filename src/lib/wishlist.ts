@@ -39,3 +39,9 @@ export function subscribeToWishlist(onChange: () => void): () => void {
     window.removeEventListener("storage", onChange);
   };
 }
+
+/** replace the whole list (a change that came from the account / another device): saved here and announced like any other change */
+export function replaceWishlistIds(ids: string[]): void {
+  window.localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify([...new Set(ids)]));
+  window.dispatchEvent(new Event(WISHLIST_CHANGE_EVENT));
+}

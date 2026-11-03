@@ -175,7 +175,10 @@ export default function Navbar({
       setHasCustomCart(true);
     };
     window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
+    // the delivery city changed: the cart of the old city is emptied (see CitySync and the location pop-up)
+    const onClear = () => { setCartItems([]); setHasCustomCart(true); };
+    window.addEventListener("tazahat:clear-cart", onClear);
+    return () => { window.removeEventListener("storage", onStorage); window.removeEventListener("tazahat:clear-cart", onClear); };
   }, []);
   useEffect(() => {
     if (!cartLoaded.current) return;
@@ -698,7 +701,7 @@ export default function Navbar({
               <Link href="/orders" role="menuitem" tabIndex={isAccountOpen ? 0 : -1} onClick={() => setIsAccountOpen(false)}>
                 <span className="navbar-account-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 3h12l2 3v15H4V6l2-3Z"/><path d="M4 6h16M9 10v7l3-2 3 2v-7"/></svg></span>{t.myOrders}
               </Link>
-              <Link href="/myprofile" role="menuitem" tabIndex={isAccountOpen ? 0 : -1} onClick={() => setIsAccountOpen(false)}>
+              <Link href="/profile" role="menuitem" tabIndex={isAccountOpen ? 0 : -1} onClick={() => setIsAccountOpen(false)}>
                 <span className="navbar-account-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="7.5" r="3.5"/><path d="M5 20v-1.2a7 7 0 0 1 14 0V20Z"/></svg></span>{t.myProfile}
               </Link>
               {user && (
@@ -761,8 +764,8 @@ export default function Navbar({
                 strokeLinejoin="round"
               >
                 <circle cx="9" cy="21" r="1" />
-                <circle cx="20" cy="21" r="1" />
-                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                <circle cx="19" cy="21" r="1" />
+                <path d="M2 3h2l2.4 12.2a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6L22 8H5" />
               </svg>
               <span className="navbar-cart-badge">{visibleCartCount}</span>
             </div>

@@ -89,7 +89,7 @@ export default function Location({ onClose }: LocationProps) {
       .then((g) => {
         if (cancelled || !mapElementRef.current) return;
         const map = new g.maps.Map(mapElementRef.current, {
-          center: INDIA_CENTER, zoom: 11, disableDefaultUI: true, zoomControl: true, gestureHandling: "greedy", clickableIcons: false,
+          center: INDIA_CENTER, zoom: 11, disableDefaultUI: true, zoomControl: true, zoomControlOptions: { position: g.maps.ControlPosition.RIGHT_CENTER }, gestureHandling: "greedy", clickableIcons: false,
         });
         const marker = new g.maps.Marker({ map, position: INDIA_CENTER, draggable: true, title: t.dragMarkerTitle });
         marker.addListener("dragend", () => { const p = marker.getPosition(); if (p) void pick(p.toJSON()); });
@@ -195,10 +195,19 @@ export default function Location({ onClose }: LocationProps) {
     void detectLocation();
   }, [mapsReady, savedCity, detectLocation]);
 
-  const confirm = async () => {
+  // a different city means a new cart: when the cart has items the visitor is asked first (the old shop's question, word for word)
+  const [askClearCart, setAskClearCart] = useState(false);
+  const cartHasItems = () => {
+    try { const raw: unknown = JSON.parse(window.localStorage.getItem("tazahat-cart-v1") ?? "[]"); return Array.isArray(raw) && raw.length > 0; } catch { return false; }
+  };
+  const confirm = async (cartAnswered = false) => {
     if (!verdict?.serviceable || saving) return;
+    if (!cartAnswered && savedCity && savedCity.id !== verdict.city.id && cartHasItems()) { setAskClearCart(true); return; }
+    setAskClearCart(false);
     setSaving(true);
-    const res = await selectCityAction(verdict.city, verdict.pincode).catch(() => ({ ok: false }));
+    const changedCity = !savedCity || savedCity.id !== verdict.city.id;
+    const res = await selectCityAction(verdict.city, verdict.pincode, address).catch(() => ({ ok: false }));
+    if (res.ok && changedCity) window.dispatchEvent(new Event("tazahat:clear-cart"));
     if (!res.ok) {
       setSaving(false);
       return setVerdict({ serviceable: false, message: t.citySaveError });
@@ -244,18 +253,12 @@ export default function Location({ onClose }: LocationProps) {
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
                   <input ref={searchInputRef} placeholder={t.searchPlaceholder} aria-label={t.searchPlaceholder} />
                 </label>
-                <button type="button" className="location-map-locate" onClick={() => void detectLocation()} disabled={busy}>{t.useCurrentLocation}</button>
               </div>
-              <span className="location-map-caption">
-                {busy
-                  ? t.checkingLocation
-                  : verdict?.serviceable
-                  ? t.deliveryAreaCaption.replace(
-                      "{location}",
-                      `${verdict.city.name}${verdict.pincode ? `, ${verdict.pincode}` : ""}`
-                    )
-                  : t.dragPinCaption}
-              </span>
+              {/* "use my current location": an icon above the zoom buttons (both sit mid-height on the right, clear of the address caption) */}
+              <button type="button" className="location-map-locate" onClick={() => void detectLocation()} disabled={busy} aria-label={t.useCurrentLocation} title={t.useCurrentLocation}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3.2M12 18.8V22M2 12h3.2M18.8 12H22"/><circle cx="12" cy="12" r="7.4"/></svg>
+              </button>
+              <span className="location-map-caption">{busy ? t.checkingLocation : verdict?.serviceable ? t.deliveryAreaCaption.replace("{location}", `${verdict.city.name}${verdict.pincode ? `, ${verdict.pincode}` : ""}`) : t.dragPinCaption}</span>
             </div>
           </section>
 
@@ -276,10 +279,23 @@ export default function Location({ onClose }: LocationProps) {
           </div>
         </div>
         <div className="location-actions">
-          <button type="button" className="location-confirm" onClick={() => void confirm()} disabled={!verdict?.serviceable || busy || saving}>
+          <button type="button" className="location-confirm" onClick={() => void confirm(false)} disabled={!verdict?.serviceable || busy || saving}>
             {verdict?.serviceable ? t.deliverToCity.replace("{city}", verdict.city.name) : t.chooseLocationBtn}
           </button>
         </div>
+        {askClearCart && (
+          <div className="location-confirm-backdrop" role="alertdialog" aria-modal="true" aria-labelledby="location-clear-title">
+            <div className="location-confirm-box">
+              <span className="location-confirm-icon" aria-hidden="true">i</span>
+              <h3 id="location-clear-title">Confirmation Message!</h3>
+              <p>Change Service City will remove all the items previously added in your cart. Do you want to continue?</p>
+              <div className="location-confirm-buttons">
+                <button type="button" className="location-confirm-yes" onClick={() => void confirm(true)}>Yes</button>
+                <button type="button" className="location-confirm-no" onClick={() => setAskClearCart(false)}>No</button>
+              </div>
+            </div>
+          </div>
+        )}
         <div className="location-modal-footer"><span>{t.footerFreshness}</span><span className="location-footer-dot" /> {t.brandName}</div>
       </section>
     </div>

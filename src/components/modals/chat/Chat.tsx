@@ -2,514 +2,332 @@
 
 import { useBackClose } from "@/lib/backLayers";
 
-import Image from "next/image";
-import Link from "next/link";
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type FormEvent, type PointerEvent } from "react";
-import productCatalog from "@/components/products/english.json";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
 import "./Chat.css";
-import { fallbackImage, isRemoteImage } from "@/lib/api";
-import { type SupportedLang, useLanguage } from "@/lib/language";
-import englishText from "./english.json";
-import bengaliText from "./bengali.json";
-import hindiText from "./hindi.json";
+import "@/components/skeleton/Skeleton.css";
+import { useAuth } from "@/lib/auth";
+import { MAX_VOICE_SECONDS, uploadChatMedia, useVoiceRecorder, type VoiceResult } from "@/lib/useVoiceRecorder";
+import { useLanguage } from "@/lib/language";
+import VoiceBubble from "./VoiceBubble";
+import { chatOlderAction, chatOpenAction, chatReadAction, chatSendAction, chatTypingAction, type ChatMedia, type ChatMsg } from "@/app/chat-actions";
 
-const textMap: Record<SupportedLang, typeof englishText> = {
-  en: englishText,
-  bn: bengaliText,
-  hi: hindiText,
-};
-
-type OrderLine = {
-  id: string;
-  name: string;
-  image: string;
-  quantity: number;
-  price: number;
-  weight: string;
-};
-
-type ChatMessage = {
-  id: string;
-  sender: "customer" | "team" | "ai";
-  author: string;
-  text: string;
-  time: string;
-  image?: string;
-  replyTo?: { author: string; text: string; image?: string };
-  order?: OrderLine[];
-  orderStatus?: "placed" | "cancelled";
-  product?: Pick<(typeof productCatalog.products)[number], "id" | "name" | "image">;
-};
-
-const productCatalogItems = productCatalog.products;
-
-function currentTime() {
-  return new Intl.DateTimeFormat("en-IN", {
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(new Date());
-}
-
-function getOrderLines(text: string): OrderLine[] {
-  const normalizedText = text.toLowerCase();
-  const quantityMatch = normalizedText.match(
-    /(?:\bx\s*|\bqty\s*|\bquantity\s*)(\d+)|\b(\d+)\s*(?:kg|g|packs?|pieces?|pcs|items?)\b/i
-  );
-  const quantity = Math.min(20, Math.max(1, Number(quantityMatch?.[1] ?? quantityMatch?.[2] ?? 1)));
-
-  return productCatalogItems
-    .filter((product) =>
-      normalizedText.includes(product.name.toLowerCase()) ||
-      normalizedText.includes(product.id.toLowerCase())
-    )
-    .map((product) => ({
-      id: product.id,
-      name: product.name,
-      image: product.image,
-      quantity,
-      price: product.price,
-      weight: product.weight,
-    }));
-}
-
-function createReply(
-  text: string,
-  activeOrder: boolean,
-  t: typeof englishText
-): Omit<ChatMessage, "id" | "time"> & { cancelOrder?: boolean } {
-  const lowerText = text.toLowerCase();
-
-  if (/\b(cancel|cancellation|stop|বাতিল|রদ্দ|रद्द)\b/i.test(lowerText)) {
-    return {
-      sender: "ai",
-      author: t.aiAuthor,
-      text: activeOrder ? t.replyCancelled : t.replyNoActiveOrder,
-      cancelOrder: activeOrder,
-    };
-  }
-
-  if (/\b(refund|complaint|damaged|spoiled|human|agent|team member|talk to support|speak to someone|সহায়তা|সাহায্য|मदद|सहायता)\b/i.test(lowerText)) {
-    return {
-      sender: "team",
-      author: t.supportAuthor,
-      text: t.replySupport,
-    };
-  }
-
-  const orderLines = getOrderLines(text);
-  if (orderLines.length > 0 && /\b(order|buy|add|get|want|need|কিনতে|অর্ডার|চাই|खरीद|ऑर्डर|चाहिए)\b/i.test(lowerText)) {
-    return {
-      sender: "ai",
-      author: t.aiAuthor,
-      text: t.replyOrderSummary,
-      order: orderLines,
-      orderStatus: "placed",
-    };
-  }
-
-  if (/\b(order|buy|add|get|want|need|কিনতে|অর্ডার|চাই|खरीद|ऑर्डर|चाहिए)\b/i.test(lowerText)) {
-    return {
-      sender: "ai",
-      author: t.aiAuthor,
-      text: t.replyAskProduct,
-    };
-  }
-
-  if (/\b(delivery|deliver|shipping|pickup|pick up|ডেলিভারি|পিকআপ|डिलीवरी|पिकअप)\b/i.test(lowerText)) {
-    return {
-      sender: "ai",
-      author: t.aiAuthor,
-      text: t.replyDelivery,
-    };
-  }
-
-  if (/\b(payment|pay|cash|online|পেমেন্ট|টাকা|भुगतान|कैश)\b/i.test(lowerText)) {
-    return {
-      sender: "ai",
-      author: t.aiAuthor,
-      text: t.replyPayment,
-    };
-  }
-
-  if (/\b(track|status|where is|arrive|ট্র্যাক|স্ট্যাটাস|ট্র্যাকিং|स्थिति|ट्रैक)\b/i.test(lowerText)) {
-    return {
-      sender: "ai",
-      author: t.aiAuthor,
-      text: t.replyTracking,
-    };
-  }
-
-  return {
-    sender: "ai",
-    author: t.aiAuthor,
-    text: t.replyFallback,
-  };
-}
-
-type ChatProduct = Pick<(typeof productCatalog.products)[number], "id" | "name" | "image">;
+/** a message on screen: the saved one, or one still being sent / that failed (kept with its own id so a retry never duplicates it) */
+type Row = ChatMsg & { state?: "sending" | "failed"; /** kept so a failed message can be sent again */ retry?: { media?: ChatMedia; blob?: Blob; kind?: "image" | "voice"; transcript?: string; seconds?: number; waveform?: number[] } };
 
 export interface ChatProps {
   onClose: () => void;
-  product?: ChatProduct;
+  /** opened from a product page: the question starts with the product's name */
+  product?: { id: string; name: string; image?: string };
   requestCloseRef?: { current: (() => void) | null };
 }
 
-export default function Chat({ onClose, product, requestCloseRef }: ChatProps) {
-  const [lang] = useLanguage();
-  const t = textMap[lang] || englishText;
+const timeOf = (iso: string) => new Intl.DateTimeFormat("en-IN", { hour: "numeric", minute: "2-digit", timeZone: "Asia/Kolkata" }).format(new Date(iso));
+const dayKey = (iso: string) => new Date(iso).toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+function dayLabel(iso: string) {
+  const key = dayKey(iso);
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+  const yesterday = new Date(Date.now() - 86_400_000).toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+  if (key === today) return "Today";
+  if (key === yesterday) return "Yesterday";
+  return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Kolkata" });
+}
+const newId = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `c${Date.now()}${Math.random().toString(36).slice(2, 8)}`);
 
-  const [messages, setMessages] = useState<ChatMessage[]>(() =>
-    product
-      ? [
-          {
-            id: "product-question",
-            sender: "ai",
-            author: t.assistantAuthor,
-            text: t.productWelcomeText.replace("{product}", product.name),
-            time: t.timeNow,
-            product,
-          },
-        ]
-      : [
-          {
-            id: "welcome",
-            sender: "ai",
-            author: t.aiAuthor,
-            text: t.welcomeText,
-            time: t.timeNow,
-          },
-        ]
-  );
-  const [message, setMessage] = useState("");
-  const [attachment, setAttachment] = useState<{ name: string; dataUrl: string } | null>(null);
-  const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null);
-  const [openMessageMenuId, setOpenMessageMenuId] = useState<string | null>(null);
-  const [pinnedMessageId, setPinnedMessageId] = useState<string | null>(null);
-  const [swipingMessageId, setSwipingMessageId] = useState<string | null>(null);
-  const [swipeOffset, setSwipeOffset] = useState(0);
-  const [attachmentError, setAttachmentError] = useState("");
-  const [isReplying, setIsReplying] = useState(false);
-  const [isTicketPromptOpen, setIsTicketPromptOpen] = useState(false);
+/** grey bubbles with a soft shine while the conversation loads (alternating sides, like real messages) */
+function ChatSkeleton({ rows }: { rows: number }) {
+  const widths = [62, 44, 74, 38, 56, 68];
+  return <>{Array.from({ length: rows }, (_, i) => <div key={i} className={`chat-sk-row${i % 2 ? " is-mine" : ""}`}><span className="sk" style={{ width: `${widths[i % widths.length]}%`, height: i % 3 === 2 ? 46 : 30 }} /></div>)}</>;
+}
+
+/** WhatsApp-style support chat: signed-in customers only, the last 20 messages first, 10 more each time you scroll up, live replies, ticks and "typing...". */
+export default function Chat({ onClose, product, requestCloseRef }: ChatProps) {
+  const { user, ready, openLogin } = useAuth();
+  const [rows, setRows] = useState<Row[]>([]);
+  const [hasMore, setHasMore] = useState(false);
+  const [state, setState] = useState<"loading" | "ready" | "error">("loading");
+  const [loadingOlder, setLoadingOlder] = useState(false);
+  const [message, setMessage] = useState(() => (product ? `Hi, I have a question about ${product.name}: ` : ""));
+  const [supportTyping, setSupportTyping] = useState(false);
+  const [language] = useLanguage();
+  const [photo, setPhoto] = useState<{ file: File; url: string } | null>(null);
+  const [lightbox, setLightbox] = useState<string | null>(null);
+  const [mediaError, setMediaError] = useState("");
+  const fileInput = useRef<HTMLInputElement>(null);
   const [isClosing, setIsClosing] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const messageInputRef = useRef<HTMLInputElement>(null);
-  const imageInputRef = useRef<HTMLInputElement>(null);
-  const messagePointerStartRef = useRef<{ x: number; y: number; messageId: string } | null>(null);
-  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const replyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scroller = useRef<HTMLDivElement>(null);
+  const input = useRef<HTMLInputElement>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastTypingSent = useRef(0);
+  const stickToEnd = useRef(true);
+  const prependFrom = useRef<number | null>(null);
+  const older = useRef(false);
+  const rowsRef = useRef<Row[]>([]);
+  rowsRef.current = rows;
 
   const closeChat = useCallback(() => {
     if (isClosing) return;
     setIsClosing(true);
-    closeTimerRef.current = setTimeout(onClose, 380);
+    closeTimer.current = setTimeout(onClose, 380);
   }, [isClosing, onClose]);
   useBackClose(closeChat);
-
   useEffect(() => {
-    if (requestCloseRef) {
-      requestCloseRef.current = closeChat;
-      return () => {
-        requestCloseRef.current = null;
-      };
-    }
+    if (requestCloseRef) { requestCloseRef.current = closeChat; return () => { requestCloseRef.current = null; }; }
   }, [closeChat, requestCloseRef]);
-
   useEffect(() => {
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") closeChat();
-    };
-    document.addEventListener("keydown", closeOnEscape);
-    return () => document.removeEventListener("keydown", closeOnEscape);
+    const esc = (e: KeyboardEvent) => { if (e.key === "Escape") closeChat(); };
+    document.addEventListener("keydown", esc);
+    return () => document.removeEventListener("keydown", esc);
   }, [closeChat]);
+  useEffect(() => () => { if (closeTimer.current) clearTimeout(closeTimer.current); if (typingTimer.current) clearTimeout(typingTimer.current); }, []);
 
+  // open: the latest 20 messages, then tell support they were read
+  const open = useCallback(async () => {
+    setState("loading");
+    const res = await chatOpenAction();
+    if (!res.ok) { setState("error"); return; }
+    setRows(res.data.messages);
+    setHasMore(res.data.hasMore);
+    stickToEnd.current = true;
+    setState("ready");
+    if (res.data.unread > 0) void chatReadAction();
+  }, []);
+  useEffect(() => { if (user) void open(); }, [user, open]);
+
+  // live: a reply, a read receipt, "typing..." (the page's own realtime link passes them on as one window event)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages, isReplying]);
-
-  useEffect(
-    () => () => {
-      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
-      if (replyTimerRef.current) clearTimeout(replyTimerRef.current);
-    },
-    []
-  );
-
-  const sendMessage = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const trimmed = message.trim();
-    if ((!trimmed && !attachment) || isReplying || isClosing) return;
-
-    const hasActiveOrder = messages.some((item) => item.orderStatus === "placed");
-    const reply = createReply(trimmed || t.sharedAnImage, hasActiveOrder, t);
-    const timestamp = Date.now();
-    const sentAttachment = attachment;
-    const sentReply = replyingTo;
-
-    setMessages((current) => [
-      ...current,
-      {
-        id: `customer-${timestamp}`,
-        sender: "customer",
-        author: t.youAuthor,
-        text: trimmed,
-        ...(sentAttachment ? { image: sentAttachment.dataUrl } : {}),
-        ...(sentReply ? { replyTo: { author: sentReply.author, text: sentReply.text, ...(sentReply.image ? { image: sentReply.image } : {}) } } : {}),
-        time: currentTime(),
-      },
-    ]);
-    setMessage("");
-    setAttachment(null);
-    setReplyingTo(null);
-    setAttachmentError("");
-    setIsReplying(true);
-
-    replyTimerRef.current = setTimeout(() => {
-      setMessages((current) => [
-        ...current.map((item) =>
-          reply.cancelOrder && item.orderStatus === "placed"
-            ? { ...item, orderStatus: "cancelled" as const }
-            : item
-        ),
-        {
-          id: `reply-${timestamp}`,
-          sender: reply.sender,
-          author: reply.author,
-          text: reply.text,
-          time: currentTime(),
-          ...(reply.order ? { order: reply.order, orderStatus: reply.orderStatus } : {}),
-        },
-      ]);
-      setIsReplying(false);
-    }, 750);
-  };
-
-  const pickImage = (file?: File) => {
-    if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      setAttachmentError(t.imageTypeError);
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      setAttachmentError(t.imageSizeError);
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === "string") {
-        setAttachment({ name: file.name, dataUrl: reader.result });
-        setAttachmentError("");
+    const onChat = (e: Event) => {
+      const d = (e as CustomEvent<{ kind: string; message?: ChatMsg; by?: string; on?: boolean; at?: string }>).detail;
+      if (d.kind === "message" && d.message) {
+        const m = d.message;
+        setRows((cur) => (cur.some((r) => r.id === m.id || (m.clientId && r.clientId === m.clientId)) ? cur.map((r) => (r.clientId && r.clientId === m.clientId ? m : r)) : [...cur, m]));
+        if (m.fromSupport) { setSupportTyping(false); if (document.visibilityState === "visible") void chatReadAction(); }
+      } else if (d.kind === "update" && d.message) {
+        const m = d.message; // e.g. the text of a voice message was written down a moment after it was sent
+        setRows((cur) => cur.map((r) => (r.id === m.id ? m : r)));
+      } else if (d.kind === "read" && d.by === "support" && d.at) {
+        const at = d.at;
+        setRows((cur) => cur.map((r) => (!r.fromSupport && !r.readAt ? { ...r, readAt: at } : r)));
+      } else if (d.kind === "typing" && d.by === "support") {
+        setSupportTyping(!!d.on);
+        if (typingTimer.current) clearTimeout(typingTimer.current);
+        if (d.on) typingTimer.current = setTimeout(() => setSupportTyping(false), 6000);
       }
     };
-    reader.onerror = () => setAttachmentError(t.imageReadError);
-    reader.readAsDataURL(file);
+    window.addEventListener("tazahat:chat", onChat);
+    return () => window.removeEventListener("tazahat:chat", onChat);
+  }, []);
+
+  // scrolling: stay at the bottom for new messages; at the top, 10 older ones load and the view does not jump
+  useLayoutEffect(() => {
+    const el = scroller.current;
+    if (!el) return;
+    if (prependFrom.current !== null) { el.scrollTop = el.scrollHeight - prependFrom.current; prependFrom.current = null; return; }
+    if (stickToEnd.current) el.scrollTop = el.scrollHeight;
+  }, [rows, supportTyping, state]);
+
+  const scrollEnd = useCallback(() => { const el = scroller.current; if (el && stickToEnd.current) el.scrollTop = el.scrollHeight; }, []);
+  // opened: land on the newest message (and stay there while pictures load and change the height)
+  useEffect(() => {
+    if (state !== "ready") return;
+    stickToEnd.current = true;
+    scrollEnd();
+    const timers = [60, 250, 700].map((ms) => setTimeout(scrollEnd, ms));
+    return () => timers.forEach(clearTimeout);
+  }, [state, scrollEnd]);
+  // the chat is being read now: the notification of its messages (one per conversation) is taken away
+  useEffect(() => {
+    const clear = async () => { try { const reg = await navigator.serviceWorker?.getRegistration(); (await reg?.getNotifications())?.forEach((n) => { if (/^chat-/.test(n.tag)) n.close(); }); } catch { /* no service worker */ } };
+    void clear();
+    const onChat = (e: Event) => { const d = (e as CustomEvent<{ kind: string }>).detail; if (d.kind === "message") void clear(); };
+    window.addEventListener("tazahat:chat", onChat);
+    return () => window.removeEventListener("tazahat:chat", onChat);
+  }, []);
+
+  const loadOlder = useCallback(async () => {
+    const first = rowsRef.current.find((r) => !r.state);
+    if (older.current || !hasMore || !first) return;
+    older.current = true;
+    setLoadingOlder(true);
+    const res = await chatOlderAction({ createdAt: first.createdAt, id: first.id });
+    older.current = false;
+    setLoadingOlder(false);
+    if (!res.ok) return;
+    const el = scroller.current;
+    prependFrom.current = el ? el.scrollHeight - el.scrollTop : null;
+    stickToEnd.current = false;
+    setRows((cur) => [...res.data.messages.filter((m) => !cur.some((r) => r.id === m.id)), ...cur]);
+    setHasMore(res.data.hasMore);
+  }, [hasMore]);
+
+  const onScroll = () => {
+    const el = scroller.current;
+    if (!el) return;
+    stickToEnd.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+    if (el.scrollTop < 60) void loadOlder();
   };
 
-  const startReply = (chatMessage: ChatMessage) => {
-    setReplyingTo(chatMessage);
-    setOpenMessageMenuId(null);
-    messageInputRef.current?.focus();
+  /** sends a message; a picture / recording is uploaded first. A failed one stays on screen with "Tap to retry". */
+  const send = async (text: string, opts: { clientId?: string; retry?: boolean; blob?: Blob; kind?: "image" | "voice"; seconds?: number; transcript?: string; waveform?: number[]; preview?: string } = {}) => {
+    const clientId = opts.clientId ?? newId();
+    const now = new Date().toISOString();
+    const local: Row = { id: `local-${clientId}`, threadId: "", text, fromSupport: false, createdAt: now, readAt: null, clientId, imageUrl: opts.kind === "image" ? opts.preview ?? null : null, voiceUrl: opts.kind === "voice" && opts.blob ? URL.createObjectURL(opts.blob) : null, voiceSeconds: opts.seconds ?? null, transcript: opts.transcript || null, waveform: opts.waveform ?? [], legacyMedia: null, state: "sending", retry: { blob: opts.blob, kind: opts.kind, seconds: opts.seconds, transcript: opts.transcript, waveform: opts.waveform } };
+    if (!opts.retry) setRows((cur) => [...cur, local]);
+    else setRows((cur) => cur.map((r) => (r.clientId === clientId ? { ...r, state: "sending" } : r)));
+    stickToEnd.current = true;
+    let media: ChatMedia | undefined;
+    if (opts.blob && opts.kind) {
+      const up = await uploadChatMedia(opts.kind, opts.blob);
+      if (!up.ok) { setMediaError(up.error); setRows((cur) => cur.map((r) => (r.clientId === clientId ? { ...r, state: "failed" } : r))); return; }
+      media = opts.kind === "image" ? { imageUrl: up.url } : { voiceUrl: up.url, voiceSeconds: opts.seconds, transcript: opts.transcript, waveform: opts.waveform };
+    }
+    const res = await chatSendAction(text, clientId, media);
+    setRows((cur) => {
+      if (!res.ok) return cur.map((r) => (r.clientId === clientId ? { ...r, state: "failed" } : r));
+      const real = res.data;
+      const withoutLive = cur.filter((r) => !(r.id === real.id && r.clientId !== clientId));
+      return withoutLive.map((r) => (r.clientId === clientId ? real : r));
+    });
   };
 
-  const togglePin = (chatMessage: ChatMessage) => {
-    setPinnedMessageId((current) => current === chatMessage.id ? null : chatMessage.id);
-    setOpenMessageMenuId(null);
+  // ---- voice recording ----------------------------------------------------------------------------------------------
+  const sendVoice = (r: VoiceResult) => void send("", { blob: r.blob, kind: "voice", seconds: r.seconds, transcript: r.transcript, waveform: r.waveform });
+  const voice = useVoiceRecorder(language, sendVoice); // the one-minute limit hands the recording over by itself
+  const startVoice = async () => { setMediaError(""); await voice.start(); };
+  const finishVoice = async () => { const r = await voice.stop(); if (r) sendVoice(r); };
+
+  // ---- pictures -----------------------------------------------------------------------------------------------------
+  const pickPhoto = (file?: File) => {
+    if (!file) return;
+    setMediaError("");
+    if (!file.type.startsWith("image/")) { setMediaError("Choose a picture."); return; }
+    if (file.size > 10 * 1024 * 1024) { setMediaError("Choose a picture under 10 MB."); return; }
+    setPhoto({ file, url: URL.createObjectURL(file) });
+  };
+  useEffect(() => () => { if (photo) URL.revokeObjectURL(photo.url); }, [photo]);
+
+  const submit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const text = message.trim();
+    if ((!text && !photo) || isClosing) return;
+    setMessage("");
+    void chatTypingAction(false);
+    if (photo) { const p = photo; setPhoto(null); void send(text, { blob: p.file, kind: "image", preview: p.url }); } else void send(text);
+    input.current?.focus();
   };
 
-  const startMessageSwipe = (chatMessage: ChatMessage, event: PointerEvent<HTMLElement>) => {
-    if (event.button !== 0) return;
-    const target = event.target;
-    if (target instanceof Element && target.closest("button, a, input")) return;
-    messagePointerStartRef.current = { x: event.clientX, y: event.clientY, messageId: chatMessage.id };
-    setSwipingMessageId(chatMessage.id);
-    setSwipeOffset(0);
-    event.currentTarget.setPointerCapture(event.pointerId);
+  const onType = (value: string) => {
+    setMessage(value);
+    const now = Date.now();
+    if (value.trim() && now - lastTypingSent.current > 2500) { lastTypingSent.current = now; void chatTypingAction(true); }
   };
 
-  const moveMessageSwipe = (event: PointerEvent<HTMLElement>) => {
-    const start = messagePointerStartRef.current;
-    if (!start) return;
-    const deltaX = event.clientX - start.x;
-    const deltaY = event.clientY - start.y;
-    if (deltaX > 0 && Math.abs(deltaX) > Math.abs(deltaY) * 1.1) setSwipeOffset(Math.min(deltaX, 72));
-  };
-
-  const finishMessageSwipe = (chatMessage: ChatMessage, event: PointerEvent<HTMLElement>) => {
-    const start = messagePointerStartRef.current;
-    messagePointerStartRef.current = null;
-    setSwipingMessageId(null);
-    setSwipeOffset(0);
-    if (!start) return;
-
-    const deltaX = event.clientX - start.x;
-    const deltaY = event.clientY - start.y;
-    if (start.messageId === chatMessage.id && deltaX > 36 && deltaX > Math.abs(deltaY) * 1.1) startReply(chatMessage);
-  };
-
-  const pinnedMessage = messages.find((item) => item.id === pinnedMessageId) ?? null;
-
+  let lastDay = "";
   return (
-    <section
-      className={`chat-panel${isClosing ? " chat-panel--closing" : ""}`}
-      role="dialog"
-      aria-modal="false"
-      aria-labelledby="chat-title"
-      lang={t.language}
-    >
+    <section className={`chat-panel${isClosing ? " chat-panel--closing" : ""}`} role="dialog" aria-modal="false" aria-labelledby="chat-title">
       <header className="chat-header">
         <span className="chat-avatar" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none">
-            <path d="M4 5h16v12H9l-5 3V5Z" />
-            <path d="M8 9h8M8 13h5" />
-          </svg>
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 5h16v12H9l-5 3V5Z" /><path d="M8 9h8M8 13h5" /></svg>
         </span>
         <span className="chat-header-copy">
-          <strong id="chat-title">{t.chatTitle}</strong>
-          <span><i /> {t.chatSubtitle}</span>
+          <strong id="chat-title">TazaHat Support</strong>
+          <span><i /> {supportTyping ? "typing…" : "We usually reply within a few minutes"}</span>
         </span>
-        <button className="chat-ticket-button" type="button" onClick={() => setIsTicketPromptOpen(true)} aria-label={t.raiseTicketAria}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 5h16v12H9l-5 3V5Z"/><path d="M8 9h8M8 13h5"/></svg>
-          <span>{t.raiseTicket}</span>
-        </button>
-        <button className="chat-collapse-button" type="button" onClick={closeChat} aria-label={t.minimizeChatAria}>
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="m6 9 6 6 6-6" />
-          </svg>
+        <button className="chat-collapse-button" type="button" onClick={closeChat} aria-label="Minimize chat">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
         </button>
       </header>
 
-      <div className="chat-demo-banner">
-        <span>{t.demoTag}</span> {t.demoNotice}
-      </div>
-
-      <div className="chat-messages" aria-live="polite" aria-relevant="additions text">
-        {pinnedMessage && (
-          <button className="chat-pinned-banner" type="button" onClick={() => document.getElementById(`chat-message-${pinnedMessage.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" })}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m16 3 5 5-4 1-4 4-1 5-2-2-4 4-2-2 4-4-2-2 5-1 4-4z" /></svg>
-            <span><strong>{t.pinnedMessagePrefix.replace("{author}", pinnedMessage.author)}</strong><small>{pinnedMessage.text || (pinnedMessage.image ? t.photoFallback : t.messageFallback)}</small></span>
-          </button>
-        )}
-        <div className="chat-day-divider"><span>{t.today}</span></div>
-        {messages.map((chatMessage) => (
-          <article
-            id={`chat-message-${chatMessage.id}`}
-            className={`chat-message chat-message--${chatMessage.sender}${pinnedMessageId === chatMessage.id ? " is-pinned" : ""}${swipingMessageId === chatMessage.id ? " is-swiping" : ""}`}
-            key={chatMessage.id}
-            style={{ "--chat-swipe-offset": `${swipingMessageId === chatMessage.id ? swipeOffset : 0}px` } as CSSProperties}
-            onPointerDown={(event) => startMessageSwipe(chatMessage, event)}
-            onPointerMove={moveMessageSwipe}
-            onPointerUp={(event) => finishMessageSwipe(chatMessage, event)}
-            onPointerCancel={() => { messagePointerStartRef.current = null; setSwipingMessageId(null); setSwipeOffset(0); }}
-          >
-            <span className="chat-message-author">{chatMessage.author}</span>
-            {swipingMessageId === chatMessage.id && swipeOffset > 8 && <span className="chat-swipe-reply-indicator" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m9 14-5-5 5-5"/><path d="M4 9h9a7 7 0 0 1 7 7v3"/></svg></span>}
-            <div className="chat-message-actions">
-              <button type="button" className="chat-message-menu-toggle" aria-label={t.moreOptionsAria.replace("{author}", chatMessage.author)} aria-haspopup="menu" aria-expanded={openMessageMenuId === chatMessage.id} onClick={() => setOpenMessageMenuId((current) => current === chatMessage.id ? null : chatMessage.id)}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
-              </button>
-              {openMessageMenuId === chatMessage.id && (
-                <div className="chat-message-menu" role="menu">
-                  <button type="button" role="menuitem" onClick={() => startReply(chatMessage)}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m9 14-5-5 5-5"/><path d="M4 9h9a7 7 0 0 1 7 7v3"/></svg>{t.replyAction}</button>
-                  <button type="button" role="menuitem" onClick={() => togglePin(chatMessage)}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m16 3 5 5-4 1-4 4-1 5-2-2-4 4-2-2 4-4-2-2 5-1 4-4z"/></svg>{pinnedMessageId === chatMessage.id ? t.unpinAction : t.pinAction}</button>
+      {!user ? (
+        <div className="chat-gate">
+          <span className="chat-gate-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 5h16v12H9l-5 3V5Z" /><path d="M8 9h8M8 13h5" /></svg></span>
+          <strong>Log in to chat with us</strong>
+          <p>Your messages stay private and saved to your account, so our team can see your orders and help faster.</p>
+          <button type="button" className="chat-gate-button" disabled={!ready} onClick={() => openLogin()}>Log in</button>
+        </div>
+      ) : (
+        <>
+          <div className="chat-messages" ref={scroller} onScroll={onScroll} aria-live="polite" aria-relevant="additions text">
+            {loadingOlder && <div className="chat-sk-group" role="status" aria-label="Loading earlier messages"><ChatSkeleton rows={2} /></div>}
+            {state === "loading" && <div className="chat-sk-group" role="status" aria-label="Loading your chat"><ChatSkeleton rows={6} /></div>}
+            {state === "error" && <div className="chat-older">Could not load the chat. <button type="button" className="chat-retry" onClick={() => void open()}>Try again</button></div>}
+            {state === "ready" && rows.length === 0 && <div className="chat-empty"><strong>Say hello 👋</strong><span>Ask about an order, a product or delivery. Our team will reply here.</span></div>}
+            {rows.map((m) => {
+              const day = dayKey(m.createdAt);
+              const divider = day !== lastDay ? <div className="chat-day-divider" key={`d-${day}-${m.id}`}><span>{dayLabel(m.createdAt)}</span></div> : null;
+              lastDay = day;
+              const mine = !m.fromSupport;
+              return (
+                <div className="chat-row" key={m.clientId ?? m.id} style={{ display: "contents" }}>
+                  {divider}
+                  <article id={`chat-message-${m.id}`} className={`chat-message chat-message--${mine ? "customer" : "team"}${m.state === "failed" ? " is-failed" : ""}`}>
+                    {!mine && <span className="chat-message-author">TazaHat Support</span>}
+                    {m.legacyMedia && <div className="chat-media-missing"><span aria-hidden="true">{m.legacyMedia === "image" ? "📷" : m.legacyMedia === "voice" ? "🎤" : m.legacyMedia === "video" ? "🎥" : "📎"}</span><span>{m.legacyMedia === "image" ? "Photo" : m.legacyMedia === "voice" ? "Voice message" : m.legacyMedia === "video" ? "Video" : "Document"} is no longer available</span></div>}
+                    {m.imageUrl && <button type="button" className="chat-photo" onClick={() => setLightbox(m.imageUrl)} aria-label="Open photo">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={m.imageUrl} alt="Photo in chat" loading="lazy" onLoad={scrollEnd} /></button>}
+                    {m.voiceUrl && <VoiceBubble src={m.voiceUrl} seconds={m.voiceSeconds ?? 1} transcript={m.transcript} waveform={m.waveform} />}
+                    {m.text && <p>{m.text}</p>}
+                    <time>
+                      {timeOf(m.createdAt)}
+                      {mine && (m.state === "sending" ? <span className="chat-tick" aria-label="Sending">🕓</span> : m.state === "failed" ? null : <span className={`chat-tick${m.readAt ? " is-read" : ""}`} aria-label={m.readAt ? "Read" : "Sent"}>{m.readAt ? "✓✓" : "✓"}</span>)}
+                    </time>
+                    {m.state === "failed" && <button type="button" className="chat-retry" onClick={() => void send(m.text, { clientId: m.clientId ?? newId(), retry: true, blob: m.retry?.blob, kind: m.retry?.kind, seconds: m.retry?.seconds, transcript: m.retry?.transcript, waveform: m.retry?.waveform, preview: m.imageUrl ?? undefined })}>Not sent · Tap to retry</button>}
+                  </article>
                 </div>
-              )}
+              );
+            })}
+            {supportTyping && <div className="chat-typing" role="status" aria-label="Support is typing"><span>Support is typing</span><i /><i /><i /></div>}
+          </div>
+
+          <form className="chat-composer" onSubmit={submit}>
+            {mediaError && <p className="chat-attachment-error" role="alert">{mediaError}</p>}
+            {voice.error && <p className="chat-attachment-error" role="alert">{voice.error}</p>}
+            {photo && (
+              <div className="chat-composer-context chat-image-attachment">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={photo.url} alt="Selected picture" width={76} height={76} />
+                <span className="chat-composer-context-copy"><strong>Picture ready to send</strong><small>Add a few words if you like, then send</small></span>
+                <button type="button" aria-label="Remove picture" onClick={() => setPhoto(null)}>×</button>
+              </div>
+            )}
+            <input ref={fileInput} className="chat-sr-only" type="file" accept="image/*" aria-label="Choose a picture" onChange={(e) => { pickPhoto(e.target.files?.[0]); e.target.value = ""; }} />
+            {voice.recording ? (
+              <div className="chat-recording" role="status" aria-label="Recording">
+                <button type="button" className="chat-rec-cancel" onClick={voice.cancel} aria-label="Cancel recording"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14" /></svg></button>
+                <span className="chat-rec-dot" aria-hidden="true" />
+                <span className="chat-rec-time">{Math.floor(voice.seconds / 60)}:{String(voice.seconds % 60).padStart(2, "0")} <small>/ {Math.floor(MAX_VOICE_SECONDS / 60)}:00</small></span>
+                <span className="chat-rec-wave" aria-hidden="true">{Array.from({ length: 36 }, (_, i) => { const v = voice.live[voice.live.length - 36 + i] ?? 0; return <i key={i} style={{ height: `${Math.max(12, Math.min(100, v * 380))}%` }} />; })}</span>
+                <button type="button" className="chat-send-button" onClick={() => void finishVoice()} aria-label="Send voice message">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 18-8-7 18-3-7-8-3Z" /><path d="m11 14 4-4" /></svg>
+                </button>
+              </div>
+            ) : (
+              <>
+                <label className="chat-sr-only" htmlFor="chat-message-input">Message to TazaHat support</label>
+                <input ref={input} id="chat-message-input" value={message} onChange={(e) => onType(e.target.value)} placeholder="Type a message" maxLength={2000} disabled={isClosing || state !== "ready"} autoComplete="off" />
+                <button className="chat-attachment-button" type="button" disabled={isClosing || state !== "ready"} aria-label="Send a picture" onClick={() => fileInput.current?.click()}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3" /><circle cx="8.5" cy="9" r="1.6" /><path d="m21 16-5-5-8 8" /></svg>
+                </button>
+                {message.trim() || photo ? (
+                  <button className="chat-send-button" type="submit" disabled={isClosing || state !== "ready"} aria-label="Send message">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 18-8-7 18-3-7-8-3Z" /><path d="m11 14 4-4" /></svg>
+                  </button>
+                ) : (
+                  <button className="chat-send-button chat-mic-button" type="button" disabled={isClosing || state !== "ready" || !voice.supported} aria-label="Record a voice message" title={voice.supported ? "Record a voice message (up to 1 minute)" : "Voice messages are not supported in this browser"} onClick={() => void startVoice()}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3" /></svg>
+                  </button>
+                )}
+              </>
+            )}
+          </form>
+          {lightbox && (
+            <div className="chat-lightbox" role="dialog" aria-label="Photo" onClick={() => setLightbox(null)}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={lightbox} alt="Photo in chat" />
+              <button type="button" aria-label="Close photo" onClick={() => setLightbox(null)}>×</button>
             </div>
-            {chatMessage.replyTo && (
-              <div className="chat-quoted-message">
-                <strong>{chatMessage.replyTo.author}</strong>
-                {chatMessage.replyTo.image && <Image src={chatMessage.replyTo.image} alt={t.repliedImageAlt} width={80} height={80} unoptimized />}
-                <span>{chatMessage.replyTo.text || (chatMessage.replyTo.image ? t.photoFallback : t.messageFallback)}</span>
-              </div>
-            )}
-            {chatMessage.text && <p>{chatMessage.text}</p>}
-            {chatMessage.image && <Image className="chat-message-image" src={chatMessage.image} alt={t.chatImageAlt} width={640} height={480} unoptimized />}
-            {chatMessage.product && (
-              <Link className="chat-product-tag" href={`/${encodeURIComponent(chatMessage.product.id)}`} aria-label={t.viewProductAria.replace("{name}", chatMessage.product.name)} onClick={closeChat}>
-                <span className="chat-product-tag-image"><Image src={chatMessage.product.image} alt="" fill sizes="42px" unoptimized={isRemoteImage(chatMessage.product.image)} onError={fallbackImage} /></span>
-                <span className="chat-product-tag-copy"><small>{t.productTagSmall}</small><strong>{chatMessage.product.name}</strong></span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-              </Link>
-            )}
-            {chatMessage.order && (
-              <div className="chat-order-card">
-                {chatMessage.order.map((item) => (
-                  <Link className="chat-order-line" key={item.id} href={`/${encodeURIComponent(item.id)}`} onClick={closeChat} aria-label={t.viewOrderLineAria.replace("{name}", item.name)}>
-                    <span className="chat-order-image">
-                      <Image src={item.image} alt="" fill sizes="38px" unoptimized={isRemoteImage(item.image)} onError={fallbackImage} />
-                    </span>
-                    <span className="chat-order-product">
-                      <strong>{item.name}</strong>
-                      <small>{item.weight} · {t.qtyFormat.replace("{quantity}", String(item.quantity))}</small>
-                    </span>
-                    <strong className="chat-order-price">₹{item.price * item.quantity}</strong>
-                  </Link>
-                ))}
-                <div className="chat-order-total">
-                  <span>{chatMessage.orderStatus === "cancelled" ? t.cancelledDemoOrder : t.demoOrderTotal}</span>
-                  <strong>₹{chatMessage.order.reduce((sum, item) => sum + item.price * item.quantity, 0)}</strong>
-                </div>
-                <span className="chat-order-disclaimer">{t.demoOrderDisclaimer}</span>
-              </div>
-            )}
-            {chatMessage.orderStatus === "cancelled" && <span className="chat-order-cancelled">{t.demoOrderCancelled}</span>}
-            <time>{chatMessage.time}</time>
-          </article>
-        ))}
-        {isReplying && (
-          <div className="chat-typing" role="status" aria-label={t.typingAria}>
-            <span>{t.typingText}</span><i /><i /><i />
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
-
-      <form className="chat-composer" onSubmit={sendMessage}>
-        {isTicketPromptOpen && (
-          <div className="chat-ticket-prompt">
-            <span className="chat-ticket-prompt-mark" aria-hidden="true">!</span>
-            <button type="button" onClick={() => setMessage(`${t.supportTicketText} `)}>
-              <small>{t.supportTicketTag}</small>
-              <span>{t.supportTicketText}</span>
-            </button>
-            <button className="chat-ticket-prompt-dismiss" type="button" aria-label={t.dismissTicketPromptAria} onClick={() => setIsTicketPromptOpen(false)}>×</button>
-          </div>
-        )}
-        {replyingTo && (
-          <div className="chat-composer-context chat-composer-reply">
-            <span className="chat-reply-accent" />
-            {replyingTo.image && <Image src={replyingTo.image} alt="" width={76} height={76} unoptimized />}
-            <span className="chat-composer-context-copy"><strong>{t.replyingToAuthor.replace("{author}", replyingTo.author)}</strong><small>{replyingTo.text || (replyingTo.image ? t.photoFallback : t.messageFallback)}</small></span>
-            <button type="button" aria-label={t.cancelReplyAria} onClick={() => setReplyingTo(null)}>×</button>
-          </div>
-        )}
-        {attachment && (
-          <div className="chat-composer-context chat-image-attachment">
-            <Image src={attachment.dataUrl} alt={t.selectedImageAlt} width={76} height={76} unoptimized />
-            <span className="chat-composer-context-copy"><strong>{t.imageReady}</strong><small>{attachment.name}</small></span>
-            <button type="button" aria-label={t.removeSelectedImageAria} onClick={() => setAttachment(null)}>×</button>
-          </div>
-        )}
-        {attachmentError && <p className="chat-attachment-error" role="alert">{attachmentError}</p>}
-        <input ref={imageInputRef} className="chat-sr-only" type="file" accept="image/*" aria-label={t.chooseImageAria} onChange={(event) => { pickImage(event.target.files?.[0]); event.target.value = ""; }} />
-        <label className="chat-sr-only" htmlFor="chat-message-input">{t.inputAria}</label>
-        <input
-          ref={messageInputRef}
-          id="chat-message-input"
-          value={message}
-          onChange={(event) => setMessage(event.target.value)}
-          placeholder={t.inputPlaceholder}
-          maxLength={1000}
-          disabled={isReplying || isClosing}
-        />
-        <button className="chat-attachment-button" type="button" disabled={isReplying || isClosing} aria-label={t.pickImageAria} onClick={() => imageInputRef.current?.click()}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
-        </button>
-        <button className="chat-send-button" type="submit" disabled={(!message.trim() && !attachment) || isReplying || isClosing} aria-label={t.sendMessageAria}>
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="m3 11 18-8-7 18-3-7-8-3Z" />
-            <path d="m11 14 4-4" />
-          </svg>
-        </button>
-      </form>
+          )}
+        </>
+      )}
     </section>
   );
 }

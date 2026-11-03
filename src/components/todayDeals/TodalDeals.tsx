@@ -174,7 +174,7 @@ export default function TodalDeals({ products }: { products?: Product[] }) {
                   <small>{unit.label}</small>
                 </span>)}
               </span>
-              <span className="deals-floating-cta">{text.shopDeals} <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 10h13m-5-5 5 5-5 5" /></svg></span>
+              <span className="deals-floating-cta" aria-label={text.shopDeals}><span className="deals-cta-text">{text.shopDeals}</span> <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 10h13m-5-5 5 5-5 5" /></svg></span>
             </button>
           </div>
         </div>

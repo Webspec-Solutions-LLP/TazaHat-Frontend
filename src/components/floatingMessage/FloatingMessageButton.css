@@ -153,3 +153,18 @@
     transform: none;
   }
 }
+
+.floating-message-badge { position: absolute; top: -3px; right: -3px; z-index: 2; display: grid; min-width: 20px; height: 20px; place-items: center; padding: 0 5px; border: 2px solid #fff; border-radius: 10px; background: #e44c43; color: #fff; font-size: 10px; font-weight: 800; line-height: 1; }
+
+/* a new message while the chat is closed: the button keeps nudging, the count pops, and a small bubble shows the message */
+.floating-message-button.has-unread { animation: floating-message-appear 420ms ease-out both, floating-message-nudge 2.6s ease-in-out 1s infinite; }
+.floating-message-button.has-unread .floating-message-icon-wrapper { animation: floating-message-ring 2.6s ease-in-out 1s infinite; transform-origin: 50% 20%; }
+.floating-message-badge { animation: floating-message-pop .35s ease-out 1; }
+@keyframes floating-message-nudge { 0%, 70%, 100% { transform: translateY(0); } 74% { transform: translateY(-7px); } 80% { transform: translateY(0); } 86% { transform: translateY(-4px); } 92% { transform: translateY(0); } }
+@keyframes floating-message-ring { 0%, 70%, 100% { transform: rotate(0); } 74% { transform: rotate(-14deg); } 78% { transform: rotate(12deg); } 82% { transform: rotate(-9deg); } 86% { transform: rotate(6deg); } 90% { transform: rotate(0); } }
+@keyframes floating-message-pop { 0% { transform: scale(.4); } 60% { transform: scale(1.35); } 100% { transform: scale(1); } }
+.floating-message-peek { position: fixed; z-index: 999; right: 90px; bottom: 30px; display: flex; max-width: min(260px, calc(100vw - 120px)); flex-direction: column; gap: 2px; padding: 9px 12px; border: 1px solid #d5e3f0; border-radius: 12px 12px 3px 12px; background: #fff; color: #17365a; font: inherit; text-align: left; box-shadow: 0 8px 24px rgb(7 59 101 / 20%); cursor: pointer; animation: floating-message-peek-in .3s ease-out both; }
+.floating-message-peek strong { font-size: 11px; color: #0b6ab8; }
+.floating-message-peek span { overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+@keyframes floating-message-peek-in { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .floating-message-button.has-unread, .floating-message-button.has-unread .floating-message-icon-wrapper, .floating-message-badge { animation: none; } }

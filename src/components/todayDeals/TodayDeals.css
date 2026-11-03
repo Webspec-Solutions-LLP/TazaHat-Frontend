@@ -486,3 +486,7 @@
   .today-deals-section .product-details-button { min-height: 31px; padding-inline: 5px; font-size: 9px; }
   .today-deals-section .product-quick-view { flex-basis: 36px; min-height: 31px; }
 }
+/* the phone view: the sticky deals bar shows only the arrow (the label is for screen readers) */
+@media (max-width: 767px) {
+  .deals-floating-cta .deals-cta-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}

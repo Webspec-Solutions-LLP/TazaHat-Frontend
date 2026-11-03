@@ -792,3 +792,7 @@
     transition: none;
   }
 }
+
+.profile-address-note, .profile-form-error { margin: 0 0 8px; color: #c63542; font-size: 13px; }
+.profile-address-empty { grid-column: 1 / -1; margin: 6px 0; color: #5d7690; font-size: 14px; }
+.profile-avatar.is-busy { opacity: .6; }

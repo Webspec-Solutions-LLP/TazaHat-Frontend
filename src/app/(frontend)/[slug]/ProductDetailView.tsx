@@ -2,6 +2,7 @@
 
 import PackAction, { AvailabilityNote, StockRibbon } from "@/components/availability/PackAction";
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Products from "@/components/products/Products";
 import CompareList, { COMPARE_CHANGE_EVENT, COMPARE_STORAGE_KEY, type CompareProduct } from "@/components/modals/compareList/CompareList";
@@ -31,7 +32,7 @@ function Icon({ name }: { name: "fish" | "leaf" | "shield" | "flask" | "box" | "
     shield: <><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></>,
     flask: <><path d="M9 3h6m-5 0v6l-6 10a2 2 0 0 0 2 3h12a2 2 0 0 0 2-3L14 9V3"/><path d="M8 15h8"/></>,
     box: <><path d="m12 2 10 5v10l-10 5-10-5V7l10-5ZM2 7l10 5 10-5M12 12v10M7 4l10 5"/></>,
-    cart: <><path d="M2 3h3l3 13h11l3-9H6"/><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/></>,
+    cart: <><path d="M2 3h2l2.4 12.2a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6L22 8H5"/><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/></>,
     heart: <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/>,
     minus: <path d="M5 12h14"/>, plus: <path d="M12 5v14M5 12h14" />,
     info: <><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></>,
@@ -44,6 +45,10 @@ const plainText = (html: string | null | undefined) => (html ?? "").replace(/<[^
 
 /** One product for the visitor's city: packs, prices and cutting options come from the API. */
 export default function ProductDetailView({ detail }: { detail: ApiProductDetail }) {
+  const router = useRouter();
+  // this page is its own screen: the bottom navigation steps aside while it is open (see ProductDetails.css)
+  useEffect(() => { document.body.classList.add("pd-page"); return () => document.body.classList.remove("pd-page"); }, []);
+  const goBack = () => { if (window.history.length > 1) router.back(); else router.push("/"); };
   const [currentLang] = useLanguage();
 
   const t = textMap[currentLang] || englishText;
@@ -188,6 +193,7 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
             {...containerProps}>
             <Image src={mainImage} alt={name} fill priority sizes="(max-width: 900px) 100vw, 40vw" unoptimized={isRemoteImage(mainImage)} onError={fallbackImage} {...imageProps} />
             {lens && <span className="pd-zoom-lens" aria-hidden="true" style={lens.lens} />}
+            <button type="button" className="pd-back" aria-label="Back" onClick={goBack}><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg></button>
             <StockRibbon pack={pack} />
             {isFish ? <span className="pd-fresh">🐟 &nbsp;{t.freshCatch}</span> : <span className="pd-fresh">🌿 &nbsp;{t.freshQualityChecked}</span>}<span className="pd-natural">◉ &nbsp;{t.freshNatural}</span>
           </div>
