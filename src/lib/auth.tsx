@@ -96,12 +96,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     source.onerror = () => setLive(false);
     source.onmessage = (event) => {
       try {
-        const message = JSON.parse(event.data) as { event?: string; notification?: Record<string, unknown>; id?: string; number?: string };
+        const message = JSON.parse(event.data) as { event?: string; notification?: Record<string, unknown>; id?: string; number?: string; ids?: string[] | null; unread?: number };
         if (message.event === "notification" && message.notification) onLive(message.notification);
         // an order of this customer changed (the shop updated it, or it was placed elsewhere): My Orders and the open order page read it again
         else if (message.event === "order") window.dispatchEvent(new CustomEvent("tazahat:order-changed", { detail: message }));
         // support chat: a reply, a read receipt or "typing..." from the support team
         else if (message.event === "chat") window.dispatchEvent(new CustomEvent("tazahat:chat", { detail: message }));
+        // read on another device (the app): the bell drops the same notifications and shows the same count
+        else if (message.event === "notification-read") {
+          const ids = message.ids;
+          setNotifications((current) => current.map((n) => (!ids || ids.includes(n.id) ? { ...n, isRead: true } : n)));
+          setUnread(typeof message.unread === "number" ? message.unread : 0);
+        }
+        // the compare list was changed on another device
+        else if (message.event === "compare") window.dispatchEvent(new CustomEvent("tazahat:compare-remote", { detail: message }));
       } catch { /* not for us */ }
     };
     return () => { source.close(); setLive(false); };

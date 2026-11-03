@@ -5,6 +5,7 @@ import FloatingMessageButton from "@/components/floatingMessage/FloatingMessageB
 import BottomNavigation from "@/components/bottomNavigation/BottomNavigation";
 import FeedbackButton from "@/components/feedbackButton/FeedbackButton";
 import HomeBackConfirmation from "@/components/modals/confermation/HomeBackConfirmation";
+import CompareSync from "@/components/modals/compareList/CompareSync";
 import { CityProvider } from "@/lib/city";
 import { AuthProvider } from "@/lib/auth";
 import { readCityCookie } from "@/lib/server/city";
@@ -26,6 +27,7 @@ export default async function RootLayout({
       <body className="min-h-screen flex flex-col">
         <CityProvider value={city}>
         <AuthProvider>
+        <CompareSync />
         <Navbar />
         <main className="flex-1 frontend-layout-main">{children}</main>
         <Footer />

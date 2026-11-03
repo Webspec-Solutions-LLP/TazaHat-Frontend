@@ -24,6 +24,8 @@ export default function FloatingMessageButton() {
     void chatUnreadAction().then((n) => { if (live) setUnread(n); });
     const onChat = (e: Event) => {
       const d = (e as CustomEvent<{ kind: string; message?: { fromSupport: boolean; text: string; voiceUrl: string | null; imageUrl: string | null } }>).detail;
+      // the chat was read on another device (the app): no count, no blinking here either
+      if (d.kind === "seen") { setUnread(0); setPreview(null); return; }
       if (d.kind === "message" && d.message?.fromSupport && !openRef.current) {
         setUnread((n) => n + 1);
         // a short peek at what support wrote; one bubble per conversation, the newest replaces the older
