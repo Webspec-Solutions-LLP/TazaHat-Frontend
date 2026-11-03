@@ -12,6 +12,7 @@ import type { CartItem } from "@/components/modals/cart/Cart";
 import { dressingChargeRupees } from "@/lib/cartLine";
 import { cardToProduct, fallbackImage, isRemoteImage, mediaSrc, PLACEHOLDER_IMAGE, shortName, type ApiProductDetail } from "@/lib/api";
 import { readWishlistIds, subscribeToWishlist, toggleWishlistId } from "@/lib/wishlist";
+import ShareButton from "@/components/share/ShareButton";
 import { useImageZoom } from "@/lib/useImageZoom";
 import { type SupportedLang, useLanguage } from "@/lib/language";
 import englishText from "./english.json";
@@ -237,6 +238,7 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
               pack ? <PackAction pack={pack} className="pd-add-cart" onAdd={addToCart}><Icon name="cart" /> {t.addToCart}</PackAction> : <button type="button" className="pd-add-cart" disabled><Icon name="cart" /> {t.addToCart}</button>
             )}
             <button type="button" className="pd-wishlist pd-wishlist--icon" aria-pressed={saved} aria-label={saved ? t.removeFromWishlist : t.addToWishlist} title={saved ? t.removeFromWishlist : t.addToWishlist} onClick={() => setSaved(toggleWishlistId(detail.slug).includes(detail.slug))}><Icon name="heart" /></button>
+            <ShareButton title={shortName(detail.name)} text={plainText(detail.shortDescription || detail.description).slice(0, 140) || undefined} path={`/${encodeURIComponent(detail.slug)}`} label="Share this product" />
             <button type="button" className={`pd-compare${isCompared ? " is-compared" : ""}`} disabled={isCompared} onClick={handleAddToCompare} title={isCompared ? t.alreadyAddedToCompare : t.addToCompare}><Icon name="compare" /><span>{isCompared ? t.addedToCompare : t.addToCompare}</span></button>
           </div>
           <div className="pd-order-note"><span><Icon name="shield" /></span><p><strong>{t.trustHeading}</strong><small>{t.trustText}</small></p></div>

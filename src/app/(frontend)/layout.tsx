@@ -12,6 +12,8 @@ import CompareSync from "@/components/modals/compareList/CompareSync";
 import { CityProvider } from "@/lib/city";
 import { AuthProvider } from "@/lib/auth";
 import { readCityCookie } from "@/lib/server/city";
+import { getAppLinks } from "@/lib/server/api";
+import AppDownloadSheet from "@/components/share/AppDownloadSheet";
 import "./Home.css";
 
 export const metadata: Metadata = {
@@ -25,6 +27,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const city = await readCityCookie();
+  const apps = await getAppLinks();
   return (
     <html lang="en">
       <body className="min-h-screen flex flex-col">
@@ -41,6 +44,7 @@ export default async function RootLayout({
         <BottomNavigation />
         <FeedbackButton />
         <HomeBackConfirmation />
+        <AppDownloadSheet android={apps.android} ios={apps.ios} />
         </AuthProvider>
         </CityProvider>
       </body>
