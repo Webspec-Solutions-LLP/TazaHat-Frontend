@@ -21,6 +21,8 @@ export interface ChatProps {
   requestCloseRef?: { current: (() => void) | null };
 }
 
+export const OPEN_CHAT_EVENT = "tazahat:open-chat";
+
 const timeOf = (iso: string) => new Intl.DateTimeFormat("en-IN", { hour: "numeric", minute: "2-digit", timeZone: "Asia/Kolkata" }).format(new Date(iso));
 const dayKey = (iso: string) => new Date(iso).toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
 function dayLabel(iso: string) {

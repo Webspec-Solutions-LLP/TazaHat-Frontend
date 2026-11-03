@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import "./FloatingMessageButton.css";
-import Chat from "../modals/chat/Chat";
+import Chat, { OPEN_CHAT_EVENT } from "../modals/chat/Chat";
 import { useAuth } from "@/lib/auth";
 import { chatUnreadAction } from "@/app/chat-actions";
 
@@ -38,6 +38,11 @@ export default function FloatingMessageButton() {
     return () => { live = false; window.removeEventListener("tazahat:chat", onChat); };
   }, [user]);
   useEffect(() => { if (isChatOpen) { setUnread(0); setPreview(null); } }, [isChatOpen]);
+  useEffect(() => {
+    const openChat = () => setIsChatOpen(true);
+    window.addEventListener(OPEN_CHAT_EVENT, openChat);
+    return () => window.removeEventListener(OPEN_CHAT_EVENT, openChat);
+  }, []);
   // a push notification of a reply opens the app on /?chat=1
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("chat") === "1") setIsChatOpen(true);

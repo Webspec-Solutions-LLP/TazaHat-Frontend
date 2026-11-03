@@ -8,6 +8,7 @@ import Cart, { type CartItem } from "../modals/cart/Cart";
 import CompareList, {
   COMPARE_CHANGE_EVENT,
   COMPARE_STORAGE_KEY,
+  OPEN_COMPARE_EVENT,
   type CompareProduct,
 } from "../modals/compareList/CompareList";
 import CompareDetails from "../modals/compareDetails/CompareDetails";
@@ -155,6 +156,11 @@ export default function Navbar({
       window.removeEventListener(COMPARE_CHANGE_EVENT, refreshCompareCount);
       window.removeEventListener("storage", refreshCompareCount);
     };
+  }, []);
+  useEffect(() => {
+    const openCompare = () => setIsCompareOpen(true);
+    window.addEventListener(OPEN_COMPARE_EVENT, openCompare);
+    return () => window.removeEventListener(OPEN_COMPARE_EVENT, openCompare);
   }, []);
   // The cart lives in this browser (guests and logged-in customers alike) so a refresh or another tab keeps it.
   const cartLoaded = useRef(false);

@@ -40,6 +40,7 @@ export interface CompareListProps {
 
 export const COMPARE_STORAGE_KEY = "tazahat_compare_list";
 export const COMPARE_CHANGE_EVENT = "tazahat:compare-change";
+export const OPEN_COMPARE_EVENT = "tazahat:open-compare";
 
 export default function CompareList({
   onClose,
