@@ -10,6 +10,7 @@ import { chatUnreadAction } from "@/app/chat-actions";
 export default function FloatingMessageButton() {
   const pathname = usePathname();
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [startInTicketMode, setStartInTicketMode] = useState(false);
   const chatCloseRef = useRef<(() => void) | null>(null);
   const { user } = useAuth();
   // replies that arrived while the chat is closed: a small red count on the button (the chat itself marks them read)
@@ -39,7 +40,11 @@ export default function FloatingMessageButton() {
   }, [user]);
   useEffect(() => { if (isChatOpen) { setUnread(0); setPreview(null); } }, [isChatOpen]);
   useEffect(() => {
-    const openChat = () => setIsChatOpen(true);
+    const openChat = (event: Event) => {
+      const detail = (event as CustomEvent<{ ticket?: boolean }>).detail;
+      setStartInTicketMode(detail?.ticket === true);
+      setIsChatOpen(true);
+    };
     window.addEventListener(OPEN_CHAT_EVENT, openChat);
     return () => window.removeEventListener(OPEN_CHAT_EVENT, openChat);
   }, []);
@@ -68,7 +73,9 @@ export default function FloatingMessageButton() {
     <>
       {isChatOpen && (
         <Chat
-          onClose={() => setIsChatOpen(false)}
+          key={startInTicketMode ? "ticket" : "chat"}
+          onClose={() => { setIsChatOpen(false); setStartInTicketMode(false); }}
+          startInTicketMode={startInTicketMode}
           requestCloseRef={chatCloseRef}
         />
       )}

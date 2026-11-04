@@ -110,5 +110,15 @@
   "resolution": "সমাধান",
   "latestUpdate": "সর্বশেষ আপডেট",
   "raised": "তৈরি",
-  "updated": "আপডেট"
+  "updated": "আপডেট",
+  "newTicket": "নতুন",
+  "closeTicketsAria": "টিকিট বন্ধ করুন",
+  "noTickets": "আপনি এখনও কোনো সাপোর্ট টিকিট পাঠাননি।",
+  "noRecentTickets": "সাম্প্রতিক মেসেজে কোনো টিকিট নেই।",
+  "ticketWaiting": "অপেক্ষমাণ",
+  "ticketReplied": "উত্তর দেওয়া হয়েছে",
+  "ticketAttachment": "সংযুক্তি",
+  "olderTickets": "আগের টিকিট দেখুন",
+  "loadingTickets": "লোড হচ্ছে…",
+  "tryAgain": "আবার চেষ্টা করুন"
 }

@@ -7,6 +7,7 @@ import Products from "@/components/products/Products";
 import AllAddress from "@/components/modals/allAddress/AllAddress";
 import Address, { type AddressFormValues } from "@/components/modals/address/Address";
 import ConfirmBox, { type ConfirmConfig } from "@/components/modals/confirmBox/ConfirmBox";
+import Ticket from "@/components/modals/tickets/Ticket";
 import { deleteAddressAction, listAddressesAction, makeDefaultAddressAction, saveAddressAction, type SavedAddress } from "@/app/address-actions";
 import { myOrderCountsAction } from "@/app/checkout-actions";
 import { useAuth } from "@/lib/auth";
@@ -115,6 +116,7 @@ function MyProfileContent() {
   const [orderCounts, setOrderCounts] = useState<Record<"all" | "complete" | "upcoming" | "cancel", number> | null>(null);
   const [addresses, setAddresses] = useState<SavedAddress[] | null>(null);
   const [isAddressListOpen, setIsAddressListOpen] = useState(false);
+  const [isTicketListOpen, setIsTicketListOpen] = useState(false);
   const [isAddressEditorOpen, setIsAddressEditorOpen] = useState(false);
   const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
   const [addressNote, setAddressNote] = useState("");
@@ -343,7 +345,7 @@ function MyProfileContent() {
             <SettingsRow icon="address" tone="green" onClick={() => setIsAddressListOpen(true)} title={t.addressesTitle} description={t.savedCount.replace("{count}", String(savedCount))} />
             <SettingsRow icon="wishlist" tone="red" href="/wishlist" title={t.wishlistTitle} description={t.wishlistCount.replace("{count}", String(likedProducts.length))} />
             <SettingsRow icon="compare" tone="purple" onClick={() => window.dispatchEvent(new Event(OPEN_COMPARE_EVENT))} title={t.compareTitle} description={t.compareCount.replace("{count}", String(compareCount))} />
-            <SettingsRow icon="ticket" tone="amber" href="/contactUs" title={t.ticketsTitle} description={t.ticketsDescription} />
+            <SettingsRow icon="ticket" tone="amber" onClick={() => setIsTicketListOpen(true)} title={t.ticketsTitle} description={t.ticketsDescription} />
           </div>
         </section>
 
@@ -407,6 +409,12 @@ function MyProfileContent() {
           onEdit={openAddressEditor}
           onDelete={(id) => void deleteAddress(id)}
           onMakeDefault={(id) => void makeDefault(id)}
+        />
+      )}
+      {isTicketListOpen && (
+        <Ticket
+          onClose={() => setIsTicketListOpen(false)}
+          onNewTicket={() => window.dispatchEvent(new CustomEvent(OPEN_CHAT_EVENT, { detail: { ticket: true } }))}
         />
       )}
       {isAddressEditorOpen && (

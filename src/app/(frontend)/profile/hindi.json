@@ -110,5 +110,15 @@
   "resolution": "समाधान",
   "latestUpdate": "नवीनतम अपडेट",
   "raised": "दर्ज",
-  "updated": "अपडेट"
+  "updated": "अपडेट",
+  "newTicket": "नया",
+  "closeTicketsAria": "टिकट बंद करें",
+  "noTickets": "आपने अभी तक कोई सपोर्ट टिकट नहीं भेजा है।",
+  "noRecentTickets": "हाल के संदेशों में कोई टिकट नहीं मिला।",
+  "ticketWaiting": "प्रतीक्षारत",
+  "ticketReplied": "जवाब दिया गया",
+  "ticketAttachment": "अटैचमेंट",
+  "olderTickets": "पुराने टिकट लोड करें",
+  "loadingTickets": "लोड हो रहा है…",
+  "tryAgain": "फिर से कोशिश करें"
 }

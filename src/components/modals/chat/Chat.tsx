@@ -16,6 +16,7 @@ type Row = ChatMsg & { state?: "sending" | "failed"; /** kept so a failed messag
 
 export interface ChatProps {
   onClose: () => void;
+  startInTicketMode?: boolean;
   /** opened from a product page: the question starts with the product's name */
   product?: { id: string; name: string; image?: string };
   requestCloseRef?: { current: (() => void) | null };
@@ -42,7 +43,7 @@ function ChatSkeleton({ rows }: { rows: number }) {
 }
 
 /** WhatsApp-style support chat: signed-in customers only, the last 20 messages first, 10 more each time you scroll up, live replies, ticks and "typing...". */
-export default function Chat({ onClose, product, requestCloseRef }: ChatProps) {
+export default function Chat({ onClose, product, requestCloseRef, startInTicketMode = false }: ChatProps) {
   const { user, ready, openLogin } = useAuth();
   const [rows, setRows] = useState<Row[]>([]);
   const [hasMore, setHasMore] = useState(false);
@@ -171,7 +172,7 @@ export default function Chat({ onClose, product, requestCloseRef }: ChatProps) {
 
   /** sends a message; a picture / recording is uploaded first. A failed one stays on screen with "Tap to retry". */
   // "Create ticket": the next message is written as a support ticket
-  const [ticketMode, setTicketMode] = useState(false);
+  const [ticketMode, setTicketMode] = useState(startInTicketMode);
   const send = async (text: string, opts: { clientId?: string; retry?: boolean; blob?: Blob; kind?: "image" | "voice"; seconds?: number; transcript?: string; waveform?: number[]; preview?: string; ticket?: boolean } = {}) => {
     const clientId = opts.clientId ?? newId();
     const now = new Date().toISOString();

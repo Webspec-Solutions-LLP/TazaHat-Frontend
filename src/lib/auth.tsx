@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Login from "@/components/modals/login/Login";
-import NotificationsPanel from "@/components/modals/notifications/NotificationsPanel";
+import Notification from "@/components/modals/notification/Notification";
 import {
   cancelNotifyMeAction, getSessionAction, logoutAction, markNotificationsReadAction, myStockAlertsAction, notificationsAction, notifyMeAction,
   type AppNotification,
@@ -191,7 +191,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           <button type="button" className="notif-toast-close" aria-label="Dismiss" onClick={() => setToast(null)}>×</button>
         </div>
       )}
-      {notificationsOpen && user && <NotificationsPanel unread={unread} onClose={() => setNotificationsOpen(false)} onChanged={() => void reloadNotifications()} />}
+      {notificationsOpen && user && <Notification unread={unread} onClose={() => setNotificationsOpen(false)} onChanged={() => void reloadNotifications()} />}
       {loginOpen && <Login onClose={() => { afterLogin.current = null; setLoginOpen(false); }} onLoggedIn={onLoggedIn} />}
     </AuthContext.Provider>
   );

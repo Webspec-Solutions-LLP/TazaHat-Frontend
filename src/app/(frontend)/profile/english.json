@@ -110,5 +110,15 @@
   "resolution": "Resolution",
   "latestUpdate": "Latest update",
   "raised": "Raised",
-  "updated": "Updated"
+  "updated": "Updated",
+  "newTicket": "New",
+  "closeTicketsAria": "Close tickets",
+  "noTickets": "You haven't sent a support ticket yet.",
+  "noRecentTickets": "No tickets found in recent messages.",
+  "ticketWaiting": "Waiting",
+  "ticketReplied": "Replied",
+  "ticketAttachment": "Attachment",
+  "olderTickets": "Load earlier tickets",
+  "loadingTickets": "Loading…",
+  "tryAgain": "Try again"
 }
