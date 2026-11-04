@@ -8,6 +8,7 @@ import AllAddress from "@/components/modals/allAddress/AllAddress";
 import Address, { type AddressFormValues } from "@/components/modals/address/Address";
 import ConfirmBox, { type ConfirmConfig } from "@/components/modals/confirmBox/ConfirmBox";
 import Ticket from "@/components/modals/tickets/Ticket";
+import Language from "@/components/modals/language/Language";
 import { deleteAddressAction, listAddressesAction, makeDefaultAddressAction, saveAddressAction, type SavedAddress } from "@/app/address-actions";
 import { myOrderCountsAction } from "@/app/checkout-actions";
 import { useAuth } from "@/lib/auth";
@@ -108,7 +109,7 @@ function GroceryIllustration() {
 }
 
 function MyProfileContent() {
-  const [language, setLanguage] = useLanguage();
+  const [language] = useLanguage();
   const t = textMap[language] || englishText;
   const { user, updateUser, logout, openNotifications, unread } = useAuth();
   const { city } = useCity();
@@ -117,6 +118,7 @@ function MyProfileContent() {
   const [addresses, setAddresses] = useState<SavedAddress[] | null>(null);
   const [isAddressListOpen, setIsAddressListOpen] = useState(false);
   const [isTicketListOpen, setIsTicketListOpen] = useState(false);
+  const [isLanguageOpen, setIsLanguageOpen] = useState(false);
   const [isAddressEditorOpen, setIsAddressEditorOpen] = useState(false);
   const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
   const [addressNote, setAddressNote] = useState("");
@@ -355,16 +357,17 @@ function MyProfileContent() {
             <SettingsRow icon="chat" tone="blue" onClick={() => window.dispatchEvent(new Event(OPEN_CHAT_EVENT))} title={t.chatTitle} description={t.chatDescription} />
             <SettingsRow icon="notifications" tone="amber" onClick={openNotifications} title={t.notificationsTitle} description={t.notificationsDescription} badge={unread > 0 ? String(unread) : undefined} />
             <SettingsRow icon="city" tone="green" onClick={openLocationPicker} title={t.cityTitle} description={city?.name ?? t.selectCity} />
-            <label className="profile-settings-row profile-settings-language">
+            <button
+              className="profile-settings-row profile-settings-language"
+              type="button"
+              aria-haspopup="dialog"
+              aria-expanded={isLanguageOpen}
+              onClick={() => setIsLanguageOpen(true)}
+            >
               <SettingsIcon name="language" tone="purple" />
               <span className="profile-settings-copy"><strong>{t.languageTitle}</strong><small>{languageName}</small></span>
-              <select aria-label={t.languageTitle} value={language} onChange={(event) => setLanguage(event.target.value as SupportedLang)}>
-                <option value="en">{t.languageEnglish}</option>
-                <option value="bn">{t.languageBengali}</option>
-                <option value="hi">{t.languageHindi}</option>
-              </select>
               <span className="profile-settings-arrow" aria-hidden="true">›</span>
-            </label>
+            </button>
             <SettingsRow icon="legal" tone="slate" href="/privacyPolicy" title={t.legalTitle} description={t.legalDescription} />
           </div>
         </section>
@@ -417,6 +420,7 @@ function MyProfileContent() {
           onNewTicket={() => window.dispatchEvent(new CustomEvent(OPEN_CHAT_EVENT, { detail: { ticket: true } }))}
         />
       )}
+      {isLanguageOpen && <Language onClose={() => setIsLanguageOpen(false)} />}
       {isAddressEditorOpen && (
         <Address
           initialValues={(() => {
