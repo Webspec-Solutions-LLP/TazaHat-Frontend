@@ -13,6 +13,11 @@
   "tryAgain": "আবার চেষ্টা করুন",
   "allCategoriesEnd": "আপনার শহরের সমস্ত বিভাগ এখানেই শেষ।",
   "closeCategoryModal": "বিভাগ বন্ধ করুন",
+  "modalHeading": "বিভাগসমূহ",
+  "backToCategories": "বিভাগের তালিকায় ফিরুন",
+  "openCategory": "{category}-এর পণ্য দেখুন",
+  "allInCategory": "{category}-এর সব পণ্য",
+  "subcategoriesLabel": "{category}-এর উপবিভাগ",
   "categoryNames": {
     "Vegetables": "সবজি",
     "Fruits": "ফলমূল",

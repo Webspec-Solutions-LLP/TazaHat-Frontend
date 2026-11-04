@@ -13,6 +13,11 @@
   "tryAgain": "Try again",
   "allCategoriesEnd": "That is every category in your city.",
   "closeCategoryModal": "Close categories",
+  "modalHeading": "Categories",
+  "backToCategories": "Back to categories",
+  "openCategory": "View products in {category}",
+  "allInCategory": "All {category}",
+  "subcategoriesLabel": "{category} subcategories",
   "categoryNames": {
     "Vegetables": "Vegetables",
     "Fruits": "Fruits",

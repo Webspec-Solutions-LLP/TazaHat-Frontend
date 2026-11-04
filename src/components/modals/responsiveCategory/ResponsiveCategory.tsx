@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { loadCategoriesAction } from "@/app/actions";
 import type { CategoryTile } from "@/components/category/Category";
 import { fallbackImage, isRemoteImage } from "@/lib/api";
@@ -11,7 +11,6 @@ import { type SupportedLang, useLanguage } from "@/lib/language";
 import englishText from "@/app/(frontend)/allCategory/english.json";
 import bengaliText from "@/app/(frontend)/allCategory/bengali.json";
 import hindiText from "@/app/(frontend)/allCategory/hindi.json";
-import "../../category/Category.css";
 import "./ResponsiveCategory.css";
 
 const textMap: Record<SupportedLang, typeof englishText> = {
@@ -25,19 +24,14 @@ type Props = {
   onClose: () => void;
 };
 
-function getCategoryCardStyle(category: CategoryTile): CSSProperties & { "--category-shadow-color": string } {
-  return {
-    backgroundColor: category.color,
-    "--category-shadow-color": category.color,
-  };
-}
-
 export default function ResponsiveCategory({ open, onClose }: Props) {
   const [language] = useLanguage();
   const text = textMap[language];
+  const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [items, setItems] = useState<CategoryTile[] | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<CategoryTile | null>(null);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -47,6 +41,16 @@ export default function ResponsiveCategory({ open, onClose }: Props) {
   const busy = useRef(false);
   const closeButton = useRef<HTMLButtonElement>(null);
   const previousFocus = useRef<HTMLElement | null>(null);
+  const categoryNames = text.categoryNames as Record<string, string>;
+  const closeModal = useCallback(() => {
+    setSelectedCategory(null);
+    onClose();
+  }, [onClose]);
+
+  const goToProducts = (href: string) => {
+    closeModal();
+    router.push(href);
+  };
 
   const loadPage = useCallback(async (nextPage: number) => {
     if (busy.current) return;
@@ -111,6 +115,10 @@ export default function ResponsiveCategory({ open, onClose }: Props) {
   }, [error, open, items, loading, loadPage]);
 
   useEffect(() => {
+    if (scrollContainer.current) scrollContainer.current.scrollTop = 0;
+  }, [selectedCategory]);
+
+  useEffect(() => {
     if (!open) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -122,11 +130,11 @@ export default function ResponsiveCategory({ open, onClose }: Props) {
   useEffect(() => {
     if (!open) return;
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") closeModal();
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [open, onClose]);
+  }, [open, closeModal]);
 
   const loadMore = useCallback(() => {
     if (hasMore && !loading && !error) void loadPage(page + 1);
@@ -135,7 +143,7 @@ export default function ResponsiveCategory({ open, onClose }: Props) {
   useEffect(() => {
     const element = sentinel.current;
     const root = scrollContainer.current;
-    if (!open || !element || !root || !hasMore || loading || error) return;
+    if (!open || selectedCategory || !element || !root || !hasMore || loading || error) return;
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting) loadMore();
@@ -144,7 +152,7 @@ export default function ResponsiveCategory({ open, onClose }: Props) {
     );
     observer.observe(element);
     return () => observer.disconnect();
-  }, [error, hasMore, loadMore, loading, open]);
+  }, [error, hasMore, loadMore, loading, open, selectedCategory]);
 
   if (!isMounted) return null;
 
@@ -153,7 +161,7 @@ export default function ResponsiveCategory({ open, onClose }: Props) {
       className={`responsive-category-overlay${isVisible ? " is-visible" : ""}`}
       aria-hidden={!isVisible}
       onClick={(event) => {
-        if (event.target === event.currentTarget) onClose();
+        if (event.target === event.currentTarget) closeModal();
       }}
     >
       <section
@@ -163,11 +171,53 @@ export default function ResponsiveCategory({ open, onClose }: Props) {
         aria-labelledby="responsive-category-heading"
         lang={text.language}
       >
+        <span className="responsive-category-handle" aria-hidden="true" />
         <header className="responsive-category-header">
-          <div>
-            <h2 id="responsive-category-heading">{text.heading}</h2>
-            <p>{text.description}</p>
-          </div>
+          {selectedCategory ? (
+            <>
+              <button
+                type="button"
+                className="responsive-category-back"
+                onClick={() => setSelectedCategory(null)}
+                aria-label={text.backToCategories}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="m15 18-6-6 6-6" />
+                </svg>
+              </button>
+              <span className="responsive-category-selected-image">
+                <Image
+                  src={selectedCategory.image}
+                  unoptimized
+                  onError={fallbackImage}
+                  draggable={false}
+                  alt=""
+                  fill
+                  sizes="44px"
+                />
+              </span>
+              <div className="responsive-category-selected-copy">
+                <h2 id="responsive-category-heading">{categoryNames[selectedCategory.name] || selectedCategory.name}</h2>
+                <p>{selectedCategory.types} {selectedCategory.types === 1 ? text.productType : text.productTypes}</p>
+              </div>
+              <button
+                type="button"
+                className="responsive-category-open"
+                aria-label={text.openCategory.replace("{category}", categoryNames[selectedCategory.name] || selectedCategory.name)}
+                onClick={() => goToProducts(selectedCategory.href ?? `/products?category=${encodeURIComponent(selectedCategory.name)}`)}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M5 12h14m-7-7 7 7-7 7" />
+                </svg>
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="responsive-category-title">
+                <h2 id="responsive-category-heading">{text.modalHeading}</h2>
+              </div>
+            </>
+          )}
           <button
             ref={closeButton}
             className="responsive-category-close"
@@ -176,25 +226,27 @@ export default function ResponsiveCategory({ open, onClose }: Props) {
             onClick={onClose}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="m6 9 6 6 6-6" />
+              <path d="m6 6 12 12M18 6 6 18" />
             </svg>
           </button>
         </header>
 
         <div className="responsive-category-scroll" ref={scrollContainer}>
-          {items && (
+          {items && !selectedCategory && (
             <ul className="responsive-category-grid" aria-label={text.allCategoriesLabel}>
               {items.map((category) => {
-                const categoryName = (text.categoryNames as Record<string, string>)[category.name] || category.name;
+                const categoryName = categoryNames[category.name] || category.name;
                 return (
                   <li key={category.id}>
-                    <Link
-                      className="category-card"
-                      href={category.href ?? `/products?category=${encodeURIComponent(category.name)}`}
-                      style={getCategoryCardStyle(category)}
-                      onClick={onClose}
+                    <button
+                      className="responsive-category-row"
+                      type="button"
+                      onClick={() => {
+                        if (category.subCategories?.length) setSelectedCategory(category);
+                        else goToProducts(category.href ?? `/products?category=${encodeURIComponent(category.name)}`);
+                      }}
                     >
-                      <div className="category-image">
+                      <span className="responsive-category-image">
                         <Image
                           src={isRemoteImage(category.image) ? category.image : `${category.image}?v=transparent-2`}
                           unoptimized
@@ -202,36 +254,63 @@ export default function ResponsiveCategory({ open, onClose }: Props) {
                           draggable={false}
                           alt={categoryName}
                           fill
-                          sizes="(max-width: 575px) 44vw, 220px"
+                          sizes="48px"
                         />
-                      </div>
-                      <div className="category-details">
-                        <h3>{categoryName}</h3>
-                        <p className="category-count">
-                          <strong>{category.types}</strong> {category.types === 1 ? text.productType : text.productTypes}
-                        </p>
-                        <span className="category-arrow" aria-hidden="true">→</span>
-                      </div>
-                    </Link>
+                      </span>
+                      <span className="responsive-category-row-copy">
+                        <strong>{categoryName}</strong>
+                        <small>{category.types} {category.types === 1 ? text.productType : text.productTypes}</small>
+                      </span>
+                      <svg className="responsive-category-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="m9 18 6-6-6-6" />
+                      </svg>
+                    </button>
                   </li>
                 );
               })}
             </ul>
           )}
 
-          {loading && (
+          {selectedCategory && (
+            <ul className="responsive-category-subcategories" aria-label={text.subcategoriesLabel.replace("{category}", categoryNames[selectedCategory.name] || selectedCategory.name)}>
+              <li>
+                <button
+                  type="button"
+                  className="responsive-category-subcategory is-all"
+                  onClick={() => goToProducts(selectedCategory.href ?? `/products?category=${encodeURIComponent(selectedCategory.name)}`)}
+                >
+                  <span>{text.allInCategory.replace("{category}", categoryNames[selectedCategory.name] || selectedCategory.name)}</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+                </button>
+              </li>
+              {selectedCategory.subCategories?.map((subcategory) => (
+                <li key={subcategory.id}>
+                  <button
+                    type="button"
+                    className="responsive-category-subcategory"
+                    onClick={() => goToProducts(`/products?category=${encodeURIComponent(selectedCategory.slug ?? selectedCategory.name)}&sub=${encodeURIComponent(subcategory.slug)}`)}
+                  >
+                    <span>{subcategory.name}</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {!selectedCategory && loading && (
             <p className="responsive-category-status" role="status">
               {items ? text.loadingMore : text.loadingCategories}
             </p>
           )}
-          {error && (
+          {!selectedCategory && error && (
             <p className="responsive-category-status" role="alert">
               {error}{" "}
               <button type="button" onClick={() => void loadPage(items ? page + 1 : 1)}>{text.tryAgain}</button>
             </p>
           )}
-          {hasMore && !error && <div ref={sentinel} aria-hidden="true" className="responsive-category-sentinel" />}
-          {items && !hasMore && items.length > 0 && (
+          {!selectedCategory && hasMore && !error && <div ref={sentinel} aria-hidden="true" className="responsive-category-sentinel" />}
+          {!selectedCategory && items && !hasMore && items.length > 0 && (
             <p className="responsive-category-status">{text.allCategoriesEnd}</p>
           )}
         </div>

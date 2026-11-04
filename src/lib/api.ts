@@ -108,8 +108,8 @@ export interface ApiFacetCategory { id: string; name: string; slug: string; imag
 const CATEGORY_COLORS = ["#edf6e8", "#fff1e6", "#e8f3fb", "#fdecef", "#f5efe0", "#eef0fb", "#e9f7f2"];
 
 /** A category tile for the home page and the all-categories page (`position` = its place in the whole list, for the tile colour). */
-export function categoryToItem(c: { id: string; name: string; slug: string; imageUrl?: string | null; subCategories: unknown[] }, position: number) {
-  return { id: c.id, name: shortName(c.name), types: c.subCategories.length, image: mediaSrc(c.imageUrl), color: CATEGORY_COLORS[position % CATEGORY_COLORS.length], href: `/products?category=${encodeURIComponent(c.slug)}` };
+export function categoryToItem(c: { id: string; name: string; slug: string; imageUrl?: string | null; subCategories: { id: string; name: string; slug: string }[] }, position: number) {
+  return { id: c.id, slug: c.slug, name: shortName(c.name), types: c.subCategories.length, image: mediaSrc(c.imageUrl), color: CATEGORY_COLORS[position % CATEGORY_COLORS.length], href: `/products?category=${encodeURIComponent(c.slug)}`, subCategories: c.subCategories.map((subCategory) => ({ ...subCategory, name: shortName(subCategory.name) })) };
 }
 
 export interface ApiProductDetail {

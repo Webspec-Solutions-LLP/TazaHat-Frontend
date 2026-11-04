@@ -19,7 +19,16 @@ const textMap: Record<SupportedLang, typeof englishText> = {
   hi: hindiText,
 };
 
-export type CategoryTile = { id: string; name: string; types: number; image: string; color: string; href?: string };
+export type CategoryTile = {
+  id: string;
+  slug?: string;
+  name: string;
+  types: number;
+  image: string;
+  color: string;
+  href?: string;
+  subCategories?: { id: string; name: string; slug: string }[];
+};
 /** old name of the type */
 export type CategoryItem = CategoryTile;
 
