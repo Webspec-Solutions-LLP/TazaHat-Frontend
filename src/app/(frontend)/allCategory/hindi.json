@@ -13,6 +13,11 @@
   "tryAgain": "पुनः प्रयास करें",
   "allCategoriesEnd": "यह आपके शहर की सभी श्रेणियां हैं।",
   "closeCategoryModal": "श्रेणियां बंद करें",
+  "modalHeading": "श्रेणियां",
+  "backToCategories": "श्रेणियों पर वापस जाएं",
+  "openCategory": "{category} के उत्पाद देखें",
+  "allInCategory": "{category} के सभी उत्पाद",
+  "subcategoriesLabel": "{category} की उपश्रेणियां",
   "categoryNames": {
     "Vegetables": "सब्जियां",
     "Fruits": "फल",

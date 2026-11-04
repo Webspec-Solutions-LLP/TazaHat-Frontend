@@ -1,0 +1,113 @@
+.all-address-dialog {
+  position: fixed;
+  inset: 0 0 0 auto;
+  width: min(430px, 100vw);
+  max-width: 100vw;
+  height: 100dvh;
+  max-height: none;
+  margin: 0 0 0 auto;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  color: #173c60;
+  animation: all-address-enter 520ms cubic-bezier(.22, 1, .36, 1) both;
+  z-index: 1200;
+}
+
+.all-address-dialog::backdrop {
+  background: rgb(6 24 44 / 48%);
+  backdrop-filter: blur(3px);
+  animation: all-address-backdrop-in 520ms ease both;
+}
+
+.all-address-dialog.is-closing {
+  pointer-events: none;
+  animation: all-address-exit 460ms cubic-bezier(.64, 0, .78, 0) both;
+}
+
+.all-address-dialog.is-closing::backdrop { animation: all-address-backdrop-out 460ms ease both; }
+.all-address-panel, .all-address-panel * { box-sizing: border-box; }
+
+.all-address-panel {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  overflow: hidden;
+  border-left: 1px solid #e1e9ef;
+  background: #fff;
+  box-shadow: -8px 0 36px rgb(19 47 71 / 12%);
+}
+
+.all-address-header {
+  display: flex;
+  min-height: 50px;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 12px;
+  border-bottom: 1px solid #e8edf1;
+}
+
+.all-address-title { min-width: 0; flex: 1; }
+.all-address-title h2 { margin: 0; color: #203d60; font-size: 16px; font-weight: 700; }
+.all-address-title p { margin: 2px 0 0; color: #7a8998; font-size: 10px; }
+
+.all-address-add {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  gap: 5px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 7px;
+  background: #398a3e;
+  color: #fff;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.all-address-add:hover { background: #2f7835; }
+.all-address-add svg { width: 15px; height: 15px; }
+.all-address-close { width: 26px; height: 30px; padding: 0; border: 0; background: transparent; color: #82909d; font-size: 24px; line-height: 1; cursor: pointer; }
+.all-address-list { display: grid; align-content: start; gap: 9px; flex: 1; overflow-y: auto; padding: 10px; overscroll-behavior: contain; }
+
+.all-address-card {
+  position: relative;
+  min-width: 0;
+  padding: 11px 42px 10px 13px;
+  border: 1.5px solid #dfe7ed;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.all-address-card.is-default { border-color: #75b953; box-shadow: inset 0 0 0 1px rgb(117 185 83 / 20%); }
+.all-address-choice { display: flex; min-width: 0; align-items: center; gap: 8px; color: #234466; font-size: 11px; font-weight: 700; cursor: pointer; }
+.all-address-choice input { width: 16px; height: 16px; flex: 0 0 16px; margin: 0; accent-color: #459c50; }
+
+.all-address-actions { position: absolute; top: 8px; right: 9px; display: flex; gap: 7px; }
+.all-address-actions button { display: grid; width: 26px; height: 26px; place-items: center; padding: 0; border: 0; border-radius: 6px; background: transparent; cursor: pointer; }
+.all-address-actions button:first-child { color: #3984c6; }
+.all-address-actions button:last-child { color: #d34b56; }
+.all-address-actions button:hover { background: #f0f5f8; }
+.all-address-actions svg { width: 15px; height: 15px; }
+
+.all-address-details { margin: 7px 0 5px 24px; color: #566d82; font-size: 10px; line-height: 1.5; }
+.all-address-phone { display: flex; align-items: center; gap: 5px; margin: 0 0 0 24px; color: #8996a3; font-size: 9px; }
+.all-address-phone svg { width: 12px; height: 12px; }
+.all-address-empty, .all-address-note { margin: 8px 2px; color: #718296; font-size: 12px; }
+.all-address-note { color: #bd3845; }
+.all-address-skeleton { min-height: 92px; border-radius: 14px; }
+.all-address-dialog button:focus-visible, .all-address-choice input:focus-visible { outline: 2px solid #398a3e; outline-offset: 2px; }
+
+@keyframes all-address-enter { from { transform: translateX(100%); } to { transform: translateX(0); } }
+@keyframes all-address-exit { from { transform: translateX(0); } to { transform: translateX(100%); } }
+@keyframes all-address-backdrop-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes all-address-backdrop-out { from { opacity: 1; } to { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .all-address-dialog, .all-address-dialog.is-closing, .all-address-dialog::backdrop, .all-address-dialog.is-closing::backdrop { animation-duration: .01ms; }
+}

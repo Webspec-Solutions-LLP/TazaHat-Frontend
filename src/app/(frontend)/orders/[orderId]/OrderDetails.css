@@ -117,3 +117,48 @@
   .order-amounts tfoot .is-total th,
   .order-amounts tfoot .is-total td { font-weight: 700; }
 }
+
+@media (max-width: 575px) {
+  .order-details-page { padding: 8px 0 20px; }
+  .order-details-container { width: calc(100% - 16px); }
+  .order-details-heading { margin-bottom: 6px; }
+  .order-edit-notice { margin-bottom: 6px; padding: 6px 9px; }
+  .order-edit-hint { margin: 0 2px 6px; }
+  .order-layout { gap: 6px; }
+  .order-side { gap: 6px; }
+  .order-details-card { padding: 9px 10px; border-radius: 9px; }
+
+  .order-summary h2 { margin-bottom: 6px; font-size: 13px; }
+  .order-summary dl { grid-template-columns: minmax(0, 1fr); gap: 5px; }
+  .order-summary dl > div {
+    display: grid;
+    grid-template-columns: 62px minmax(0, 1fr);
+    align-items: start;
+    gap: 7px;
+  }
+  .order-summary dl > .is-wide { grid-column: auto; }
+  .order-summary dt { font-size: 10px; line-height: 1.3; }
+  .order-summary dd { font-size: 11px; line-height: 1.3; }
+
+  .order-amounts table { font-size: 11px; }
+  .order-amounts th, .order-amounts td { padding: 3px 0; }
+  .order-amounts thead th { padding-bottom: 5px; font-size: 9px; }
+  .order-amounts tfoot .is-total th,
+  .order-amounts tfoot .is-total td { padding-top: 6px; font-size: 12px; }
+  .order-amounts tfoot tr:not(.is-total) th,
+  .order-amounts tfoot tr:not(.is-total) td { font-size: 10px; }
+  .order-amount-saved { margin-top: 5px; font-size: 10px; }
+  .order-amount-wait { margin-top: 4px; font-size: 9px; line-height: 1.35; }
+
+  .order-products-heading { gap: 6px; padding: 8px 10px; }
+  .order-products-heading h2 { font-size: 13px; }
+  .order-products-heading p { font-size: 10px; }
+  .order-products-list { padding-inline: 10px; }
+  .order-product-row { gap: 3px 8px; padding: 7px 0; }
+  .order-product-copy h3 { font-size: 12px; }
+  .order-product-copy p { font-size: 10px; }
+  .order-product-amounts { gap: 0; }
+  .order-product-est { font-size: 11px; }
+  .order-product-final { font-size: 10px; }
+  .order-product-status { gap: 4px; padding: 3px 7px; font-size: 9px; }
+}

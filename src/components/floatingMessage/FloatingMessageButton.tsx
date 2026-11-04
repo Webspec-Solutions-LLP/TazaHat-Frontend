@@ -3,13 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import "./FloatingMessageButton.css";
-import Chat from "../modals/chat/Chat";
+import Chat, { OPEN_CHAT_EVENT } from "../modals/chat/Chat";
 import { useAuth } from "@/lib/auth";
 import { chatUnreadAction } from "@/app/chat-actions";
 
 export default function FloatingMessageButton() {
   const pathname = usePathname();
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [startInTicketMode, setStartInTicketMode] = useState(false);
   const chatCloseRef = useRef<(() => void) | null>(null);
   const { user } = useAuth();
   // replies that arrived while the chat is closed: a small red count on the button (the chat itself marks them read)
@@ -38,6 +39,15 @@ export default function FloatingMessageButton() {
     return () => { live = false; window.removeEventListener("tazahat:chat", onChat); };
   }, [user]);
   useEffect(() => { if (isChatOpen) { setUnread(0); setPreview(null); } }, [isChatOpen]);
+  useEffect(() => {
+    const openChat = (event: Event) => {
+      const detail = (event as CustomEvent<{ ticket?: boolean }>).detail;
+      setStartInTicketMode(detail?.ticket === true);
+      setIsChatOpen(true);
+    };
+    window.addEventListener(OPEN_CHAT_EVENT, openChat);
+    return () => window.removeEventListener(OPEN_CHAT_EVENT, openChat);
+  }, []);
   // a push notification of a reply opens the app on /?chat=1
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("chat") === "1") setIsChatOpen(true);
@@ -63,7 +73,9 @@ export default function FloatingMessageButton() {
     <>
       {isChatOpen && (
         <Chat
-          onClose={() => setIsChatOpen(false)}
+          key={startInTicketMode ? "ticket" : "chat"}
+          onClose={() => { setIsChatOpen(false); setStartInTicketMode(false); }}
+          startInTicketMode={startInTicketMode}
           requestCloseRef={chatCloseRef}
         />
       )}
