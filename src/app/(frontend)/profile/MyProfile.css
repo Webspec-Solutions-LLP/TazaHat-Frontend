@@ -929,6 +929,35 @@
   .profile-settings-copy small { font-size: 11px; }
 }
 
+@media (max-width: 575px) {
+  .profile-settings-page { padding: 8px 0 16px; }
+  .profile-settings-container,
+  .profile-top-container { padding-inline: 11px; }
+  .profile-top-container { margin-bottom: 12px; }
+  .profile-settings-page .profile-hero { padding: 12px 10px; border-radius: 6px; }
+  .profile-settings-page .profile-stat-grid { gap: 6px; margin-top: 7px; }
+  .profile-settings-page .profile-stat-card { min-height: 64px; gap: 6px; padding: 7px; border-radius: 6px; }
+  .profile-settings-page .profile-next-step { gap: 6px; margin-top: 7px; padding: 7px; border-radius: 6px; }
+  .profile-settings-page .profile-next-step-icon,
+  .profile-settings-page .profile-next-step > a { border-radius: 6px; }
+  .profile-settings-page-title { margin: 0 0 6px 2px; font-size: 16px; }
+  .profile-settings-section { margin-top: 8px; }
+  .profile-settings-section > h2 { margin: 0 0 5px 2px; font-size: 13px; }
+  .profile-settings-list { border-radius: 6px; }
+  .profile-settings-row { min-height: 54px; gap: 8px; padding: 6px 9px; }
+  .profile-settings-icon { width: 34px; height: 34px; flex-basis: 34px; border-radius: 6px; }
+  .profile-settings-icon svg { width: 18px; height: 18px; }
+  .profile-settings-copy { gap: 1px; }
+  .profile-settings-copy strong { font-size: 12px; }
+  .profile-settings-copy small { font-size: 10px; }
+  .profile-settings-arrow { font-size: 22px; }
+  .profile-settings-badge { width: 21px; height: 21px; flex-basis: 21px; font-size: 10px; }
+  .profile-settings-language select { max-width: 90px; font-size: 10px; }
+  .profile-settings-actions { gap: 6px; margin-top: 10px; }
+  .profile-settings-actions button { min-height: 42px; gap: 6px; border-radius: 6px; font-size: 12px; }
+  .profile-settings-actions button svg { width: 16px; height: 16px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .profile-settings-row { transition: none; }
 }
