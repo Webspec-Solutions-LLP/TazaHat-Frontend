@@ -10,8 +10,11 @@ pipeline {
         NETWORK_NAME = "proxy-net"
         MEMORY_LIMIT = "512m"
         DOMAIN_NAME = "taza.webspec.in"
-        VIRTUAL_HOSTS = "taza.webspec.in"
-        LETSENCRYPT_HOSTS = "taza.webspec.in"
+        // The site answers on both addresses (one certificate covers both). test-site.machranga.co.in must have an A record to this server's IP
+        // (144.91.93.125) at its DNS provider: a CNAME to taza.webspec.in does not work (Cloudflare error 1001) and Let's Encrypt could not
+        // check the domain, which would also stop the certificate of the first address from being renewed.
+        VIRTUAL_HOSTS = "taza.webspec.in,test-site.machranga.co.in"
+        LETSENCRYPT_HOSTS = "taza.webspec.in,test-site.machranga.co.in"
         LETSENCRYPT_EMAIL = "debnathtapash56@gmail.com"
         NODE_ENV = "production"
         // The backend API (container on proxy-net, see the backend repository's Jenkinsfile). Server-side only: the browser never sees it.
@@ -127,7 +130,7 @@ pipeline {
 
     post {
         success {
-            echo "Deployment successful: https://${env.DOMAIN_NAME}"
+            echo "Deployment successful: https://${env.DOMAIN_NAME} and https://test-site.machranga.co.in"
         }
         failure {
             sh 'docker logs --tail 100 "$CONTAINER_NAME" || true'
