@@ -102,7 +102,7 @@ export default function ContactUsPage() {
     {
       ...t.contactCards[2],
       icon: "handshake",
-      href: "mailto:partner@tazahaat.in",
+      href: "mailto:partner@tazahat.in",
       tone: "orange",
     },
     {

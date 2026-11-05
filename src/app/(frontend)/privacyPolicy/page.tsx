@@ -315,7 +315,7 @@ export default function PrivacyPolicyPage() {
                 <div className="privacy-help-card">
                   <h4 className="privacy-help-title">{data.contactHelpTitle}</h4>
                   <p className="privacy-help-desc">{data.contactHelpDesc}</p>
-                  <a href="mailto:privacy@tazahaat.in" className="privacy-help-link">
+                  <a href="mailto:privacy@tazahat.in" className="privacy-help-link">
                     <span>{data.contactHelpBtn}</span>
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <line x1="7" y1="17" x2="17" y2="7" />
@@ -385,8 +385,8 @@ export default function PrivacyPolicyPage() {
                     <p>Our Data Protection team in Agartala is ready to assist you with compliance inquiries or account requests.</p>
                   </div>
                   <div className="privacy-bottom-actions">
-                    <a href="mailto:privacy@tazahaat.in" className="privacy-btn-contact">
-                      privacy@tazahaat.in
+                    <a href="mailto:privacy@tazahat.in" className="privacy-btn-contact">
+                      privacy@tazahat.in
                     </a>
                     <Link href="/contactUs" className="privacy-btn-help">
                       Help Center &amp; Support
