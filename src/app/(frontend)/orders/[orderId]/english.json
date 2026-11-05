@@ -83,5 +83,6 @@
   "cancelItemDialogTitle": "Cancel Item",
   "cancelOrderDialogTitle": "Cancel Order",
   "orderPrefix": "Order",
-  "requireLoginWhat": "your order"
+  "requireLoginWhat": "your order",
+  "invoiceBtn": "Download invoice"
 }

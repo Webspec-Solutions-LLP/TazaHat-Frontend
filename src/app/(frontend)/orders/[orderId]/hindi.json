@@ -83,5 +83,6 @@
   "cancelItemDialogTitle": "आइटम रद्द करें",
   "cancelOrderDialogTitle": "ऑर्डर रद्द करें",
   "orderPrefix": "ऑर्डर",
-  "requireLoginWhat": "आपका ऑर्डर"
+  "requireLoginWhat": "आपका ऑर्डर",
+  "invoiceBtn": "इनवॉइस डाउनलोड"
 }

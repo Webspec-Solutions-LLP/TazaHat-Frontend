@@ -83,5 +83,6 @@
   "cancelItemDialogTitle": "পণ্য বাতিল",
   "cancelOrderDialogTitle": "অর্ডার বাতিল",
   "orderPrefix": "অর্ডার",
-  "requireLoginWhat": "আপনার অর্ডার"
+  "requireLoginWhat": "আপনার অর্ডার",
+  "invoiceBtn": "ইনভয়েস ডাউনলোড"
 }

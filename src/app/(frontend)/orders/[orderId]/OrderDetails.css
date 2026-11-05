@@ -162,3 +162,6 @@
   .order-product-final { font-size: 10px; }
   .order-product-status { gap: 4px; padding: 3px 7px; font-size: 9px; }
 }
+
+.order-invoice-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;border:1px solid var(--primary,#16a34a);color:var(--primary,#16a34a);font-weight:600;font-size:13px;text-decoration:none;background:transparent;white-space:nowrap}
+.order-invoice-btn:hover{background:var(--primary,#16a34a);color:#fff}

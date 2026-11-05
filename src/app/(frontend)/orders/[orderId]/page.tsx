@@ -185,6 +185,7 @@ function Details({ reference }: { reference: string }) {
             </div>
             <div className="order-details-heading-main">
               <h1>{order.orderNumber}</h1>
+              {order.status !== "CANCELLED" && <a className="order-invoice-btn" href={`/api/invoice/${encodeURIComponent(order.orderNumber)}?format=thermal&lang=${lang}&download=1`}>{text.invoiceBtn}</a>}
               {order.cancelMode && (
                 <span className="order-edit-buttons">
                   {order.editable && <button type="button" disabled={busy} onClick={() => setPanel(true)}>{text.editOrderBtn}</button>}
