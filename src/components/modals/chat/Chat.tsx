@@ -45,6 +45,10 @@ function ChatSkeleton({ rows }: { rows: number }) {
 }
 
 /** WhatsApp-style support chat: signed-in customers only, the last 20 messages first, 10 more each time you scroll up, live replies, ticks and "typing...". */
+/** the "no image" picture: the shop's logo, shown when a product has no picture or its file cannot be loaded */
+const NO_IMAGE = "/images/logo.webp";
+const toLogo = (e: { currentTarget: HTMLImageElement }) => { const img = e.currentTarget; if (!img.src.endsWith(NO_IMAGE)) { img.removeAttribute("srcset"); img.src = NO_IMAGE; img.classList.add("is-logo"); } };
+
 const ORDER_COLOR: Record<string, string> = { PENDING: "#f59e0b", IN_PROGRESS: "#3b82f6", PROCESSING: "#8b5cf6", PACKAGING: "#06b6d4", OUT_FOR_DELIVERY: "#ec4899", DELIVERED: "#10b981", CANCELLED: "#ef4444" };
 
 /** "Please rate our delivered order": five stars; once rated it shows the stars given */
@@ -108,7 +112,8 @@ function ChatCardView({ card }: { card: NonNullable<ChatMsg["card"]> }) {
   if (card.kind === "rate") return <RateCard card={card} />;
   const inner = (
     <>
-      {card.image ? /* eslint-disable-next-line @next/next/no-img-element */ <img className="chat-card-photo" src={card.image} alt={card.title} loading="lazy" /> : <div className="chat-card-photo chat-card-photo--empty" aria-hidden="true">🛍️</div>}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img className={`chat-card-photo${card.image ? "" : " is-logo"}`} src={card.image || NO_IMAGE} alt={card.title} loading="lazy" onError={toLogo} />
       <div className="chat-card-body">
         <span className="chat-card-kind">🛍️ Product</span>
         <b className="chat-card-title chat-card-title--name">{card.title}</b>
@@ -414,7 +419,8 @@ export default function Chat({ onClose, product, tag: tagProp = null, requestClo
             )}
             {tag && (
               <div className="chat-composer-context chat-tag">
-                {tag.image ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={tag.image} alt="" width={76} height={76} /> : <span className="chat-tag-icon" aria-hidden="true">🛍️</span>}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img className={tag.image ? "" : "is-logo"} src={tag.image || NO_IMAGE} alt="" width={76} height={76} onError={toLogo} />
                 <span className="chat-composer-context-copy"><strong>Asking about</strong><b>{tag.title}</b>{tag.subtitle && <small>{tag.subtitle}</small>}</span>
                 <button type="button" aria-label="Remove the product" onClick={() => setTag(null)}>×</button>
               </div>

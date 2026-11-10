@@ -647,3 +647,7 @@
 .chat-tag .chat-composer-context-copy small { font-size: 11px; }
 .chat-tag-icon { display: grid; width: 38px; height: 38px; flex: 0 0 38px; place-items: center; border-radius: 6px; background: #eef4fa; font-size: 20px; }
 .chat-tag > button { border: 0; background: transparent; color: #6d7e74; font-size: 20px; cursor: pointer; }
+
+/* the "no image" logo inside a product picture */
+.chat-card-photo.is-logo { height: 120px; padding: 14px; object-fit: contain; background: #f4f8fc; }
+.chat-composer-context > img.is-logo { padding: 3px; object-fit: contain; background: #f4f8fc; }
