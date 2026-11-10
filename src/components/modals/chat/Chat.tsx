@@ -396,7 +396,9 @@ export default function Chat({ onClose, product, tag: tagProp = null, requestClo
                     {m.legacyMedia && <div className="chat-media-missing"><span aria-hidden="true">{m.legacyMedia === "image" ? "📷" : m.legacyMedia === "voice" ? "🎤" : m.legacyMedia === "video" ? "🎥" : "📎"}</span><span>{m.legacyMedia === "image" ? "Photo" : m.legacyMedia === "voice" ? "Voice message" : m.legacyMedia === "video" ? "Video" : "Document"} is no longer available</span></div>}
                     {m.imageUrl && <button type="button" className="chat-photo" onClick={() => setLightbox(m.imageUrl)} aria-label="Open photo">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={m.imageUrl} alt="Photo in chat" loading="lazy" onLoad={scrollEnd} /></button>}
                     {m.voiceUrl && <VoiceBubble src={m.voiceUrl} seconds={m.voiceSeconds ?? 1} transcript={m.transcript} waveform={m.waveform} />}
-                    {m.card ? <ChatCardView card={m.card} /> : (m.text && <p>{m.text}</p>)}
+                    {m.card && <ChatCardView card={m.card} />}
+                    {/* a card's words are its caption only when the customer wrote them (the team's cards carry a plain-text copy of the card) */}
+                    {m.text && (!m.card || mine) && <p>{m.text}</p>}
                     <time>
                       {timeOf(m.createdAt)}
                       {mine && (m.state === "sending" ? <span className="chat-tick" aria-label="Sending">🕓</span> : m.state === "failed" ? null : <span className={`chat-tick${m.readAt ? " is-read" : ""}`} aria-label={m.readAt ? "Read" : "Sent"}>{m.readAt ? "✓✓" : "✓"}</span>)}
