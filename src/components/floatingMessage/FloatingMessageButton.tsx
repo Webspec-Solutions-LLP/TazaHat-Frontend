@@ -53,7 +53,8 @@ export default function FloatingMessageButton() {
     if (new URLSearchParams(window.location.search).get("chat") === "1") setIsChatOpen(true);
   }, []);
 
-  if (pathname === "/checkout" || pathname.startsWith("/checkout/")) {
+  // the chat button is on the home page only (an open chat keeps its button, so it can still be closed)
+  if (pathname !== "/" && !isChatOpen) {
     return null;
   }
 
