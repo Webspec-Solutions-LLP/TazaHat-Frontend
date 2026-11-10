@@ -681,3 +681,8 @@
   .products-section .product-details-button { min-height: 31px; padding-inline: 6px; font-size: 10px; }
   .products-section .product-quick-view { flex-basis: 36px; min-height: 31px; }
 }
+
+/* the quick-view (eye) button is not shown on phones: the card opens the product itself */
+@media (max-width: 767px) {
+  .product-quick-view { display: none !important; }
+}
