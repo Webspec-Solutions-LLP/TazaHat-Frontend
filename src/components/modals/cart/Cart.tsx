@@ -404,7 +404,8 @@ export default function Cart({
                   </div>
                 </article>
               ))}
-              {related.length > 0 && (
+              {/* "You may also like" is hidden for now */}
+              {false && related.length > 0 && (
                 <section className="cart-related" aria-label={t.relatedHeading}>
                   <h3>{t.relatedHeading}</h3>
                   <div className="cart-related-row">
