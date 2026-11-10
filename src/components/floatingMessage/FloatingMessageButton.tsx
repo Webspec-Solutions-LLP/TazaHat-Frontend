@@ -5,12 +5,13 @@ import { usePathname } from "next/navigation";
 import "./FloatingMessageButton.css";
 import Chat, { OPEN_CHAT_EVENT } from "../modals/chat/Chat";
 import { useAuth } from "@/lib/auth";
-import { chatUnreadAction } from "@/app/chat-actions";
+import { chatUnreadAction, type ChatProductTag } from "@/app/chat-actions";
 
 export default function FloatingMessageButton() {
   const pathname = usePathname();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [startInTicketMode, setStartInTicketMode] = useState(false);
+  const [tag, setTag] = useState<ChatProductTag | null>(null);
   const chatCloseRef = useRef<(() => void) | null>(null);
   const { user } = useAuth();
   // replies that arrived while the chat is closed: a small red count on the button (the chat itself marks them read)
@@ -41,8 +42,9 @@ export default function FloatingMessageButton() {
   useEffect(() => { if (isChatOpen) { setUnread(0); setPreview(null); } }, [isChatOpen]);
   useEffect(() => {
     const openChat = (event: Event) => {
-      const detail = (event as CustomEvent<{ ticket?: boolean }>).detail;
+      const detail = (event as CustomEvent<{ ticket?: boolean; tag?: ChatProductTag }>).detail;
       setStartInTicketMode(detail?.ticket === true);
+      setTag(detail?.tag ?? null);
       setIsChatOpen(true);
     };
     window.addEventListener(OPEN_CHAT_EVENT, openChat);
@@ -74,8 +76,9 @@ export default function FloatingMessageButton() {
     <>
       {isChatOpen && (
         <Chat
-          key={startInTicketMode ? "ticket" : "chat"}
-          onClose={() => { setIsChatOpen(false); setStartInTicketMode(false); }}
+          key={startInTicketMode ? "ticket" : tag ? `tag-${tag.title}-${tag.subtitle ?? ""}` : "chat"}
+          tag={tag}
+          onClose={() => { setIsChatOpen(false); setStartInTicketMode(false); setTag(null); }}
           startInTicketMode={startInTicketMode}
           requestCloseRef={chatCloseRef}
         />

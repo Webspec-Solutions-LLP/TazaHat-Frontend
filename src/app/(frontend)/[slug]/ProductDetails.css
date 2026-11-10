@@ -501,3 +501,25 @@ body.pd-page .mobile-bottom-navigation { display: none !important; }
 .pd-trust strong { color: #173b70; font-size: clamp(10px, 1.05vw, 12px); font-weight: 800; }
 .pd-trust small { color: #748398; font-size: clamp(9px, .9vw, 11px); }
 .pd-river-art { display: none; }
+
+/* the heart, share and chat buttons beside "Add to Cart": one size, one look (46px squares) */
+.pd-image-share { display: contents; }
+.pd-actions .pd-wishlist--icon,
+.pd-actions .share-icon-btn,
+.pd-actions .pd-chat-btn { display: grid; flex: 0 0 46px; width: 46px; height: 46px; min-height: 46px; place-items: center; padding: 0; border: 1px solid #1682e8; border-radius: 10px; background: #fff; color: #0768c2; cursor: pointer; }
+.pd-actions .pd-wishlist--icon:hover,
+.pd-actions .share-icon-btn:hover,
+.pd-actions .pd-chat-btn:hover { background: #eaf5ff; }
+.pd-actions .pd-wishlist--icon svg,
+.pd-actions .share-icon-btn svg,
+.pd-actions .pd-chat-btn svg { width: 21px; height: 21px; }
+@media (min-width: 576px) { .pd-actions .pd-compare { flex: 0 0 auto; height: 46px; } }
+
+@media (max-width: 575px) {
+  /* on a phone the bar is Chat, Compare, Add to Cart (the heart and the share icon are over the picture) */
+  .pd-actions .share-icon-btn, .pd-actions .pd-wishlist--icon { display: none; }
+  .pd-actions .pd-chat-btn { order: 0; flex: 0 0 42px; width: 42px; height: 42px; min-height: 42px; border: 1px solid #cfe0f1; background: #f0f7ff; }
+  /* the share icon over the picture looks like the heart and the cart */
+  .pd-mobile-image-actions .share-icon-btn { display: grid; width: 40px; height: 40px; place-items: center; padding: 0; border: 0; border-radius: 50%; background: #fffffff0; color: #173b70; box-shadow: 0 2px 9px #06336126; }
+  .pd-mobile-image-actions .share-icon-btn svg { width: 21px; height: 21px; }
+}

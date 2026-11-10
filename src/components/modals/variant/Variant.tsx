@@ -75,6 +75,8 @@ export default function Variant({ product, currency, onClose, onGoToCart, cityId
       if (cancelled) return;
       setDetail(found);
       setDetailState(found ? "ready" : "failed");
+      const saved = found?.cutting.find(c => c.sameAsLast);
+      if (saved) { setDressingId(saved.id); if (saved.details) setInstruction(saved.details); }
     });
     return () => { cancelled = true; };
   }, [product.id, cityId]);

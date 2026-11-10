@@ -5,6 +5,7 @@ import { readPlace, type GeocodeResult } from "@/lib/places";
 import { checkServiceability, checkShopCart, getCartRelated, getCities, getShopCatalog, getShopCategoryPage, getShopProduct, getShopProducts, type CatalogQuery } from "@/lib/server/api";
 import { readCityCookie, writeCityCookie } from "@/lib/server/city";
 import { userApi } from "@/lib/server/session";
+import { withSavedDressings } from "@/lib/server/saved-dressing";
 import { cardToProduct, type CartLineCheck, categoryToItem, type ApiCity, type ApiProductDetail, type Product } from "@/lib/api";
 import type { CategoryTile } from "@/components/category/Category";
 
@@ -142,7 +143,7 @@ export async function getProductDetailAction(slug: string, cityId?: string): Pro
   try {
     let detail = await getShopProduct(city.id, clean);
     if (detail.redirectSlug) detail = await getShopProduct(city.id, detail.redirectSlug); // the product was renamed
-    return detail.packs ? detail : null;
+    return detail.packs ? ((await withSavedDressings(detail)) ?? null) : null;
   } catch {
     return null;
   }

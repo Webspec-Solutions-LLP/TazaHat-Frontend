@@ -2,7 +2,7 @@
 
 import PackAction, { AvailabilityNote, StockRibbon } from "@/components/availability/PackAction";
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Products from "@/components/products/Products";
 import CompareList, { COMPARE_CHANGE_EVENT, COMPARE_STORAGE_KEY, type CompareProduct } from "@/components/modals/compareList/CompareList";
@@ -61,12 +61,17 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
   const gallery = detail.images.length ? detail.images.map(mediaSrc) : [PLACEHOLDER_IMAGE];
   const [activeImage, setActiveImage] = useState(0);
   const touchStartX = useRef<number | null>(null);
-  const firstAvailable = Math.max(0, detail.packs.findIndex(p => p.inStock));
+  // a link from the chat ("?variant=..&dressing=..") opens the product with that size and dressing already chosen
+  const query = useSearchParams();
+  const wantedPack = detail.packs.findIndex(p => p.id === query.get("variant"));
+  const wantedDressing = detail.cutting.find(c => c.id === query.get("dressing"));
+  const firstAvailable = wantedPack >= 0 ? wantedPack : Math.max(0, detail.packs.findIndex(p => p.inStock));
   const [packIndex, setPackIndex] = useState(firstAvailable);
-  const [dressingId, setDressingId] = useState("");
+  const savedDressing = wantedDressing ?? detail.cutting.find(c => c.sameAsLast);
+  const [dressingId, setDressingId] = useState(savedDressing?.id ?? "");
   const [dressingError, setDressingError] = useState(false);
   const dressingSelect = useRef<HTMLSelectElement>(null);
-  const [specialInstruction, setSpecialInstruction] = useState("");
+  const [specialInstruction, setSpecialInstruction] = useState(savedDressing?.details ?? "");
   // what is in the cart now (the navbar keeps the cart and announces it): the quantity stepper shows once this pack has been added
   const [cartLines, setCartLines] = useState<CartItem[]>([]);
   useEffect(() => {
@@ -185,6 +190,13 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
     };
     window.dispatchEvent(new CustomEvent("tazahat:add-cart-item", { detail: item }));
   };
+  // "ask about this product": the chat opens with it tagged (the size and the dressing chosen), the customer adds a few words and sends
+  const askAboutProduct = () => {
+    const raw = gallery[0] ?? "";
+    const upload = /\/uploads\/[\w./-]+/.exec(raw)?.[0];
+    const sub = [pack?.label, dressing ? shortName(dressing.name) : "", isCustomDressing && specialInstruction.trim() ? `“${specialInstruction.trim().slice(0, 60)}”` : ""].filter(Boolean).join(" · ");
+    window.dispatchEvent(new CustomEvent("tazahat:open-chat", { detail: { tag: { title: shortName(detail.name), subtitle: sub || undefined, price: pack ? money.format(unitPrice) : undefined, variantId: pack?.id, cuttingId: dressing?.id, image: upload ?? (/^https:\/\//.test(raw) ? raw : undefined), url: `${window.location.origin}/${encodeURIComponent(detail.slug)}${pack ? `?variant=${encodeURIComponent(pack.id)}${dressing ? `&dressing=${encodeURIComponent(dressing.id)}` : ""}` : ""}` } } }));
+  };
   const changeQuantity = (delta: number) => window.dispatchEvent(new CustomEvent("tazahat:update-cart-quantity", { detail: { id: lineId, delta } }));
 
   return <main className="product-details-page" lang={t.language}>
@@ -205,9 +217,10 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
             }}>
             <Image src={mainImage} alt={name} fill priority sizes="(max-width: 900px) 100vw, 40vw" unoptimized={isRemoteImage(mainImage)} onError={fallbackImage} {...imageProps} />
             {lens && <span className="pd-zoom-lens" aria-hidden="true" style={lens.lens} />}
-            <button type="button" className="pd-back" aria-label="Back" onClick={goBack}><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg></button>
+            <button type="button" className="pd-back" aria-label="Back" onClick={goBack}><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7" /></svg></button>
             <div className="pd-mobile-image-actions">
               <button type="button" className="pd-image-action" aria-pressed={saved} aria-label={saved ? t.removeFromWishlist : t.addToWishlist} title={saved ? t.removeFromWishlist : t.addToWishlist} onClick={event => { event.stopPropagation(); setSaved(toggleWishlistId(detail.slug).includes(detail.slug)); }}><Icon name="heart" /></button>
+              <span className="pd-image-share" onClick={event => event.stopPropagation()}><ShareButton title={shortName(detail.name)} text={plainText(detail.shortDescription || detail.description).slice(0, 140) || undefined} path={`/${encodeURIComponent(detail.slug)}`} label="Share this product" /></span>
               <button type="button" className="pd-image-action" aria-label={t.openCartAria} title={t.openCartAria} onClick={event => { event.stopPropagation(); window.dispatchEvent(new Event("tazahat:open-cart")); }}><Icon name="cart" /></button>
             </div>
             <StockRibbon pack={pack} />
@@ -261,6 +274,7 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
             )}
             <button type="button" className="pd-wishlist pd-wishlist--icon" aria-pressed={saved} aria-label={saved ? t.removeFromWishlist : t.addToWishlist} title={saved ? t.removeFromWishlist : t.addToWishlist} onClick={() => setSaved(toggleWishlistId(detail.slug).includes(detail.slug))}><Icon name="heart" /></button>
             <ShareButton title={shortName(detail.name)} text={plainText(detail.shortDescription || detail.description).slice(0, 140) || undefined} path={`/${encodeURIComponent(detail.slug)}`} label="Share this product" />
+            <button type="button" className="pd-chat-btn" aria-label="Ask about this product" title="Ask about this product" onClick={askAboutProduct}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.5-4.6A8 8 0 1 1 21 12Z" /></svg></button>
             <button type="button" className={`pd-compare${isCompared ? " is-compared" : ""}`} disabled={isCompared} onClick={handleAddToCompare} title={isCompared ? t.alreadyAddedToCompare : t.addToCompare}><Icon name="compare" /><span>{isCompared ? t.addedToCompare : t.addToCompare}</span></button>
           </div>
           <div className="pd-order-note"><span><Icon name="shield" /></span><p><strong>{t.trustHeading}</strong><small>{t.trustText}</small></p></div>

@@ -11,12 +11,14 @@ export interface ChatMsg {
   /** a line of the conversation itself ("Priya is now your support agent"): shown in the middle */
   system?: boolean;
   /** a product / offer / order shared by the team: shown as a card */
-  card?: { kind: "product" | "offer" | "order" | "rate"; title: string; subtitle?: string; image?: string; price?: string; url?: string; code?: string; badge?: string; status?: string; ref?: string } | null;
+  card?: { kind: "product" | "offer" | "order" | "rate"; title: string; subtitle?: string; image?: string; price?: string; url?: string; code?: string; badge?: string; status?: string; ref?: string; variantId?: string; cuttingId?: string } | null;
   /** the support agent who wrote it */
   sentBy?: string | null;
   /** the old system's pictures / recordings: the file is gone, a "not available" card is shown */
   legacyMedia: "image" | "voice" | "video" | "document" | null;
 }
+/** a product the customer is asking about (with the size and dressing chosen): goes on the message as a card */
+export interface ChatProductTag { title: string; subtitle?: string; price?: string; image?: string; url?: string; variantId?: string; cuttingId?: string }
 export interface ChatMedia { imageUrl?: string; voiceUrl?: string; voiceSeconds?: number; transcript?: string; waveform?: number[] }
 export interface ChatOpen { threadId: string; messages: ChatMsg[]; hasMore: boolean; unread: number }
 type Result<T> = { ok: true; data: T } | { ok: false; error: string };
@@ -34,10 +36,10 @@ export async function chatOlderAction(before: { createdAt: string; id: string })
   return res.ok ? { ok: true, data: res.data } : { ok: false, error: res.message };
 }
 
-export async function chatSendAction(text: string, clientId: string, media?: ChatMedia, ticket = false): Promise<Result<ChatMsg>> {
+export async function chatSendAction(text: string, clientId: string, media?: ChatMedia, ticket = false, card?: ChatProductTag): Promise<Result<ChatMsg>> {
   const res = await userApi<{ message: ChatMsg }>("/chat/messages", {
     method: "POST",
-    body: { text: String(text).slice(0, 2000), clientId: String(clientId).slice(0, 60), ...(ticket ? { ticket: true } : {}), ...(media?.imageUrl ? { imageUrl: String(media.imageUrl).slice(0, 200) } : {}), ...(media?.voiceUrl ? { voiceUrl: String(media.voiceUrl).slice(0, 200), voiceSeconds: Math.min(60, Math.max(1, Math.round(Number(media.voiceSeconds) || 1))), transcript: String(media.transcript ?? "").slice(0, 3000), waveform: (media.waveform ?? []).slice(0, 64).map((n) => Math.max(0, Math.min(100, Math.round(Number(n) || 0)))) } : {}) },
+    body: { text: String(text).slice(0, 2000), clientId: String(clientId).slice(0, 60), ...(ticket ? { ticket: true } : {}), ...(card ? { card: { kind: "product", title: String(card.title).slice(0, 140), subtitle: card.subtitle ? String(card.subtitle).slice(0, 160) : undefined, price: card.price ? String(card.price).slice(0, 60) : undefined, image: card.image, url: card.url, variantId: card.variantId, cuttingId: card.cuttingId } } : {}), ...(media?.imageUrl ? { imageUrl: String(media.imageUrl).slice(0, 200) } : {}), ...(media?.voiceUrl ? { voiceUrl: String(media.voiceUrl).slice(0, 200), voiceSeconds: Math.min(60, Math.max(1, Math.round(Number(media.voiceSeconds) || 1))), transcript: String(media.transcript ?? "").slice(0, 3000), waveform: (media.waveform ?? []).slice(0, 64).map((n) => Math.max(0, Math.min(100, Math.round(Number(n) || 0)))) } : {}) },
   });
   return res.ok ? { ok: true, data: res.data.message } : { ok: false, error: res.message };
 }

@@ -4,6 +4,7 @@ import { notFound, permanentRedirect } from "next/navigation";
 import CityPrompt from "@/components/home/CityPrompt";
 import { shortName, type ApiProductDetail } from "@/lib/api";
 import { getProductShare, getShopProduct } from "@/lib/server/api";
+import { withSavedDressings } from "@/lib/server/saved-dressing";
 import { absoluteUrl, getSiteIdentity } from "@/lib/server/site";
 import { readCityCookie } from "@/lib/server/city";
 import ProductDetailView from "./ProductDetailView";
@@ -12,7 +13,7 @@ import "./ProductDetails.css";
 /** One fetch per request, shared by the page and its <title>. null = no such product; undefined = the shop could not be reached. */
 const loadProduct = cache(async (cityId: string, slug: string): Promise<ApiProductDetail | null | undefined> => {
   try {
-    return await getShopProduct(cityId, slug);
+    return await withSavedDressings(await getShopProduct(cityId, slug));
   } catch (err) {
     return err instanceof Error && /not found/i.test(err.message) ? null : undefined;
   }
@@ -20,6 +21,17 @@ const loadProduct = cache(async (cityId: string, slug: string): Promise<ApiProdu
 
 // something that looks like a file (favicon.ico, robots.txt ...) is never a product
 const looksLikeFile = (slug: string) => /\.[a-z0-9]{2,5}$/i.test(slug);
+
+/** a share-preview picture has to be a real file: a product whose picture is missing on the server shows the shop's logo instead (the "no image" picture) */
+async function reachable(url: string | null | undefined): Promise<string | null> {
+  if (!url) return null;
+  try {
+    const r = await fetch(url, { method: "HEAD", signal: AbortSignal.timeout(2500), next: { revalidate: 600 } });
+    return r.ok && /^image\//.test(r.headers.get("content-type") ?? "") ? url : null;
+  } catch {
+    return null;
+  }
+}
 
 /** The tags a product is shown with in search results and when a link is shared (WhatsApp, Facebook, Telegram, Google ...): no delivery city is needed. */
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -32,7 +44,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const price = share.price ? ` From ₹${Math.round(share.price.lowPaisa / 100)}.` : "";
   const description = `${share.description ? `${share.description}. ` : ""}Buy fresh ${name} online${share.category ? ` (${shortName(share.category.name)})` : ""} and get it delivered by ${id.name}.${price}`.replace(/\.\s*\./g, ".").slice(0, 300);
   const url = `${id.origin}/${encodeURIComponent(share.slug)}`;
-  const image = absoluteUrl(id.origin, share.image) ?? id.logo;
+  const image = (await reachable(absoluteUrl(id.origin, share.image))) ?? id.logo;
   return {
     title: name, description,
     alternates: { canonical: url },

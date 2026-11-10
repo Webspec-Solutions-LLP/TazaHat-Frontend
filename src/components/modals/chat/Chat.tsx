@@ -9,7 +9,7 @@ import { useAuth } from "@/lib/auth";
 import { MAX_VOICE_SECONDS, uploadChatMedia, useVoiceRecorder, type VoiceResult } from "@/lib/useVoiceRecorder";
 import { useLanguage } from "@/lib/language";
 import VoiceBubble from "./VoiceBubble";
-import { chatOlderAction, chatOpenAction, chatRateAction, chatReadAction, chatSendAction, chatShortcutRunAction, chatShortcutsAction, type ChatShortcut, chatTypingAction, type ChatMedia, type ChatMsg } from "@/app/chat-actions";
+import { chatOlderAction, chatOpenAction, chatRateAction, chatReadAction, chatSendAction, chatShortcutRunAction, type ChatProductTag, chatShortcutsAction, type ChatShortcut, chatTypingAction, type ChatMedia, type ChatMsg } from "@/app/chat-actions";
 
 /** a message on screen: the saved one, or one still being sent / that failed (kept with its own id so a retry never duplicates it) */
 type Row = ChatMsg & { state?: "sending" | "failed"; /** kept so a failed message can be sent again */ retry?: { media?: ChatMedia; blob?: Blob; kind?: "image" | "voice"; transcript?: string; seconds?: number; waveform?: number[] } };
@@ -19,6 +19,8 @@ export interface ChatProps {
   startInTicketMode?: boolean;
   /** opened from a product page: the question starts with the product's name */
   product?: { id: string; name: string; image?: string };
+  /** the product the customer is asking about (from the product page): tagged above the box, goes as a card with their words under it */
+  tag?: ChatProductTag | null;
   requestCloseRef?: { current: (() => void) | null };
 }
 
@@ -119,7 +121,8 @@ function ChatCardView({ card }: { card: NonNullable<ChatMsg["card"]> }) {
   return card.url ? <a className="chat-card chat-card--product" href={card.url} target="_blank" rel="noopener noreferrer">{inner}</a> : <div className="chat-card chat-card--product">{inner}</div>;
 }
 
-export default function Chat({ onClose, product, requestCloseRef, startInTicketMode = false }: ChatProps) {
+export default function Chat({ onClose, product, tag: tagProp = null, requestCloseRef, startInTicketMode = false }: ChatProps) {
+  const [tag, setTag] = useState<ChatProductTag | null>(tagProp);
   const { user, ready, openLogin } = useAuth();
   const [rows, setRows] = useState<Row[]>([]);
   const [hasMore, setHasMore] = useState(false);
@@ -275,10 +278,10 @@ export default function Chat({ onClose, product, requestCloseRef, startInTicketM
   /** sends a message; a picture / recording is uploaded first. A failed one stays on screen with "Tap to retry". */
   // "Create ticket": the next message is written as a support ticket
   const [ticketMode, setTicketMode] = useState(startInTicketMode);
-  const send = async (text: string, opts: { clientId?: string; retry?: boolean; blob?: Blob; kind?: "image" | "voice"; seconds?: number; transcript?: string; waveform?: number[]; preview?: string; ticket?: boolean } = {}) => {
+  const send = async (text: string, opts: { clientId?: string; retry?: boolean; blob?: Blob; kind?: "image" | "voice"; seconds?: number; transcript?: string; waveform?: number[]; preview?: string; ticket?: boolean; card?: ChatProductTag } = {}) => {
     const clientId = opts.clientId ?? newId();
     const now = new Date().toISOString();
-    const local: Row = { id: `local-${clientId}`, threadId: "", text, fromSupport: false, createdAt: now, readAt: null, clientId, ticket: opts.ticket === true, imageUrl: opts.kind === "image" ? opts.preview ?? null : null, voiceUrl: opts.kind === "voice" && opts.blob ? URL.createObjectURL(opts.blob) : null, voiceSeconds: opts.seconds ?? null, transcript: opts.transcript || null, waveform: opts.waveform ?? [], legacyMedia: null, state: "sending", retry: { blob: opts.blob, kind: opts.kind, seconds: opts.seconds, transcript: opts.transcript, waveform: opts.waveform } };
+    const local: Row = { id: `local-${clientId}`, threadId: "", text, card: opts.card ? { kind: "product", title: opts.card.title, subtitle: opts.card.subtitle, price: opts.card.price, image: opts.card.image, url: opts.card.url } : null, fromSupport: false, createdAt: now, readAt: null, clientId, ticket: opts.ticket === true, imageUrl: opts.kind === "image" ? opts.preview ?? null : null, voiceUrl: opts.kind === "voice" && opts.blob ? URL.createObjectURL(opts.blob) : null, voiceSeconds: opts.seconds ?? null, transcript: opts.transcript || null, waveform: opts.waveform ?? [], legacyMedia: null, state: "sending", retry: { blob: opts.blob, kind: opts.kind, seconds: opts.seconds, transcript: opts.transcript, waveform: opts.waveform } };
     if (!opts.retry) setRows((cur) => [...cur, local]);
     else setRows((cur) => cur.map((r) => (r.clientId === clientId ? { ...r, state: "sending" } : r)));
     stickToEnd.current = true;
@@ -288,7 +291,7 @@ export default function Chat({ onClose, product, requestCloseRef, startInTicketM
       if (!up.ok) { setMediaError(up.error); setRows((cur) => cur.map((r) => (r.clientId === clientId ? { ...r, state: "failed" } : r))); return; }
       media = opts.kind === "image" ? { imageUrl: up.url } : { voiceUrl: up.url, voiceSeconds: opts.seconds, transcript: opts.transcript, waveform: opts.waveform };
     }
-    const res = await chatSendAction(text, clientId, media, opts.ticket === true);
+    const res = await chatSendAction(text, clientId, media, opts.ticket === true, opts.card);
     setRows((cur) => {
       if (!res.ok) return cur.map((r) => (r.clientId === clientId ? { ...r, state: "failed" } : r));
       const real = res.data;
@@ -316,12 +319,12 @@ export default function Chat({ onClose, product, requestCloseRef, startInTicketM
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const text = message.trim();
-    if ((!text && !photo) || isClosing) return;
+    if ((!text && !photo && !tag) || isClosing) return;
     setMessage("");
     void chatTypingAction(false);
     const ticket = ticketMode;
     setTicketMode(false);
-    if (photo) { const p = photo; setPhoto(null); void send(text, { ticket, blob: p.file, kind: "image", preview: p.url }); } else void send(text, { ticket });
+    if (photo) { const p = photo; setPhoto(null); void send(text, { ticket, blob: p.file, kind: "image", preview: p.url }); } else { const card = tag ?? undefined; setTag(null); void send(text, { ticket, card }); }
     input.current?.focus();
   };
 
@@ -407,6 +410,13 @@ export default function Chat({ onClose, product, requestCloseRef, startInTicketM
                 <span aria-hidden="true">🎫</span>
                 <span><strong>New ticket</strong><small>What is your problem? Tell us in detail and we will save it as a ticket.</small></span>
                 <button type="button" aria-label="Cancel the ticket" onClick={() => setTicketMode(false)}>×</button>
+              </div>
+            )}
+            {tag && (
+              <div className="chat-composer-context chat-tag">
+                {tag.image ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={tag.image} alt="" width={76} height={76} /> : <span className="chat-tag-icon" aria-hidden="true">🛍️</span>}
+                <span className="chat-composer-context-copy"><strong>Asking about</strong><b>{tag.title}</b>{tag.subtitle && <small>{tag.subtitle}</small>}</span>
+                <button type="button" aria-label="Remove the product" onClick={() => setTag(null)}>×</button>
               </div>
             )}
             {mediaError && <p className="chat-attachment-error" role="alert">{mediaError}</p>}
