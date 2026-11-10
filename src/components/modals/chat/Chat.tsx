@@ -9,7 +9,7 @@ import { useAuth } from "@/lib/auth";
 import { MAX_VOICE_SECONDS, uploadChatMedia, useVoiceRecorder, type VoiceResult } from "@/lib/useVoiceRecorder";
 import { useLanguage } from "@/lib/language";
 import VoiceBubble from "./VoiceBubble";
-import { chatOlderAction, chatOpenAction, chatReadAction, chatSendAction, chatTypingAction, type ChatMedia, type ChatMsg } from "@/app/chat-actions";
+import { chatOlderAction, chatOpenAction, chatRateAction, chatReadAction, chatSendAction, chatShortcutRunAction, chatShortcutsAction, type ChatShortcut, chatTypingAction, type ChatMedia, type ChatMsg } from "@/app/chat-actions";
 
 /** a message on screen: the saved one, or one still being sent / that failed (kept with its own id so a retry never duplicates it) */
 type Row = ChatMsg & { state?: "sending" | "failed"; /** kept so a failed message can be sent again */ retry?: { media?: ChatMedia; blob?: Blob; kind?: "image" | "voice"; transcript?: string; seconds?: number; waveform?: number[] } };
@@ -43,6 +43,82 @@ function ChatSkeleton({ rows }: { rows: number }) {
 }
 
 /** WhatsApp-style support chat: signed-in customers only, the last 20 messages first, 10 more each time you scroll up, live replies, ticks and "typing...". */
+const ORDER_COLOR: Record<string, string> = { PENDING: "#f59e0b", IN_PROGRESS: "#3b82f6", PROCESSING: "#8b5cf6", PACKAGING: "#06b6d4", OUT_FOR_DELIVERY: "#ec4899", DELIVERED: "#10b981", CANCELLED: "#ef4444" };
+
+/** "Please rate our delivered order": five stars; once rated it shows the stars given */
+function RateCard({ card }: { card: NonNullable<ChatMsg["card"]> }) {
+  const [given, setGiven] = useState(card.status === "rated" ? Number(card.badge) || 0 : 0);
+  const [hover, setHover] = useState(0);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => { if (card.status === "rated") setGiven(Number(card.badge) || 0); }, [card.status, card.badge]);
+  const done = given > 0;
+  const tap = async (n: number) => {
+    if (done || busy || !card.ref) return;
+    setBusy(true);
+    const r = await chatRateAction(card.ref, n);
+    setBusy(false);
+    if (r.ok) setGiven(n);
+  };
+  return (
+    <div className="chat-card chat-card--rate">
+      <div className="chat-card-offer-head chat-card-rate-head">⭐ Rate your order</div>
+      <div className="chat-card-body">
+        <b className="chat-card-title">{card.title}</b>
+        <span className="chat-card-sub">{done ? "Thank you for rating!" : card.subtitle}</span>
+        <div className="chat-stars" role="radiogroup" aria-label="Rating">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <button key={n} type="button" role="radio" aria-checked={given === n} aria-label={`${n} star${n === 1 ? "" : "s"}`} disabled={done || busy} className={n <= (hover || given) ? "is-on" : ""} onMouseEnter={() => setHover(n)} onMouseLeave={() => setHover(0)} onClick={() => void tap(n)}>★</button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** a product / offer / order shared by the team: the same three layouts as in the team's CRM */
+function ChatCardView({ card }: { card: NonNullable<ChatMsg["card"]> }) {
+  const [copied, setCopied] = useState("");
+  const copy = (text: string, what: string) => { void navigator.clipboard?.writeText(text).then(() => { setCopied(what); setTimeout(() => setCopied(""), 1500); }); };
+  if (card.kind === "order") {
+    const col = ORDER_COLOR[card.status ?? ""] ?? "#3b82f6";
+    return (
+      <div className="chat-card chat-card--order" style={{ borderLeftColor: col }}>
+        <div className="chat-card-row"><span className="chat-card-kind">🧾 Order</span>{card.badge && <span className="chat-card-pill" style={{ background: col }}>{card.badge}</span>}</div>
+        <div className="chat-card-row"><b className="chat-card-title">{card.title}</b>{card.price && <b className="chat-card-price">{card.price}</b>}</div>
+        {card.subtitle && <span className="chat-card-sub">{card.subtitle}</span>}
+      </div>
+    );
+  }
+  if (card.kind === "offer") {
+    return (
+      <div className="chat-card chat-card--offer">
+        <div className="chat-card-offer-head">🏷️ {card.badge || "Offer"}</div>
+        <div className="chat-card-body"><b className="chat-card-title">{card.title}</b>{card.subtitle && <span className="chat-card-sub">{card.subtitle}</span>}</div>
+        {card.code && (
+          <div className="chat-card-code-row">
+            <span className="chat-card-code">{card.code}</span>
+            <button type="button" onClick={() => copy(card.code!, "code")}>{copied === "code" ? "Copied ✓" : "Copy"}</button>
+          </div>
+        )}
+      </div>
+    );
+  }
+  if (card.kind === "rate") return <RateCard card={card} />;
+  const inner = (
+    <>
+      {card.image ? /* eslint-disable-next-line @next/next/no-img-element */ <img className="chat-card-photo" src={card.image} alt={card.title} loading="lazy" /> : <div className="chat-card-photo chat-card-photo--empty" aria-hidden="true">🛍️</div>}
+      <div className="chat-card-body">
+        <span className="chat-card-kind">🛍️ Product</span>
+        <b className="chat-card-title chat-card-title--name">{card.title}</b>
+        {card.subtitle && <span className="chat-card-sub">{card.subtitle}</span>}
+        {card.price && <b className="chat-card-price">{card.price}</b>}
+        {card.url && <span className="chat-card-open">View product →</span>}
+      </div>
+    </>
+  );
+  return card.url ? <a className="chat-card chat-card--product" href={card.url} target="_blank" rel="noopener noreferrer">{inner}</a> : <div className="chat-card chat-card--product">{inner}</div>;
+}
+
 export default function Chat({ onClose, product, requestCloseRef, startInTicketMode = false }: ChatProps) {
   const { user, ready, openLogin } = useAuth();
   const [rows, setRows] = useState<Row[]>([]);
@@ -55,6 +131,21 @@ export default function Chat({ onClose, product, requestCloseRef, startInTicketM
   const [photo, setPhoto] = useState<{ file: File; url: string } | null>(null);
   const [lightbox, setLightbox] = useState<string | null>(null);
   const [mediaError, setMediaError] = useState("");
+  // the quick questions under the header: built from the customer's own orders / tickets / offers; a tap is answered by the system
+  const [shortcuts, setShortcuts] = useState<ChatShortcut[]>([]);
+  const [shortcutBusy, setShortcutBusy] = useState("");
+  const loadShortcuts = useCallback(() => { void chatShortcutsAction().then(setShortcuts).catch(() => undefined); }, []);
+  useEffect(() => { if (user) loadShortcuts(); }, [user, loadShortcuts]);
+  const merge = useCallback((list: ChatMsg[]) => setRows((cur) => { const out = [...cur]; for (const m of list) if (!out.some((r) => r.id === m.id)) out.push(m); return out; }), []);
+  const runShortcut = async (sc: ChatShortcut) => {
+    if (shortcutBusy) return;
+    setShortcutBusy(sc.id);
+    stickToEnd.current = true;
+    const r = await chatShortcutRunAction(sc.id);
+    setShortcutBusy("");
+    if (r.ok) { stickToEnd.current = true; merge([r.data.question, ...r.data.answers]); }
+    loadShortcuts();
+  };
   const fileInput = useRef<HTMLInputElement>(null);
   const [isClosing, setIsClosing] = useState(false);
   const scroller = useRef<HTMLDivElement>(null);
@@ -74,6 +165,17 @@ export default function Chat({ onClose, product, requestCloseRef, startInTicketM
     closeTimer.current = setTimeout(onClose, 380);
   }, [isClosing, onClose]);
   useBackClose(closeChat);
+  // a click outside the chat closes it (the round chat button has its own toggle)
+  useEffect(() => {
+    const away = (e: MouseEvent | TouchEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (!t || t.closest(".chat-panel, .floating-message-button, .floating-message-peek, [role='dialog'], .lightbox, .chat-lightbox")) return;
+      closeChat();
+    };
+    document.addEventListener("mousedown", away);
+    document.addEventListener("touchstart", away, { passive: true });
+    return () => { document.removeEventListener("mousedown", away); document.removeEventListener("touchstart", away); };
+  }, [closeChat]);
   useEffect(() => {
     if (requestCloseRef) { requestCloseRef.current = closeChat; return () => { requestCloseRef.current = null; }; }
   }, [closeChat, requestCloseRef]);
@@ -104,7 +206,7 @@ export default function Chat({ onClose, product, requestCloseRef, startInTicketM
       if (d.kind === "message" && d.message) {
         const m = d.message;
         setRows((cur) => (cur.some((r) => r.id === m.id || (m.clientId && r.clientId === m.clientId)) ? cur.map((r) => (r.clientId && r.clientId === m.clientId ? m : r)) : [...cur, m]));
-        if (m.fromSupport) { setSupportTyping(false); if (document.visibilityState === "visible") void chatReadAction(); }
+        if (m.fromSupport) { loadShortcuts(); setSupportTyping(false); if (document.visibilityState === "visible") void chatReadAction(); }
       } else if (d.kind === "update" && d.message) {
         const m = d.message; // e.g. the text of a voice message was written down a moment after it was sent
         setRows((cur) => cur.map((r) => (r.id === m.id ? m : r)));
@@ -246,9 +348,6 @@ export default function Chat({ onClose, product, requestCloseRef, startInTicketM
             <span>Create ticket</span>
           </button>
         )}
-        <button className="chat-collapse-button" type="button" onClick={closeChat} aria-label="Minimize chat">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
-        </button>
       </header>
 
       {!user ? (
@@ -260,6 +359,15 @@ export default function Chat({ onClose, product, requestCloseRef, startInTicketM
         </div>
       ) : (
         <>
+          {shortcuts.length > 0 && (
+            <div className="chat-shortcuts" role="toolbar" aria-label="Quick questions">
+              {shortcuts.map((sc) => (
+                <button key={sc.id} type="button" className="chat-shortcut" disabled={!!shortcutBusy} onClick={() => void runShortcut(sc)}>
+                  <span aria-hidden="true">{sc.icon === "order" ? "📦" : sc.icon === "ticket" ? "🎫" : sc.icon === "star" ? "⭐" : "🏷️"}</span>{sc.label}
+                </button>
+              ))}
+            </div>
+          )}
           <div className="chat-messages" ref={scroller} onScroll={onScroll} aria-live="polite" aria-relevant="additions text">
             {loadingOlder && <div className="chat-sk-group" role="status" aria-label="Loading earlier messages"><ChatSkeleton rows={2} /></div>}
             {state === "loading" && <div className="chat-sk-group" role="status" aria-label="Loading your chat"><ChatSkeleton rows={6} /></div>}
@@ -270,16 +378,17 @@ export default function Chat({ onClose, product, requestCloseRef, startInTicketM
               const divider = day !== lastDay ? <div className="chat-day-divider" key={`d-${day}-${m.id}`}><span>{dayLabel(m.createdAt)}</span></div> : null;
               lastDay = day;
               const mine = !m.fromSupport;
+              if (m.system) return (<div className="chat-row" key={m.id} style={{ display: "contents" }}>{divider}<div className="chat-system-line" role="status">{m.text}</div></div>);
               return (
                 <div className="chat-row" key={m.clientId ?? m.id} style={{ display: "contents" }}>
                   {divider}
                   <article id={`chat-message-${m.id}`} className={`chat-message chat-message--${mine ? "customer" : "team"}${m.state === "failed" ? " is-failed" : ""}`}>
                     {m.ticket && <span className="chat-ticket-tag">🎫 Ticket</span>}
-                    {!mine && <span className="chat-message-author">TazaHat Support</span>}
+                    {!mine && <span className="chat-message-author">{m.sentBy ? `${m.sentBy} · TazaHat Support` : "TazaHat Support"}</span>}
                     {m.legacyMedia && <div className="chat-media-missing"><span aria-hidden="true">{m.legacyMedia === "image" ? "📷" : m.legacyMedia === "voice" ? "🎤" : m.legacyMedia === "video" ? "🎥" : "📎"}</span><span>{m.legacyMedia === "image" ? "Photo" : m.legacyMedia === "voice" ? "Voice message" : m.legacyMedia === "video" ? "Video" : "Document"} is no longer available</span></div>}
                     {m.imageUrl && <button type="button" className="chat-photo" onClick={() => setLightbox(m.imageUrl)} aria-label="Open photo">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={m.imageUrl} alt="Photo in chat" loading="lazy" onLoad={scrollEnd} /></button>}
                     {m.voiceUrl && <VoiceBubble src={m.voiceUrl} seconds={m.voiceSeconds ?? 1} transcript={m.transcript} waveform={m.waveform} />}
-                    {m.text && <p>{m.text}</p>}
+                    {m.card ? <ChatCardView card={m.card} /> : (m.text && <p>{m.text}</p>)}
                     <time>
                       {timeOf(m.createdAt)}
                       {mine && (m.state === "sending" ? <span className="chat-tick" aria-label="Sending">🕓</span> : m.state === "failed" ? null : <span className={`chat-tick${m.readAt ? " is-read" : ""}`} aria-label={m.readAt ? "Read" : "Sent"}>{m.readAt ? "✓✓" : "✓"}</span>)}
@@ -289,7 +398,7 @@ export default function Chat({ onClose, product, requestCloseRef, startInTicketM
                 </div>
               );
             })}
-            {supportTyping && <div className="chat-typing" role="status" aria-label="Support is typing"><span>Support is typing</span><i /><i /><i /></div>}
+            {(supportTyping || shortcutBusy) && <div className="chat-typing" role="status" aria-label={shortcutBusy ? "Analyzing" : "Support is typing"}><span>{shortcutBusy ? "Analyzing" : "Support is typing"}</span><i /><i /><i /></div>}
           </div>
 
           <form className="chat-composer" onSubmit={submit}>

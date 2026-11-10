@@ -8,6 +8,12 @@ export interface ChatMsg {
   voiceUrl: string | null; voiceSeconds: number | null; transcript: string | null; waveform: number[];
   /** written as a support ticket ("Create ticket") */
   ticket?: boolean;
+  /** a line of the conversation itself ("Priya is now your support agent"): shown in the middle */
+  system?: boolean;
+  /** a product / offer / order shared by the team: shown as a card */
+  card?: { kind: "product" | "offer" | "order" | "rate"; title: string; subtitle?: string; image?: string; price?: string; url?: string; code?: string; badge?: string; status?: string; ref?: string } | null;
+  /** the support agent who wrote it */
+  sentBy?: string | null;
   /** the old system's pictures / recordings: the file is gone, a "not available" card is shown */
   legacyMedia: "image" | "voice" | "video" | "document" | null;
 }
@@ -34,6 +40,23 @@ export async function chatSendAction(text: string, clientId: string, media?: Cha
     body: { text: String(text).slice(0, 2000), clientId: String(clientId).slice(0, 60), ...(ticket ? { ticket: true } : {}), ...(media?.imageUrl ? { imageUrl: String(media.imageUrl).slice(0, 200) } : {}), ...(media?.voiceUrl ? { voiceUrl: String(media.voiceUrl).slice(0, 200), voiceSeconds: Math.min(60, Math.max(1, Math.round(Number(media.voiceSeconds) || 1))), transcript: String(media.transcript ?? "").slice(0, 3000), waveform: (media.waveform ?? []).slice(0, 64).map((n) => Math.max(0, Math.min(100, Math.round(Number(n) || 0)))) } : {}) },
   });
   return res.ok ? { ok: true, data: res.data.message } : { ok: false, error: res.message };
+}
+
+/** the quick questions under the chat header (from this customer's own orders / tickets / offers) */
+export interface ChatShortcut { id: string; label: string; icon: string }
+export async function chatShortcutsAction(): Promise<ChatShortcut[]> {
+  const res = await userApi<{ items: ChatShortcut[] }>("/chat/shortcuts");
+  return res.ok ? res.data.items : [];
+}
+/** a tapped shortcut: the question and the answer are written into the chat by the system */
+export async function chatShortcutRunAction(id: string): Promise<Result<{ question: ChatMsg; answers: ChatMsg[] }>> {
+  const res = await userApi<{ question: ChatMsg; answers: ChatMsg[] }>(`/chat/shortcuts/${encodeURIComponent(String(id).slice(0, 30))}`, { method: "POST", body: {} });
+  return res.ok ? { ok: true, data: res.data } : { ok: false, error: res.message };
+}
+/** the stars on a "rate our delivered order" card */
+export async function chatRateAction(orderNumber: string, stars: number): Promise<Result<{ already: boolean }>> {
+  const res = await userApi<{ already: boolean }>(`/chat/orders/${encodeURIComponent(String(orderNumber).slice(0, 40))}/rate`, { method: "POST", body: { stars: Math.max(1, Math.min(5, Math.round(stars))) } });
+  return res.ok ? { ok: true, data: res.data } : { ok: false, error: res.message };
 }
 
 export async function chatReadAction(): Promise<void> {

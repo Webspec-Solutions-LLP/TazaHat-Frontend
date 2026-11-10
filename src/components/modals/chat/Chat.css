@@ -585,3 +585,57 @@
 .chat-ticket-banner button { width: 26px; height: 26px; border: 0; border-radius: 50%; background: transparent; color: inherit; font-size: 18px; cursor: pointer; }
 .chat-ticket-tag { display: inline-block; align-self: flex-start; margin-bottom: 3px; padding: 1px 8px; border-radius: 10px; background: #fff0c2; color: #7a5600; font-size: 11px; font-weight: 800; }
 @media (max-width: 480px) { .chat-ticket-button span { display: none; } .chat-ticket-button { width: 34px; padding: 0; justify-content: center; } }
+
+/* a line of the conversation itself: "Priya is now your support agent" */
+.chat-system-line {
+  align-self: center;
+  margin: 6px 18px;
+  padding: 5px 12px;
+  border-radius: 12px;
+  background: #e3ecf5;
+  color: #4a5b6c;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* the ticket button sits at the right end of the header; the chat closes by the round button or a click outside */
+.chat-ticket-button { margin-left: auto; }
+
+/* a product / offer / order shared by the team (the same layouts as the team's CRM) */
+.chat-card { display: block; width: 252px; max-width: 100%; overflow: hidden; margin: 2px 0 4px; border: 1px solid #dbe6f1; border-radius: 12px; background: #fff; color: #14202e; text-decoration: none; }
+.chat-card-kind { color: #1f5fa8; font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.chat-card-title { display: block; font-size: 14px; line-height: 1.3; }
+.chat-card-title--name { display: -webkit-box; overflow: hidden; margin-top: 2px; font-size: 15.5px; font-weight: 800; line-height: 1.3; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+.chat-card-sub { display: block; margin-top: 2px; color: #5d6b7a; font-size: 12px; line-height: 1.35; }
+.chat-card-price { display: block; margin-top: 3px; color: #0f9f6e; font-size: 15px; font-weight: 800; }
+.chat-card-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.chat-card-body { padding: 9px 12px 11px; }
+.chat-card-open { display: block; margin-top: 7px; color: #1f5fa8; font-size: 12.5px; font-weight: 800; }
+.chat-card-photo { display: block; width: 100%; height: 160px; object-fit: cover; background: #eef4fa; }
+.chat-card-photo--empty { display: grid; place-items: center; height: 80px; font-size: 32px; }
+/* order: a coloured edge and the status */
+.chat-card--order { padding: 9px 12px 10px; border-left: 4px solid #3b82f6; }
+.chat-card--order .chat-card-row + .chat-card-row { margin-top: 3px; }
+.chat-card-pill { padding: 2px 9px; border-radius: 999px; color: #fff; font-size: 10.5px; font-weight: 800; }
+/* offer: a green head, the words, the code to copy */
+.chat-card--offer { border-color: rgb(16 185 129 / 50%); }
+.chat-card-offer-head { padding: 7px 12px; background: #059669; color: #fff; font-size: 11px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+.chat-card-code-row { display: flex; align-items: center; justify-content: space-between; padding: 7px 12px; border-top: 1px dashed rgb(0 0 0 / 18%); }
+.chat-card-code { color: #1d4ed8; font-family: ui-monospace, monospace; font-size: 15px; font-weight: 800; letter-spacing: .2em; }
+.chat-card-code-row button { padding: 3px 9px; border: 0; border-radius: 6px; background: transparent; color: #047857; font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
+.chat-card-code-row button:hover { background: rgb(16 185 129 / 12%); }
+
+/* the quick questions: a sticky row under the header, scrolled sideways */
+.chat-shortcuts { display: flex; flex: 0 0 auto; gap: 8px; overflow-x: auto; padding: 8px 12px; border-bottom: 1px solid #dbe6f1; background: #fff; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.chat-shortcuts::-webkit-scrollbar { display: none; }
+.chat-shortcut { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid #c9d8e8; border-radius: 999px; background: #f3f8fd; color: #07386b; font: inherit; font-size: 12.5px; font-weight: 700; white-space: nowrap; cursor: pointer; transition: background .15s ease, border-color .15s ease; }
+.chat-shortcut:hover:not(:disabled) { border-color: #1f5fa8; background: #e6f0fa; }
+.chat-shortcut:disabled { opacity: .6; cursor: progress; }
+/* the rating card */
+.chat-card-rate-head { background: #f59e0b; }
+.chat-stars { display: flex; gap: 4px; margin-top: 8px; }
+.chat-stars button { padding: 0 2px; border: 0; background: transparent; color: #c7d0da; font-size: 30px; line-height: 1; cursor: pointer; transition: transform .12s ease, color .12s ease; }
+.chat-stars button.is-on { color: #f59e0b; }
+.chat-stars button:hover:not(:disabled) { transform: scale(1.15); }
+.chat-stars button:disabled { cursor: default; }
