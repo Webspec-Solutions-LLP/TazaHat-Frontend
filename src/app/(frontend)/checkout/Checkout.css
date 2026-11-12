@@ -68,7 +68,7 @@
 .checkout-payment-options { gap: 16px; }
 .checkout-payment-options .checkout-choice { width: min(29%, 220px); }
 .checkout-payment-section { min-height: 96px; }
-.checkout-summary { position: sticky; top: 75px; display: flex; flex-direction: column; min-width: 0; height: calc(100vh - 94px); max-height: calc(100vh - 94px); overflow: hidden; padding: 18px 18px 0; border: 1px solid #dcecf8; border-radius: 13px; background: linear-gradient(145deg, #fff, #fffffffa); box-shadow: none; }
+.checkout-summary { position: sticky; top: 75px; display: flex; flex-direction: column; min-width: 0; height: calc(100vh - 94px); max-height: calc(100vh - 94px); overflow-x: hidden; overflow-y: auto; padding: 18px 18px 0; border: 1px solid #dcecf8; border-radius: 13px; background: linear-gradient(145deg, #fff, #fffffffa); box-shadow: none; }
 .checkout-summary-heading { flex: 0 0 auto; gap: 12px; }
 .checkout-summary-icon { display: grid; flex: 0 0 40px; width: 40px; height: 40px; place-items: center; border-radius: 8px; background: #eaf6ff; color: #07396e; }
 .checkout-summary-heading h2 { font-size: 15px; }
@@ -157,7 +157,8 @@
   .checkout-layout { display: flex; height: auto; min-height: 0; flex-direction: column; gap: 10px; }
   .checkout-left-scroll { display: contents; height: auto; overflow: visible; }
   .checkout-section { width: 100%; padding: 13px; }
-  .checkout-summary { position: relative; top: auto; order: 1; width: 100%; height: 470px; max-height: none; padding: 13px 13px 0; }
+  /* on a phone the card is as tall as what is in it: a fixed height cut the Place Order button off */
+  .checkout-summary { position: relative; top: auto; order: 1; width: 100%; height: auto; max-height: none; overflow: visible; padding: 13px 13px 0; }
   .checkout-address { order: 0; }
   .checkout-layout > .checkout-left-scroll > .checkout-section:nth-child(2) { order: 0; }
   .checkout-date-grid { grid-auto-columns: 72px; gap: 6px; }
@@ -195,7 +196,7 @@
   .checkout-date span, .checkout-date b { font-size: 9px; }
   .checkout-choice, .checkout-payment-options .checkout-choice { min-height: 35px; padding: 5px 8px; }
   .checkout-schedule { gap: 5px; min-height: 27px; }
-  .checkout-summary { height: 430px; padding: 11px 10px 0; }
+  .checkout-summary { height: auto; padding: 11px 10px 0; }
   .checkout-summary-icon { flex-basis: 30px; width: 30px; height: 30px; }
   .checkout-coupon { flex-basis: 33px; height: 33px; margin-top: 9px; }
   .checkout-coupon > span { width: 27px; flex-basis: 27px; }
@@ -220,7 +221,7 @@
   .checkout-date-grid { grid-auto-columns: 64px; gap: 4px; }
   .checkout-date { width: 64px; }
   .checkout-choice, .checkout-payment-options .checkout-choice { width: 100%; }
-  .checkout-summary { height: 410px; padding-right: 9px; padding-left: 9px; }
+  .checkout-summary { height: auto; padding-right: 9px; padding-left: 9px; }
   .checkout-promo-art { margin-inline: -9px; }
 }
 
