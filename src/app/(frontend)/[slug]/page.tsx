@@ -37,7 +37,7 @@ async function reachable(url: string | null | undefined): Promise<string | null>
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug: raw } = await params;
   const slug = decodeURIComponent(raw);
-  if (looksLikeFile(slug)) return { title: "TazaHat" };
+  if (looksLikeFile(slug)) return { title: (await getSiteIdentity()).name };
   const [share, id] = await Promise.all([getProductShare(slug).catch(() => null), getSiteIdentity()]);
   if (!share) return { title: "Product not found", robots: { index: false, follow: false } };
   const name = shortName(share.name);

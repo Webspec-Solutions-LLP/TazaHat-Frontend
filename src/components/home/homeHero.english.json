@@ -1,8 +1,8 @@
 {
   "language": "en",
-  "heroAriaLabel": "Fresh food from TazaHat",
+  "heroAriaLabel": "Fresh food from {brand}",
   "sliderContainerMessage": "Fresh food banners",
-  "fallbackEyebrow": "TazaHat offer",
+  "fallbackEyebrow": "{brand} offer",
   "fallbackTitle": "Fresh every day",
   "fallbackAction": "Shop now",
   "promoKicker": "Good food, made easy",

@@ -15,6 +15,9 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
+# a brand's own static files (brands/<tenant>/public) replace the same-named files of public/
+ARG BRAND=
+RUN if [ -n "$BRAND" ] && [ -d "brands/$BRAND/public" ]; then cp -r "brands/$BRAND/public/." public/; fi
 RUN npm run build
 
 FROM node:20-alpine AS runner

@@ -93,7 +93,7 @@ export interface MyOrderDetail {
   deliveryType: string; paymentMethod: string; paymentState: string; address: Record<string, string | number | null> | null; legacyAddressText: string | null;
   store: { name: string; areaName: string | null; pincode: string | null; phone: string } | null;
   editable: boolean; cancelMode: "direct" | "request" | null; cancelReason: string | null; paidPaisa: number;
-  totals: { itemCount: number; deliveryFeePaisa: number; deliveryTimeFeePaisa: number; cuttingFeePaisa: number; convenienceFeePaisa: number; estimatedTotalPaisa: number; billTotalPaisa: number; adjustmentPaisa: number; discountPaisa: number; couponDiscountPaisa: number };
+  totals: { itemCount: number; deliveryFeePaisa: number; deliveryTimeFeePaisa: number; cuttingFeePaisa: number; convenienceFeePaisa: number; estimatedTotalPaisa: number; billTotalPaisa: number; adjustmentPaisa: number; discountPaisa: number; couponDiscountPaisa: number; /** saved against the MRP (only shown) */ savedPaisa?: number };
   items: { id: string; name: string; slug: string | null; image: string | null; weight: boolean; linePaisa: number; estimatedLinePaisa: number; packLabel: string | null; dressing: string | null; instruction: string | null; quantity: number; unitPricePaisa: number; dressingUnitPaisa: number; status: MyOrder["status"]; cancelled: boolean; orderedMeasurement: number; billedMeasurement: number; variantId: string | null; cuttingTypeId: string | null; cancelStatus: "NONE" | "PENDING" | "REJECTED" | "CONFIRMED"; cancelNote: string | null; canEdit: boolean; canCancel: boolean; finalLinePaisa: number | null }[];
 }
 

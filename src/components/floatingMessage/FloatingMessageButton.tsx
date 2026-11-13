@@ -1,5 +1,6 @@
 "use client";
 
+import { useBrand } from "@/lib/brand";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import "./FloatingMessageButton.css";
@@ -8,6 +9,7 @@ import { useAuth } from "@/lib/auth";
 import { chatUnreadAction, type ChatProductTag } from "@/app/chat-actions";
 
 export default function FloatingMessageButton() {
+  const brand = useBrand();
   const pathname = usePathname();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [startInTicketMode, setStartInTicketMode] = useState(false);
@@ -83,12 +85,12 @@ export default function FloatingMessageButton() {
           requestCloseRef={chatCloseRef}
         />
       )}
-      {preview && !isChatOpen && <button type="button" className="floating-message-peek" onClick={handleToggle}><strong>TazaHat Support{unread > 1 ? ` · ${unread} new` : ""}</strong><span>{preview}</span></button>}
+      {preview && !isChatOpen && <button type="button" className="floating-message-peek" onClick={handleToggle}><strong>{brand.name} Support{unread > 1 ? ` · ${unread} new` : ""}</strong><span>{preview}</span></button>}
       <button
         className={`floating-message-button${isChatOpen ? " is-chat-open" : ""}${unread > 0 && !isChatOpen ? " has-unread" : ""}`}
         type="button"
         onClick={handleToggle}
-        aria-label={isChatOpen ? "Close TazaHat chat" : "Open TazaHat chat"}
+        aria-label={isChatOpen ? `Close ${brand.name} chat` : `Open ${brand.name} chat`}
         aria-expanded={isChatOpen}
       >
         {unread > 0 && !isChatOpen && <span className="floating-message-badge" aria-label={`${unread} new messages`}>{unread > 9 ? "9+" : unread}</span>}

@@ -6,10 +6,12 @@ import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { A11y, Keyboard, Mousewheel } from "swiper/modules";
 import "swiper/css";
-import text from "./english.json";
+import textRaw from "./english.json";
 import CityPrompt from "@/components/home/CityPrompt";
 import { fallbackImage, isRemoteImage } from "@/lib/api";
 import "./PriceList.css";
+import { brandify } from "@/lib/brandText";
+const text = brandify(textRaw);
 
 /** One product line of the price list (a product of the shop, as it is sold in the chosen city). */
 export interface PriceRow { id: string; name: string; image: string; price: number; originalPrice: number; unit: string }

@@ -1,5 +1,6 @@
 "use client";
 
+import { BrandWords, useBrand } from "@/lib/brand";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -26,10 +27,14 @@ import {
   useLanguage,
 } from "@/lib/language";
 import { OPEN_LOCATION_EVENT, useCity } from "../../lib/city";
-import englishText from "./english.json";
-import bengaliText from "./bengali.json";
-import hindiText from "./hindi.json";
+import englishTextRaw from "./english.json";
+import bengaliTextRaw from "./bengali.json";
+import hindiTextRaw from "./hindi.json";
 import "./Navbar.css";
+import { brandify } from "@/lib/brandText";
+const englishText = brandify(englishTextRaw);
+const bengaliText = brandify(bengaliTextRaw);
+const hindiText = brandify(hindiTextRaw);
 
 const SEARCH_HISTORY_KEY = "tazahat-search-history";
 const MAX_SEARCH_HISTORY = 30;
@@ -59,6 +64,7 @@ export default function Navbar({
   onLanguageChange,
 }: NavbarProps) {
   const [currentLang, setSiteLanguage] = useLanguage();
+  const brand = useBrand();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -393,7 +399,8 @@ export default function Navbar({
           <div className="navbar-brand-stack">
             <Link href="/" className="navbar-logo-link" aria-label={t.homeAria}>
               <Image
-                src={t.logoSrc}
+                src={brand.logo || t.logoSrc}
+                unoptimized={!(brand.logo || t.logoSrc).startsWith("/images/")}
                 alt={t.logoAlt}
                 width={38}
                 height={38}
@@ -404,7 +411,7 @@ export default function Navbar({
             </Link>
             <div className="navbar-brand-details">
               <Link href="/" className="navbar-brand-name-link" aria-label={t.homeAria}>
-                <span className="navbar-brand-name">{t.brandName}<span>{t.brandNameHighlight}</span></span>
+                <span className="navbar-brand-name"><BrandWords name={brand.name} /></span>
               </Link>
               <button type="button" className="navbar-location" aria-label={t.deliverTo} onClick={() => setIsLocationOpen(true)}>
                 <span className="navbar-location-icon-wrap">

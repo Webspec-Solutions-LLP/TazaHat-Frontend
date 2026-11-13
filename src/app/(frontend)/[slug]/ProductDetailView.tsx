@@ -1,6 +1,7 @@
 "use client";
 
 import PackAction, { AvailabilityNote, StockRibbon } from "@/components/availability/PackAction";
+import { placeholderImage } from "@/lib/brandText";
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
@@ -10,7 +11,7 @@ import CompareDetails from "@/components/modals/compareDetails/CompareDetails";
 import Confermation from "@/components/modals/confermation/Confermation";
 import type { CartItem } from "@/components/modals/cart/Cart";
 import { dressingChargeRupees } from "@/lib/cartLine";
-import { cardToProduct, fallbackImage, isRemoteImage, mediaSrc, PLACEHOLDER_IMAGE, shortName, type ApiProductDetail } from "@/lib/api";
+import { cardToProduct, fallbackImage, isRemoteImage, mediaSrc, shortName, type ApiProductDetail } from "@/lib/api";
 import { readWishlistIds, subscribeToWishlist, toggleWishlistId } from "@/lib/wishlist";
 import ShareButton from "@/components/share/ShareButton";
 import { useImageZoom } from "@/lib/useImageZoom";
@@ -58,7 +59,7 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
   const isFish = /fish|seafood/i.test(detail.category.slug + detail.category.name);
   const trustItems = isFish ? t.fishTrust : t.generalTrust;
   const name = shortName(detail.name);
-  const gallery = detail.images.length ? detail.images.map(mediaSrc) : [PLACEHOLDER_IMAGE];
+  const gallery = detail.images.length ? detail.images.map(mediaSrc) : [placeholderImage()];
   const [activeImage, setActiveImage] = useState(0);
   const touchStartX = useRef<number | null>(null);
   // a link from the chat ("?variant=..&dressing=..") opens the product with that size and dressing already chosen

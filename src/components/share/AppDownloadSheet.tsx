@@ -1,5 +1,6 @@
 "use client";
 
+import { useBrand } from "@/lib/brand";
 import { useEffect, useState } from "react";
 import "./Share.css";
 
@@ -12,6 +13,7 @@ const DAYS = 7;
  * Shown once in a while (not again for a week once closed), on phones and on the desktop alike; never inside the app itself.
  */
 export default function AppDownloadSheet({ android, ios }: { android: AppLink; ios: AppLink }) {
+  const brand = useBrand();
   const [open, setOpen] = useState(false);
   const hasAny = android.state === "link" || ios.state === "link";
 
@@ -35,9 +37,9 @@ export default function AppDownloadSheet({ android, ios }: { android: AppLink; i
 
   return (
     <div className="share-backdrop" onClick={close}>
-      <div className="share-sheet" role="dialog" aria-label="Get the TazaHat app" onClick={(e) => e.stopPropagation()}>
+      <div className="share-sheet" role="dialog" aria-label={`Get the ${brand.name} app`} onClick={(e) => e.stopPropagation()}>
         <div className="share-head">
-          <div className="app-sheet-hero"><img src="/images/logo.webp" alt="" /><div><h3>For a better experience, get the TazaHat app</h3><p style={{ margin: 0 }}>Faster ordering, live order tracking and offers made for you.</p></div></div>
+          <div className="app-sheet-hero"><img src={brand.logo || "/images/logo.webp"} alt="" /><div><h3>For a better experience, get the {brand.name} app</h3><p style={{ margin: 0 }}>Faster ordering, live order tracking and offers made for you.</p></div></div>
           <button type="button" className="share-close" aria-label="Close" onClick={close}>✕</button>
         </div>
         <div className="app-sheet-stores">

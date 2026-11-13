@@ -1,5 +1,7 @@
 "use client";
 
+import { placeholderImage } from "@/lib/brandText";
+import { useBrand } from "@/lib/brand";
 import { useBackClose } from "@/lib/backLayers";
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
@@ -46,8 +48,7 @@ function ChatSkeleton({ rows }: { rows: number }) {
 
 /** WhatsApp-style support chat: signed-in customers only, the last 20 messages first, 10 more each time you scroll up, live replies, ticks and "typing...". */
 /** the "no image" picture: the shop's logo, shown when a product has no picture or its file cannot be loaded */
-const NO_IMAGE = "/images/logo.webp";
-const toLogo = (e: { currentTarget: HTMLImageElement }) => { const img = e.currentTarget; if (!img.src.endsWith(NO_IMAGE)) { img.removeAttribute("srcset"); img.src = NO_IMAGE; img.classList.add("is-logo"); } };
+const toLogo = (e: { currentTarget: HTMLImageElement }) => { const NO_IMAGE = placeholderImage(); const img = e.currentTarget; if (!img.src.endsWith(NO_IMAGE)) { img.removeAttribute("srcset"); img.src = NO_IMAGE; img.classList.add("is-logo"); } };
 
 const ORDER_COLOR: Record<string, string> = { PENDING: "#f59e0b", IN_PROGRESS: "#3b82f6", PROCESSING: "#8b5cf6", PACKAGING: "#06b6d4", OUT_FOR_DELIVERY: "#ec4899", DELIVERED: "#10b981", CANCELLED: "#ef4444" };
 
@@ -113,7 +114,7 @@ function ChatCardView({ card }: { card: NonNullable<ChatMsg["card"]> }) {
   const inner = (
     <>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img className={`chat-card-photo${card.image ? "" : " is-logo"}`} src={card.image || NO_IMAGE} alt={card.title} loading="lazy" onError={toLogo} />
+      <img className={`chat-card-photo${card.image ? "" : " is-logo"}`} src={card.image || placeholderImage()} alt={card.title} loading="lazy" onError={toLogo} />
       <div className="chat-card-body">
         <span className="chat-card-kind">🛍️ Product</span>
         <b className="chat-card-title chat-card-title--name">{card.title}</b>
@@ -127,6 +128,7 @@ function ChatCardView({ card }: { card: NonNullable<ChatMsg["card"]> }) {
 }
 
 export default function Chat({ onClose, product, tag: tagProp = null, requestCloseRef, startInTicketMode = false }: ChatProps) {
+  const brand = useBrand();
   const [tag, setTag] = useState<ChatProductTag | null>(tagProp);
   const { user, ready, openLogin } = useAuth();
   const [rows, setRows] = useState<Row[]>([]);
@@ -347,7 +349,7 @@ export default function Chat({ onClose, product, tag: tagProp = null, requestClo
           <svg viewBox="0 0 24 24" fill="none"><path d="M4 5h16v12H9l-5 3V5Z" /><path d="M8 9h8M8 13h5" /></svg>
         </span>
         <span className="chat-header-copy">
-          <strong id="chat-title">TazaHat Support</strong>
+          <strong id="chat-title">{brand.name} Support</strong>
           <span><i /> {supportTyping ? "typing…" : "We usually reply within a few minutes"}</span>
         </span>
         {user && (
@@ -392,7 +394,7 @@ export default function Chat({ onClose, product, tag: tagProp = null, requestClo
                   {divider}
                   <article id={`chat-message-${m.id}`} className={`chat-message chat-message--${mine ? "customer" : "team"}${m.state === "failed" ? " is-failed" : ""}`}>
                     {m.ticket && <span className="chat-ticket-tag">🎫 Ticket</span>}
-                    {!mine && <span className="chat-message-author">{m.sentBy ? `${m.sentBy} · TazaHat Support` : "TazaHat Support"}</span>}
+                    {!mine && <span className="chat-message-author">{m.sentBy ? `${m.sentBy} · ${brand.name} Support` : `${brand.name} Support`}</span>}
                     {m.legacyMedia && <div className="chat-media-missing"><span aria-hidden="true">{m.legacyMedia === "image" ? "📷" : m.legacyMedia === "voice" ? "🎤" : m.legacyMedia === "video" ? "🎥" : "📎"}</span><span>{m.legacyMedia === "image" ? "Photo" : m.legacyMedia === "voice" ? "Voice message" : m.legacyMedia === "video" ? "Video" : "Document"} is no longer available</span></div>}
                     {m.imageUrl && <button type="button" className="chat-photo" onClick={() => setLightbox(m.imageUrl)} aria-label="Open photo">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={m.imageUrl} alt="Photo in chat" loading="lazy" onLoad={scrollEnd} /></button>}
                     {m.voiceUrl && <VoiceBubble src={m.voiceUrl} seconds={m.voiceSeconds ?? 1} transcript={m.transcript} waveform={m.waveform} />}
@@ -422,7 +424,7 @@ export default function Chat({ onClose, product, tag: tagProp = null, requestClo
             {tag && (
               <div className="chat-composer-context chat-tag">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img className={tag.image ? "" : "is-logo"} src={tag.image || NO_IMAGE} alt="" width={76} height={76} onError={toLogo} />
+                <img className={tag.image ? "" : "is-logo"} src={tag.image || placeholderImage()} alt="" width={76} height={76} onError={toLogo} />
                 <span className="chat-composer-context-copy"><strong>Asking about</strong><b>{tag.title}</b>{tag.subtitle && <small>{tag.subtitle}</small>}</span>
                 <button type="button" aria-label="Remove the product" onClick={() => setTag(null)}>×</button>
               </div>
@@ -450,7 +452,7 @@ export default function Chat({ onClose, product, tag: tagProp = null, requestClo
               </div>
             ) : (
               <>
-                <label className="chat-sr-only" htmlFor="chat-message-input">Message to TazaHat support</label>
+                <label className="chat-sr-only" htmlFor="chat-message-input">Message to {brand.name} support</label>
                 <input ref={input} id="chat-message-input" value={message} onChange={(e) => onType(e.target.value)} placeholder={ticketMode ? "What is your problem? Tell us in detail" : "Type a message"} maxLength={2000} disabled={isClosing || state !== "ready"} autoComplete="off" />
                 <button className="chat-attachment-button" type="button" disabled={isClosing || state !== "ready"} aria-label="Send a picture" onClick={() => fileInput.current?.click()}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3" /><circle cx="8.5" cy="9" r="1.6" /><path d="m21 16-5-5-8 8" /></svg>

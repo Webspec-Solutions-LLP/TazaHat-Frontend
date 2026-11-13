@@ -1,16 +1,20 @@
 "use client";
 
+import { BrandWords, useBrand } from "@/lib/brand";
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { type SupportedLang, useLanguage } from "@/lib/language";
-import englishText from "./english.json";
-import bengaliText from "./bengali.json";
+import englishTextRaw from "./english.json";
+import bengaliTextRaw from "./bengali.json";
 import hindiText from "./hindi.json";
 import type { AppLink } from "@/lib/server/api";
 
 type AppLinks = { android: AppLink; ios: AppLink };
 import "./Footer.css";
+import { brandify } from "@/lib/brandText";
+const englishText = brandify(englishTextRaw);
+const bengaliText = brandify(bengaliTextRaw);
 
 const textMap: Record<SupportedLang, typeof englishText> = {
   en: englishText,
@@ -50,6 +54,7 @@ const LANGUAGES: LanguageOption[] = [
 
 export default function FooterView({ apps, legal = [], bottom = [] }: { apps: AppLinks; legal?: { slug: string; title: string }[]; bottom?: { slug: string; title: string }[] }) {
   const [currentLang, setSiteLanguage] = useLanguage();
+  const brand = useBrand();
   const [isLangOpen, setIsLangOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
 
@@ -93,18 +98,19 @@ export default function FooterView({ apps, legal = [], bottom = [] }: { apps: Ap
             <Link href="/" className="footer-logo-link" aria-label={t.homeAria}>
               <span className="footer-brand-lockup">
                 <Image
-                  src="/images/logo.webp"
+                  src={brand.logo || "/images/logo.webp"}
+                  unoptimized={!(brand.logo || "/images/logo.webp").startsWith("/images/")}
                   alt={t.logoAlt}
                   width={120}
                   height={52}
                   className="footer-logo-img"
                 />
                 <span className="footer-brand-name">
-                  {t.brandName}<span>{t.brandNameHighlight}</span>
+                  <BrandWords name={brand.name} />
                 </span>
               </span>
               <span className="footer-tagline">
-                {t.brandTagline}
+                {brand.tagline || t.brandTagline}
               </span>
             </Link>
 

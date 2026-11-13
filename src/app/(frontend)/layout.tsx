@@ -1,3 +1,5 @@
+import { BrandProvider } from "@/lib/brand";
+import { setBrand } from "@/lib/brandText";
 import type { Metadata } from "next";
 import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/footer/Footer";
@@ -13,7 +15,7 @@ import { CityProvider } from "@/lib/city";
 import { AuthProvider } from "@/lib/auth";
 import { readCityCookie } from "@/lib/server/city";
 import { getAppLinks, getUiConfig } from "@/lib/server/api";
-import { SITE_DESCRIPTION, SITE_TAGLINE, getSiteIdentity } from "@/lib/server/site";
+import { SITE_DESCRIPTION, getSiteIdentity, siteTitle } from "@/lib/server/site";
 import AppDownloadSheet from "@/components/share/AppDownloadSheet";
 import "./Home.css";
 
@@ -23,15 +25,15 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: new URL(id.origin),
     applicationName: id.name,
-    title: { default: `${id.name} | ${SITE_TAGLINE}`, template: `%s | ${id.name}` },
+    title: { default: siteTitle(id), template: `%s | ${id.name}` },
     description: SITE_DESCRIPTION,
     keywords: ["fresh fish online", "buy fish online", "meat delivery", "chicken", "mutton", "vegetables", "groceries", "online fish market", id.name],
     manifest: "/manifest.webmanifest",
     icons: { icon: [{ url: "/favicon.ico" }], shortcut: "/favicon.ico", apple: id.logo },
     alternates: { canonical: "/" },
     robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
-    openGraph: { type: "website", siteName: id.name, locale: "en_IN", title: `${id.name} | ${SITE_TAGLINE}`, description: SITE_DESCRIPTION, url: "/", images: [{ url: id.logo, alt: id.name }] },
-    twitter: { card: "summary_large_image", title: `${id.name} | ${SITE_TAGLINE}`, description: SITE_DESCRIPTION, images: [id.logo] },
+    openGraph: { type: "website", siteName: id.name, locale: "en_IN", title: siteTitle(id), description: SITE_DESCRIPTION, url: "/", images: [{ url: id.logo, alt: id.name }] },
+    twitter: { card: "summary_large_image", title: siteTitle(id), description: SITE_DESCRIPTION, images: [id.logo] },
     formatDetection: { telephone: false },
   };
 }
@@ -43,6 +45,8 @@ export default async function RootLayout({
 }>) {
   const city = await readCityCookie();
   const [apps, ui, id] = await Promise.all([getAppLinks(), getUiConfig(), getSiteIdentity()]);
+  const brand = { name: id.name, tagline: id.tagline, logo: id.logoPath, noImage: id.noImagePath };
+  setBrand(brand);
   const ld = [
     { "@context": "https://schema.org", "@type": "Organization", name: id.name, url: id.origin, logo: id.logo, ...(id.phone ? { telephone: id.phone } : {}), ...(id.email ? { email: id.email } : {}) },
     { "@context": "https://schema.org", "@type": "WebSite", name: id.name, url: id.origin, potentialAction: { "@type": "SearchAction", target: `${id.origin}/products?q={search_term_string}`, "query-input": "required name=search_term_string" } },
@@ -51,6 +55,7 @@ export default async function RootLayout({
     <html lang="en">
       <body className="min-h-screen flex flex-col">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, "\\u003c") }} />
+        <BrandProvider brand={brand}>
         <CityProvider value={city}>
         <AuthProvider>
         <CompareSync />
@@ -67,6 +72,7 @@ export default async function RootLayout({
         <AppDownloadSheet android={apps.android} ios={apps.ios} />
         </AuthProvider>
         </CityProvider>
+        </BrandProvider>
       </body>
     </html>
   );

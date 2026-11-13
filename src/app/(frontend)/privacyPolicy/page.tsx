@@ -4,8 +4,10 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import { type SupportedLang, useLanguage } from "@/lib/language";
 import "./PrivacyPolicy.css";
-import englishData from "./english.json";
+import englishDataRaw from "./english.json";
 import bengaliData from "./bengali.json";
+import { brandify } from "@/lib/brandText";
+const englishData = brandify(englishDataRaw);
 
 export default function PrivacyPolicyPage() {
   const [lang, setSiteLanguage] = useLanguage();

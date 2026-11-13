@@ -6,9 +6,13 @@ import {
   LANGUAGE_STORAGE_KEY,
   type SupportedLang,
 } from "../navbar/Navbar";
-import englishText from "./homeBenefits.english.json";
-import bengaliText from "./homeBenefits.bengali.json";
-import hindiText from "./homeBenefits.hindi.json";
+import englishTextRaw from "./homeBenefits.english.json";
+import bengaliTextRaw from "./homeBenefits.bengali.json";
+import hindiTextRaw from "./homeBenefits.hindi.json";
+import { brandify } from "@/lib/brandText";
+const englishText = brandify(englishTextRaw);
+const bengaliText = brandify(bengaliTextRaw);
+const hindiText = brandify(hindiTextRaw);
 
 const textMap: Record<SupportedLang, typeof englishText> = {
   en: englishText,

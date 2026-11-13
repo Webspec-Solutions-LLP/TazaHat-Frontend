@@ -1,10 +1,11 @@
 "use client";
 
+import { placeholderImage } from "@/lib/brandText";
 import { useBackClose } from "@/lib/backLayers";
 
 import { useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
-import { fallbackImage, isRemoteImage, PLACEHOLDER_IMAGE } from "@/lib/api";
+import { fallbackImage, isRemoteImage } from "@/lib/api";
 import "./CompareList.css";
 import { type SupportedLang, useLanguage } from "@/lib/language";
 import englishText from "./english.json";
@@ -284,11 +285,11 @@ export default function CompareList({
 
                     <div className="compare-item-image">
                       <Image
-                        src={item.image || PLACEHOLDER_IMAGE}
+                        src={item.image || placeholderImage()}
                         alt={item.name}
                         fill
                         sizes="96px"
-                        unoptimized={isRemoteImage(item.image || PLACEHOLDER_IMAGE)}
+                        unoptimized={isRemoteImage(item.image || placeholderImage())}
                         onError={fallbackImage}
                         className="compare-item-img"
                       />

@@ -17,9 +17,13 @@ import { getProductDetailAction } from "@/app/actions";
 import { useImageZoom } from "@/lib/useImageZoom";
 import PackAction, { AvailabilityNote, StockRibbon, firstOrderable, packStatus } from "@/components/availability/PackAction";
 import { type SupportedLang, useLanguage } from "@/lib/language";
-import englishText from "./english.json";
-import bengaliText from "./bengali.json";
-import hindiText from "./hindi.json";
+import englishTextRaw from "./english.json";
+import bengaliTextRaw from "./bengali.json";
+import hindiTextRaw from "./hindi.json";
+import { brandify } from "@/lib/brandText";
+const englishText = brandify(englishTextRaw);
+const bengaliText = brandify(bengaliTextRaw);
+const hindiText = brandify(hindiTextRaw);
 
 const textMap: Record<SupportedLang, typeof englishText> = {
   en: englishText,

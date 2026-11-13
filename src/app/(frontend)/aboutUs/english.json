@@ -4,13 +4,13 @@
   "heroTitlePrefix": "Redefining Fresh Food with ",
   "heroTitleHighlight": "Smart Logistics",
   "heroTitleSuffix": " & Honest Commerce.",
-  "heroSub": "TazaHat is building Northeast India's most advanced fresh supply network. We eliminate layers of middlemen to deliver morning harvest vegetables, freshwater river catch, and dairy directly to your kitchen in under 90 minutes.",
+  "heroSub": "{brand} is building Northeast India's most advanced fresh supply network. We eliminate layers of middlemen to deliver morning harvest vegetables, freshwater river catch, and dairy directly to your kitchen in under 90 minutes.",
   "heroBtnPrimary": "Explore Fresh Products",
   "heroBtnSecondary": "Partner With Us",
   "heroTrustFormalin": "100% Formalin Free",
   "heroTrustDirect": "Dawn-To-Door Direct",
   "heroTrustInspection": "Doorstep Open-Box Inspection",
-  "heroImgAlt": "TazaHat Fresh Produce and Supply Chain",
+  "heroImgAlt": "{brand} Fresh Produce and Supply Chain",
   "hudTelemetryLabel": "COLD CHAIN TELEMETRY",
   "hudTelemetryVal": "3.6°C Core Temp Active",
   "hudGrowerLabel": "DIRECT GROWER BENEFIT",
@@ -43,7 +43,7 @@
   ],
   "tabsBadge": "OUR ARCHITECTURE",
   "tabsHeading": "Built to Solve Northeast India's Perishable Supply Chain",
-  "tabsDesc": "Conventional wholesale mandis rely on multiple middlemen, delayed transit, and hazardous chemical preservatives. Here is how TazaHat changes the equation using modern engineering.",
+  "tabsDesc": "Conventional wholesale mandis rely on multiple middlemen, delayed transit, and hazardous chemical preservatives. Here is how {brand} changes the equation using modern engineering.",
   "tabPerks": [
     "Real-time digital traceability",
     "Zero formaldehyde / formalin certification",
@@ -56,7 +56,7 @@
       "label": "Origin & Mission",
       "badge": "HYPERLOCAL IMPACT",
       "title": "Bridging Tripura's Traditional Bazaars with Next-Gen Tech",
-      "lead": "TazaHat was founded with an uncompromising mission: to rescue fresh food commerce in Northeast India from lengthy, opaque supply chains and chemical adulteration.",
+      "lead": "{brand} was founded with an uncompromising mission: to rescue fresh food commerce in Northeast India from lengthy, opaque supply chains and chemical adulteration.",
       "points": [
         {
           "title": "Direct Sourcing Infrastructure",
@@ -149,7 +149,7 @@
     }
   ],
   "lifecycleBadge": "FIELD TO FORK",
-  "lifecycleHeading": "How TazaHat Delivers In Hours, Not Days",
+  "lifecycleHeading": "How {brand} Delivers In Hours, Not Days",
   "lifecycleDesc": "Every morning, before most of Tripura wakes up, our network is in full motion to bring you food at peak freshness.",
   "lifecycleSteps": [
     {
@@ -178,7 +178,7 @@
     }
   ],
   "pillarsBadge": "UNCOMPROMISING PROMISES",
-  "pillarsHeading": "The Four Standards That Define TazaHat",
+  "pillarsHeading": "The Four Standards That Define {brand}",
   "pillarsDesc": "Designed around safety, transparent economics, and customer-first values.",
   "pillars": [
     {

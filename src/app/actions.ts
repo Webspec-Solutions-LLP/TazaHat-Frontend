@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { readPlace, type GeocodeResult } from "@/lib/places";
-import { checkServiceability, checkShopCart, getCartRelated, getCities, getShopCatalog, getShopCategoryPage, getShopProduct, getShopProducts, type CatalogQuery } from "@/lib/server/api";
+import { checkServiceability, checkShopCart, getCartRelated, getCities, getShopCatalog, getShopCategoryPage, getShopProduct, getShopProducts, getSiteSettings, type CatalogQuery } from "@/lib/server/api";
 import { readCityCookie, writeCityCookie } from "@/lib/server/city";
 import { userApi } from "@/lib/server/session";
 import { withSavedDressings } from "@/lib/server/saved-dressing";
@@ -47,7 +47,7 @@ export async function checkLocationAction(lat: number, lng: number): Promise<Loc
     const address = place.address || "Selected location";
     return found.serviceable && found.city
       ? { ok: true, address, serviceable: true, city: found.city, ...(/^\d{6}$/.test(place.pincode) ? { pincode: place.pincode } : {}) }
-      : { ok: true, address, serviceable: false, message: found.message ?? "TazaHat does not deliver to this location yet. Please wait, we are coming to this area soon." };
+      : { ok: true, address, serviceable: false, message: found.message ?? `${(await getSiteSettings()).appName || "We"} does not deliver to this location yet. Please wait, we are coming to this area soon.` };
   } catch {
     return { ok: false, error: "We could not check this location. Please try again or pick a city below." };
   }

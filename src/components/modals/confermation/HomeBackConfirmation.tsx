@@ -5,9 +5,12 @@ import { usePathname } from "next/navigation";
 import { onBackWithoutLayer } from "@/lib/backLayers";
 import "./HomeBackConfirmation.css";
 import { type SupportedLang, useLanguage } from "@/lib/language";
-import englishText from "./homeBackConfirmation.english.json";
-import bengaliText from "./homeBackConfirmation.bengali.json";
+import englishTextRaw from "./homeBackConfirmation.english.json";
+import bengaliTextRaw from "./homeBackConfirmation.bengali.json";
 import hindiText from "./homeBackConfirmation.hindi.json";
+import { brandify } from "@/lib/brandText";
+const englishText = brandify(englishTextRaw);
+const bengaliText = brandify(bengaliTextRaw);
 
 const textMap: Record<SupportedLang, typeof englishText> = {
   en: englishText,

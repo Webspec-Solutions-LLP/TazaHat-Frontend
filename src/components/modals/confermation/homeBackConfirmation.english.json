@@ -2,7 +2,7 @@
   "language": "en",
   "closeAria": "Close dialog",
   "badge": "Wait, before you go",
-  "title": "Leaving TazaHat so soon?",
+  "title": "Leaving {brand} so soon?",
   "desc": "Fresh farm groceries, daily discounts, and express delivery are waiting for you. Are you sure you want to leave?",
   "perks": [
     { "title": "Fast Delivery", "sub": "30-60 mins" },

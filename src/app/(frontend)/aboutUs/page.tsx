@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import englishText from "./english.json";
-import bengaliText from "./bengali.json";
+import englishTextRaw from "./english.json";
+import bengaliTextRaw from "./bengali.json";
 import hindiText from "./hindi.json";
 import {
   LANGUAGE_CHANGE_EVENT,
@@ -12,6 +12,9 @@ import {
   type SupportedLang,
 } from "@/components/navbar/Navbar";
 import "./About.css";
+import { brandify } from "@/lib/brandText";
+const englishText = brandify(englishTextRaw);
+const bengaliText = brandify(bengaliTextRaw);
 
 const textMap: Record<SupportedLang, typeof englishText> = {
   en: englishText,

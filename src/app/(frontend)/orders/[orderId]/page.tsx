@@ -226,7 +226,7 @@ function Details({ reference }: { reference: string }) {
                   {billed && <tr><th scope="row">{text.rowDue}</th><td /><td>{money(due)}</td></tr>}
                 </tfoot>
               </table>
-              {t.discountPaisa > 0 && <p className="order-amount-saved">{text.savedOnOrder.replace("{amount}", money(t.discountPaisa))}</p>}
+              {(t.discountPaisa + (t.savedPaisa ?? 0)) > 0 && <p className="order-amount-saved">{text.savedOnOrder.replace("{amount}", money(t.discountPaisa + (t.savedPaisa ?? 0)))}</p>}
               {!billed && order.status !== "CANCELLED" && <p className="order-amount-wait">{text.finalBillWaitNote}</p>}
             </section>
           </aside>

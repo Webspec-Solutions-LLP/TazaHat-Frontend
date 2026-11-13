@@ -4,7 +4,7 @@
   "freshPicks": "তাজা পণ্য",
   "productImagesAria": "পণ্যের ছবিসমূহ",
   "showPictureAria": "{name}-এর {index} নম্বর ছবি দেখুন",
-  "qualityPromiseAria": "TazaHat গুণমানের অঙ্গীকার",
+  "qualityPromiseAria": "{brand} গুণমানের অঙ্গীকার",
   "promiseTitle": "প্রতিদিন সতেজতা যাচাইকৃত",
   "promiseText": "যত্নসহকারে বাছাই করে অর্ডারের পর প্যাক করা হয়।",
   "reviews": "({count}টি রিভিউ)",

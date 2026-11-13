@@ -1,5 +1,6 @@
 "use client";
 
+import { BrandWords, useBrand } from "@/lib/brand";
 import { useBackClose } from "@/lib/backLayers";
 
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
@@ -8,10 +9,13 @@ import Link from "next/link";
 import { requestOtpAction, verifyOtpAction } from "@/app/auth-actions";
 import type { SessionUser } from "@/lib/server/session";
 import { type SupportedLang, useLanguage } from "@/lib/language";
-import englishText from "./english.json";
-import bengaliText from "./bengali.json";
+import englishTextRaw from "./english.json";
+import bengaliTextRaw from "./bengali.json";
 import hindiText from "./hindi.json";
 import "./Login.css";
+import { brandify } from "@/lib/brandText";
+const englishText = brandify(englishTextRaw);
+const bengaliText = brandify(bengaliTextRaw);
 
 const textMap: Record<SupportedLang, typeof englishText> = {
   en: englishText,
@@ -26,6 +30,7 @@ const emptyOtp = () => Array<string>(OTP_LENGTH).fill("");
 
 export default function Login({ onClose, onLoggedIn }: LoginModalProps) {
   const [lang] = useLanguage();
+  const brand = useBrand();
   // the legal documents linked on the sign-in screen (set in the CRM)
   const [legalLinks, setLegalLinks] = useState<{ slug: string; title: string }[]>([]);
   useEffect(() => { void fetch("/api/legal").then((r) => (r.ok ? r.json() : null)).then((d: { documents?: { slug: string; title: string }[] } | null) => setLegalLinks(d?.documents ?? [])).catch(() => undefined); }, []);
@@ -128,8 +133,8 @@ export default function Login({ onClose, onLoggedIn }: LoginModalProps) {
         <main className="login-page is-login-modal">
           <section className="login-brand-panel" aria-label={text.brandPanelAria}>
             <Link className="login-brand" href="/" aria-label={text.brandHomeAria}>
-              <span className="login-brand-logo"><Image src="/images/logo.webp" alt="" width={100} height={100} priority /></span>
-              <span className="login-brand-copy"><strong>Taza<span>Hat</span></strong><small>{text.freshnessDelivered}</small></span>
+              <span className="login-brand-logo"><Image src={brand.logo || "/images/logo.webp"} alt="" width={100} height={100} priority unoptimized={!(brand.logo || "/images/logo.webp").startsWith("/images/")} /></span>
+              <span className="login-brand-copy"><strong><BrandWords name={brand.name} /></strong><small>{text.freshnessDelivered}</small></span>
             </Link>
             <div className="login-brand-message">
               <p>{text.freshCatch}</p>

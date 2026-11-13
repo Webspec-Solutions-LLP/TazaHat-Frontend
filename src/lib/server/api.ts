@@ -60,14 +60,14 @@ export const getLegalList = () => get<{ documents: LegalListItem[] }>("/legal").
 export const getLegalDoc = (slug: string) => get<LegalDoc>(`/legal/${encodeURIComponent(slug)}`);
 
 /** the shop's name, logo and favicon (CRM > Settings > General): what the browser tab, the share cards and the search results carry */
-export type SiteSettings = { appName: string; supportPhone: string | null; supportEmail: string | null; logoUrl: string | null; faviconUrl: string | null };
+export type SiteSettings = { appName: string; tagline?: string; noImageUrl?: string | null; supportPhone: string | null; supportEmail: string | null; logoUrl: string | null; faviconUrl: string | null };
 export async function getSiteSettings(): Promise<SiteSettings> {
   try {
     const res = await fetch(`${API_BASE}/api/settings`, { next: { revalidate: 300 } });
     const json = (await res.json()) as { status?: string; data?: SiteSettings };
     if (res.ok && json.status === "success" && json.data) return json.data;
   } catch { /* the defaults below */ }
-  return { appName: "TazaHat", supportPhone: null, supportEmail: null, logoUrl: null, faviconUrl: null };
+  return { appName: "", tagline: "", supportPhone: null, supportEmail: null, logoUrl: null, faviconUrl: null };
 }
 
 export type SitemapData = { products: { slug: string; updatedAt: string }[]; categories: { slug: string; subs: string[] }[]; legal: { slug: string; updatedAt: string }[] };

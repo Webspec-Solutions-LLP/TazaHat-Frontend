@@ -1,12 +1,13 @@
 "use client";
 
+import { placeholderImage } from "@/lib/brandText";
 import { useBackClose } from "@/lib/backLayers";
 
 import { useCallback, useEffect, useId, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { getProductDetailAction } from "@/app/actions";
-import { fallbackImage, isRemoteImage, mediaSrc, PLACEHOLDER_IMAGE, shortName, type ApiProductDetail } from "@/lib/api";
+import { fallbackImage, isRemoteImage, mediaSrc, shortName, type ApiProductDetail } from "@/lib/api";
 import type { CompareProduct } from "../compareList/CompareList";
 import "./CompareDetails.css";
 import { type SupportedLang, useLanguage } from "@/lib/language";
@@ -61,7 +62,7 @@ function describe(p: CompareProduct, detail: Detail, t: typeof englishText) {
     category: detail ? `${shortName(detail.category.name)} › ${shortName(detail.subCategory.name)}` : detail === undefined ? t.loading : t.dash,
     sizes: detail ? (packs.length ? packs.map(x => x.label).join(", ") : t.dash) : detail === undefined ? t.loading : t.dash,
     dressing: detail ? (detail.cutting.length ? t.dressingOptions.replace("{count}", String(detail.cutting.length)).replace("{unit}", detail.cutting.length === 1 ? t.optionSingle : t.optionPlural) : t.dressingNone) : detail === undefined ? t.loading : t.dash,
-    image: detail?.images?.[0] ? mediaSrc(detail.images[0]) : p.image || PLACEHOLDER_IMAGE,
+    image: detail?.images?.[0] ? mediaSrc(detail.images[0]) : p.image || placeholderImage(),
     rating: Number(p.rating ?? 0),
     reviews: p.reviews ?? 0,
   };

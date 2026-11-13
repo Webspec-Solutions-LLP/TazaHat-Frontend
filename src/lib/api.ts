@@ -1,3 +1,4 @@
+import { placeholderImage } from "./brandText";
 import type { SyntheticEvent } from "react";
 import catalog from "@/components/products/english.json";
 
@@ -15,23 +16,23 @@ export type Product = Omit<CatalogProduct, "variants"> & {
   variants: (CatalogVariant & PackAvailability)[];
 };
 
-export const PLACEHOLDER_IMAGE = "/images/logo.webp";
 
 /** API pictures come as "/uploads/..." (served through this site, see next.config.ts) or as full URLs. */
 export function mediaSrc(url?: string | null): string {
-  if (!url) return PLACEHOLDER_IMAGE;
+  if (!url) return placeholderImage();
   return /^https?:\/\//.test(url) || url.startsWith("/") ? url : `/uploads/${url}`;
 }
 
 /** Pictures from the API are already sized: skip the image optimiser for them. */
 export const isRemoteImage = (src: string) => !src.startsWith("/images/");
 
-/** onError for <Image>: show the logo instead of a broken picture. */
+/** onError for <Image>: show the "No image" picture (CRM Settings) instead of a broken picture. */
 export function fallbackImage(event: SyntheticEvent<HTMLImageElement>) {
   const img = event.currentTarget;
-  if (!img.src.endsWith(PLACEHOLDER_IMAGE)) {
+  const none = placeholderImage();
+  if (!img.src.endsWith(none)) {
     img.removeAttribute("srcset");
-    img.src = PLACEHOLDER_IMAGE;
+    img.src = none;
   }
 }
 

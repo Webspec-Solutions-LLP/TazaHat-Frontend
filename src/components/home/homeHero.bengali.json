@@ -1,8 +1,8 @@
 {
   "language": "bn",
-  "heroAriaLabel": "TazaHat থেকে তাজা খাবার",
+  "heroAriaLabel": "{brand} থেকে তাজা খাবার",
   "sliderContainerMessage": "তাজা খাবারের ব্যানার",
-  "fallbackEyebrow": "TazaHat অফার",
+  "fallbackEyebrow": "{brand} অফার",
   "fallbackTitle": "প্রতিদিন টাটকা",
   "fallbackAction": "এখনই কিনুন",
   "promoKicker": "ভালো খাবার, সহজে",

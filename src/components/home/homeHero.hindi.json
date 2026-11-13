@@ -1,8 +1,8 @@
 {
   "language": "hi",
-  "heroAriaLabel": "TazaHat से ताज़ा भोजन",
+  "heroAriaLabel": "{brand} से ताज़ा भोजन",
   "sliderContainerMessage": "ताज़ा खाद्य बैनर",
-  "fallbackEyebrow": "TazaHat ऑफ़र",
+  "fallbackEyebrow": "{brand} ऑफ़र",
   "fallbackTitle": "हर दिन ताज़ा",
   "fallbackAction": "अभी खरीदें",
   "promoKicker": "अच्छा खाना, अब आसान",

@@ -4,7 +4,7 @@
   "freshPicks": "Fresh picks",
   "productImagesAria": "Product images",
   "showPictureAria": "Show picture {index} of {name}",
-  "qualityPromiseAria": "TazaHat quality promise",
+  "qualityPromiseAria": "{brand} quality promise",
   "promiseTitle": "Freshness, checked daily",
   "promiseText": "Selected with care and packed to order.",
   "reviews": "({count} Reviews)",

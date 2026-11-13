@@ -6,7 +6,7 @@ import { getSiteSettings } from "./api";
 export async function siteOrigin(): Promise<string> {
   const h = await headers();
   const host = h.get("x-forwarded-host") ?? h.get("host");
-  if (!host) return process.env.NEXT_PUBLIC_SITE_URL ?? "https://tazahat.in";
+  if (!host) return process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
   return `${proto}://${host}`;
 }
@@ -16,8 +16,9 @@ export const absoluteUrl = (origin: string, value: string | null | undefined) =>
 /** the shop's identity for this request: its name and the absolute addresses of the logo and the favicon uploaded in the CRM */
 export async function getSiteIdentity() {
   const [s, origin] = await Promise.all([getSiteSettings(), siteOrigin()]);
-  return { origin, name: s.appName || "TazaHat", logo: absoluteUrl(origin, s.logoUrl) ?? `${origin}/images/logo.webp`, favicon: absoluteUrl(origin, s.faviconUrl) ?? absoluteUrl(origin, s.logoUrl) ?? `${origin}/images/logo.webp`, phone: s.supportPhone, email: s.supportEmail };
+  return { origin, name: s.appName || "Our store", tagline: s.tagline?.trim() || "", logoPath: s.logoUrl || "", noImagePath: s.noImageUrl || "", logo: absoluteUrl(origin, s.logoUrl) ?? `${origin}/images/logo.webp`, favicon: absoluteUrl(origin, s.faviconUrl) ?? absoluteUrl(origin, s.logoUrl) ?? `${origin}/images/logo.webp`, phone: s.supportPhone, email: s.supportEmail };
 }
 
-export const SITE_TAGLINE = "Fresh fish, meat, vegetables and groceries delivered to your door";
+/** the tab / share-card title: the name, then the tagline set in the CRM when there is one */
+export const siteTitle = (id: { name: string; tagline: string }) => (id.tagline ? `${id.name} | ${id.tagline}` : id.name);
 export const SITE_DESCRIPTION = "Order fresh fish, meat, poultry, vegetables, fruit and everyday groceries online. Cut and cleaned the way you like, delivered fresh in the time slot you choose.";

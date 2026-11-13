@@ -1,9 +1,9 @@
 {
   "language": "bn",
-  "modalAria": "তাজাহাটে লগইন করুন",
+  "modalAria": "{brand}ে লগইন করুন",
   "closeAria": "লগইন বন্ধ করুন",
-  "brandPanelAria": "তাজাহাট তাজা মুদিপণ্য",
-  "brandHomeAria": "তাজাহাট হোম",
+  "brandPanelAria": "{brand} তাজা মুদিপণ্য",
+  "brandHomeAria": "{brand} হোম",
   "freshnessDelivered": "সতেজতার নিশ্চয়তা",
   "freshCatch": "তাজা সংগ্রহ",
   "betterTomorrow": "সুন্দর আগামী",

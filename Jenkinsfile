@@ -1,28 +1,17 @@
 pipeline {
     agent any
 
+    // One pipeline, one job per tenant (brand): the TENANT parameter picks deploy/tenants/<tenant>.env (container, port, website addresses,
+    // API container). The first choice is the default, so a push build deploys TazaHat as before.
+    parameters {
+        choice(name: 'TENANT', choices: ['tazahat', 'machranga'], description: 'Which brand to deploy')
+    }
+
     environment {
-        IMAGE_NAME = "tazahat-frontend"
         IMAGE_TAG = "latest"
-        CONTAINER_NAME = "tazahat-frontend-service"
-        HOST_WEB_PORT = "4006"
         // Server-wide proxy network (managed by the MONGO-DB infra repo).
         NETWORK_NAME = "proxy-net"
-        MEMORY_LIMIT = "512m"
-        DOMAIN_NAME = "taza.webspec.in"
-        // The site answers on both addresses (one certificate covers both). test-site.machranga.co.in must have an A record to this server's IP
-        // (144.91.93.125) at its DNS provider: a CNAME to taza.webspec.in does not work (Cloudflare error 1001) and Let's Encrypt could not
-        // check the domain, which would also stop the certificate of the first address from being renewed.
-        VIRTUAL_HOSTS = "taza.webspec.in,test-site.machranga.co.in"
-        LETSENCRYPT_HOSTS = "taza.webspec.in,test-site.machranga.co.in"
-        LETSENCRYPT_EMAIL = "debnathtapash56@gmail.com"
         NODE_ENV = "production"
-        // The backend API (container on proxy-net, see the backend repository's Jenkinsfile). Server-side only: the browser never sees it.
-        API_BASE_URL = "http://tazahat-api-service:8000"
-        // File with the Google Maps key (created by the backend repository's deploy/server-setup.sh, inside Jenkins' home volume). It is
-        // used in the browser (map, build time) and on the server (address lookup, run time). Restrict the key in Google Cloud: by
-        // website for the browser, by server IP for the server.
-        GOOGLE_MAPS_KEY_FILE = "/var/jenkins_home/tazahat/google-maps-key"
     }
 
     options {
@@ -36,6 +25,26 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
+            }
+        }
+
+        stage('Tenant') {
+            steps {
+                script {
+                    // every KEY=value line of deploy/tenants/<tenant>.env becomes an environment variable of the steps below
+                    def file = "deploy/tenants/${params.TENANT ?: 'tazahat'}.env"
+                    for (String line : readFile(file).split('\n')) {
+                        def t = line.trim()
+                        int at = t.indexOf('=')
+                        if (t.startsWith('#') || at < 1) { continue }
+                        env[t.substring(0, at).trim()] = t.substring(at + 1).trim()
+                    }
+                    // File with the Google Maps key (created by the backend repository's deploy/server-setup.sh, inside Jenkins' home volume). It is
+                    // used in the browser (map, build time) and on the server (address lookup, run time).
+                    env.GOOGLE_MAPS_KEY_FILE = "${env.ENV_DIR}/google-maps-key"
+                    currentBuild.displayName = "#${env.BUILD_NUMBER} ${env.TENANT}"
+                    echo "Deploying ${env.BRAND_NAME}: ${env.VIRTUAL_HOSTS}"
+                }
             }
         }
 
@@ -53,6 +62,7 @@ pipeline {
                       GOOGLE_MAPS_KEY="$(cat "$GOOGLE_MAPS_KEY_FILE")"
                       docker build --pull \
                         --build-arg API_BASE_URL="$API_BASE_URL" \
+                        --build-arg BRAND="$TENANT" \
                         --build-arg NEXT_PUBLIC_GOOGLE_MAPS_API_KEY="$GOOGLE_MAPS_KEY" \
                         -t "${IMAGE_NAME}:${IMAGE_TAG}" .
                     '''
@@ -130,7 +140,7 @@ pipeline {
 
     post {
         success {
-            echo "Deployment successful: https://${env.DOMAIN_NAME} and https://test-site.machranga.co.in"
+            echo "Deployment successful (${env.TENANT}): ${env.VIRTUAL_HOSTS}"
         }
         failure {
             sh 'docker logs --tail 100 "$CONTAINER_NAME" || true'

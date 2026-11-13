@@ -1,9 +1,9 @@
 {
   "language": "en",
-  "modalAria": "Login to TazaHat",
+  "modalAria": "Login to {brand}",
   "closeAria": "Close login",
-  "brandPanelAria": "TazaHat fresh groceries",
-  "brandHomeAria": "TazaHat home",
+  "brandPanelAria": "{brand} fresh groceries",
+  "brandHomeAria": "{brand} home",
   "freshnessDelivered": "Freshness Delivered",
   "freshCatch": "Fresh Catch",
   "betterTomorrow": "Better Tomorrow",
