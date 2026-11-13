@@ -6,7 +6,7 @@ import { checkServiceability, checkShopCart, getCartRelated, getCities, getShopC
 import { readCityCookie, writeCityCookie } from "@/lib/server/city";
 import { userApi } from "@/lib/server/session";
 import { withSavedDressings } from "@/lib/server/saved-dressing";
-import { cardToProduct, type CartLineCheck, categoryToItem, type ApiCity, type ApiProductDetail, type Product } from "@/lib/api";
+import { cardToProduct, type CartLineCheck, categoryToItem, shortName, type ApiCity, type ApiProductDetail, type Product } from "@/lib/api";
 import type { CategoryTile } from "@/components/category/Category";
 
 /**
@@ -203,6 +203,18 @@ export async function searchSuggestionsAction(q: string, cityId?: string): Promi
   if (!city || text.length < 2) return [];
   try {
     return (await getShopCatalog(city.id, { q: text }, 1, 6)).items.map(cardToProduct);
+  } catch {
+    return [];
+  }
+}
+
+/** a few product names of the visitor's city, for the typing hint in the search box (empty until a city is chosen) */
+export async function searchHintNamesAction(cityId?: string): Promise<string[]> {
+  const city = await shopCity(cityId);
+  if (!city) return [];
+  try {
+    const names = (await getShopCatalog(city.id, {}, 1, 16)).items.map((c) => shortName(c.name).trim()).filter((n) => n.length >= 3 && n.length <= 34);
+    return [...new Set(names)].slice(0, 10);
   } catch {
     return [];
   }

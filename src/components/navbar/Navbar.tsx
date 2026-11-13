@@ -19,7 +19,8 @@ import Location from "../modals/location/Location";
 import NotificationBell from "./NotificationBell";
 import { useAuth } from "@/lib/auth";
 import { navigateAfterClose, useBackClose } from "@/lib/backLayers";
-import { searchSuggestionsAction } from "@/app/actions";
+import { searchHintNamesAction, searchSuggestionsAction } from "@/app/actions";
+import { useTypingPlaceholder } from "./useTypingPlaceholder";
 import { SearchHistorySkeleton, SearchSuggestionSkeleton } from "../skeleton/Skeletons";
 import { fallbackImage, isRemoteImage, type Product as CatalogProduct } from "@/lib/api";
 import { readWishlistIds, subscribeToWishlist, toggleWishlistId } from "../../lib/wishlist";
@@ -204,6 +205,14 @@ export default function Navbar({
   }, []);
   // Search suggestions come from the server (for the delivery city), a moment after the visitor stops typing.
   const [searchResults, setSearchResults] = useState<CatalogProduct[]>([]);
+  // product names typed into the search box's placeholder, one letter at a time
+  const [hintNames, setHintNames] = useState<string[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    void searchHintNamesAction().then((names) => { if (!cancelled) setHintNames(names); }).catch(() => undefined);
+    return () => { cancelled = true; };
+  }, [deliveryLocation]); // the names are the ones of the chosen city
+  useTypingPlaceholder(searchInputRef, hintNames, t.searchHintPrefix, t.searchPlaceholder);
   const [searchedFor, setSearchedFor] = useState("");
   useEffect(() => {
     const text = searchQuery.trim();

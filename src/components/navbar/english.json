@@ -8,6 +8,7 @@
   "brandName": "Taza",
   "brandNameHighlight": "Hat",
   "searchPlaceholder": "Search for fish, meat, vegetables, fruits, dairy...",
+  "searchHintPrefix": "Search for ",
   "searchOpenAria": "Open search",
   "searchCloseAria": "Close search",
   "searchClearAria": "Clear search",
