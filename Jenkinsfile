@@ -1,12 +1,8 @@
 pipeline {
     agent any
 
-    // One pipeline, one job per tenant (brand): the TENANT parameter picks deploy/tenants/<tenant>.env (container, port, website addresses,
-    // API container). The first choice is the default, so a push build deploys TazaHat as before.
-    parameters {
-        choice(name: 'TENANT', choices: ['tazahat', 'machranga'], description: 'Which brand to deploy')
-    }
-
+    // One pipeline, one job per brand, picked by the BRANCH: `master` deploys TazaHat, `machranga` deploys Machranga (same code, the files in
+    // deploy/tenants/<tenant>.env hold each brand's containers, ports, domains and database). Work on master, then merge master into machranga to release there.
     environment {
         IMAGE_TAG = "latest"
         // Server-wide proxy network (managed by the MONGO-DB infra repo).
@@ -32,12 +28,14 @@ pipeline {
             steps {
                 script {
                     // every KEY=value line of deploy/tenants/<tenant>.env becomes an environment variable of the steps below
-                    def file = "deploy/tenants/${params.TENANT ?: 'tazahat'}.env"
+                    def branch = (env.BRANCH_NAME ?: env.GIT_BRANCH ?: 'master').replace('origin/', '')
+                    def tenant = branch == 'machranga' ? 'machranga' : 'tazahat'
+                    def file = "deploy/tenants/${tenant}.env"
                     for (String line : readFile(file).split('\n')) {
                         def t = line.trim()
                         int at = t.indexOf('=')
                         if (t.startsWith('#') || at < 1) { continue }
-                        env[t.substring(0, at).trim()] = t.substring(at + 1).trim()
+                        env."${t.substring(0, at).trim()}" = t.substring(at + 1).trim()
                     }
                     // File with the Google Maps key (created by the backend repository's deploy/server-setup.sh, inside Jenkins' home volume). It is
                     // used in the browser (map, build time) and on the server (address lookup, run time).
@@ -50,10 +48,7 @@ pipeline {
 
         stage('Build Image') {
             when {
-                anyOf {
-                    branch 'master'
-                    expression { env.GIT_BRANCH in ['master', 'origin/master'] }
-                }
+                expression { env.GIT_BRANCH in ['master', 'origin/master', 'machranga', 'origin/machranga'] || env.BRANCH_NAME in ['master', 'machranga'] }
             }
             steps {
                 sh '''
@@ -71,10 +66,7 @@ pipeline {
 
         stage('Deploy') {
             when {
-                anyOf {
-                    branch 'master'
-                    expression { env.GIT_BRANCH in ['master', 'origin/master'] }
-                }
+                expression { env.GIT_BRANCH in ['master', 'origin/master', 'machranga', 'origin/machranga'] || env.BRANCH_NAME in ['master', 'machranga'] }
             }
             steps {
                 sh '''
@@ -113,10 +105,7 @@ pipeline {
 
         stage('Health Check') {
             when {
-                anyOf {
-                    branch 'master'
-                    expression { env.GIT_BRANCH in ['master', 'origin/master'] }
-                }
+                expression { env.GIT_BRANCH in ['master', 'origin/master', 'machranga', 'origin/machranga'] || env.BRANCH_NAME in ['master', 'machranga'] }
             }
             steps {
                 sh '''
