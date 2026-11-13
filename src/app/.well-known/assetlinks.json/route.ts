@@ -1,4 +1,4 @@
-/** Android App Links: tells Android that this site's product links belong to the TazaHat app (so they open in the app when it is installed). */
+/** Android App Links: tells Android that this site's product links belong to the Machranga app (so they open in the app when it is installed). */
 export const dynamic = "force-static";
 
 export function GET() {
@@ -7,7 +7,7 @@ export function GET() {
       relation: ["delegate_permission/common.handle_all_urls"],
       target: {
         namespace: "android_app",
-        package_name: "in.tazahat.tazahat_app",
+        package_name: "in.machranga.app",
         // the release key of the app, and the debug key (builds installed from a computer)
         sha256_cert_fingerprints: [
           "B1:66:B3:C3:BC:19:F8:4E:80:DE:65:9B:FF:B0:09:F6:71:7B:7B:0A:14:8C:F4:D2:D3:D2:94:CB:D8:7D:79:9C",

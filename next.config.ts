@@ -10,6 +10,10 @@ const nextConfig: NextConfig = {
       { source: "/myOrders", destination: "/orders", permanent: false },
       // the privacy policy now lives in the CRM's legal documents
       { source: "/privacyPolicy", destination: "/legal/privacy-policy", permanent: true },
+      // About, Contact and Delivery pages too: their text (company, e-mail, phone, address) is written in the CRM, not in the code
+      { source: "/aboutUs", destination: "/legal/about-us", permanent: true },
+      { source: "/contactUs", destination: "/legal/contact-us", permanent: true },
+      { source: "/deliveryService", destination: "/legal/delivery-shipping-policy", permanent: true },
     ];
   },
   async rewrites() {

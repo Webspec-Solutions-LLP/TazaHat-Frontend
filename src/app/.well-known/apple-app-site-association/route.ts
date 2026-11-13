@@ -1,5 +1,5 @@
 /**
- * iOS Universal Links: a product link (tazahat.in/<product-slug>) opens the TazaHat app when it is installed. Every one-word address is a
+ * iOS Universal Links: a product link (machranga.co.in/<product-slug>) opens the Machranga app when it is installed. Every one-word address is a
  * product, so the pages of the site itself are left out here (they stay in the browser).
  */
 export const dynamic = "force-static";
@@ -12,7 +12,7 @@ export function GET() {
       applinks: {
         details: [
           {
-            appIDs: ["PGSAUCF654.in.tazahat.tazahatApp"],
+            appIDs: ["PGSAUCF654.in.machranga.app"],
             components: [
               { "/": "/", exclude: true },
               ...SITE_PAGES.flatMap((p) => [{ "/": `/${p}`, exclude: true }, { "/": `/${p}/*`, exclude: true }]),
