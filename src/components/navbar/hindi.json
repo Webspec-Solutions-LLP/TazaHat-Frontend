@@ -8,6 +8,7 @@
   "brandName": "ताज़ा",
   "brandNameHighlight": "हाट",
   "searchPlaceholder": "मछली, मीट, सब्जियां, फल, डेयरी उत्पाद खोजें...",
+  "searchHintPrefix": "खोजें: ",
   "searchOpenAria": "सर्च खोलें",
   "searchCloseAria": "सर्च बंद करें",
   "searchClearAria": "सर्च हटाएं",
