@@ -1,5 +1,6 @@
 "use client";
 
+import { useUi } from "@/lib/ui";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import RequireLogin from "@/components/auth/RequireLogin";
@@ -122,6 +123,7 @@ function MyProfileContent() {
   const [isAddressEditorOpen, setIsAddressEditorOpen] = useState(false);
   const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
   const [addressNote, setAddressNote] = useState("");
+  const ui = useUi();
   const [compareCount, setCompareCount] = useState(0);
   const [question, setQuestion] = useState<(ConfirmConfig & { resolve: (yes: boolean) => void }) | null>(null);
   const [avatarBusy, setAvatarBusy] = useState(false);
@@ -346,7 +348,7 @@ function MyProfileContent() {
             <SettingsRow icon="orders" tone="blue" href="/orders" title={t.ordersTitle} description={t.ordersDescription} />
             <SettingsRow icon="address" tone="green" onClick={() => setIsAddressListOpen(true)} title={t.addressesTitle} description={t.savedCount.replace("{count}", String(savedCount))} />
             <SettingsRow icon="wishlist" tone="red" href="/wishlist" title={t.wishlistTitle} description={t.wishlistCount.replace("{count}", String(likedProducts.length))} />
-            <SettingsRow icon="compare" tone="purple" onClick={() => window.dispatchEvent(new Event(OPEN_COMPARE_EVENT))} title={t.compareTitle} description={t.compareCount.replace("{count}", String(compareCount))} />
+            {ui.compareButton && <SettingsRow icon="compare" tone="purple" onClick={() => window.dispatchEvent(new Event(OPEN_COMPARE_EVENT))} title={t.compareTitle} description={t.compareCount.replace("{count}", String(compareCount))} />}
             <SettingsRow icon="ticket" tone="amber" onClick={() => setIsTicketListOpen(true)} title={t.ticketsTitle} description={t.ticketsDescription} />
           </div>
         </section>

@@ -51,7 +51,9 @@ export const getShopHome = (cityId: string) => get<ShopHome>("/shop/home", { cit
 export const checkServiceability = (q: { pincode?: string; city?: string }) => get<Serviceability>("/serviceability", q);
 
 /** the CRM's switches for the floating buttons (all on when the shop cannot be reached) */
-export const getUiConfig = () => get<{ feedbackButton: boolean }>("/ui-config").catch(() => ({ feedbackButton: true }));
+export type UiConfig = { feedbackButton: boolean; compareButton: boolean };
+/** the switches from CRM > Settings > Shop buttons (Compare is off until the CRM turns it on) */
+export const getUiConfig = () => get<Partial<UiConfig>>("/ui-config").then((u) => ({ feedbackButton: u.feedbackButton !== false, compareButton: u.compareButton === true })).catch(() => ({ feedbackButton: true, compareButton: false }));
 
 /** the legal documents written in the CRM (Privacy Policy, Terms ...): the published ones, and where each shows */
 export type LegalListItem = { slug: string; title: string; footer: boolean; login: boolean; updatedAt: string };
