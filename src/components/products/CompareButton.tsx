@@ -1,5 +1,6 @@
 "use client";
 
+import { useUi } from "@/lib/ui";
 import { useEffect, useState } from "react";
 import {
   COMPARE_CHANGE_EVENT,
@@ -19,6 +20,7 @@ export default function CompareButton({
   addedLabel: string;
   className?: string;
 }) {
+  const ui = useUi();
   const [isCompared, setIsCompared] = useState(false);
 
   useEffect(() => {
@@ -58,6 +60,8 @@ export default function CompareButton({
     window.dispatchEvent(new Event(COMPARE_CHANGE_EVENT));
     setIsCompared(true);
   };
+
+  if (!ui.compareButton) return null; // switched off in the CRM
 
   return (
     <button

@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const slug = decodeURIComponent(raw);
   if (looksLikeFile(slug)) return { title: (await getSiteIdentity()).name };
   const [share, id] = await Promise.all([getProductShare(slug).catch(() => null), getSiteIdentity()]);
-  if (!share) return { title: "Product not found", robots: { index: false, follow: false } };
+  if (!share) return { title: "Page not found", robots: { index: false, follow: false } };
   const name = shortName(share.name);
   const price = share.price ? ` From ₹${Math.round(share.price.lowPaisa / 100)}.` : "";
   const description = `${share.description ? `${share.description}. ` : ""}Buy fresh ${name} online${share.category ? ` (${shortName(share.category.name)})` : ""} and get it delivered by ${id.name}.${price}`.replace(/\.\s*\./g, ".").slice(0, 300);
@@ -80,7 +80,12 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const slug = decodeURIComponent(raw);
   if (looksLikeFile(slug)) notFound();
   const city = await readCityCookie();
-  if (!city) return <main className="product-details-page"><CityPrompt /></main>;
+  if (!city) {
+    // a visitor with no city yet: only ask for it when the address is a real product (the product's existence does not depend on the city)
+    const missing = await getProductShare(slug).then(() => false, (e: unknown) => e instanceof Error && /not found/i.test(e.message));
+    if (missing) notFound();
+    return <main className="product-details-page"><CityPrompt /></main>;
+  }
 
   const detail = await loadProduct(city.id, slug);
   if (detail === null) notFound();

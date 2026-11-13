@@ -1,3 +1,4 @@
+import { UiProvider } from "@/lib/ui";
 import { BrandProvider } from "@/lib/brand";
 import { setBrand } from "@/lib/brandText";
 import type { Metadata } from "next";
@@ -59,6 +60,7 @@ export default async function RootLayout({
       <body className="min-h-screen flex flex-col" style={id.font ? ({ "--brand-font": `"${id.font}", sans-serif` } as React.CSSProperties) : undefined}>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, "\\u003c") }} />
         <BrandProvider brand={brand}>
+        <UiProvider ui={ui}>
         <CityProvider value={city}>
         <AuthProvider>
         <CompareSync />
@@ -75,6 +77,7 @@ export default async function RootLayout({
         <AppDownloadSheet android={apps.android} ios={apps.ios} />
         </AuthProvider>
         </CityProvider>
+        </UiProvider>
         </BrandProvider>
       </body>
     </html>

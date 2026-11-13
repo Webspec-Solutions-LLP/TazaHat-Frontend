@@ -1,5 +1,6 @@
 "use client";
 
+import { useUi } from "@/lib/ui";
 import PackAction, { AvailabilityNote, StockRibbon } from "@/components/availability/PackAction";
 import { placeholderImage } from "@/lib/brandText";
 import { useEffect, useRef, useState } from "react";
@@ -91,6 +92,7 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
   const pack = detail.packs[packIndex];
 
   // Compare (from main): add this product to a compare list of up to a few products and open the side-by-side view
+  const ui = useUi();
   const [isCompareOpen, setIsCompareOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isCompareDetailsOpen, setIsCompareDetailsOpen] = useState(false);
@@ -276,7 +278,7 @@ export default function ProductDetailView({ detail }: { detail: ApiProductDetail
             <button type="button" className="pd-wishlist pd-wishlist--icon" aria-pressed={saved} aria-label={saved ? t.removeFromWishlist : t.addToWishlist} title={saved ? t.removeFromWishlist : t.addToWishlist} onClick={() => setSaved(toggleWishlistId(detail.slug).includes(detail.slug))}><Icon name="heart" /></button>
             <ShareButton title={shortName(detail.name)} text={plainText(detail.shortDescription || detail.description).slice(0, 140) || undefined} path={`/${encodeURIComponent(detail.slug)}`} label="Share this product" />
             <button type="button" className="pd-chat-btn" aria-label="Ask about this product" title="Ask about this product" onClick={askAboutProduct}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.5-4.6A8 8 0 1 1 21 12Z" /></svg></button>
-            <button type="button" className={`pd-compare${isCompared ? " is-compared" : ""}`} disabled={isCompared} onClick={handleAddToCompare} title={isCompared ? t.alreadyAddedToCompare : t.addToCompare}><Icon name="compare" /><span>{isCompared ? t.addedToCompare : t.addToCompare}</span></button>
+            {ui.compareButton && <button type="button" className={`pd-compare${isCompared ? " is-compared" : ""}`} disabled={isCompared} onClick={handleAddToCompare} title={isCompared ? t.alreadyAddedToCompare : t.addToCompare}><Icon name="compare" /><span>{isCompared ? t.addedToCompare : t.addToCompare}</span></button>}
           </div>
           <div className="pd-order-note"><span><Icon name="shield" /></span><p><strong>{t.trustHeading}</strong><small>{t.trustText}</small></p></div>
         </section>

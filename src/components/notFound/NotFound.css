@@ -1,0 +1,19 @@
+.nf-page { min-height: 70vh; display: flex; align-items: center; justify-content: center; padding: 32px 16px 56px; background: radial-gradient(circle at 20% 0%, #e8f3ff 0, transparent 45%), radial-gradient(circle at 90% 100%, #e6faf1 0, transparent 40%); }
+.nf-card { width: min(100%, 640px); text-align: center; background: #fff; border: 1px solid #dde7f1; border-radius: 22px; padding: clamp(24px, 5vw, 48px); box-shadow: 0 10px 40px #0633611a; }
+.nf-art { display: flex; align-items: center; justify-content: center; gap: clamp(4px, 2vw, 14px); margin-bottom: 6px; }
+.nf-four { font-size: clamp(78px, 20vw, 132px); font-weight: 900; line-height: 1; letter-spacing: -.04em; background: linear-gradient(135deg, #0a3f76, #0875d1); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.nf-fish { width: clamp(76px, 19vw, 126px); height: auto; animation: nf-swim 3.2s ease-in-out infinite; }
+@keyframes nf-swim { 0%, 100% { transform: translateX(-6px) rotate(-3deg); } 50% { transform: translateX(6px) rotate(3deg); } }
+@media (prefers-reduced-motion: reduce) { .nf-fish { animation: none; } }
+.nf-title { margin: 6px 0 10px; font-size: clamp(22px, 4.6vw, 30px); font-weight: 800; color: #0f2a52; letter-spacing: -.01em; }
+.nf-text { margin: 0 auto 24px; max-width: 460px; color: #4b627a; font-size: 15.5px; line-height: 1.6; }
+.nf-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.nf-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 20px; border-radius: 12px; border: 1px solid transparent; font: inherit; font-size: 14.5px; font-weight: 700; text-decoration: none; cursor: pointer; transition: transform .12s ease, box-shadow .12s ease, background .12s ease; }
+.nf-btn:hover { transform: translateY(-1px); }
+.nf-btn:focus-visible, .nf-link:focus-visible { outline: 3px solid #0875d155; outline-offset: 2px; }
+.nf-btn-primary { background: linear-gradient(135deg, #0875d1, #0a3f76); color: #fff; box-shadow: 0 6px 18px #0875d144; }
+.nf-btn-light { background: #eef6ff; color: #0a3f76; border-color: #cfe3f7; }
+.nf-btn-ghost { background: transparent; color: #4b627a; border-color: #dde7f1; }
+.nf-auto { margin: 22px 0 0; font-size: 13.5px; color: #6a7f95; }
+.nf-auto b { color: #0a3f76; font-variant-numeric: tabular-nums; }
+.nf-link { background: none; border: 0; padding: 0; font: inherit; font-weight: 700; color: #0875d1; text-decoration: underline; cursor: pointer; }

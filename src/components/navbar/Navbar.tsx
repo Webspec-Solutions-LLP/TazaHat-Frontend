@@ -1,6 +1,7 @@
 "use client";
 
 import { BrandWords, useBrand } from "@/lib/brand";
+import { useUi } from "@/lib/ui";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -65,6 +66,7 @@ export default function Navbar({
 }: NavbarProps) {
   const [currentLang, setSiteLanguage] = useLanguage();
   const brand = useBrand();
+  const ui = useUi();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -608,7 +610,7 @@ export default function Navbar({
           </button>
 
           {/* Compare: only while the list has something in it */}
-          {compareCount > 0 && (
+          {ui.compareButton && compareCount > 0 && (
           <button
             type="button"
             className="navbar-action-item navbar-compare-action"
