@@ -16,7 +16,10 @@ export const absoluteUrl = (origin: string, value: string | null | undefined) =>
 /** the shop's identity for this request: its name and the absolute addresses of the logo and the favicon uploaded in the CRM */
 export async function getSiteIdentity() {
   const [s, origin] = await Promise.all([getSiteSettings(), siteOrigin()]);
-  return { origin, name: s.appName || "Our store", tagline: s.tagline?.trim() || "", logoPath: s.logoUrl || "", noImagePath: s.noImageUrl || "", logo: absoluteUrl(origin, s.logoUrl) ?? `${origin}/images/logo.webp`, favicon: absoluteUrl(origin, s.faviconUrl) ?? absoluteUrl(origin, s.logoUrl) ?? `${origin}/images/logo.webp`, phone: s.supportPhone, email: s.supportEmail };
+  // ?v=<time the settings were last saved>: a new logo / favicon has a new address, so no browser or CDN keeps showing the old one
+  const v = s.updatedAt ? encodeURIComponent(s.updatedAt) : "";
+  const ver = (u: string | null | undefined) => (u && v ? `${u}${u.includes("?") ? "&" : "?"}v=${v}` : u || "");
+  return { origin, v, name: s.appName || "Our store", tagline: s.tagline?.trim() || "", logoPath: ver(s.logoUrl), noImagePath: ver(s.noImageUrl), logo: absoluteUrl(origin, ver(s.logoUrl)) ?? `${origin}/images/logo.webp`, favicon: absoluteUrl(origin, ver(s.faviconUrl)) ?? absoluteUrl(origin, ver(s.logoUrl)) ?? `${origin}/images/logo.webp`, phone: s.supportPhone, email: s.supportEmail };
 }
 
 /** the tab / share-card title: the name, then the tagline set in the CRM when there is one */
