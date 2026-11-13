@@ -67,7 +67,7 @@
 
 .footer-brand-name {
   color: #fff;
-  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  font-family: var(--brand-font, "Trebuchet MS", "Segoe UI", sans-serif);
   font-size: 30px;
   font-weight: 800;
   letter-spacing: -1px;

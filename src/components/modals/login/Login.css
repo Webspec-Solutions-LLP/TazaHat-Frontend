@@ -10,7 +10,7 @@ body { margin: 0; }
 .login-brand-logo { display: block; width: 104px; height: 104px; overflow: hidden; border: 4px solid #f58220; border-radius: 50%; background: #fff; box-shadow: 0 5px 14px #073d6426; }
 .login-brand-logo img { width: 100%; height: 100%; object-fit: cover; }
 .login-brand-copy { display: flex; flex-direction: column; }
-.login-brand-copy strong { color: #063361; font-family: "Trebuchet MS", "Segoe UI", sans-serif; font-size: clamp(31px, 3vw, 43px); font-weight: 800; letter-spacing: -1.7px; line-height: 1; }
+.login-brand-copy strong { color: #063361; font-family: var(--brand-font, "Trebuchet MS", "Segoe UI", sans-serif); font-size: clamp(31px, 3vw, 43px); font-weight: 800; letter-spacing: -1.7px; line-height: 1; }
 .login-brand-copy strong span { color: #8bd331; }
 .login-brand-copy small { margin-top: 7px; color: #315774; font-size: 14px; font-weight: 600; }
 .login-brand-message { position: relative; margin-top: 37px; text-align: center; transform: rotate(-4deg); }

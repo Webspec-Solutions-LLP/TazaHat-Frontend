@@ -60,7 +60,7 @@ export const getLegalList = () => get<{ documents: LegalListItem[] }>("/legal").
 export const getLegalDoc = (slug: string) => get<LegalDoc>(`/legal/${encodeURIComponent(slug)}`);
 
 /** the shop's name, logo and favicon (CRM > Settings > General): what the browser tab, the share cards and the search results carry */
-export type SiteSettings = { appName: string; tagline?: string; updatedAt?: string; noImageUrl?: string | null; supportPhone: string | null; supportEmail: string | null; logoUrl: string | null; faviconUrl: string | null };
+export type SiteSettings = { appName: string; tagline?: string; brandFont?: string | null; updatedAt?: string; noImageUrl?: string | null; supportPhone: string | null; supportEmail: string | null; logoUrl: string | null; faviconUrl: string | null };
 export async function getSiteSettings(): Promise<SiteSettings> {
   try {
     const res = await fetch(`${API_BASE}/api/settings`, { cache: "no-store" });

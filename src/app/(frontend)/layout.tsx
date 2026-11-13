@@ -53,7 +53,10 @@ export default async function RootLayout({
   ];
   return (
     <html lang="en">
-      <body className="min-h-screen flex flex-col">
+      <head>
+        {id.font && <link rel="stylesheet" href={`https://fonts.googleapis.com/css2?family=${id.font.replace(/ /g, "+")}:wght@400;600;800&display=swap`} />}
+      </head>
+      <body className="min-h-screen flex flex-col" style={id.font ? ({ "--brand-font": `"${id.font}", sans-serif` } as React.CSSProperties) : undefined}>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, "\\u003c") }} />
         <BrandProvider brand={brand}>
         <CityProvider value={city}>
