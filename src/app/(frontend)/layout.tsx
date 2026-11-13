@@ -29,7 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
     description: SITE_DESCRIPTION,
     keywords: ["fresh fish online", "buy fish online", "meat delivery", "chicken", "mutton", "vegetables", "groceries", "online fish market", id.name],
     manifest: "/manifest.webmanifest",
-    icons: { icon: [{ url: "/favicon.ico" }], shortcut: "/favicon.ico", apple: id.logo },
+    icons: { icon: [{ url: `/favicon.ico${id.v ? `?v=${id.v}` : ""}` }], shortcut: `/favicon.ico${id.v ? `?v=${id.v}` : ""}`, apple: id.logo },
     alternates: { canonical: "/" },
     robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
     openGraph: { type: "website", siteName: id.name, locale: "en_IN", title: siteTitle(id), description: SITE_DESCRIPTION, url: "/", images: [{ url: id.logo, alt: id.name }] },
